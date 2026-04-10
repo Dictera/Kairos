@@ -1,23 +1,23 @@
 import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 import './globals.css'
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
+import { Providers } from '@/components/providers'
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Sigorta Uyuşmazlık Takip',
-  description: 'Sigorta uyuşmazlık dosyalarını takip sistemi',
+  title: 'Sigorta Takip',
+  description: 'Sigorta uyuşmazlık takip sistemi',
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="tr" className={cn("font-sans", geist.variable)}>
-      <body>{children}</body>
+    <html lang="tr">
+      <body className={inter.className}>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
     </html>
   )
 }
