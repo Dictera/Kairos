@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Phase 1 context gathered (discuss mode)
-last_updated: "2026-04-10T18:19:48.904Z"
-last_activity: 2026-04-10 — Roadmap created; project initialized
+status: executing
+stopped_at: Completed 01-foundation-01-PLAN.md
+last_updated: "2026-04-10T23:10:45.710Z"
+last_activity: 2026-04-10
 progress:
   total_phases: 7
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 5
+  completed_plans: 1
+  percent: 20
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-10)
 
 **Core value:** Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kritik süreleri tek ekrandan görebilmek.
-**Current focus:** Phase 1 — Foundation
+**Current focus:** Phase 01 — foundation
 
 ## Current Position
 
-Phase: 1 of 7 (Foundation)
-Plan: 0 of 5 in current phase
-Status: Ready to plan
-Last activity: 2026-04-10 — Roadmap created; project initialized
+Phase: 01 (foundation) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-04-10
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01-foundation P01 | 7 | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -64,6 +65,9 @@ Recent decisions affecting current work:
 - [Init]: WAL mode + busy_timeout + foreign_keys pragmas must be set on every DB connection open
 - [Init]: Use `generate`+`migrate` workflow (not `drizzle-kit push`) from day one to prevent data loss
 - [Init]: Phase 7 requires a Turkish font validation spike before building the petition PDF system
+- [Phase 01-foundation]: Bootstrapped manually (not via create-next-app) — project dir was non-empty; packages installed individually for exact version pinning
+- [Phase 01-foundation]: tailwindcss pinned to ^3 (not v4) — shadcn/ui requires Tailwind v3
+- [Phase 01-foundation]: next pinned to ^15.5.15 — npm latest now resolves to Next.js 16 with breaking API changes
 
 ### Pending Todos
 
@@ -75,6 +79,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T18:19:48.898Z
-Stopped at: Phase 1 context gathered (discuss mode)
-Resume file: .planning/phases/01-foundation/01-CONTEXT.md
+Last session: 2026-04-10T23:10:45.706Z
+Stopped at: Completed 01-foundation-01-PLAN.md
+Resume file: None

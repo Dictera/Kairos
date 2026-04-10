@@ -9,7 +9,7 @@
 
 ### Foundation (Altyapı)
 
-- [ ] **FOUND-01**: Next.js 15 App Router projesi oluşturulur; `serverExternalPackages: ['better-sqlite3']` yapılandırılır
+- [x] **FOUND-01**: Next.js 15 App Router projesi oluşturulur; `serverExternalPackages: ['better-sqlite3']` yapılandırılır
 - [ ] **FOUND-02**: SQLite bağlantı singleton'ı WAL modu, busy_timeout ve foreign_keys pragma'ları ile kurulur
 - [ ] **FOUND-03**: Drizzle ORM şeması tanımlanır; `generate`+`migrate` iş akışı kurulur
 - [ ] **FOUND-04**: tRPC v11 `fetchRequestHandler` route handler kurulur; superjson transformer eklenir
