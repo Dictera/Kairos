@@ -44,7 +44,7 @@ Plans:
 - [x] 01-01: Project scaffold + next.config.ts (`serverExternalPackages: ['better-sqlite3']`, TypeScript strict, path aliases)
 - [x] 01-02: SQLite + Drizzle ORM (connection singleton with WAL pragma, busy_timeout, foreign_keys; `generate`+`migrate` workflow; initial schema stubs)
 - [x] 01-03: tRPC v11 route handler (`fetchRequestHandler`, superjson transformer, `createCallerFactory`, `publicProcedure`, `protectedProcedure`, health-check procedure)
-- [ ] 01-04: Env-based auth (login page, `iron-session` signed HttpOnly cookie, `middleware.ts` guard for all routes except `/login` and `/api/trpc`)
+- [x] 01-04: Env-based auth (login page, `iron-session` signed HttpOnly cookie, `middleware.ts` guard for all routes except `/login` and `/api/trpc`)
 - [ ] 01-05: Base layout (sidebar navigation with all top-level route links, shadcn/ui component init, Tailwind theme, TRPCProvider + QueryClientProvider)
 
 **UI hint**: yes
@@ -204,7 +204,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 1/5 | In Progress|  |
+| 1. Foundation | 4/5 | In Progress|  |
 | 2. Core Case Management | 0/4 | Not started | - |
 | 3. STK & Mahkeme Process Tracking | 0/3 | Not started | - |
 | 4. Deadline Engine + Dashboard | 0/3 | Not started | - |

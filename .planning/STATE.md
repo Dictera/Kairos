@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-foundation-03-PLAN.md
-last_updated: "2026-04-10T23:20:31.780Z"
+stopped_at: Completed 01-foundation-04-PLAN.md
+last_updated: "2026-04-10T23:25:00.772Z"
 last_activity: 2026-04-10
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
-  percent: 60
+  completed_plans: 4
+  percent: 80
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-10)
 ## Current Position
 
 Phase: 01 (foundation) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-04-10
 
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01-foundation P01 | 7 | 2 tasks | 13 files |
 | Phase 01-foundation P02 | 2min | 2 tasks | 6 files |
 | Phase 01-foundation P03 | 2 | 2 tasks | 5 files |
+| Phase 01-foundation P04 | 1min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,9 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: schemaTest is deliberate proof-of-concept stub per D-06; Phase 2 owns all real entity schemas
 - [Phase 01-foundation]: lib/trpc/client.ts uses type-only AppRouter import — no server/DB code leaks into client bundle
 - [Phase 01-foundation]: TRPCProvider + QueryClientProvider deferred to Plan 01-05 (base layout) — tightly coupled with root layout structure
+- [Phase 01-foundation]: PUBLIC_PATHS includes /api/auth to prevent infinite redirect loop when login POST is blocked by middleware
+- [Phase 01-foundation]: Login page uses plain HTML+Tailwind (no shadcn) to avoid cross-plan dependency with Plan 01-05 shadcn init
+- [Phase 01-foundation]: Password comparison uses strict === with !password guard to prevent empty string matching undefined APP_PASSWORD
 
 ### Pending Todos
 
@@ -86,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T23:20:31.772Z
-Stopped at: Completed 01-foundation-03-PLAN.md
+Last session: 2026-04-10T23:25:00.767Z
+Stopped at: Completed 01-foundation-04-PLAN.md
 Resume file: None

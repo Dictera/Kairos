@@ -13,7 +13,7 @@
 - [x] **FOUND-02**: SQLite bağlantı singleton'ı WAL modu, busy_timeout ve foreign_keys pragma'ları ile kurulur
 - [x] **FOUND-03**: Drizzle ORM şeması tanımlanır; `generate`+`migrate` iş akışı kurulur
 - [x] **FOUND-04**: tRPC v11 `fetchRequestHandler` route handler kurulur; superjson transformer eklenir
-- [ ] **FOUND-05**: Env tabanlı tek kullanıcı girişi: `.env` şifresi → signed HttpOnly cookie → middleware koruması
+- [x] **FOUND-05**: Env tabanlı tek kullanıcı girişi: `.env` şifresi → signed HttpOnly cookie → middleware koruması
 - [ ] **FOUND-06**: shadcn/ui + Tailwind CSS v3 kurulumu ve temel layout (sidebar + header)
 
 ### Müvekkil Yönetimi
