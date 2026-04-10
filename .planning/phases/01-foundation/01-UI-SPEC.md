@@ -5,6 +5,7 @@ status: draft
 shadcn_initialized: false
 preset: none
 created: 2026-04-10
+updated: 2026-04-10
 ---
 
 # Phase 1 — UI Design Contract
@@ -18,12 +19,14 @@ created: 2026-04-10
 | Property | Value |
 |----------|-------|
 | Tool | shadcn (to be initialized in plan 01-05) |
-| Preset | none — initialize with `npx shadcn init` using teal theme tokens |
+| Preset | none — initialize with `npx shadcn@latest init` using teal theme tokens |
 | Component library | Radix UI (via shadcn) |
-| Icon library | Lucide React (shadcn default; already a peer dependency) |
+| Icon library | Lucide React v1.8.0 (shadcn default; peer dependency) |
 | Font | Inter (shadcn default; no custom font needed for Phase 1) |
 
-**shadcn initialization note:** `components.json` does not yet exist — project is completely greenfield. Plan 01-05 runs `npx shadcn init` and installs only the components required for base layout: `sidebar`, `button`, `separator`, `tooltip`, `avatar`. No other components are added in Phase 1.
+**shadcn initialization note:** `components.json` does not yet exist — project is completely greenfield. Plan 01-05 runs `npx shadcn@latest init` then `npx shadcn@latest add sidebar button input label separator tooltip form`. The shadcn `Sidebar` component uses `SidebarProvider` as a required root wrapper in `app/layout.tsx`. No other components are added in Phase 1.
+
+**Source:** CONTEXT.md D-04 (palette), RESEARCH.md §Standard Stack (versions), RESEARCH.md §Architecture Patterns (shadcn sidebar pattern with `collapsible="icon"` and `SidebarProvider`).
 
 ---
 
@@ -80,7 +83,7 @@ Source: CONTEXT.md D-04 (locked decisions). Page background is white — chosen 
 | Error text | `#dc2626` | Form validation messages |
 
 Accent (`#14b8a6`) reserved for:
-1. Active/selected sidebar nav item — left border indicator (3px) + item background tint
+1. Active/selected sidebar nav item — left border indicator (3px solid) + item background tint (`rgba(20, 184, 166, 0.12)`)
 2. Login form "Giriş Yap" submit button (primary state)
 3. Keyboard focus ring on all interactive elements (`outline: 2px solid #14b8a6; outline-offset: 2px`)
 4. Sidebar collapse toggle button hover state
@@ -103,7 +106,7 @@ Phase 1 surfaces: Login page + sidebar navigation shell. No data or error flows 
 | Wrong password error | "Şifre hatalı. Lütfen tekrar deneyin." |
 | Session expired / unauthenticated redirect | No toast — silent redirect to `/login`; login page shows no pre-populated error message |
 | Empty nav items (placeholder pages) | Page renders empty with heading only; no empty-state copy needed in Phase 1 |
-| Sidebar collapse tooltip (collapsed state) | Each nav icon shows item label as tooltip on hover |
+| Sidebar collapse tooltip (collapsed state) | Each nav icon shows its route label as tooltip on hover |
 | Sidebar section separator label | None — separators are visual lines only, no text labels |
 
 Destructive actions in Phase 1: None. Login has no destructive path.
@@ -112,53 +115,65 @@ Destructive actions in Phase 1: None. Login has no destructive path.
 
 ## Component Inventory
 
-Components used in Phase 1 (shadcn official only):
+Components installed via `npx shadcn@latest add` in Phase 1 (official registry only):
 
 | Component | Source | Purpose |
 |-----------|--------|---------|
-| Button | shadcn/ui | Login submit, sidebar collapse toggle |
+| Sidebar | shadcn/ui | Collapsible sidebar shell — use with `SidebarProvider`, `SidebarContent`, `SidebarMenu`, `SidebarMenuItem`, `SidebarMenuButton`; set `collapsible="icon"` |
+| Button | shadcn/ui | Login submit button, sidebar collapse toggle |
 | Input | shadcn/ui | Password field on login page |
 | Label | shadcn/ui | Password field label |
 | Separator | shadcn/ui | Sidebar nav group dividers |
-| Tooltip | shadcn/ui | Icon-only rail item labels (collapsed state) |
-| Card | shadcn/ui | Login form container |
-| Form | shadcn/ui | Login form with react-hook-form integration |
+| Tooltip | shadcn/ui | Icon-only rail item labels (collapsed state) — `TooltipProvider` must wrap the sidebar |
+| Form | shadcn/ui | Login form with react-hook-form integration; wraps Input and Label |
 
-Custom components (not from registry):
+Custom components (built in Phase 1, NOT from registry):
 
-| Component | Purpose |
-|-----------|---------|
-| `<Sidebar>` | Full collapsible sidebar with icon+label / icon-only rail states |
-| `<NavItem>` | Single navigation link with Lucide icon, label, active state |
-| `<AppLayout>` | Root layout wrapper: sidebar + main content area |
+| Component | File | Purpose |
+|-----------|------|---------|
+| `AppSidebar` | `components/app-sidebar.tsx` | Configures the shadcn Sidebar with the 9 nav items, Lucide icons, active state, and collapse toggle |
+| `AppLayout` | `app/layout.tsx` (root layout) | Wraps `SidebarProvider` + `TRPCProvider` + `QueryClientProvider`; renders `AppSidebar` beside `{children}` |
+| `Providers` | `components/providers.tsx` | Client component — `TRPCProvider` + `QueryClientProvider` wrapper (client boundary) |
 
 ---
 
 ## Interaction Contract
 
 ### Sidebar Collapse
-- Toggle button: chevron icon, positioned at the bottom of the sidebar
-- Collapsed state: 56px wide, icons only, labels hidden, Tooltip shows label on hover
+
+- Toggle button: chevron icon, positioned at the bottom of the sidebar (inside the shadcn `SidebarFooter` slot)
+- Collapsed state: 56px wide, icons only, labels hidden, `Tooltip` shows label on hover
 - Expanded state: 240px wide, icon + label visible
-- Transition: CSS width transition, 200ms ease-in-out
-- State persisted: in `localStorage` key `sidebar_collapsed` (boolean)
+- Transition: CSS width transition, 200ms ease-in-out (shadcn sidebar handles this via `collapsible="icon"`)
+- State persisted: shadcn sidebar uses `useSidebar()` hook; persist collapse state to `localStorage` key `sidebar_collapsed` (boolean) via a `useEffect` in `AppSidebar`
 - Default: expanded
 
 ### Active Nav Item
+
 - Active item: left border `3px solid #14b8a6` + background `rgba(20, 184, 166, 0.12)` + text `#f0fdfa`
 - Inactive item: no border, background transparent, text `#99f6e4`
 - Hover (inactive): background `rgba(255, 255, 255, 0.08)`
+- Active state detection: use Next.js `usePathname()` to compare current route against nav item href
 
 ### Login Form
+
 - Submit on Enter key or button click
-- Password field: type="password", no show/hide toggle in Phase 1
-- Error message appears below the submit button, text `#dc2626`, 14px
-- Form is centered vertically and horizontally on the page
+- Password field: `type="password"`, no show/hide toggle in Phase 1
+- Error message appears below the submit button, text `#dc2626`, 14px Regular
+- Form is centered vertically and horizontally on the page using flexbox (`min-h-screen flex items-center justify-center`)
 - Page background: `#ffffff`; card has `border: 1px solid #e2e8f0`, `border-radius: 8px`, `box-shadow: 0 1px 3px rgba(0,0,0,0.1)`
+- Card max-width: 400px; inner padding: 24px (lg token)
 
 ### Focus Management
+
 - All interactive elements have visible focus ring: `outline: 2px solid #14b8a6; outline-offset: 2px`
 - Tab order on login page: Password input → Submit button
+- Sidebar nav items are keyboard navigable (Tab + Enter to activate)
+
+### Placeholder Pages
+
+- Each of the 9 routes (Dashboard, Dosyalar, Müvekkiller, Takvim, Belgeler, Finans, Dilekçeler, Raporlar, Ayarlar) renders a minimal server component with a single `<h1>` showing the page name in Turkish
+- No loading states, skeletons, or empty-state UI needed in Phase 1
 
 ---
 
@@ -166,7 +181,7 @@ Custom components (not from registry):
 
 | Registry | Blocks Used | Safety Gate |
 |----------|-------------|-------------|
-| shadcn official | Button, Input, Label, Separator, Tooltip, Card, Form | not required |
+| shadcn official | Sidebar, Button, Input, Label, Separator, Tooltip, Form | not required |
 
 No third-party registries declared for Phase 1.
 
