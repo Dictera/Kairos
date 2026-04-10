@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 01-foundation-04-PLAN.md
-last_updated: "2026-04-10T23:25:00.772Z"
+status: verifying
+stopped_at: Completed 01-foundation-05-PLAN.md
+last_updated: "2026-04-10T23:51:13.534Z"
 last_activity: 2026-04-10
 progress:
   total_phases: 7
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 5
-  completed_plans: 4
-  percent: 80
+  completed_plans: 5
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-10)
 
 Phase: 01 (foundation) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-10
 
 Progress: [░░░░░░░░░░] 0%
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01-foundation P02 | 2min | 2 tasks | 6 files |
 | Phase 01-foundation P03 | 2 | 2 tasks | 5 files |
 | Phase 01-foundation P04 | 1min | 2 tasks | 3 files |
+| Phase 01-foundation P05 | 25min | 2 tasks | 29 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,9 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: PUBLIC_PATHS includes /api/auth to prevent infinite redirect loop when login POST is blocked by middleware
 - [Phase 01-foundation]: Login page uses plain HTML+Tailwind (no shadcn) to avoid cross-plan dependency with Plan 01-05 shadcn init
 - [Phase 01-foundation]: Password comparison uses strict === with !password guard to prevent empty string matching undefined APP_PASSWORD
+- [Phase 01-foundation]: shadcn v4 installed (shadcn@latest resolves to v4); required Tailwind CSS upgrade from v3 to v4 — shadcn v4 uses @base-ui/react (not Radix UI) and Tailwind v4 CSS syntax
+- [Phase 01-foundation]: tRPC v11 TRPCProvider: not directly exported from @trpc/tanstack-react-query; createTRPCContext<AppRouter>() must be called in lib/trpc/context.ts to get TRPCProvider + useTRPC + useTRPCClient
+- [Phase 01-foundation]: Route groups for sidebar isolation: (dashboard) layout has SidebarProvider+AppSidebar; (auth) is passthrough — login page has no sidebar without conditional pathname checks
 
 ### Pending Todos
 
@@ -90,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T23:25:00.767Z
-Stopped at: Completed 01-foundation-04-PLAN.md
+Last session: 2026-04-10T23:51:13.511Z
+Stopped at: Completed 01-foundation-05-PLAN.md
 Resume file: None

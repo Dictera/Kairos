@@ -45,7 +45,7 @@ Plans:
 - [x] 01-02: SQLite + Drizzle ORM (connection singleton with WAL pragma, busy_timeout, foreign_keys; `generate`+`migrate` workflow; initial schema stubs)
 - [x] 01-03: tRPC v11 route handler (`fetchRequestHandler`, superjson transformer, `createCallerFactory`, `publicProcedure`, `protectedProcedure`, health-check procedure)
 - [x] 01-04: Env-based auth (login page, `iron-session` signed HttpOnly cookie, `middleware.ts` guard for all routes except `/login` and `/api/trpc`)
-- [ ] 01-05: Base layout (sidebar navigation with all top-level route links, shadcn/ui component init, Tailwind theme, TRPCProvider + QueryClientProvider)
+- [x] 01-05: Base layout (sidebar navigation with all top-level route links, shadcn/ui component init, Tailwind theme, TRPCProvider + QueryClientProvider)
 
 **UI hint**: yes
 

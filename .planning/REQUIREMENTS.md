@@ -14,7 +14,7 @@
 - [x] **FOUND-03**: Drizzle ORM şeması tanımlanır; `generate`+`migrate` iş akışı kurulur
 - [x] **FOUND-04**: tRPC v11 `fetchRequestHandler` route handler kurulur; superjson transformer eklenir
 - [x] **FOUND-05**: Env tabanlı tek kullanıcı girişi: `.env` şifresi → signed HttpOnly cookie → middleware koruması
-- [ ] **FOUND-06**: shadcn/ui + Tailwind CSS v3 kurulumu ve temel layout (sidebar + header)
+- [x] **FOUND-06**: shadcn/ui + Tailwind CSS v3 kurulumu ve temel layout (sidebar + header)
 
 ### Müvekkil Yönetimi
 
