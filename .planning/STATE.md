@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-foundation-01-PLAN.md
-last_updated: "2026-04-10T23:10:45.710Z"
+stopped_at: Completed 01-foundation-02-PLAN.md
+last_updated: "2026-04-10T23:15:51.434Z"
 last_activity: 2026-04-10
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
-  percent: 20
+  completed_plans: 2
+  percent: 40
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-10)
 ## Current Position
 
 Phase: 01 (foundation) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-04-10
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01-foundation P01 | 7 | 2 tasks | 13 files |
+| Phase 01-foundation P02 | 2min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,9 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: Bootstrapped manually (not via create-next-app) — project dir was non-empty; packages installed individually for exact version pinning
 - [Phase 01-foundation]: tailwindcss pinned to ^3 (not v4) — shadcn/ui requires Tailwind v3
 - [Phase 01-foundation]: next pinned to ^15.5.15 — npm latest now resolves to Next.js 16 with breaking API changes
+- [Phase 01-foundation]: dotenv omitted from drizzle.config.ts — not installed; hardcoded DB URL needs no env resolution at migration time
+- [Phase 01-foundation]: server-only constraint documented via comment in lib/db.ts — package not installed; Next.js serverExternalPackages: ['better-sqlite3'] provides runtime protection
+- [Phase 01-foundation]: schemaTest is deliberate proof-of-concept stub per D-06; Phase 2 owns all real entity schemas
 
 ### Pending Todos
 
@@ -79,6 +83,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T23:10:45.706Z
-Stopped at: Completed 01-foundation-01-PLAN.md
+Last session: 2026-04-10T23:15:51.427Z
+Stopped at: Completed 01-foundation-02-PLAN.md
 Resume file: None
