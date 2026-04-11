@@ -82,10 +82,7 @@ export function AppSidebar() {
   const isActive = (href: string) => mounted && pathname === href
 
   return (
-    <Sidebar
-      collapsible="icon"
-      style={{ '--sidebar-background': '#134e4a' } as React.CSSProperties}
-    >
+    <Sidebar collapsible="icon">
       <SidebarCollapseSync />
 
       <SidebarContent>
@@ -109,12 +106,12 @@ export function AppSidebar() {
                               style={
                                 active
                                   ? {
-                                      borderLeft: '3px solid #14b8a6',
-                                      backgroundColor: 'rgba(20, 184, 166, 0.12)',
-                                      color: '#f0fdfa',
+                                      borderLeft: '3px solid #FA991C',
+                                      backgroundColor: 'rgba(250, 153, 28, 0.15)',
+                                      color: '#FBF3F2',
                                     }
                                   : {
-                                      color: '#99f6e4',
+                                      color: 'rgba(251, 243, 242, 0.70)',
                                       borderLeft: '3px solid transparent',
                                     }
                               }
@@ -148,12 +145,12 @@ export function AppSidebar() {
                       style={
                         isActive(settingsItem.href)
                           ? {
-                              borderLeft: '3px solid #14b8a6',
-                              backgroundColor: 'rgba(20, 184, 166, 0.12)',
-                              color: '#f0fdfa',
+                              borderLeft: '3px solid #FA991C',
+                              backgroundColor: 'rgba(250, 153, 28, 0.15)',
+                              color: '#FBF3F2',
                             }
                           : {
-                              color: '#99f6e4',
+                              color: 'rgba(251, 243, 242, 0.70)',
                               borderLeft: '3px solid transparent',
                             }
                       }
