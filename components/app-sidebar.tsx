@@ -54,13 +54,15 @@ const settingsItem = { label: 'Ayarlar', href: '/ayarlar', icon: Settings }
 function SidebarCollapseSync() {
   const { open, setOpen } = useSidebar()
 
-  // Persist collapse state to localStorage
+  // Read from localStorage once on mount — do not include setOpen in deps
+  // (shadcn recreates setOpen on each render, causing an infinite loop if included)
   useEffect(() => {
     const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY)
     if (stored !== null) {
       setOpen(stored !== 'true') // sidebar_collapsed=true means open=false
     }
-  }, [setOpen])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, String(!open))
