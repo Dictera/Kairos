@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -73,6 +73,13 @@ function SidebarCollapseSync() {
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const isActive = (href: string) => mounted && pathname === href
 
   return (
     <Sidebar
@@ -89,18 +96,18 @@ export function AppSidebar() {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {group.items.map((item) => {
-                    const isActive = pathname === item.href
+                    const active = isActive(item.href)
                     const Icon = item.icon
                     return (
                       <SidebarMenuItem key={item.href}>
                         <SidebarMenuButton
-                          isActive={isActive}
+                          isActive={active}
                           tooltip={item.label}
                           render={
                             <Link
                               href={item.href}
                               style={
-                                isActive
+                                active
                                   ? {
                                       borderLeft: '3px solid #14b8a6',
                                       backgroundColor: 'rgba(20, 184, 166, 0.12)',
@@ -133,13 +140,13 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  isActive={pathname === settingsItem.href}
+                  isActive={isActive(settingsItem.href)}
                   tooltip={settingsItem.label}
                   render={
                     <Link
                       href={settingsItem.href}
                       style={
-                        pathname === settingsItem.href
+                        isActive(settingsItem.href)
                           ? {
                               borderLeft: '3px solid #14b8a6',
                               backgroundColor: 'rgba(20, 184, 166, 0.12)',
