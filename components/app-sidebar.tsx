@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -81,44 +81,47 @@ export function AppSidebar() {
 
       <SidebarContent>
         {navGroups.map((group, groupIndex) => (
-          <SidebarGroup key={groupIndex}>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => {
-                  const isActive = pathname === item.href
-                  const Icon = item.icon
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        isActive={isActive}
-                        tooltip={item.label}
-                        render={
-                          <Link
-                            href={item.href}
-                            style={
-                              isActive
-                                ? {
-                                    borderLeft: '3px solid #14b8a6',
-                                    backgroundColor: 'rgba(20, 184, 166, 0.12)',
-                                    color: '#f0fdfa',
-                                  }
-                                : {
-                                    color: '#99f6e4',
-                                    borderLeft: '3px solid transparent',
-                                  }
-                            }
-                          />
-                        }
-                      >
-                        <Icon />
-                        <span>{item.label}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          <React.Fragment key={groupIndex}>
+            {groupIndex > 0 && <SidebarSeparator />}
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {group.items.map((item) => {
+                    const isActive = pathname === item.href
+                    const Icon = item.icon
+                    return (
+                      <SidebarMenuItem key={item.href}>
+                        <SidebarMenuButton
+                          isActive={isActive}
+                          tooltip={item.label}
+                          render={
+                            <Link
+                              href={item.href}
+                              style={
+                                isActive
+                                  ? {
+                                      borderLeft: '3px solid #14b8a6',
+                                      backgroundColor: 'rgba(20, 184, 166, 0.12)',
+                                      color: '#f0fdfa',
+                                    }
+                                  : {
+                                      color: '#99f6e4',
+                                      borderLeft: '3px solid transparent',
+                                    }
+                              }
+                            />
+                          }
+                        >
+                          <Icon />
+                          <span>{item.label}</span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    )
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </React.Fragment>
         ))}
 
         <SidebarSeparator />
