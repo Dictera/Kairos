@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -13,8 +13,8 @@
 # testing
 /coverage
 
-# next.js
-/.next/
+# next.js build output
+.next/
 /out/
 
 # production
@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+Thumbs.db
 
 # debug
 npm-debug.log*
@@ -45,3 +46,6 @@ next-env.d.ts
 data/db.sqlite
 data/db.sqlite-wal
 data/db.sqlite-shm
+
+# GSD quick tasks (ephemeral, not worth tracking)
+.planning/quick/
