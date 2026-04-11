@@ -21,6 +21,20 @@ function createDb() {
   sqlite.pragma('busy_timeout = 5000')
   // foreign_keys: enforce FK constraints (SQLite disables them by default)
   sqlite.pragma('foreign_keys = ON')
+  // lower_tr: Turkish-aware lowercase for case-insensitive LIKE search.
+  // SQLite LIKE is ASCII-only; this covers ş→s, ğ→g, ü→u, ö→o, ç→c, ı→i, İ→i.
+  // Used in all tRPC list queries: sql`lower_tr(col) LIKE lower_tr(${pattern})`
+  // IMPORTANT: must be registered BEFORE drizzle() wraps the connection.
+  sqlite.function('lower_tr', (s: unknown) =>
+    String(s ?? '')
+      .toLowerCase()
+      .replace(/ş/g, 's').replace(/Ş/g, 's')
+      .replace(/ğ/g, 'g').replace(/Ğ/g, 'g')
+      .replace(/ü/g, 'u').replace(/Ü/g, 'u')
+      .replace(/ö/g, 'o').replace(/Ö/g, 'o')
+      .replace(/ç/g, 'c').replace(/Ç/g, 'c')
+      .replace(/ı/g, 'i').replace(/İ/g, 'i')
+  )
   return drizzle({ client: sqlite, schema })
 }
 
