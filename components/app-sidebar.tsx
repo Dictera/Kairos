@@ -146,12 +146,12 @@ export function AppSidebar() {
                     style={
                       isActive(settingsItem.href)
                         ? {
-                            borderLeft: '3px solid #FA991C',
-                            backgroundColor: 'rgba(250, 153, 28, 0.15)',
-                            color: '#FBF3F2',
+                            borderLeft: '3px solid var(--sidebar-primary)',
+                            backgroundColor: 'var(--sidebar-accent)',
+                            color: 'var(--sidebar-foreground)',
                           }
                         : {
-                            color: 'rgba(251, 243, 242, 0.70)',
+                            color: 'color-mix(in oklch, var(--sidebar-foreground) 70%, transparent)',
                             borderLeft: '3px solid transparent',
                           }
                     }
