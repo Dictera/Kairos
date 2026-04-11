@@ -8,6 +8,13 @@
       "when": 1775862827417,
       "tag": "0000_lowly_sleepwalker",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1775942900000,
+      "tag": "0001_core_entities",
+      "breakpoints": true
     }
   ]
 }
