@@ -98,28 +98,28 @@ export function AppSidebar() {
                     return (
                       <SidebarMenuItem key={item.href}>
                         <SidebarMenuButton
+                          asChild
                           isActive={active}
                           tooltip={item.label}
-                          render={
-                            <Link
-                              href={item.href}
-                              style={
-                                active
-                                  ? {
-                                      borderLeft: '3px solid #FA991C',
-                                      backgroundColor: 'rgba(250, 153, 28, 0.15)',
-                                      color: '#FBF3F2',
-                                    }
-                                  : {
-                                      color: 'rgba(251, 243, 242, 0.70)',
-                                      borderLeft: '3px solid transparent',
-                                    }
-                              }
-                            />
-                          }
                         >
-                          <Icon />
-                          <span>{item.label}</span>
+                          <Link
+                            href={item.href}
+                            style={
+                              active
+                                ? {
+                                    borderLeft: '3px solid #FA991C',
+                                    backgroundColor: 'rgba(250, 153, 28, 0.15)',
+                                    color: '#FBF3F2',
+                                  }
+                                : {
+                                    color: 'rgba(251, 243, 242, 0.70)',
+                                    borderLeft: '3px solid transparent',
+                                  }
+                            }
+                          >
+                            <Icon />
+                            <span>{item.label}</span>
+                          </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     )
@@ -137,28 +137,28 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
+                  asChild
                   isActive={isActive(settingsItem.href)}
                   tooltip={settingsItem.label}
-                  render={
-                    <Link
-                      href={settingsItem.href}
-                      style={
-                        isActive(settingsItem.href)
-                          ? {
-                              borderLeft: '3px solid #FA991C',
-                              backgroundColor: 'rgba(250, 153, 28, 0.15)',
-                              color: '#FBF3F2',
-                            }
-                          : {
-                              color: 'rgba(251, 243, 242, 0.70)',
-                              borderLeft: '3px solid transparent',
-                            }
-                      }
-                    />
-                  }
                 >
-                  <settingsItem.icon />
-                  <span>{settingsItem.label}</span>
+                  <Link
+                    href={settingsItem.href}
+                    style={
+                      isActive(settingsItem.href)
+                        ? {
+                            borderLeft: '3px solid #FA991C',
+                            backgroundColor: 'rgba(250, 153, 28, 0.15)',
+                            color: '#FBF3F2',
+                          }
+                        : {
+                            color: 'rgba(251, 243, 242, 0.70)',
+                            borderLeft: '3px solid transparent',
+                          }
+                    }
+                  >
+                    <settingsItem.icon />
+                    <span>{settingsItem.label}</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

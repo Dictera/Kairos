@@ -11,8 +11,8 @@
   }
 
   :root {
-    /* Base surfaces — warm white #FBF3F2 */
-    --background: oklch(0.969 0.008 20);
+    /* Base surfaces — warm beige #F5F0E8 */
+    --background: oklch(0.952 0.012 80);
     --foreground: oklch(0.219 0.044 240);
 
     /* Cards / popovers on warm white */
@@ -124,8 +124,8 @@
 }
 
 :root {
-  /* Base surfaces — warm white #FBF3F2 */
-  --background: oklch(0.969 0.008 20);
+  /* Base surfaces — warm beige #F5F0E8 */
+  --background: oklch(0.952 0.012 80);
   --foreground: oklch(0.219 0.044 240);
 
   /* Cards / popovers on warm white */
