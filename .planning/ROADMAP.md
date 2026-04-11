@@ -214,6 +214,18 @@ Plans:
 
 **Total plans:** 24
 
+### Phase 8: UI Yenileme: renk paleti degisikligi ve shadcn-ui bilesenleri
+
+**Goal:** Replace the teal palette with Navy + Turuncu (#032539 / #FA991C / #1C768F / #FBF3F2), migrate the sidebar and login page off hardcoded colors, and front-load the 23 shadcn/ui components that Phase 2-7 feature work will consume — a pure theme + component infrastructure refresh with zero feature page changes.
+**Requirements**: none (infrastructure-only phase; no v1 functional requirements)
+**Depends on:** Phase 7
+**Plans:** 3 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Theme tokens: replace globals.css palette with Navy + Turuncu oklch tokens and switch dashboard layout to bg-background
+- [ ] 08-02-PLAN.md — Install 23 shadcn components (form group, layout/data, modals/notifications, advanced) for Phase 2-7 consumption
+- [ ] 08-03-PLAN.md — Migrate app-sidebar.tsx off teal hardcodes, rewrite login page with shadcn Card+Button+Input+Label, human-verify checkpoint
+
 ---
 
 ## Milestone Success Criteria
