@@ -23,16 +23,21 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password }),
-    })
-    setLoading(false)
-    if (res.ok) {
-      router.push('/')
-    } else {
-      setError('Şifre hatalı. Lütfen tekrar deneyin.')
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      })
+      if (res.ok) {
+        router.push('/')
+      } else {
+        setError('Şifre hatalı. Lütfen tekrar deneyin.')
+      }
+    } catch {
+      setError('Bağlantı hatası. Lütfen tekrar deneyin.')
+    } finally {
+      setLoading(false)
     }
   }
 
