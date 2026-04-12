@@ -12,14 +12,14 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] **Phase 04 (2026-04-13)**: Deadline engine + dashboard: Pure deadline calculation service (lib/deadline-service.ts), sure table with auto-calc triggers, tRPC routers (sure + dashboard), full dashboard UI with urgency badges and adli tatil indicators
 
 ### Active
 
 - [ ] Dosya yönetimi: oluşturma, listeleme, filtreleme, hızlı arama ve detay görünümü (200+ dosya)
 - [ ] STK Tahkim süreci takibi: başvuru/kabul, raportör süreci, hakem kararı, itiraz/iptal davası
 - [ ] Mahkeme süreci takibi: Asliye Ticaret ve Asliye Hukuk aşamaları
-- [ ] Takvim: duruşma tarihleri ve yaklaşan süre uyarıları
+- [x] ~~Takvim: duruşma tarihleri ve yaklaşan süre uyarıları~~ → Validated (Phase 04)
 - [ ] Müvekkil yönetimi: profil, iletişim bilgileri, dosya geçmişi
 - [ ] Finans takibi: gelen ödemeler, giden ödemeler, masraf ve harçlar, fatura/makbuz
 - [ ] Dilekçe şablon sistemi: şablon seç → değişkenleri doldur → PDF önizle → indir
@@ -79,4 +79,4 @@ Bu belge faz geçişlerinde ve milestone sınırlarında güncellenir.
 4. Context güncelleme
 
 ---
-*Last updated: 2026-04-10 after initialization*
+*Last updated: 2026-04-13 after Phase 04 completion*
