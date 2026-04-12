@@ -130,8 +130,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: tRPC calendar query (fetch all duruşma + sure records for a given month range, keyed by date); Turkish locale configuration for shadcn Calendar (`tr` locale, Monday week start)
-- [ ] 05-02: Calendar page UI — monthly grid with event dots/badges per day, event popover on click showing case link, prev/next month navigation
+- [x] 05-01: tRPC calendar query (fetch all duruşma + sure records for a given month range, keyed by date); Turkish locale configuration for shadcn Calendar (`tr` locale, Monday week start)
+- [x] 05-02: Calendar page UI — monthly grid with event dots/badges per day, event popover on click showing case link, prev/next month navigation
 
 **UI hint**: yes
 
@@ -209,7 +209,7 @@ Plans:
 | 2. Core Case Management | 0/4 | Not started | - |
 | 3. STK & Mahkeme Process Tracking | 0/3 | Not started | - |
 | 4. Deadline Engine + Dashboard | 0/3 | Not started | - |
-| 5. Calendar View | 0/2 | Not started | - |
+| 5. Calendar View | 2/2 | Ready to execute | - |
 | 6. Documents + Finance | 0/3 | Not started | - |
 | 7. Petition Templates + PDF + Reports | 0/4 | Not started | - |
 
