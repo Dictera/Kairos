@@ -106,12 +106,13 @@ Plans:
   4. When a mahkeme kararı tebligat date is entered, the 14-day istinaf başvuru süresi is auto-calculated; when a dava tebligat date is entered, the 14-day cevap dilekçesi süresi is auto-calculated
   5. A manual deadline (with custom name, date, and notes) can be added to any case and appears in the dashboard deadline list
   6. Deadlines falling within the adli tatil period (20 July–31 August) show a visible warning label — the user is prompted to verify manually; no automatic date extension is applied
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
 - [x] 04-01: Drizzle schema for `sure` (deadlines) table; deadline calculation service (STK 10-day, istinaf 14-day, cevap 14-day rules; adli tatil overlap detection)
 - [x] 04-02: tRPC procedures for deadline read/write; auto-calculation triggers when process dates are saved; manual deadline entry form on case detail
 - [x] 04-03: Dashboard page (upcoming deadlines widget, today's hearings list, summary stats, color-coded urgency badges)
+- [ ] 04-04: Fix review findings — CR-01 timezone off-by-one (dashboard.ts), WR-01 unused parseISO import (deadline-service.ts), IN-01 silent deleteSure (sure.ts)
 
 **UI hint**: yes
 
