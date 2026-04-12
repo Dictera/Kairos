@@ -6,14 +6,14 @@
 
 ## Summary
 
-Phase 9 standardizes calendar/date-picker components across the project to use Turkish locale (Monday week start, `dd.MM.yyyy` format) with the Navy + Turuncu color palette. The primary implementation work involves: (1) extracting the duplicated `DatePickerField` component to a shared location, (2) adding `weekStartsOn={1}` prop to Calendar components, (3) applying Turuncu (`#FA991C`) color to selected days, and (4) replacing `<Input type="date">` in sure-list.tsx with DatePickerField.
+Phase 9 standardizes calendar/date-picker components across the project to use Turkish locale (Monday week start, `dd.MM.yyyy` format) with the Navy + Turuncu color palette. The primary implementation work involves: (1) extracting the duplicated `DatePickerField` component to a shared location, (2) adding `weekStartsOn={1}` prop to Calendar components, (3) applying Turuncu (`#FA991C`) color to selected days, (4) replacing `<Input type="date">` in sure-list.tsx with DatePickerField, and (5) replacing `<Input type="date">` in dosya-list.tsx filter inputs with DatePickerField.
 
 **Critical finding:** Context document D-03 says `startWeekOn={1}` but react-day-picker v9 API uses `weekStartsOn={1}` (0=Sunday through 6=Saturday). This must be corrected in implementation.
 
 ## User Constraints (from CONTEXT.md)
 
 ### Locked Decisions
-- **D-01:** Replace `<Input type="date">` with Popover+Calendar DatePickerField in sure-list.tsx (both create form and edit dialog)
+- **D-01:** Replace `<Input type="date">` with Popover+Calendar DatePickerField in sure-list.tsx (both create form and edit dialog) and dosya-list.tsx (filter date inputs)
 - **D-02:** All dates use `dd.MM.yyyy` format with Turkish locale (`date-fns/locale/tr`)
 - **D-03:** Calendar week starts on Monday — set `weekStartsOn={1}` on all Calendar components
 - **D-04:** Calendar styled with Navy + Turuncu palette: selected day highlight `#FA991C` turuncu
@@ -135,7 +135,8 @@ components/dosya/
 ├── stk-data-form.tsx     # Uses DatePickerField (import from ui/)
 ├── mahkeme-data-form.tsx  # Uses DatePickerField (import from ui/)
 ├── durusma-dialog.tsx     # Uses DatePickerField (import from ui/)
-└── sure-list.tsx         # D-01: Replace Input type="date" with DatePickerField
+├── sure-list.tsx         # D-01: Replace Input type="date" with DatePickerField
+└── dosya-list.tsx        # D-01: Replace Input type="date" filter inputs with DatePickerField
 ```
 
 ## Don't Hand-Roll
@@ -269,14 +270,47 @@ export function DatePickerField({
 />
 ```
 
+### DosyaList Filter Date Inputs (D-01 - Expanded Scope)
+```tsx
+// In dosya-list.tsx filter section
+// These are controlled inputs with direct state management (no react-hook-form)
+// State: const [tarihBaslangic, setTarihBaslangic] = useState('')
+
+<div className="space-y-1">
+  <label className="text-sm font-semibold text-muted-foreground">Başlangıç</label>
+  {/* Before: <Input type="date" className="w-[160px]" value={tarihBaslangic} onChange={(e) => {...} /> */}
+  <DatePickerField
+    value={tarihBaslangic}
+    onChange={(val) => { setTarihBaslangic(val || ''); setPage(1) }}
+    placeholder="Başlangıç tarihi"
+  />
+</div>
+
+<div className="space-y-1">
+  <label className="text-sm font-semibold text-muted-foreground">Bitiş</label>
+  {/* Before: <Input type="date" className="w-[160px]" value={tarihBitis} onChange={(e) => {...} /> */}
+  <DatePickerField
+    value={tarihBitis}
+    onChange={(val) => { setTarihBitis(val || ''); setPage(1) }}
+    placeholder="Bitiş tarihi"
+  />
+</div>
+```
+
+**Note:** The existing DatePickerField pattern works directly for dosya-list.tsx because:
+- It accepts `value` and `onChange` props matching the component's state signature
+- It does not require react-hook-form integration
+- State updates (setting `tarihBaslangic`/`tarihBitis` + resetting page) can be done in the `onChange` handler
+
 ## State of the Art
 
 | Aspect | Current State | Required Change |
-|--------|---------------|-----------------|
+|--------|---------------|----------------|
 | DatePickerField location | Duplicated in 3 form files | Extract to `components/ui/date-picker.tsx` |
 | Week start prop | Missing | Add `weekStartsOn={1}` to all Calendar usages |
 | Selected day color | Uses default (primary) | Confirm `--primary` is Turuncu (`oklch(0.746 0.174 57)`) |
 | SureList date inputs | `<Input type="date">` | Replace with DatePickerField |
+| DosyaList filter dates | `<Input type="date">` | Replace with DatePickerField |
 
 **CSS Variable `--primary`:** Already set to `oklch(0.746 0.174 57)` in `app/globals.css` which corresponds to Turuncu `#FA991C`. ✓
 
@@ -293,12 +327,7 @@ export function DatePickerField({
 
 ## Open Questions
 
-1. **Should dosya-list.tsx filter date inputs also be updated?**
-   - Current: `<Input type="date">` for filter inputs (lines 176, 186)
-   - Context says scope is "calendar/date-picker UI components" and D-01 specifically mentions only sure-list.tsx
-   - **Recommendation:** Leave dosya-list.tsx filters as-is — they are filter controls, not date entry pickers, and not mentioned in scope
-
-2. **Should DatePickerField support `mode="range"` for future use?**
+1. **Should DatePickerField support `mode="range"` for future use?**
    - Current reference implementations all use `mode="single"`
    - Phase 5 (Takvim) might need range selection
    - **Recommendation:** Keep `mode="single"` for now; design for extensibility if needed later
@@ -323,6 +352,7 @@ export function DatePickerField({
 | DatePickerField renders with Turkish date format | unit | `tests/components/date-picker.test.tsx` (to be created) |
 | Calendar shows Monday as first day | unit | `tests/components/calendar.test.tsx` (to be created) |
 | SureList uses DatePickerField not Input type="date" | smoke | Visual verification in browser |
+| DosyaList filter inputs use DatePickerField | smoke | Visual verification in browser |
 
 ### Wave 0 Gaps
 - [ ] `tests/components/date-picker.test.tsx` — DatePickerField Turkish locale and format
