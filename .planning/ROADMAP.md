@@ -109,9 +109,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: Drizzle schema for `sure` (deadlines) table; deadline calculation service (STK 10-day, istinaf 14-day, cevap 14-day rules; adli tatil overlap detection)
-- [ ] 04-02: tRPC procedures for deadline read/write; auto-calculation triggers when process dates are saved; manual deadline entry form on case detail
-- [ ] 04-03: Dashboard page (upcoming deadlines widget, today's hearings list, summary stats, color-coded urgency badges)
+- [x] 04-01: Drizzle schema for `sure` (deadlines) table; deadline calculation service (STK 10-day, istinaf 14-day, cevap 14-day rules; adli tatil overlap detection)
+- [x] 04-02: tRPC procedures for deadline read/write; auto-calculation triggers when process dates are saved; manual deadline entry form on case detail
+- [x] 04-03: Dashboard page (upcoming deadlines widget, today's hearings list, summary stats, color-coded urgency badges)
 
 **UI hint**: yes
 
