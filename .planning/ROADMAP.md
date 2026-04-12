@@ -235,8 +235,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — Extract DatePickerField to shared component and update SureList date inputs
-- [ ] 09-02-PLAN.md — Update reference forms to use shared DatePickerField and update DosyaList filters
+- [x] 09-01-PLAN.md — Extract DatePickerField to shared component and update SureList date inputs
+- [x] 09-02-PLAN.md — Update reference forms to use shared DatePickerField and update DosyaList filters
 
 ---
 
