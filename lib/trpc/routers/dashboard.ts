@@ -7,8 +7,9 @@ import { addDays } from 'date-fns'
 
 export const dashboardRouter = createTRPCRouter({
   dashboardStats: protectedProcedure.query(async () => {
-    const today = new Date().toISOString().split('T')[0]
-    const in14Days = addDays(new Date(), 14).toISOString().split('T')[0]
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString().split('T')[0]
+    const in14Days = addDays(new Date(now.getFullYear(), now.getMonth(), now.getDate()), 14).toISOString().split('T')[0]
 
     const [totalRows, activeRows, thisMonthRows, deadlineRows, hearingRows] = await Promise.all([
       db.select({ count: count() }).from(dosya),
