@@ -65,10 +65,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 02-01: Drizzle schema for `muvekkil`, `dosya`, `taraf` tables with FK cascade rules; tRPC routers for muvekkil and ayarlar CRUD
-- [ ] 02-02: Müvekkil list, detail, create/edit/delete pages with search and linked-case count
-- [ ] 02-03: Dosya list page (server-side filtered query, `<1s` for 200+ rows), create/edit form (6-tab detail shell, Genel Bilgiler + Karşı Taraflar tabs filled)
-- [ ] 02-04: Ayarlar page (sigorta şirketi ve mahkeme/kurum tanımları CRUD; env şifre değiştirme kılavuzu)
+- [x] 02-01: Drizzle schema for `muvekkil`, `dosya`, `taraf` tables with FK cascade rules; tRPC routers for muvekkil and ayarlar CRUD
+- [x] 02-02: Müvekkil list, detail, create/edit/delete pages with search and linked-case count
+- [x] 02-03: Dosya list page (server-side filtered query, `<1s` for 200+ rows), create/edit form (6-tab detail shell, Genel Bilgiler + Karşı Taraflar tabs filled)
+- [x] 02-04: Ayarlar page (sigorta şirketi ve mahkeme/kurum tanımları CRUD; env şifre değiştirme kılavuzu)
 
 **UI hint**: yes
 
