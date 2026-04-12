@@ -227,6 +227,17 @@ Plans:
 - [ ] 08-02-PLAN.md — Install 23 shadcn components (form group, layout/data, modals/notifications, advanced) for Phase 2-7 consumption
 - [ ] 08-03-PLAN.md — Migrate app-sidebar.tsx off teal hardcodes, rewrite login page with shadcn Card+Button+Input+Label, human-verify checkpoint
 
+### Phase 9: Projedeki bütün takvim görünümlerinin dosyalar/dosya detayı/yargılama sürecinde bulunan takvimler gibi olmasını istiyorum
+
+**Goal:** Standardize all calendar/date-picker UI components to match the reference implementation in dosyalar/dosya detayı/yargılama süreci — Turkish locale (dd.MM.yyyy format, Monday week start), Navy + Turuncu color palette, shared DatePickerField component.
+**Requirements**: none (UI standardization only)
+**Depends on:** Phase 8
+**Plans:** 2 plans
+
+Plans:
+- [ ] 09-01-PLAN.md — Extract DatePickerField to shared component and update SureList date inputs
+- [ ] 09-02-PLAN.md — Update reference forms to use shared DatePickerField and update DosyaList filters
+
 ---
 
 ## Milestone Success Criteria
