@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { toast } from 'sonner'
 import { format, parseISO } from 'date-fns'
@@ -23,11 +23,12 @@ import {
 } from '@/components/ui/form'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const mahkemeDataFormSchema = z.object({
   esas_no: z.string().max(100).optional().or(z.literal('')),
   karar_no: z.string().max(100).optional().or(z.literal('')),
-  mahkeme_adi: z.string().max(200).optional().or(z.literal('')),
+  mahkeme_id: z.number().int().optional().nullable(),
   dava_tarihi: z.string().max(10).optional().or(z.literal('')),
   tebligat_tarihi: z.string().max(10).optional().or(z.literal('')),
   karar_tarihi: z.string().max(10).optional().or(z.literal('')),
@@ -79,12 +80,14 @@ export function MahkemeDataForm({ dosyaId, initialData }: MahkemeDataFormProps) 
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
+  const { data: mahkemeler } = useQuery(trpc.ayarlar.mahkeme.list.queryOptions())
+
   const form = useForm<MahkemeDataFormValues>({
     resolver: zodResolver(mahkemeDataFormSchema),
     defaultValues: {
       esas_no: initialData?.esas_no ?? '',
       karar_no: initialData?.karar_no ?? '',
-      mahkeme_adi: initialData?.mahkeme_adi ?? '',
+      mahkeme_id: initialData?.mahkeme_id ?? undefined,
       dava_tarihi: initialData?.dava_tarihi ?? '',
       tebligat_tarihi: initialData?.tebligat_tarihi ?? '',
       karar_tarihi: initialData?.karar_tarihi ?? '',
@@ -109,7 +112,7 @@ export function MahkemeDataForm({ dosyaId, initialData }: MahkemeDataFormProps) 
       data: {
         esas_no: values.esas_no || undefined,
         karar_no: values.karar_no || undefined,
-        mahkeme_adi: values.mahkeme_adi || undefined,
+        mahkeme_id: values.mahkeme_id || undefined,
         dava_tarihi: values.dava_tarihi || undefined,
         tebligat_tarihi: values.tebligat_tarihi || undefined,
         karar_tarihi: values.karar_tarihi || undefined,
@@ -156,15 +159,29 @@ export function MahkemeDataForm({ dosyaId, initialData }: MahkemeDataFormProps) 
                 )}
               />
 
-              {/* mahkeme_adi */}
+              {/* mahkeme_id - dropdown from ayarlar */}
               <FormField
                 control={form.control}
-                name="mahkeme_adi"
+                name="mahkeme_id"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Mahkeme Adı</FormLabel>
                     <FormControl>
-                      <Input placeholder="Mahkeme adı" {...field} />
+                      <Select
+                        value={field.value?.toString() ?? ''}
+                        onValueChange={(val) => field.onChange(val ? parseInt(val, 10) : undefined)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Mahkeme seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(mahkemeler ?? []).map((m) => (
+                            <SelectItem key={m.id} value={m.id.toString()}>
+                              {m.ad}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

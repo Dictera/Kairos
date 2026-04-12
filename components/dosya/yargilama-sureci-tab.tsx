@@ -44,6 +44,17 @@ export function YargilamaSureciTab({
     })
   )
 
+  const stkGeriAlMutation = useMutation(
+    trpc.surec.stkGeriAl.mutationOptions({
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        const label = STK_ASAMA_LABELS[data.asama as keyof typeof STK_ASAMA_LABELS] ?? data.asama
+        toast.success(`Aşama güncellendi: ${label}`)
+      },
+      onError: (err) => toast.error(err.message ?? 'Geri alınırken hata oluştu.'),
+    })
+  )
+
   const initMahkemeMutation = useMutation(
     trpc.surec.initMahkemeSurec.mutationOptions({
       onSuccess: () => {
@@ -65,6 +76,17 @@ export function YargilamaSureciTab({
     })
   )
 
+  const mahkemeGeriAlMutation = useMutation(
+    trpc.surec.mahkemeGeriAl.mutationOptions({
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        const label = MAHKEME_ASAMA_LABELS[data.asama as keyof typeof MAHKEME_ASAMA_LABELS] ?? data.asama
+        toast.success(`Aşama güncellendi: ${label}`)
+      },
+      onError: (err) => toast.error(err.message ?? 'Geri alınırken hata oluştu.'),
+    })
+  )
+
   const showStk = dosyaTur === 'STK'
   const showMahkemeSection = dosyaTur === 'AT' || dosyaTur === 'AH' || (dosyaTur === 'STK' && mahkeme)
 
@@ -72,8 +94,16 @@ export function YargilamaSureciTab({
     mahkemeIleriAlMutation.mutate({ dosya_id: dosyaId })
   }
 
+  const handleMahkemeGeriAl = () => {
+    mahkemeGeriAlMutation.mutate({ dosya_id: dosyaId })
+  }
+
   const handleStkIleriAl = () => {
     stkIleriAlMutation.mutate({ dosya_id: dosyaId })
+  }
+
+  const handleStkGeriAl = () => {
+    stkGeriAlMutation.mutate({ dosya_id: dosyaId })
   }
 
   return (
@@ -90,7 +120,8 @@ export function YargilamaSureciTab({
               labels={STK_ASAMA_LABELS}
               current={stk?.asama ?? null}
               onAdvance={handleStkIleriAl}
-              isPending={stkIleriAlMutation.isPending}
+              onBack={handleStkGeriAl}
+              isPending={stkIleriAlMutation.isPending || stkGeriAlMutation.isPending}
             />
             <StkDataForm dosyaId={dosyaId} initialData={stk} />
           </CardContent>
@@ -112,7 +143,8 @@ export function YargilamaSureciTab({
               labels={MAHKEME_ASAMA_LABELS}
               current={mahkeme?.asama ?? null}
               onAdvance={handleMahkemeIleriAl}
-              isPending={mahkemeIleriAlMutation.isPending}
+              onBack={handleMahkemeGeriAl}
+              isPending={mahkemeIleriAlMutation.isPending || mahkemeGeriAlMutation.isPending}
             />
             <MahkemeDataForm dosyaId={dosyaId} initialData={mahkeme} />
           </CardContent>

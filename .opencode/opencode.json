@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "read": {
+      "D:/sigorta-takip/.opencode/get-shit-done/*": "allow"
+    },
+    "external_directory": {
+      "D:/sigorta-takip/.opencode/get-shit-done/*": "allow"
+    }
+  }
+}

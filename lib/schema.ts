@@ -49,7 +49,7 @@ export type MahkemeSurecData = {
   asama: MahkemeAsama | null
   esas_no: string | null
   karar_no: string | null
-  mahkeme_adi: string | null
+  mahkeme_id: number | null
   dava_tarihi: string | null
   tebligat_tarihi: string | null
   karar_tarihi: string | null
