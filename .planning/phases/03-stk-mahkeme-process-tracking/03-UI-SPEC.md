@@ -156,7 +156,7 @@ All components already installed in components/ui/. No new shadcn components nee
 - Sorted: ascending chronological order (earliest date first / most upcoming at top).
 - Table columns: Tarih | Saat | Mahkeme/Kurum | Tür | Notlar | Aksiyonlar
 - Notlar column: truncated to 40 chars, tooltip on hover shows full text.
-- "Düzenle" and "Sil" appear as ghost icon-buttons (Pencil icon / Trash2 icon from lucide-react) in the Aksiyonlar column.
+- "Düzenle" and "Sil" appear as ghost icon-only buttons (Pencil icon / Trash2 icon from lucide-react) in the Aksiyonlar column. Each button must include an accessibility label: `aria-label="Duruşmayı düzenle"` and `aria-label="Duruşmayı sil"` respectively (or an equivalent `<span className="sr-only">` child). No visible text label is rendered — the aria attribute is the only label for screen readers.
 - "Duruşma Ekle" button (variant="default") below the table, left-aligned.
 - Empty state: "Henüz duruşma kaydı yok" with "Duruşma Ekle" button inline.
 
@@ -165,7 +165,7 @@ All components already installed in components/ui/. No new shadcn components nee
 - Opens for both add (empty form) and edit (pre-filled form) states.
 - Dialog title: "Duruşma Ekle" / "Duruşma Düzenle".
 - Form fields order: Tarih (date picker) → Saat (text input, placeholder "09:30") → Mahkeme/Kurum (Select from settings + free text fallback) → Tür (text input, placeholder "esas / ara karar / bilirkişi") → Notlar (textarea, 3 rows).
-- Footer: Cancel (Button variant="outline") + Submit (Button variant="default") right-aligned.
+- Footer: "Vazgeç" (Button variant="outline") + "Duruşmayı Kaydet" in add mode / "Değişiklikleri Kaydet" in edit mode (Button variant="default"), right-aligned.
 - On submit: tRPC `addDurusma` or `updateDurusma`, dialog closes, list refreshes, sonner toast.
 
 ### 6. Duruşma Delete Confirmation
@@ -183,6 +183,9 @@ All components already installed in components/ui/. No new shadcn components nee
 | Primary CTA — stage advance | "İleri Al →" |
 | Primary CTA — data form save | "Kaydet" |
 | Primary CTA — add hearing | "Duruşma Ekle" |
+| Dialog confirm button — add mode | "Duruşmayı Kaydet" |
+| Dialog confirm button — edit mode | "Değişiklikleri Kaydet" |
+| Dialog cancel button | "Vazgeç" |
 | Section heading — STK process | "STK Tahkim Süreci" |
 | Section heading — court process | "Mahkeme Süreci" |
 | Section heading — hearings | "Duruşmalar" |
@@ -208,6 +211,8 @@ All components already installed in components/ui/. No new shadcn components nee
 | Form validation — date required | "Tarih seçilmelidir." |
 | Saat format hint | Placeholder: "09:30" |
 | Mahkeme activate confirmation | none — single-click, irreversible, no confirmation dialog |
+| Düzenle row action aria-label | `aria-label="Duruşmayı düzenle"` |
+| Sil row action aria-label | `aria-label="Duruşmayı sil"` |
 
 **Stage display labels (Turkish human-readable, mapped from enum keys):**
 
