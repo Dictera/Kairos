@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { format, parseISO } from 'date-fns'
 import { tr } from 'date-fns/locale/tr'
 import { CalendarIcon } from 'lucide-react'
+import { DatePickerField } from '@/components/ui/date-picker'
 import type { StkSurecData } from '@/lib/schema'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -40,41 +41,6 @@ type StkDataFormValues = z.infer<typeof stkDataFormSchema>
 type StkDataFormProps = {
   dosyaId: number
   initialData: StkSurecData | undefined
-}
-
-function DatePickerField({
-  value,
-  onChange,
-  placeholder,
-}: {
-  value: string | null | undefined
-  onChange: (value: string | undefined) => void
-  placeholder?: string
-}) {
-  const date = value ? parseISO(value) : undefined
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className="w-full justify-start text-left font-normal"
-        >
-          {date ? format(date, 'dd.MM.yyyy', { locale: tr }) : placeholder ?? 'Tarih seçin'}
-          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={(d) => onChange(d ? format(d, 'yyyy-MM-dd') : undefined)}
-          locale={tr}
-          captionLayout="label"
-        />
-      </PopoverContent>
-    </Popover>
-  )
 }
 
 export function StkDataForm({ dosyaId, initialData }: StkDataFormProps) {
