@@ -391,7 +391,11 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
                   <FormItem>
                     <FormLabel>Son Tarih</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <DatePickerField
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Son tarih seçin"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
