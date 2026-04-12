@@ -3,6 +3,8 @@ import { muvekkillRouter } from './muvekkil'
 import { ayarlarRouter } from './ayarlar'
 import { dosyaRouter } from './dosya'
 import { surecRouter } from './surec'
+import { sureRouter } from './sure'
+import { dashboardRouter } from './dashboard'
 
 export const appRouter = createTRPCRouter({
   health: publicProcedure.query(() => ({
@@ -13,6 +15,8 @@ export const appRouter = createTRPCRouter({
   ayarlar: ayarlarRouter,
   dosya: dosyaRouter,
   surec: surecRouter,
+  sure: sureRouter,
+  dashboard: dashboardRouter,
 })
 
 export type AppRouter = typeof appRouter

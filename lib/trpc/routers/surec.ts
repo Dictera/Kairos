@@ -2,13 +2,14 @@ import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { db } from '@/lib/db'
 import {
-  dosya, durusma,
+  dosya, durusma, sure,
   STK_ASAMALAR, MAHKEME_ASAMALAR,
   parseSurecDetay, serializeSurecDetay,
   type SurecDetay, type StkSurecData, type MahkemeSurecData,
 } from '@/lib/schema'
-import { eq, asc, sql } from 'drizzle-orm'
+import { eq, asc, sql, and } from 'drizzle-orm'
 import { z } from 'zod'
+import { calcStkItirazSuresi, calcIstinafBasvurusu, calcCevapDilekce } from '@/lib/deadline-service'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -85,6 +86,20 @@ export const surecRouter = createTRPCRouter({
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
         .where(eq(dosya.id, input.dosya_id))
+
+      // D-07, D-11: Auto-calc STK itiraz süresi — upsert on tebligat_tarihi change
+      await db.delete(sure)
+        .where(and(eq(sure.dosya_id, input.dosya_id), eq(sure.tur, 'stk_itiraz')))
+      if (input.data.tebligat_tarihi) {
+        const sonTarih = calcStkItirazSuresi(input.data.tebligat_tarihi)
+        await db.insert(sure).values({
+          dosya_id: input.dosya_id,
+          ad: 'STK Karara İtiraz Süresi',
+          son_tarih: sonTarih,
+          tur: 'stk_itiraz',
+        })
+      }
+
       return { success: true }
     }),
 
@@ -151,6 +166,33 @@ export const surecRouter = createTRPCRouter({
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
         .where(eq(dosya.id, input.dosya_id))
+
+      // D-07, D-11: Auto-calc cevap dilekçesi — upsert on tebligat_tarihi change
+      await db.delete(sure)
+        .where(and(eq(sure.dosya_id, input.dosya_id), eq(sure.tur, 'cevap_dilekce')))
+      if (input.data.tebligat_tarihi) {
+        const sonTarih = calcCevapDilekce(input.data.tebligat_tarihi)
+        await db.insert(sure).values({
+          dosya_id: input.dosya_id,
+          ad: 'Cevap Dilekçesi Süresi',
+          son_tarih: sonTarih,
+          tur: 'cevap_dilekce',
+        })
+      }
+
+      // D-09: Auto-calc istinaf başvurusu — upsert on karar_tarihi change
+      await db.delete(sure)
+        .where(and(eq(sure.dosya_id, input.dosya_id), eq(sure.tur, 'istinaf')))
+      if (input.data.karar_tarihi) {
+        const sonTarih = calcIstinafBasvurusu(input.data.karar_tarihi)
+        await db.insert(sure).values({
+          dosya_id: input.dosya_id,
+          ad: 'İstinaf Başvurusu Süresi',
+          son_tarih: sonTarih,
+          tur: 'istinaf',
+        })
+      }
+
       return { success: true }
     }),
 
