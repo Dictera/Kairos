@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { SurecStepper } from './surec-stepper'
 import { StkDataForm } from './stk-data-form'
+import { MahkemeDataForm } from './mahkeme-data-form'
+import { DurusmaList } from './durusma-list'
 
 type YargilamaSureciTabProps = {
   dosyaId: number
@@ -52,8 +54,23 @@ export function YargilamaSureciTab({
     })
   )
 
+  const mahkemeIleriAlMutation = useMutation(
+    trpc.surec.mahkemeIleriAl.mutationOptions({
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        const label = MAHKEME_ASAMA_LABELS[data.asama as keyof typeof MAHKEME_ASAMA_LABELS] ?? data.asama
+        toast.success(`Aşama güncellendi: ${label}`)
+      },
+      onError: () => toast.error('Aşama güncellenirken hata oluştu. Sayfayı yenileyip tekrar deneyin.'),
+    })
+  )
+
   const showStk = dosyaTur === 'STK'
   const showMahkemeSection = dosyaTur === 'AT' || dosyaTur === 'AH' || (dosyaTur === 'STK' && mahkeme)
+
+  const handleMahkemeIleriAl = () => {
+    mahkemeIleriAlMutation.mutate({ dosya_id: dosyaId })
+  }
 
   const handleStkIleriAl = () => {
     stkIleriAlMutation.mutate({ dosya_id: dosyaId })
@@ -89,10 +106,15 @@ export function YargilamaSureciTab({
           <CardHeader>
             <CardTitle className="text-base">Mahkeme Süreci</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground py-8 text-center">
-              Mahkeme süreci bileşeni Plan 03 ile eklenecek.
-            </p>
+          <CardContent className="space-y-6">
+            <SurecStepper
+              stages={MAHKEME_ASAMALAR}
+              labels={MAHKEME_ASAMA_LABELS}
+              current={mahkeme?.asama ?? null}
+              onAdvance={handleMahkemeIleriAl}
+              isPending={mahkemeIleriAlMutation.isPending}
+            />
+            <MahkemeDataForm dosyaId={dosyaId} initialData={mahkeme} />
           </CardContent>
         </Card>
       ) : showStk && !mahkeme ? (
@@ -106,20 +128,8 @@ export function YargilamaSureciTab({
         </Button>
       ) : null}
 
-      {/* Separator before Durusma section */}
-      {showMahkemeSection && <Separator className="my-6" />}
-
-      {/* Durusma Section stub */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Duruşmalar</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground py-8 text-center">
-            Duruşma listesi Plan 03 ile eklenecek.
-          </p>
-        </CardContent>
-      </Card>
+      {/* Durusma Section - always shown for all file types */}
+      <DurusmaList dosyaId={dosyaId} />
     </div>
   )
 }
