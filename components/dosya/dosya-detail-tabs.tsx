@@ -28,6 +28,7 @@ import {
 import Link from 'next/link'
 import { GenelBilgilerTab } from './genel-bilgiler-tab'
 import { KarsitaraflarTab } from './karsitaraflar-tab'
+import { YargilamaSureciTab } from './yargilama-sureci-tab'
 
 interface DosyaDetailTabsProps {
   dosyaId: number
@@ -187,7 +188,11 @@ export function DosyaDetailTabs({ dosyaId }: DosyaDetailTabsProps) {
         </TabsContent>
 
         <TabsContent value="yargilama-sureci" className="mt-4">
-          <EmptyTabContent />
+          <YargilamaSureciTab
+            dosyaId={dosyaId}
+            dosyaTur={data.tur}
+            surecDetayRaw={data.surec_detay ?? null}
+          />
         </TabsContent>
 
         <TabsContent value="belgeler" className="mt-4">
