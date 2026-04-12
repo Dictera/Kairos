@@ -112,10 +112,7 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
         router.push('/dosyalar/' + row.id)
       },
       onError: (err) => {
-        if (
-          err.message?.toLowerCase().includes('unique') ||
-          err.message?.toLowerCase().includes('conflict')
-        ) {
+        if (err.data?.code === 'CONFLICT') {
           form.setError('dosya_no', { message: 'Bu dosya numarası zaten kullanılıyor.' })
         } else {
           toast.error('Kaydedilemedi. Lütfen tekrar deneyin.')
@@ -132,10 +129,7 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
         router.push('/dosyalar/' + dosyaId)
       },
       onError: (err) => {
-        if (
-          err.message?.toLowerCase().includes('unique') ||
-          err.message?.toLowerCase().includes('conflict')
-        ) {
+        if (err.data?.code === 'CONFLICT') {
           form.setError('dosya_no', { message: 'Bu dosya numarası zaten kullanılıyor.' })
         } else {
           toast.error('Kaydedilemedi. Lütfen tekrar deneyin.')
@@ -184,7 +178,9 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
     }
   }
 
-  if (mode === 'edit' && dosyaLoading) {
+  const lookupsReady = !!sigortaTuruList && !!sigortaSirketiList && !!muvekkilData
+
+  if (mode === 'edit' && (dosyaLoading || !lookupsReady)) {
     return (
       <div className="max-w-2xl space-y-4">
         {Array.from({ length: 6 }).map((_, i) => (
