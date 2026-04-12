@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { Input } from '@/components/ui/input'
+import { DatePickerField } from '@/components/ui/date-picker'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -172,21 +173,19 @@ export function DosyaList() {
 
         <div className="space-y-1">
           <label className="text-sm font-semibold text-muted-foreground">Başlangıç</label>
-          <Input
-            type="date"
-            className="w-[160px]"
+          <DatePickerField
             value={tarihBaslangic}
-            onChange={(e) => { setTarihBaslangic(e.target.value); setPage(1) }}
+            onChange={(val) => { setTarihBaslangic(val || ''); setPage(1) }}
+            placeholder="Başlangıç tarihi"
           />
         </div>
 
         <div className="space-y-1">
           <label className="text-sm font-semibold text-muted-foreground">Bitiş</label>
-          <Input
-            type="date"
-            className="w-[160px]"
+          <DatePickerField
             value={tarihBitis}
-            onChange={(e) => { setTarihBitis(e.target.value); setPage(1) }}
+            onChange={(val) => { setTarihBitis(val || ''); setPage(1) }}
+            placeholder="Bitiş tarihi"
           />
         </div>
       </div>
