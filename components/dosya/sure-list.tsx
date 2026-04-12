@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { DatePickerField } from '@/components/ui/date-picker'
 import {
   Dialog,
   DialogContent,
@@ -216,7 +217,11 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
                 <FormItem>
                   <FormLabel>Son Tarih</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <DatePickerField
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Son tarih seçin"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
