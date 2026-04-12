@@ -1,12 +1,17 @@
 import { describe, it, expect, beforeAll } from 'vitest'
 import { muvekkillRouter } from '@/lib/trpc/routers/muvekkil'
 import { createCallerFactory } from '@/lib/trpc/init'
+import type { IronSession } from 'iron-session'
+import type { SessionData } from '@/lib/session'
 
 const createCaller = createCallerFactory(muvekkillRouter)
 let caller: ReturnType<typeof createCaller>
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockSession = { isLoggedIn: true } as unknown as IronSession<SessionData>
+
 beforeAll(() => {
-  caller = createCaller({ session: { isLoggedIn: true, user: undefined } })
+  caller = createCaller({ session: mockSession, headers: new Headers() })
 })
 
 describe('muvekkil router — procedure registry', () => {
