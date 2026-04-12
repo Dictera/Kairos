@@ -5,6 +5,7 @@ import { dosyaRouter } from './dosya'
 import { surecRouter } from './surec'
 import { sureRouter } from './sure'
 import { dashboardRouter } from './dashboard'
+import { calendarRouter } from './calendar'
 
 export const appRouter = createTRPCRouter({
   health: publicProcedure.query(() => ({
@@ -17,6 +18,7 @@ export const appRouter = createTRPCRouter({
   surec: surecRouter,
   sure: sureRouter,
   dashboard: dashboardRouter,
+  calendar: calendarRouter,
 })
 
 export type AppRouter = typeof appRouter
