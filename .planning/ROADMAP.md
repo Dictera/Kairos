@@ -87,9 +87,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: Drizzle schema for `surec_detay` (JSON column on dosya for type-specific state), `durusma` table; tRPC router procedures for stage advancement and duruşma CRUD
-- [ ] 03-02: STK process UI — stage stepper, data-point form fields (STK-specific), stage advancement action
-- [ ] 03-03: Mahkeme process UI — stage stepper, data-point form fields (court-specific), duruşma add/edit/delete list with sorting
+- [x] 03-01: Drizzle schema for `surec_detay` (JSON column on dosya for type-specific state), `durusma` table; tRPC router procedures for stage advancement and duruşma CRUD
+- [x] 03-02: STK process UI — stage stepper, data-point form fields (STK-specific), stage advancement action
+- [x] 03-03: Mahkeme process UI — stage stepper, data-point form fields (court-specific), duruşma add/edit/delete list with sorting
 
 **UI hint**: yes
 
