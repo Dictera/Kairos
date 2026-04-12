@@ -14,6 +14,7 @@ import { SurecStepper } from './surec-stepper'
 import { StkDataForm } from './stk-data-form'
 import { MahkemeDataForm } from './mahkeme-data-form'
 import { DurusmaList } from './durusma-list'
+import { SureList } from './sure-list'
 
 type YargilamaSureciTabProps = {
   dosyaId: number
@@ -162,6 +163,13 @@ export function YargilamaSureciTab({
 
       {/* Durusma Section - always shown for all file types */}
       <DurusmaList dosyaId={dosyaId} />
+
+      {/* Süreler Section */}
+      <Separator className="my-6" />
+      <div className="space-y-4">
+        <h3 className="text-base font-semibold">Süreler</h3>
+        <SureList dosyaId={dosyaId} />
+      </div>
     </div>
   )
 }
