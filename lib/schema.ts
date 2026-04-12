@@ -69,6 +69,32 @@ export function serializeSurecDetay(data: SurecDetay): string {
   return JSON.stringify(data)
 }
 
+// ── Sure (Deadline) types ──────────────────────────────────────────────────────
+
+export const SURE_TUR = ['stk_itiraz', 'istinaf', 'cevap_dilekce', 'manuel'] as const
+export type SureTur = typeof SURE_TUR[number]
+
+// ── Sure (Deadline) table ─────────────────────────────────────────────────────
+
+export const sure = sqliteTable('sure', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  dosya_id: integer('dosya_id').notNull().references(() => dosya.id, { onDelete: 'cascade' }),
+  ad: text('ad').notNull(),
+  son_tarih: text('son_tarih').notNull(),  // YYYY-MM-DD
+  tur: text('tur').notNull(),              // SureTur
+  notlar: text('notlar'),
+  created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
+}, (t) => [
+  index('idx_sure_dosya').on(t.dosya_id),
+  index('idx_sure_son_tarih').on(t.son_tarih),
+])
+
+export const sureRelations = relations(sure, ({ one }) => ({
+  dosya: one(dosya, { fields: [sure.dosya_id], references: [dosya.id] }),
+}))
+
+// ── Stage Labels ─────────────────────────────────────────────────────────────
+
 export const STK_ASAMA_LABELS: Record<StkAsama, string> = {
   'BAŞVURU': 'Başvuru',
   'KABUL': 'Kabul',
@@ -163,6 +189,7 @@ export const dosyaRelations = relations(dosya, ({ one, many }) => ({
   karsitarafSigorta: one(sigortaSirketi, { fields: [dosya.karsitaraf_sigorta_id], references: [sigortaSirketi.id] }),
   taraflar: many(taraf),
   durusmalar: many(durusma),
+  sureler: many(sure),
 }))
 
 export const tarafRelations = relations(taraf, ({ one }) => ({
