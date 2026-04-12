@@ -21,6 +21,8 @@
 - **D-08:** STK itiraz süresi: `stk_tebligat_tarihi + 10 calendar days`
 - **D-09:** İstinaf başvurusu: `mahkeme_karar_tebligat_tarihi + 14 calendar days`
 - **D-10:** Cevap dilekçesi: `dava_tebligat_tarihi + 14 calendar days`
+- **D-11:** Tebligat/karar tarihi silindiğinde (null'a dönünce) ilgili `sure` satırı da silinir. Aynı mutation bloğunda `if (!input.data.tebligat_tarihi)` guard'ı ile temizlenir.
+- **D-12:** Manuel süreler düzenlenebilir. `sureRouter.updateManuel` prosedürü eklenir (ad, son_tarih, notlar). Düzenleme UI'ı case detail sayfasındaki Süreler subsection'ında yer alır.
 
 ### Claude's Discretion
 
@@ -437,6 +439,19 @@ export const sureRouter = createTRPCRouter({
       return row
     }),
 
+  updateManuel: protectedProcedure
+    .input(z.object({
+      id: z.number().int(),
+      ad: z.string().min(1).max(200),
+      son_tarih: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      notlar: z.string().max(2000).optional().or(z.literal('')),
+    }))
+    .mutation(async ({ input }) => {
+      const { id, ...data } = input
+      const [row] = await db.update(sure).set(data).where(eq(sure.id, id)).returning()
+      return row
+    }),
+
   delete: protectedProcedure
     .input(z.object({ id: z.number().int() }))
     .mutation(async ({ input }) => {
@@ -494,15 +509,13 @@ export default function DashboardPage() {
 
 ## Open Questions
 
-1. **Deletion of auto-calculated deadlines when source date is cleared**
-   - What we know: D-07 says auto-calc fires on date save
-   - What's unclear: If a user clears `stk.tebligat_tarihi` (sets it back to null), should the auto-calculated `sure` row be deleted?
-   - Recommendation: Yes — delete the `sure` row when the trigger date is explicitly set to `null` or empty. Add the cleanup in the same mutation block, guarded by `if (!input.data.tebligat_tarihi)`.
+*All open questions resolved by user decision.*
 
-2. **`sure` row for manual deadlines — can they be edited after creation?**
-   - What we know: D-06 says manual deadline entry from case detail page; CONTEXT.md mentions add form only
-   - What's unclear: Whether there's an edit flow for manual deadlines (name, date, notes change)
-   - Recommendation: Include an `update` procedure in `sureRouter` for completeness (same pattern as `durusmaUpdate`). The plan can decide whether to surface the edit UI.
+1. **Deletion of auto-calculated deadlines when source date is cleared** → **RESOLVED (D-11)**
+   - Decision: Yes — delete the `sure` row when trigger date is set to null/empty. Guard: `if (!input.data.tebligat_tarihi)` in mutation block.
+
+2. **`sure` row for manual deadlines — can they be edited after creation?** → **RESOLVED (D-12)**
+   - Decision: Yes — `sureRouter.updateManuel` procedure is required. Edit UI in case detail Süreler subsection.
 
 ---
 
