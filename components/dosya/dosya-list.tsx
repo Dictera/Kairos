@@ -78,12 +78,12 @@ export function DosyaList() {
   const hasFilters = debouncedSearch || tur || durum || tarihBaslangic || tarihBitis
 
   function handleTurChange(val: string) {
-    setTur(val as 'STK' | 'AT' | 'AH' | '')
+    setTur((val === 'all' ? '' : val) as 'STK' | 'AT' | 'AH' | '')
     setPage(1)
   }
 
   function handleDurumChange(val: string) {
-    setDurum(val as 'aktif' | 'arsiv' | '')
+    setDurum((val === 'all' ? '' : val) as 'aktif' | 'arsiv' | '')
     setPage(1)
   }
 
@@ -143,12 +143,12 @@ export function DosyaList() {
       <div className="flex flex-wrap items-end gap-3">
         <div className="space-y-1">
           <label className="text-sm font-semibold text-muted-foreground">Tür</label>
-          <Select value={tur} onValueChange={handleTurChange}>
+          <Select value={tur || 'all'} onValueChange={handleTurChange}>
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Tümü" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tümü</SelectItem>
+              <SelectItem value="all">Tümü</SelectItem>
               <SelectItem value="STK">STK</SelectItem>
               <SelectItem value="AT">Asliye Ticaret</SelectItem>
               <SelectItem value="AH">Asliye Hukuk</SelectItem>
@@ -158,12 +158,12 @@ export function DosyaList() {
 
         <div className="space-y-1">
           <label className="text-sm font-semibold text-muted-foreground">Durum</label>
-          <Select value={durum} onValueChange={handleDurumChange}>
+          <Select value={durum || 'all'} onValueChange={handleDurumChange}>
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Tümü" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tümü</SelectItem>
+              <SelectItem value="all">Tümü</SelectItem>
               <SelectItem value="aktif">Aktif</SelectItem>
               <SelectItem value="arsiv">Arşivlenmiş</SelectItem>
             </SelectContent>
