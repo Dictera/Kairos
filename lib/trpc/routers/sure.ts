@@ -58,7 +58,8 @@ export const sureRouter = createTRPCRouter({
   deleteSure: protectedProcedure
     .input(z.object({ id: z.number().int() }))
     .mutation(async ({ input }) => {
-      await db.delete(sure).where(eq(sure.id, input.id))
+      const [deleted] = await db.delete(sure).where(eq(sure.id, input.id)).returning()
+      if (!deleted) throw new TRPCError({ code: 'NOT_FOUND', message: 'Silinecek süre bulunamadı.' })
       return { success: true }
     }),
 })

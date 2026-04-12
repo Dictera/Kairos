@@ -3,13 +3,13 @@ import { db } from '@/lib/db'
 import { dosya, muvekkil, sure, durusma } from '@/lib/schema'
 import { eq, and, gte, lte, sql } from 'drizzle-orm'
 import { count } from 'drizzle-orm'
-import { addDays } from 'date-fns'
+import { addDays, format } from 'date-fns'
 
 export const dashboardRouter = createTRPCRouter({
   dashboardStats: protectedProcedure.query(async () => {
     const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString().split('T')[0]
-    const in14Days = addDays(new Date(now.getFullYear(), now.getMonth(), now.getDate()), 14).toISOString().split('T')[0]
+    const today = format(new Date(now.getFullYear(), now.getMonth(), now.getDate()), 'yyyy-MM-dd')
+    const in14Days = format(addDays(new Date(now.getFullYear(), now.getMonth(), now.getDate()), 14), 'yyyy-MM-dd')
 
     const [totalRows, activeRows, thisMonthRows, deadlineRows, hearingRows] = await Promise.all([
       db.select({ count: count() }).from(dosya),
