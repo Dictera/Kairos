@@ -18,7 +18,7 @@
 | 7. Petition Templates + PDF + Reports | v1.0 | 4/4 | ✅ Complete |
 | 8. UI Renewal (Navy + Turuncu) | v1.1 | 3/3 | ✅ Complete |
 | 9. Calendar Standardization | v1.1 | 2/2 | ✅ Complete |
-| 10. Schema & Migration Foundation | 2/2 | Complete   | 2026-04-13 |
+| 10. Schema & Migration Foundation | 3/3 | Complete    | 2026-04-13 |
 | 11. Müvekkil Email Removal | v1.1 | TBD | 📋 Planned |
 | 12. Taraf Tab Driver Info UI | v1.1 | TBD | 📋 Planned |
 | 13. Tab Cleanup & UI/UX | v1.1 | TBD | 📋 Planned |
