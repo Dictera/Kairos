@@ -25,6 +25,8 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 - ✓ **Finans Takibi (FINANS-01–06)** — v1.0: Gelen/Giden/Masraf entries, net balance, finance dashboard
 - ✓ **Dilekçe Şablon Sistemi (DILEKCE-01–05)** — v1.0: Tiptap editor, variable substitution, Arial TTF Turkish PDF
 - ✓ **Raporlar (RAPOR-01–03)** — v1.0: Portfolio + financial reports, PDF + Excel export
+- ✓ **Müvekkil E-posta Kaldırma (MUVEK-06)** — v1.1: Müvekkil formlarından e-posta alanı kaldırma
+- ✓ **Sürücü Bilgileri (TARAF-06, 09, 10)** — v1.1: Dosya > Taraflar bölümüne sürücü bilgileri ekleme (Ad, Soyad, Plaka, Telefon, Poliçe No) + Turkish phone regex
 
 ## Current Milestone: v1.1 Dosyalar ve Müvekkiller Sekmesi İyileştirmeleri
 
@@ -35,13 +37,6 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 - Dosya > Taraflar bölümüne diğer sürücü bilgileri ekleme (Ad, Soyad, Plaka, Telefon, Poliçe No)
 - Mevcut sekmelerde bölüm ekleme/çıkarma
 - Dosyalar ve Müvekkiller genel UI/UX iyileştirmeleri
-
-### Active
-
-- Müvekkil e-posta alanı kaldırma
-- Diğer sürücü bilgileri ekleme (Dosya > Taraflar)
-- Sekme içerikleri düzenleme
-- UI/UX iyileştirmeleri (Dosyalar ve Müvekkiller)
 
 ### Out of Scope
 
@@ -103,4 +98,4 @@ Bu belge faz geçişlerinde ve milestone sınırlarında güncellenir.
 4. Context güncelleme
 
 ---
-*Last updated: 2026-04-13 after v1.0 milestone, updated 2026-04-13 for v1.1*
+*Last updated: 2026-04-13 after v1.0 milestone, updated 2026-04-14 for v1.1 (Phase 10 complete)*
