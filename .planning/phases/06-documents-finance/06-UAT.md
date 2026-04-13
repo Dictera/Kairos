@@ -3,7 +3,7 @@ status: complete
 phase: 06-documents-finance
 source: 06-01-PLAN.md, 06-RESEARCH.md, implementation verification
 started: 2026-04-13T10:00:00.0000000+03:00
-updated: 2026-04-13T10:08:00.0000000+03:00
+updated: 2026-04-13T10:10:00.0000000+03:00
 ---
 
 ## Current Test
@@ -14,7 +14,9 @@ updated: 2026-04-13T10:08:00.0000000+03:00
 
 ### 1. Belge Yükleme (Document Upload)
 expected: Navigate to a case detail page (dosya). Go to the Belgeler tab. Select a PDF, DOC, DOCX, JPG, or PNG file (max 20MB). Choose a category (Dilekçe, Karar, Poliçe, Sigorta poliçesi, Hasar dosyası, Vekaletname, Diğer). Click the upload button. A success toast appears ("Belge yüklendi"). The document appears in the list below with name, category, and date.
-result: pass
+result: issue
+reported: "Belge yüklendikten sonra dosyanın yanında çıkan X (kaldır) butonu görünmüyor, ayrıca Belgeler tabında 'Event handlers cannot be passed to Client Component props' React hatası alıyorum"
+severity: major
 
 ### 2. Belge Listesi (Document List)
 expected: Navigate to a case's Belgeler tab. A list shows all uploaded documents for that case. Each row shows: document name, category (translated to Turkish), file size, and upload date. Documents are sorted newest first.
@@ -53,8 +55,8 @@ result: pass
 ## Summary
 
 total: 8
-passed: 5
-issues: 3
+passed: 4
+issues: 4
 pending: 0
 skipped: 0
 blocked: 0
@@ -84,6 +86,15 @@ blocked: 0
   reason: "User reported: yıllık filtre var ama chartlar yok, tabular UI sıkıntıları: aylık detay ve yıllık özet tablolarındaki sütunlar hizalı değil, aylar tam adıyla yazılsın, grafikler sekmesinde gereksiz scroll"
   severity: major
   test: 7
+  artifacts: []
+  missing: []
+  debug_session: ""
+
+- truth: "After file upload, X button appears to remove selected file; Belgeler tab loads without React errors"
+  status: failed
+  reason: "User reported: Belge yüklendikten sonra dosyanın yanında çıkan X (kaldır) butonu görünmüyor, ayrıca Belgeler tabında 'Event handlers cannot be passed to Client Component props' React hatası"
+  severity: major
+  test: 1
   artifacts: []
   missing: []
   debug_session: ""
