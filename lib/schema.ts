@@ -161,6 +161,11 @@ export const taraf = sqliteTable('taraf', {
   karsitaraf_vekil: text('karsitaraf_vekil'),
   police_no: text('police_no'),
   karsitaraf_plaka: text('karsitaraf_plaka'),     // nullable — D-12
+  surucu_ad: text('surucu_ad'),                    // nullable — surucu (driver) info
+  surucu_soyad: text('surucu_soyad'),              // nullable
+  surucu_plaka: text('surucu_plaka'),              // nullable
+  surucu_telefon: text('surucu_telefon'),          // nullable
+  surucu_police_no: text('surucu_police_no'),       // nullable
 })
 
 export const durusma = sqliteTable('durusma', {
@@ -251,6 +256,19 @@ export const dilekceSablonu = sqliteTable('dilekce_sablonu', {
 export const dilekceSablonuRelations = relations(dilekceSablonu, ({ one }) => ({
   // No relations needed for this phase
 }))
+
+export const dilekceOdtSablonu = sqliteTable('dilekce_odt_sablonu', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  baslik: text('baslik').notNull(),
+  kategori: text('kategori').notNull(), // 'STK' | 'Mahkeme' | 'Genel'
+  dosya_adi: text('dosya_adi').notNull(), // original filename.odt
+  dosya_yolu: text('dosya_yolu').notNull(), // path to stored .odt file
+  degiskenler: text('degiskenler').notNull().default('[]'), // JSON array of variable names found in template
+  created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
+  updated_at: text('updated_at').notNull().default(sql`(datetime('now'))`),
+}, (t) => [
+  index('idx_odt_sablon_kategori').on(t.kategori),
+])
 
 // ── FINANS (Finance) types ───────────────────────────────────────────────────
 
