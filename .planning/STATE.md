@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: executing
-stopped_at: Phase 07 UI-SPEC approved
-last_updated: "2026-04-13T18:44:47.172Z"
+milestone: v1.1
+milestone_name: Dosyalar ve Müvekkiller Sekmesi İyileştirmeleri
+status: defining_requirements
+stopped_at: Milestone v1.1 started
+last_updated: "2026-04-13"
 last_activity: 2026-04-13
 progress:
-  total_phases: 9
-  completed_phases: 8
-  total_plans: 31
-  completed_plans: 28
-  percent: 90
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-10)
 
 ## Current Position
 
-Phase: 08
-Plan: Not started
-Status: Executing Phase 07
-Last activity: 2026-04-13
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-13 — Milestone v1.1 started
 
 Progress: [░░░░░░░░░░] 0%
 

@@ -26,9 +26,22 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 - ✓ **Dilekçe Şablon Sistemi (DILEKCE-01–05)** — v1.0: Tiptap editor, variable substitution, Arial TTF Turkish PDF
 - ✓ **Raporlar (RAPOR-01–03)** — v1.0: Portfolio + financial reports, PDF + Excel export
 
+## Current Milestone: v1.1 Dosyalar ve Müvekkiller Sekmesi İyileştirmeleri
+
+**Goal:** Müvekkil ve dosya yönetiminde temizlik ve iyileştirme — gereksiz alan çıkarma, yeni alan ekleme, sekme düzeni ve UI/UX.
+
+**Target features:**
+- Müvekkil formlarından e-posta alanı kaldırma
+- Dosya > Taraflar bölümüne diğer sürücü bilgileri ekleme (Ad, Soyad, Plaka, Telefon, Poliçe No)
+- Mevcut sekmelerde bölüm ekleme/çıkarma
+- Dosyalar ve Müvekkiller genel UI/UX iyileştirmeleri
+
 ### Active
 
-*(Next milestone will define new requirements)*
+- Müvekkil e-posta alanı kaldırma
+- Diğer sürücü bilgileri ekleme (Dosya > Taraflar)
+- Sekme içerikleri düzenleme
+- UI/UX iyileştirmeleri (Dosyalar ve Müvekkiller)
 
 ### Out of Scope
 
@@ -90,4 +103,4 @@ Bu belge faz geçişlerinde ve milestone sınırlarında güncellenir.
 4. Context güncelleme
 
 ---
-*Last updated: 2026-04-13 after v1.0 milestone*
+*Last updated: 2026-04-13 after v1.0 milestone, updated 2026-04-13 for v1.1*
