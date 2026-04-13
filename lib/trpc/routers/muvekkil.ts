@@ -9,7 +9,6 @@ const muvekkilSchema = z.object({
   ad: z.string().min(1, 'Ad zorunludur').max(100),
   soyad: z.string().min(1, 'Soyad zorunludur').max(100),
   telefon: z.string().max(20).optional().or(z.literal('')),
-  email: z.string().email('Geçersiz e-posta formatı').optional().or(z.literal('')),
   tc_vergi_no: z.string().max(11).optional().or(z.literal('')),
   adres: z.string().max(500).optional().or(z.literal('')),
   notlar: z.string().max(2000).optional().or(z.literal('')),

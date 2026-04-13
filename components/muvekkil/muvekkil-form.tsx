@@ -250,7 +250,6 @@ export function MuvekkilForm(props: MuvekkilFormProps) {
         ad: data.ad,
         soyad: data.soyad,
         telefon: data.telefon ?? '',
-        email: data.email ?? '',
         tc_vergi_no: data.tc_vergi_no ?? '',
         adres: data.adres ?? '',
         notlar: data.notlar ?? '',

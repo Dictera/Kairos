@@ -125,7 +125,6 @@ export const muvekkil = sqliteTable('muvekkil', {
   ad: text('ad').notNull(),
   soyad: text('soyad').notNull(),
   telefon: text('telefon'),
-  email: text('email'),
   tc_vergi_no: text('tc_vergi_no'),
   adres: text('adres'),
   notlar: text('notlar'),
