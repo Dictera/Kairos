@@ -41,10 +41,13 @@
 1. `taraf` table has 5 new columns: surucu_ad, surucu_soyad, surucu_plaka, surucu_telefon, surucu_police_no
 2. Drizzle migration generated and applied to development database
 3. tRPC `tarafSchema` accepts all 5 new fields with Turkish phone validation (05XX XXX XX XX)
-4. tRPC `tarafSchema` accepts plaka field with Turkish plate validation (XX XXX XX format)
-5. Müvekkil email column dropped via Drizzle migration (data backed up prior)
+4. tRPC `tarafSchema` accepts plaka field without format validation (per D-02: user validates manually)
+5. Müvekkil email column dropped via Drizzle migration (no backup per D-04: emails unused)
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+- [ ] 10-01-PLAN.md — Add 5 driver columns to taraf + tRPC validation + migration
+- [ ] 10-02-PLAN.md — Drop email column from muvekkil + migration
 
 **UI hint**: no
 
@@ -115,7 +118,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 10. Schema & Migration Foundation | 0/5 | Not started | - |
+| 10. Schema & Migration Foundation | 0/2 | 📋 Planned | - |
 | 11. Müvekkil Email Removal | 0/4 | Not started | - |
 | 12. Taraf Tab Driver Info UI | 0/5 | Not started | - |
 | 13. Tab Cleanup & UI/UX | 0/4 | Not started | - |
