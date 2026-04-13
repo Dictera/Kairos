@@ -32,6 +32,9 @@ import { KarsitaraflarTab } from './karsitaraflar-tab'
 import { YargilamaSureciTab } from './yargilama-sureci-tab'
 import { BelgeUpload } from '@/components/belge/belge-upload'
 import { BelgeList } from '@/components/belge/belge-list'
+import { FinansForm } from '@/components/finans/finans-form'
+import { FinansSummary } from '@/components/finans/finans-summary'
+import { FinansEntryList } from '@/components/finans/finans-entry-list'
 
 interface DosyaDetailTabsProps {
   dosyaId: number
@@ -216,8 +219,13 @@ export function DosyaDetailTabs({ dosyaId }: DosyaDetailTabsProps) {
           />
         </TabsContent>
 
-        <TabsContent value="dosya-finansi" className="mt-4">
-          <EmptyTabContent />
+        <TabsContent value="dosya-finansi" className="mt-4 space-y-6">
+          <FinansSummary dosyaId={dosyaId} />
+          <div className="border rounded-lg p-4">
+            <h3 className="text-lg font-medium mb-4">Yeni Finans Kaydı</h3>
+            <FinansForm dosyaId={dosyaId} />
+          </div>
+          <FinansEntryList dosyaId={dosyaId} />
         </TabsContent>
       </Tabs>
     </div>
