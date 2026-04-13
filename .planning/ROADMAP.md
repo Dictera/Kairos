@@ -68,7 +68,10 @@
 3. Existing müvekkil records display correctly without email
 4. Müvekkil list displays without email column
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+- [ ] 11-01-PLAN.md — Regenerate drizzle metadata (nuclear approach)
+- [ ] 11-02-PLAN.md — Schema verification test + visual verification
 
 **UI hint**: yes
 
