@@ -1,7 +1,7 @@
 "use client"
 
 import { CalendarView } from "@/components/calendar/calendar-view"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 
 export default function TakvimPage() {
   return (
