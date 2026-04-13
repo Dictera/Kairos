@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 06-documents-finance
 source: 06-01-PLAN.md, 06-RESEARCH.md, implementation verification
 started: 2026-04-13T10:00:00.0000000+03:00
-updated: 2026-04-13T10:10:00.0000000+03:00
+updated: 2026-04-13T10:12:00.0000000+03:00
 ---
 
 ## Current Test
@@ -68,8 +68,12 @@ blocked: 0
   reason: "User reported: yeni finans kaydı bölümünde bulunan datepicker phase 9 da kararlaştırdığımız standartlara uymuyor"
   severity: minor
   test: 4
-  artifacts: []
-  missing: []
+  root_cause: "Using HTML <input type=\"date\"> instead of calendar picker component in finans-form.tsx lines 128-134"
+  artifacts:
+    - path: "components/finans/finans-form.tsx"
+      issue: "Basic HTML date input used instead of proper calendar picker"
+  missing:
+    - "Replace with shadcn Calendar or react-day-picker component"
   debug_session: ""
 
 - truth: "Finance entries sorted newest first (descending by tarih)"
@@ -77,8 +81,12 @@ blocked: 0
   reason: "User reported: entryler yeni eklenen en aşağıda olacak şekilde sıralanıyor yeni olan en başta olmuyor"
   severity: major
   test: 5
-  artifacts: []
-  missing: []
+  root_cause: "No sort applied before rendering entries in finans-entry-list.tsx line 73 - data rendered in database order"
+  artifacts:
+    - path: "components/finans/finans-entry-list.tsx"
+      issue: "Entries rendered without sorting, database returns oldest first"
+  missing:
+    - "Sort entries by tarih descending before rendering"
   debug_session: ""
 
 - truth: "Finans dashboard charts visible, tables aligned, month names full Turkish"
@@ -86,8 +94,14 @@ blocked: 0
   reason: "User reported: yıllık filtre var ama chartlar yok, tabular UI sıkıntıları: aylık detay ve yıllık özet tablolarındaki sütunlar hizalı değil, aylar tam adıyla yazılsın, grafikler sekmesinde gereksiz scroll"
   severity: major
   test: 7
-  artifacts: []
-  missing: []
+  root_cause: "Multiple issues: 1) Month abbreviations used instead of full names (line 26-28), 2) Month column missing text-right class (line 158), 3) Fixed h-[300px] on charts causing overflow (lines 95, 118)"
+  artifacts:
+    - path: "components/finans/finans-dashboard.tsx"
+      issue: "Turkish month names are 3-letter abbreviations, table column alignment off, chart fixed height"
+  missing:
+    - "Use full Turkish month names: Ocak, Şubat, Mart, Nisan, Mayıs, Haziran, Temmuz, Ağustos, Eylül, Ekim, Kasım, Aralık"
+    - "Add text-right to month column in tables"
+    - "Remove fixed height or use responsive height on charts"
   debug_session: ""
 
 - truth: "After file upload, X button appears to remove selected file; Belgeler tab loads without React errors"
@@ -95,6 +109,13 @@ blocked: 0
   reason: "User reported: Belge yüklendikten sonra dosyanın yanında çıkan X (kaldır) butonu görünmüyor, ayrıca Belgeler tabında 'Event handlers cannot be passed to Client Component props' React hatası"
   severity: major
   test: 1
-  artifacts: []
-  missing: []
+  root_cause: "1) belge-list.tsx missing 'use client' directive - Next.js throws error when event handlers passed from client component, 2) X button in upload zone may have visibility issue due to ghost button styling"
+  artifacts:
+    - path: "components/belge/belge-list.tsx"
+      issue: "Missing 'use client' directive at line 1"
+    - path: "components/belge/belge-upload.tsx"
+      issue: "X button (lines 160-166) uses ghost variant which may be invisible on certain backgrounds"
+  missing:
+    - "Add 'use client' to belge-list.tsx"
+    - "Change X button styling from variant=\"ghost\" to variant=\"outline\" with explicit colors"
   debug_session: ""
