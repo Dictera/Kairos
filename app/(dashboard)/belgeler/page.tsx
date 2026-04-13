@@ -30,30 +30,29 @@ export default async function BelgelerPage() {
       ) : (
         <div className="space-y-2">
           {allBelgeler.map((belge) => (
-            <Link
+            <div
               key={belge.id}
-              href={`/dosyalar/${belge.dosya_id}`}
-              className="block p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+              className="flex justify-between items-start p-4 border rounded-lg hover:bg-muted/50 transition-colors"
             >
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="font-medium">{belge.dosya_adi}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Dosya: {belge.dosya_no} • {belge.kategori} •{' '}
-                    {format(new Date(belge.created_at), 'dd MMM yyyy', { locale: tr })}
-                  </p>
-                </div>
-                <a
-                  href={belge.dosya_yolu}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-primary hover:underline"
-                >
-                  Görüntüle
-                </a>
-              </div>
-            </Link>
+              <Link
+                href={`/dosyalar/${belge.dosya_id}`}
+                className="flex-1 min-w-0"
+              >
+                <p className="font-medium">{belge.dosya_adi}</p>
+                <p className="text-sm text-muted-foreground">
+                  Dosya: {belge.dosya_no} • {belge.kategori} •{' '}
+                  {format(new Date(belge.created_at), 'dd MMM yyyy', { locale: tr })}
+                </p>
+              </Link>
+              <a
+                href={belge.dosya_yolu}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline ml-4"
+              >
+                Görüntüle
+              </a>
+            </div>
           ))}
         </div>
       )}

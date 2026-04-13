@@ -143,7 +143,7 @@ export function FinansDashboard() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Ay</TableHead>
+                    <TableHead className="text-right">Ay</TableHead>
                     <TableHead className="text-right">Gelen</TableHead>
                     <TableHead className="text-right">Giden</TableHead>
                     <TableHead className="text-right">Masraf</TableHead>

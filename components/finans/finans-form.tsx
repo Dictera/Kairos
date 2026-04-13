@@ -126,11 +126,13 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
       {/* Date */}
       <div className="space-y-2">
         <Label htmlFor="tarih">Tarih *</Label>
-        <DatePickerField
-          value={tarih}
-          onChange={(value) => setTarih(value ?? format(new Date(), 'yyyy-MM-dd'))}
-          placeholder="Tarih seçin"
-        />
+        <div className="w-[200px]">
+          <DatePickerField
+            value={tarih}
+            onChange={(value) => setTarih(value ?? format(new Date(), 'yyyy-MM-dd'))}
+            placeholder="Tarih seçin"
+          />
+        </div>
       </div>
       
       {/* Description */}

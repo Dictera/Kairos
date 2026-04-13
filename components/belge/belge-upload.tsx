@@ -114,7 +114,7 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
   }
   
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative">
       {/* Category selector */}
       <div className="space-y-2">
         <Label>Kategori</Label>
@@ -141,13 +141,6 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
         onDragLeave={() => setDragActive(false)}
         onDrop={handleDrop}
       >
-        <input
-          type="file"
-          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f) }}
-        />
-        
         {file ? (
           <div className="flex items-center justify-center gap-3">
             <FileIcon className="h-8 w-8 text-[var(--accent)]" />
@@ -157,14 +150,6 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
                 {(file.size / 1024 / 1024).toFixed(2)} MB
               </p>
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="text-muted-foreground hover:text-foreground"
-              onClick={(e) => { e.stopPropagation(); setFile(null); setError(null) }}
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         ) : (
           <>
@@ -177,7 +162,28 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
             </p>
           </>
         )}
+        <input
+          type="file"
+          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+          className={`
+            absolute inset-0 w-full h-full opacity-0 cursor-pointer
+            ${file ? 'pointer-events-none' : ''}
+          `}
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f) }}
+        />
       </div>
+      
+      {/* X Button - outside drop zone to prevent file input triggering */}
+      {file && (
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute top-2 right-2 text-muted-foreground hover:text-foreground z-10"
+          onClick={(e) => { e.stopPropagation(); setFile(null); setError(null) }}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      )}
       
       {/* Error message */}
       {error && (
