@@ -143,7 +143,7 @@ Plans:
 **Requirements**: BELGE-01, BELGE-02, BELGE-03, BELGE-04, FINANS-01, FINANS-02, FINANS-03, FINANS-04, FINANS-05, FINANS-06
 **Success Criteria** (what must be TRUE):
   1. User can upload a file (PDF, DOC, DOCX, JPG, PNG up to 20 MB) to a case; it appears in the Belgeler tab with category label and upload date
-  2. Uploaded files are stored at `public/uploads/{dosyaId}/` and accessible via static URL (no auth route needed for localhost)
+  2. Uploaded files are stored at `E:/sigorta-belgeler/{dosyaId}/` and accessible via `/api/files/{dosyaId}/{filename}` (no auth route needed for localhost)
   3. User can delete a document; it is removed from disk and from the database
   4. User can log a finance entry (type: Gelen/Giden/Masraf, amount, date, description) against a case; it appears in the Dosya Finansı tab
   5. Dosya Finansı tab shows total received, total paid out, and net balance for the case
@@ -151,9 +151,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 06-01: Drizzle schema for `belge` and `finans_kalemi` tables; file upload route handler (multipart `Request.formData()`, 20 MB limit, disk write to `public/uploads/{dosyaId}/`); document delete (disk + DB)
-- [ ] 06-02: Belgeler tab UI (upload form, document list with category/date, delete action); BELGE tRPC router
-- [ ] 06-03: Finans CRUD (tRPC router covering Gelen/Giden/Masraf types), Dosya Finansı tab UI (entry list + per-case summary), finance dashboard page (aylık/yıllık overview)
+- [x] 06-01-PLAN.md — Drizzle schema + file upload/download Route Handlers + belge/finans tRPC routers
+- [x] 06-02-PLAN.md — Belgeler tab UI (upload form, document list with category/date, delete action)
+- [x] 06-03-PLAN.md — Finans CRUD + Dosya Finansı tab UI + finance dashboard page
 
 **UI hint**: yes
 
@@ -210,7 +210,7 @@ Plans:
 | 3. STK & Mahkeme Process Tracking | 0/3 | Not started | - |
 | 4. Deadline Engine + Dashboard | 0/3 | Not started | - |
 | 5. Calendar View | 2/2 | Ready to execute | - |
-| 6. Documents + Finance | 0/3 | Not started | - |
+| 6. Documents + Finance | 3/3 | Ready to execute | - |
 | 7. Petition Templates + PDF + Reports | 0/4 | Not started | - |
 
 **Total plans:** 24
@@ -250,7 +250,7 @@ When all 7 phases are complete and ALL of the following are true, v1.0 is done:
 4. Every case can hold multiple hearing records; all hearing dates appear on the monthly calendar with clickable links to case detail
 5. The deadline engine auto-calculates STK itiraz (10 days), istinaf başvuru (14 days), and cevap dilekçesi (14 days) periods from their trigger dates; deadlines in adli tatil show a warning badge
 6. The dashboard shows today's hearings, approaching deadlines color-coded by urgency, and portfolio summary stats
-7. Documents (PDF, Word, images) up to 20 MB can be uploaded to a case, stored in `public/uploads/`, and deleted
+  7. Documents (PDF, Word, images) up to 20 MB can be uploaded to a case, stored in `E:/sigorta-belgeler/`, and deleted
 8. Finance entries covering incoming payments, outgoing payments, and expenses can be logged per case; each case shows net balance; the finance dashboard shows monthly/yearly totals
 9. Petition templates with `{{variable}}` placeholders can be created; a filled PDF can be generated from any case's data; all Turkish characters (ş, ğ, ü, ö, ç, ı, İ) render correctly in the PDF output
 10. Portfolio and financial reports can be exported as PDF; the filtered case list can be exported as Excel
