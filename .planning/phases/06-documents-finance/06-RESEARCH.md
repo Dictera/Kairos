@@ -15,7 +15,7 @@ Phase 6 implements two loosely-coupled features: (1) document management per cas
 ## User Constraints (from CONTEXT.md)
 
 ### Locked Decisions
-- **D-01:** Static URL via `public/uploads/{dosyaId}/` — no auth route needed
+- **D-01:** Documents stored on E: drive (`E:/sigorta-belgeler/{dosyaId}/`), not in project directory. Static URL access — no auth needed for localhost.
 - **D-02:** Both drag-and-drop zone AND file picker button
 - **D-03:** Seven categories: Dilekçe, Karar, Poliçe, Sigorta poliçesi, Hasar dosyası, Vekaletname, Diğer
 - **D-04:** Minimal finance fields: type (Gelen/Giden/Masraf), amount, date, description only
@@ -39,7 +39,7 @@ Phase 6 implements two loosely-coupled features: (1) document management per cas
 |----|-------------|------------------|
 | BELGE-01 | Belge yükleme: dosyaya bağlı, maks. 20 MB, PDF/DOC/DOCX/JPG/PNG | Route Handler + multer-like manual parsing + fs.writeFile to public/uploads |
 | BELGE-02 | Belge listesi dosya detay sayfasında; kategori, yükleme tarihi | belge table + BelgelerTab component |
-| BELGE-03 | Belgeler public/uploads/{dosyaId}/ klasörüne kaydedilir; statik URL | Next.js static file serving from public/ |
+| BELGE-03 | Belgeler E:/sigorta-belgeler/{dosyaId}/ klasörüne kaydedilir; API üzerinden erişim | Route Handler serves files from E: drive |
 | BELGE-04 | Belge silme (disk + DB) | fs.unlink + db.delete in tRPC mutation |
 | FINANS-01 | Finans kalemi girişi: tür, tutar, tarih, açıklama, dosyaya bağlı | finans_kalemi table + finansRouter.create |
 | FINANS-02–04 | Gelen/Giden/Masraf entry types | finans_kalemi.tur enum: 'Gelen' \| 'Giden' \| 'Masraf' |
@@ -83,9 +83,9 @@ lib/trpc/routers/
 ├── belge.ts                   # New: belge upload/delete/list router
 ├── finans.ts                  # New: finans_kalemi CRUD + dashboard router
 ├── _app.ts                    # Register belgeRouter + finansRouter
-public/
-└── uploads/                   # Create if not exists
-    └── {dosyaId}/             # Files per case (auto-created on first upload)
+app/api/
+├── upload/route.ts            # New: file upload handler (E: drive)
+├── files/[dosyaId]/[filename]/route.ts  # New: file download handler (E: drive)
 components/
 ├── belge/                     # New
 │   ├── belge-upload.tsx       # Drag-and-drop + file picker
@@ -99,11 +99,14 @@ app/(dashboard)/
 ├── finans/page.tsx            # Implement: global finance dashboard
 dosyalar/[id]/
 └── page.tsx                   # Update: BelgelerTab + DosyaFinansiTab components
+E:/
+└── sigorta-belgeler/          # External document storage (E: drive)
+    └── {dosyaId}/             # Files per case (auto-created on first upload)
 ```
 
-### Pattern 1: File Upload via Route Handler + tRPC
+### File Upload via Route Handler + tRPC
 
-**What:** Upload flow uses a Route Handler to receive `multipart/form-data`, write file to disk, then call a tRPC mutation to record metadata in the DB.
+**What:** Upload flow uses a Route Handler to receive `multipart/form-data`, write file to E: drive, then call a tRPC mutation to record metadata in the DB.
 
 **When to use:** Every file upload in this project.
 
@@ -111,7 +114,7 @@ dosyalar/[id]/
 
 **Example flow:**
 1. Client: `const formData = new FormData(); formData.append('file', file); formData.append('dosyaId', dosyaId.toString());`
-2. Route Handler (`app/api/upload/route.ts`): Parse `request.formData()`, validate size/type, write to `public/uploads/${dosyaId}/${filename}` via `fs`
+2. Route Handler (`app/api/upload/route.ts`): Parse `request.formData()`, validate size/type, write to `E:/sigorta-belgeler/${dosyaId}/${filename}` via `fs`
 3. Route Handler calls tRPC mutation `belge.create` with file path + metadata
 4. tRPC mutation inserts into `belge` table, returns new record
 
@@ -121,13 +124,15 @@ dosyalar/[id]/
 
 **File type validation:** Check `file.type` against allowed MIME types: `application/pdf`, `application/msword`, `application/vnd.openxmlformats-officedocument.wordprocessingml.document`, `image/jpeg`, `image/png`.
 
-### Pattern 2: Static File Serving
+### Static File Serving from E: Drive
 
-**What:** Files in `public/uploads/{dosyaId}/` are served at `/uploads/{dosyaId}/{filename}` automatically by Next.js static file serving — no route handler needed.
+**What:** Files stored on E: drive at `E:/sigorta-belgeler/{dosyaId}/` are served via direct URL access — no auth route needed for localhost.
 
 **When to use:** Every file download/view.
 
-**Why this works:** `public/` directory files are served at root path. `public/uploads/abc/file.pdf` → `http://localhost:3000/uploads/abc/file.pdf`.
+**Why this works:** Files are served from a fixed path; the URL pattern is `/api/files/{dosyaId}/{filename}` which maps to the E: drive location.
+
+**URL pattern:** `/api/files/${dosyaId}/${filename}` → maps to `E:/sigorta-belgeler/${dosyaId}/${filename}`
 
 ### Pattern 3: Finance Dashboard Aggregation
 
@@ -236,7 +241,7 @@ export const belge = sqliteTable('belge', {
   dosya_no: text('dosya_no').notNull(), // denormalized for easier queries
   kategori: text('kategori').notNull(),  // BELGE_KATEGORILER enum
   dosya_adi: text('dosya_adi').notNull(), // original filename
-  dosya_yolu: text('dosya_yolu').notNull(), // /uploads/{dosyaId}/{filename}
+  dosya_yolu: text('dosya_yolu').notNull(), // /api/files/{dosyaId}/{filename}
   dosya_boyutu: integer('dosya_boyutu').notNull(), // bytes
   mime_tur: text('mime_tur').notNull(),
   created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
@@ -289,6 +294,7 @@ const ALLOWED_TYPES = [
   'image/png',
 ]
 const MAX_SIZE = 20 * 1024 * 1024 // 20 MB
+const BASE_PATH = 'E:/sigorta-belgeler'
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData()
@@ -307,7 +313,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Dosya boyutu 20 MB\'ı aşamaz' }, { status: 400 })
   }
 
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads', dosyaId)
+  const uploadDir = path.join(BASE_PATH, dosyaId)
   fs.mkdirSync(uploadDir, { recursive: true })
 
   const filename = `${Date.now()}-${file.name.toLowerCase().replace(/\s+/g, '-')}`
@@ -317,9 +323,46 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ 
     filename, 
-    dosya_yolu: `/uploads/${dosyaId}/${filename}`,
+    dosya_yolu: `/api/files/${dosyaId}/${filename}`,
     dosya_boyutu: file.size,
     mime_tur: file.type,
+  })
+}
+```
+
+### File Download Route Handler
+```typescript
+// app/api/files/[dosyaId]/[filename]/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import fs from 'fs'
+import path from 'path'
+
+const BASE_PATH = 'E:/sigorta-belgeler'
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ dosyaId: string; filename: string }> }
+) {
+  const { dosyaId, filename } = await params
+  const filePath = path.join(BASE_PATH, dosyaId, filename)
+  
+  if (!fs.existsSync(filePath)) {
+    return NextResponse.json({ error: 'Dosya bulunamadı' }, { status: 404 })
+  }
+  
+  const file = fs.readFileSync(filePath)
+  const ext = path.extname(filename).toLowerCase()
+  const mimeTypes: Record<string, string> = {
+    '.pdf': 'application/pdf',
+    '.doc': 'application/msword',
+    '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.png': 'image/png',
+  }
+  
+  return new NextResponse(file, {
+    headers: { 'Content-Type': mimeTypes[ext] || 'application/octet-stream' },
   })
 }
 ```
@@ -370,8 +413,8 @@ export const belgeRouter = createTRPCRouter({
       // Delete DB record first
       await db.delete(belge).where(eq(belge.id, input.id))
       
-      // Then delete file from disk
-      const fullPath = path.join(process.cwd(), 'public', existing[0].dosya_yolu)
+      // Then delete file from E: drive
+      const fullPath = path.join('E:/sigorta-belgeler', existing[0].dosya_yolu.replace('/api/files/', ''))
       try { fs.unlinkSync(fullPath) } catch { /* log but don't throw */ }
       
       return { success: true }
@@ -497,7 +540,7 @@ const Legend = dynamic(() => import('recharts').then(m => m.Legend), { ssr: fals
 | Old Approach | Current Approach | When Changed | Impact |
 |--------------|------------------|--------------|--------|
 | Server Actions for mutations | tRPC protectedProcedure for all data mutations | Phase 01 | Single API layer, consistent auth/validation |
-| File upload via base64 in JSON | Route Handler + fs write to public/uploads | Phase 06 (this phase) | Binary files stay out of tRPC wire format |
+| File upload via base64 in JSON | Route Handler + fs write to E:/sigorta-belgeler | Phase 06 (this phase) | Binary files stay out of tRPC wire format |
 | Direct DB queries from client | tRPC server-side queries + React Query cache | Phase 01 | DB credentials never reach client |
 
 **Deprecated/outdated:**
@@ -514,7 +557,7 @@ const Legend = dynamic(() => import('recharts').then(m => m.Legend), { ssr: fals
 |---|-------|---------|---------------|
 | A1 | File upload Route Handler should be at `app/api/upload/route.ts` | Architecture Patterns | May need to coordinate with existing API patterns |
 | A2 | recharts is not yet installed and needs to be added | Standard Stack | If it IS installed, planner should skip the install step |
-| A3 | `public/uploads/` needs to be created (verified not exists) | Environment Availability | Directory creation must be part of implementation |
+| A3 | `E:/sigorta-belgeler/` directory will be created on first upload | Environment Availability | Directory creation must be part of implementation |
 
 **If this table is empty:** All claims in this research were verified or cited — no user confirmation needed.
 

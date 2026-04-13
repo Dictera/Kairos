@@ -14,7 +14,7 @@ Document upload/management (PDF, DOC, DOCX, JPG, PNG up to 20MB per case) + Fina
 ## Implementation Decisions
 
 ### Storage Access
-- **D-01:** Static URL via `public/uploads/{dosyaId}/` — no auth route needed. Files served directly as static assets. localhost-only deployment makes auth unnecessary.
+- **D-01:** Belgeler E: sürücüsünde ayrı bir klasörde saklanacak (`E:/sigorta-belgeler/{dosyaId}/`). Proje içinde değil. Statik URL erişimi — localhost için auth gerekmiyor.
 
 ### Upload UX
 - **D-02:** Both drag-and-drop zone AND file picker button — maximum flexibility. User can drag files onto the drop zone or click the button to browse.
