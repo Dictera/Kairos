@@ -40,7 +40,7 @@ created: 2026-04-13
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
 | 06-01-T1 | 01 | 1 | BELGE-01, FINANS-01 | — | Schema exports belge + finans_kalemi tables with correct structure | unit | `npm run test` | ✅ | ✅ green |
 | 06-01-T2 | 01 | 1 | BELGE-04 | T-06-01, T-06-04 | Upload route validates MIME type + 20MB limit; rejects invalid files | unit | `npm run test` | ✅ | ✅ green |
-| 06-01-T3 | 01 | 1 | BELGE-01 | T-06-03 | Download route serves files from E: drive with path traversal protection | manual | See Manual-Only | ❌ missing | ⚠️ file missing |
+| 06-01-T3 | 01 | 1 | BELGE-01 | T-06-03 | Download route serves files from E: drive with path traversal protection | manual | See Manual-Only | ✅ | ⬜ pending |
 | 06-01-T4 | 01 | 1 | BELGE-03 | — | belge router exposes list/create/delete procedures | unit | `npm run test` | ✅ | ✅ green |
 | 06-01-T5 | 01 | 1 | FINANS-01–06 | T-06-09, T-06-12 | finans router exposes all 6 procedures; net = gelen - giden - masraf | unit | `npm run test` | ✅ | ✅ green |
 | 06-01-T6 | 01 | 1 | FINANS-01 | — | Drizzle schema push creates belge + finans_kalemi in SQLite | manual | See Manual-Only | ✅ | ⬜ pending |
@@ -74,7 +74,7 @@ Existing infrastructure covers all phase requirements.
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Download route serves files with correct Content-Type | BELGE-01 | Requires E:/sigorta-belgeler/ disk access + HTTP request; route file missing from disk | 1. Create `app/api/files/[dosyaId]/[filename]/route.ts` 2. Upload a PDF 3. Click download link, verify PDF opens |
+| Download route serves files with correct Content-Type | BELGE-01 | Requires E:/sigorta-belgeler/ disk access + HTTP request | 1. Upload a PDF 2. Click download link in Belgeler tab, verify PDF opens in browser |
 | Drizzle push created belge + finans_kalemi tables | FINANS-01 | Requires live SQLite DB; run `npx drizzle-kit push` | Run `npx drizzle-kit push` then verify tables in drizzle-kit studio |
 | BelgeUpload: drag-and-drop + file picker | BELGE-01, BELGE-04 | Client React component; Vitest node env has no DOM | 1. Open case detail → Belgeler tab 2. Drag a PDF onto drop zone, verify file preview shows 3. Click zone, verify file picker opens |
 | BelgeUpload: invalid file type shows error | BELGE-04 | Client UI | Drag a .txt file onto drop zone, verify Turkish error message appears |
@@ -107,7 +107,19 @@ Existing infrastructure covers all phase requirements.
 
 ---
 
-## Validation Audit 2026-04-13
+## Validation Audit 2026-04-13 (second pass)
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+| Already manual | 17 |
+| Notes | VALIDATION.md already current from first audit pass; UAT issues (4) fixed in 06-04 gap closure |
+
+---
+
+## Validation Audit 2026-04-13 (first pass)
 
 | Metric | Count |
 |--------|-------|
