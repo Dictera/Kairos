@@ -12,37 +12,42 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 
 ### Validated
 
-- [x] **Phase 04 (2026-04-13)**: Deadline engine + dashboard: Pure deadline calculation service (lib/deadline-service.ts), sure table with auto-calc triggers, tRPC routers (sure + dashboard), full dashboard UI with urgency badges and adli tatil indicators
+- ✓ **Foundation (FOUND-01–06)** — v1.0: Next.js 15, SQLite/Drizzle ORM, tRPC v11, iron-session auth, shadcn/ui
+- ✓ **Müvekkil Yönetimi (MUVEK-01–04)** — v1.0: Full CRUD with Turkish search, linked dosya count, delete guards
+- ✓ **Dosya Yönetimi (DOSYA-01–05)** — v1.0: Case CRUD, 6-tab detail shell, counter-party fields, archive
+- ✓ **Ayarlar (AYAR-01–03)** — v1.0: Sigorta şirketi, mahkeme, sigorta türü CRUD + şifre kılavuzu
+- ✓ **STK Süreç Takibi (SUREC-01–05)** — v1.0: 9-stage STK tracker with all data points
+- ✓ **Mahkeme Süreç Takibi (SUREC-01–05)** — v1.0: 8-stage Mahkeme tracker, multiple hearings
+- ✓ **Süre Otomatik Hesaplama (SURE-01–05)** — v1.0: STK 10d, istinaf 14d, cevap 14d + adli tatil warnings
+- ✓ **Dashboard (DASH-01–02)** — v1.0: Stats cards, urgency badges, today's hearings
+- ✓ **Takvim (TAKVIM-01–02)** — v1.0: Monthly calendar grid, clickable event links
+- ✓ **Belge Yönetimi (BELGE-01–04)** — v1.0: Upload/download 20MB, category badges, delete
+- ✓ **Finans Takibi (FINANS-01–06)** — v1.0: Gelen/Giden/Masraf entries, net balance, finance dashboard
+- ✓ **Dilekçe Şablon Sistemi (DILEKCE-01–05)** — v1.0: Tiptap editor, variable substitution, Arial TTF Turkish PDF
+- ✓ **Raporlar (RAPOR-01–03)** — v1.0: Portfolio + financial reports, PDF + Excel export
 
 ### Active
 
-- [ ] Dosya yönetimi: oluşturma, listeleme, filtreleme, hızlı arama ve detay görünümü (200+ dosya)
-- [ ] STK Tahkim süreci takibi: başvuru/kabul, raportör süreci, hakem kararı, itiraz/iptal davası
-- [ ] Mahkeme süreci takibi: Asliye Ticaret ve Asliye Hukuk aşamaları
-- [x] ~~Takvim: duruşma tarihleri ve yaklaşan süre uyarıları~~ → Validated (Phase 04)
-- [ ] Müvekkil yönetimi: profil, iletişim bilgileri, dosya geçmişi
-- [ ] Finans takibi: gelen ödemeler, giden ödemeler, masraf ve harçlar, fatura/makbuz
-- [ ] Dilekçe şablon sistemi: şablon seç → değişkenleri doldur → PDF önizle → indir
-- [ ] Raporlar: portföy özeti, finansal rapor, PDF/Excel dışa aktarım
-- [ ] Env tabanlı tek kullanıcı girişi (şifre .env içinde)
-- [ ] Ayarlar: hesap, bildirimler, tanımlar (sigorta şirketi listesi vb.)
+*(Next milestone will define new requirements)*
 
 ### Out of Scope
 
-- Çok kullanıcılı / rol bazlı yetkilendirme — solo avukat, tek kullanıcı yeterli
-- Bulut senkronizasyonu / uzaktan erişim — tam offline/lokal çalışma hedefi
-- İstinaf / Temyiz özel modülü — v1'de yok, ileride eklenebilir
-- Mobil uygulama — web-first, masaüstü tarayıcı
-- Geçmiş dosya aktarımı (Excel import) — sıfırdan veri girişi yeterli
+| Feature | Reason |
+|---------|--------|
+| Çok kullanıcılı / rol bazlı yetkilendirme | Solo avukat — tek kullanıcı yeterli |
+| Bulut senkronizasyonu / uzaktan erişim | Offline-first; lokal SQLite |
+| İstinaf / Temyiz özel modülü | v1'de yok, ileride eklenebilir |
+| Mobil uygulama | Web-first; masaüstü tarayıcı |
+| Geçmiş dosya aktarımı (Excel import) | Sıfırdan veri girişi yeterli |
 
 ## Context
 
-- Kullanıcı solo avukat; ağırlıklı dosya türleri Kasko/Trafik ve Sağlık/Hayat sigortaları
-- Sigorta türü dosya bazında kaydedilecek (sabit liste değil, genişletilebilir tanımlar)
-- Mevcut iş akışı: Excel, kağıt klasörler, dağınık belgeler — tümü bu uygulamaya taşınacak
-- Veri girişi sıfırdan yapılacak, herhangi bir import aracı gerekmez
-- Site haritası v2 hazır: sitemap.html referans alınacak
-- Dosya detay ekranında alt sekmeler: Genel Bilgiler, Yargılama Süreci, Belgeler/Dilekçeler, Notlar/Zaman Çizelgesi, Karşı Taraflar, Dosya Finansı
+- **Tech stack:** Next.js 15.5.15, SQLite (better-sqlite3), Drizzle ORM, tRPC v11, shadcn/ui, Tailwind CSS v3, TypeScript strict
+- **Auth:** `.env` tabanlı tek kullanıcı — session yok, HttpOnly cookie
+- **Deployment:** Lokal only — `next dev` → `localhost:3000`
+- **Storage:** `./data/db.sqlite`, `./public/uploads`
+- **User:** Solo avukat; ağırlıklı Kasko/Trafik ve Sağlık/Hayat sigortaları
+- **User feedback themes:** Demand for shape tools in reports; Turkish character rendering critical; calendar integration with case detail is primary workflow
 
 ## Constraints
 
@@ -55,11 +60,17 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| SQLite + Drizzle ORM | Offline çalışma, sıfır sunucu bağımlılığı, kolay yedekleme | — Pending |
-| tRPC | TypeScript end-to-end tip güvenliği, Next.js App Router ile uyum | — Pending |
-| Env tabanlı auth | Solo avukat — session/JWT karmaşıklığı gerekmez | — Pending |
-| shadcn/ui + Tailwind | Hazır bileşenler, hızlı UI geliştirme | — Pending |
+|---------|-----------|---------|
+| SQLite + Drizzle ORM | Offline çalışma, sıfır sunucu bağımlılığı, kolay yedekleme | ✓ Confirmed — works well |
+| tRPC | TypeScript end-to-end tip güvenliği, Next.js App Router ile uyum | ✓ Confirmed — excellent DX |
+| Env tabanlı auth | Solo avukat — session/JWT karmaşıklığı gerekmez | ✓ Confirmed — simple and sufficient |
+| shadcn/ui + Tailwind CSS v3 | Hazır bileşenler, hızlı UI geliştirme | ✓ Confirmed — v1 shipped |
+| 6-tab dosya detail shell | One-stop case management | ✓ Confirmed — core workflow |
+| Pure deadline functions (no DB imports) | Testability, timezone safety | ✓ Confirmed — 13 unit tests pass |
+| Turkish locale (dd.MM.yyyy, Pazartesi hafta başı) | Turkish legal context | ✓ Confirmed |
+| Arial TTF for PDF (instead of Roboto) | Google Fonts blocked by network | ✓ Confirmed — all Turkish chars render |
+| Navy + Turuncu color palette | Brand refresh planned for v1.1 | — Pending (Phase 8) |
+| DatePickerField shared component | Standardization needed | — Pending (Phase 9) |
 
 ## Evolution
 
@@ -79,4 +90,4 @@ Bu belge faz geçişlerinde ve milestone sınırlarında güncellenir.
 4. Context güncelleme
 
 ---
-*Last updated: 2026-04-13 after Phase 04 completion*
+*Last updated: 2026-04-13 after v1.0 milestone*
