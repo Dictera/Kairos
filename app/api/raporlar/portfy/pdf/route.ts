@@ -12,22 +12,22 @@ export async function GET() {
   
   const docDefinition = {
     content: [
-      { text: 'PORTFÖY RAPORU', font: 'Arial', bold: true, fontSize: 18, margin: [0, 0, 0, 20] },
-      { text: `Toplam Dosya: ${allDosya.length}`, font: 'Arial', margin: [0, 0, 0, 5] },
-      { text: `Aktif: ${aktifCount}`, font: 'Arial', margin: [0, 0, 0, 5] },
-      { text: `Pasif: ${pasifCount}`, font: 'Arial', margin: [0, 0, 0, 20] },
-      { text: 'Türe Göre Dağılım:', font: 'Arial', bold: true, margin: [0, 0, 0, 5] },
-      { text: `STK: ${stkCount}`, font: 'Arial', margin: [0, 0, 0, 5] },
-      { text: `Mahkeme: ${mahkemeCount}`, font: 'Arial', margin: [0, 0, 0, 5] },
+      { text: 'PORTFÖY RAPORU', font: 'Roboto', bold: true, fontSize: 18, margin: [0, 0, 0, 20] },
+      { text: `Toplam Dosya: ${allDosya.length}`, font: 'Roboto', margin: [0, 0, 0, 5] },
+      { text: `Aktif: ${aktifCount}`, font: 'Roboto', margin: [0, 0, 0, 5] },
+      { text: `Pasif: ${pasifCount}`, font: 'Roboto', margin: [0, 0, 0, 20] },
+      { text: 'Türe Göre Dağılım:', font: 'Roboto', bold: true, margin: [0, 0, 0, 5] },
+      { text: `STK: ${stkCount}`, font: 'Roboto', margin: [0, 0, 0, 5] },
+      { text: `Mahkeme: ${mahkemeCount}`, font: 'Roboto', margin: [0, 0, 0, 5] },
     ],
     defaultStyle: {
-      font: 'Arial',
+      font: 'Roboto',
     },
   }
   
   const pdfBuffer = await generatePdfBuffer(docDefinition)
   
-  return new Response(pdfBuffer, {
+  return new Response(new Uint8Array(pdfBuffer), {
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'attachment; filename="portfoy-raporu.pdf"',

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useTRPC } from "@/lib/trpc/context"
 import { useQuery } from "@tanstack/react-query"
 import Link from "next/link"
@@ -23,6 +24,23 @@ export type CalendarEvent = {
   tarih: string
   saat: string | null
 }
+
+const months = [
+  { value: "0", label: "Ocak" },
+  { value: "1", label: "Şubat" },
+  { value: "2", label: "Mart" },
+  { value: "3", label: "Nisan" },
+  { value: "4", label: "Mayıs" },
+  { value: "5", label: "Haziran" },
+  { value: "6", label: "Temmuz" },
+  { value: "7", label: "Ağustos" },
+  { value: "8", label: "Eylül" },
+  { value: "9", label: "Ekim" },
+  { value: "10", label: "Kasım" },
+  { value: "11", label: "Aralık" },
+]
+
+const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i)
 
 export function CalendarView() {
   const trpc = useTRPC()
@@ -62,6 +80,14 @@ export function CalendarView() {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))
   }
 
+  const handleMonthChange = (month: string) => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), parseInt(month)))
+  }
+
+  const handleYearChange = (year: string) => {
+    setCurrentMonth(new Date(parseInt(year), currentMonth.getMonth()))
+  }
+
   const handleDayClick = (date: Date) => {
     const dateStr = format(date, "yyyy-MM-dd")
     const dayEvents = eventsMap.get(dateStr) || []
@@ -90,9 +116,35 @@ export function CalendarView() {
           <Button variant="outline" size="icon" onClick={handlePrevMonth}>
             <ChevronLeftIcon className="size-4" />
           </Button>
-          <h2 className="text-xl font-semibold min-w-[140px] text-center">
-            {format(currentMonth, "MMMM yyyy", { locale: tr })}
-          </h2>
+
+          <div className="flex items-center gap-2">
+            <Select value={String(currentMonth.getMonth())} onValueChange={handleMonthChange}>
+              <SelectTrigger className="w-[110px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {months.map((m) => (
+                  <SelectItem key={m.value} value={m.value}>
+                    {m.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={String(currentMonth.getFullYear())} onValueChange={handleYearChange}>
+              <SelectTrigger className="w-[100px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {years.map((y) => (
+                  <SelectItem key={y} value={String(y)}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <Button variant="outline" size="icon" onClick={handleNextMonth}>
             <ChevronRightIcon className="size-4" />
           </Button>

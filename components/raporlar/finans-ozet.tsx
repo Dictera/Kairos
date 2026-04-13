@@ -23,7 +23,7 @@ function formatCurrency(amount: number): string {
 }
 
 export function FinansOzet({ data, view }: Props) {
-  const chartData = view === 'monthly' ? data.byMonth : data.byYear
+  const chartData = (view === 'monthly' ? data.byMonth : data.byYear) as { month?: string; year?: string; gelen: number; giden: number; masraf: number }[]
   const xKey = view === 'monthly' ? 'month' : 'year'
   
   return (

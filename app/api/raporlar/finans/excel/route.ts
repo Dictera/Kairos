@@ -1,10 +1,10 @@
 import ExcelJS from 'exceljs'
 import { db } from '@/lib/db'
-import { finanstablosu, dosya, muvekkil } from '@/lib/schema'
+import { finans_kalemi, dosya, muvekkil } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
 
 export async function GET() {
-  const entries = await db.select().from(finanstablosu)
+  const entries = await db.select().from(finans_kalemi)
   
   const workbook = new ExcelJS.Workbook()
   const sheet = workbook.addWorksheet('Finansal Rapor')

@@ -9,6 +9,7 @@ import { calendarRouter } from './calendar'
 import { belgeRouter } from './belge'
 import { finansRouter } from './finans'
 import { dilekceRouter } from './dilekce'
+import { dilekceOdtRouter } from './dilekce-odt'
 import { raporRouter } from './rapor'
 
 export const appRouter = createTRPCRouter({
@@ -26,6 +27,7 @@ export const appRouter = createTRPCRouter({
   belge: belgeRouter,
   finans: finansRouter,
   dilekce: dilekceRouter,
+  dilekceOdt: dilekceOdtRouter,
   rapor: raporRouter,
 })
 

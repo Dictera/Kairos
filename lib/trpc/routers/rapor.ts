@@ -1,6 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { db } from '@/lib/db'
-import { dosya, muvekkil, finanstablosu, sigortaSirketi } from '@/lib/schema'
+import { dosya, muvekkil, finans_kalemi, sigortaSirketi, sigortaTuru } from '@/lib/schema'
 import { eq, and, gte, lte } from 'drizzle-orm'
 import { z } from 'zod'
 
@@ -18,10 +18,13 @@ export const raporRouter = createTRPCRouter({
     const mahkemeCount = allDosya.filter(d => d.tur === 'Mahkeme').length
     
     // Count by insurance type
+    const allSigortaTuru = await db.select().from(sigortaTuru)
+    const sigortaTuruById = Object.fromEntries(allSigortaTuru.map(s => [s.id, s.ad]))
     const bySigortaType: Record<string, number> = {}
     allDosya.forEach(d => {
-      if (d.tur_sigorta) {
-        bySigortaType[d.tur_sigorta] = (bySigortaType[d.tur_sigorta] || 0) + 1
+      if (d.sigorta_turu_id && sigortaTuruById[d.sigorta_turu_id]) {
+        const name = sigortaTuruById[d.sigorta_turu_id]
+        bySigortaType[name] = (bySigortaType[name] || 0) + 1
       }
     })
     
@@ -63,7 +66,7 @@ export const raporRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const { startDate, endDate } = input || {}
       
-      let entries = await db.select().from(finanstablosu)
+      let entries = await db.select().from(finans_kalemi)
       
       // Filter by date if provided
       if (startDate || endDate) {
@@ -135,8 +138,8 @@ export const raporRouter = createTRPCRouter({
       const withMuvekkil = await Promise.all(
         entries.map(async (d) => {
           const [m] = await db.select().from(muvekkil).where(eq(muvekkil.id, d.muvekkil_id))
-          const [sigorta] = d.sigorta_sirketi_id
-            ? await db.select().from(sigortaSirketi).where(eq(sigortaSirketi.id, d.sigorta_sirketi_id))
+          const [sigorta] = d.karsitaraf_sigorta_id
+            ? await db.select().from(sigortaSirketi).where(eq(sigortaSirketi.id, d.karsitaraf_sigorta_id))
             : [null]
           return {
             ...d,

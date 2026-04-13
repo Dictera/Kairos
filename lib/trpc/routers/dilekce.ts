@@ -4,7 +4,7 @@ import { dilekceSablonu } from '@/lib/schema'
 import { eq, desc } from 'drizzle-orm'
 import { z } from 'zod'
 
-const sablonKategoriEnum = z.enum(['İtiraz Dilekçesi', 'Cevap Dilekçesi', 'Genel'])
+const sablonKategoriEnum = z.enum(['STK', 'Mahkeme', 'Genel'])
 
 export const dilekceRouter = createTRPCRouter({
   list: protectedProcedure.query(async () => {

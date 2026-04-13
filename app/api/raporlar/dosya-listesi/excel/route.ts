@@ -16,14 +16,12 @@ export async function GET(req: Request) {
   const workbook = new ExcelJS.Workbook()
   const sheet = workbook.addWorksheet('Dosya Listesi')
   
-  // Headers
-  sheet.addRow(['Dosya No', 'Tür', 'Durum', 'Müşteri', 'Sigorta Şirketi', 'Talep Tutarı', 'Oluşturulma'])
+  sheet.addRow(['Dosya No', 'Tür', 'Durum', 'Müşteri', 'Karşı Sigorta', 'Talep Tutarı', 'Oluşturulma'])
   
-  // Data rows
   for (const d of entries) {
     const [musteri] = await db.select().from(muvekkil).where(eq(muvekkil.id, d.muvekkil_id))
-    const [sigorta] = d.sigorta_sirketi_id
-      ? await db.select().from(sigortaSirketi).where(eq(sigortaSirketi.id, d.sigorta_sirketi_id))
+    const [sigorta] = d.karsitaraf_sigorta_id
+      ? await db.select().from(sigortaSirketi).where(eq(sigortaSirketi.id, d.karsitaraf_sigorta_id))
       : [null]
     
     sheet.addRow([
@@ -32,25 +30,24 @@ export async function GET(req: Request) {
       d.durum,
       musteri?.ad || '',
       sigorta?.ad || '',
-      d.basin_cumulative || 0,
+      d.talep_tutari || 0,
       d.created_at,
     ])
   }
   
-  // Column widths
   sheet.columns = [
-    { width: 15 }, // Dosya No
-    { width: 10 }, // Tür
-    { width: 10 }, // Durum
-    { width: 25 }, // Müşteri
-    { width: 20 }, // Sigorta
-    { width: 15 }, // Talep
-    { width: 12 }, // Oluşturulma
+    { width: 15 },
+    { width: 10 },
+    { width: 10 },
+    { width: 25 },
+    { width: 20 },
+    { width: 15 },
+    { width: 12 },
   ]
   
   const buffer = await workbook.xlsx.writeBuffer()
   
-  return new Response(buffer, {
+  return new Response(new Uint8Array(buffer), {
     headers: {
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'Content-Disposition': 'attachment; filename="dosya-listesi.xlsx"',

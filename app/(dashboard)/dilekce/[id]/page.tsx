@@ -4,7 +4,7 @@ import { use } from 'react'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { useTRPC } from '@/lib/trpc/client'
+import { useTRPC } from '@/lib/trpc/context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,7 +14,7 @@ import { SablonEditor } from '@/components/dilekce/sablon-editor'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 
-const KATEGORILER = ['İtiraz Dilekçesi', 'Cevap Dilekçesi', 'Genel'] as const
+const KATEGORILER = ['STK', 'Mahkeme', 'Genel'] as const
 
 type Props = {
   params: Promise<{ id: string }>
@@ -84,7 +84,7 @@ export default function DuzenleSablonPage({ params }: Props) {
     updateMutation.mutate({
       id: sablonId,
       baslik,
-      kategori: kategori as 'İtiraz Dilekçesi' | 'Cevap Dilekçesi' | 'Genel',
+      kategori: kategori as 'STK' | 'Mahkeme' | 'Genel',
       icerik,
       degiskenler: customVars,
     })
@@ -130,7 +130,7 @@ export default function DuzenleSablonPage({ params }: Props) {
                 id="baslik"
                 value={baslik}
                 onChange={(e) => setBaslik(e.target.value)}
-                placeholder="Örn: İtiraz Dilekçesi - STK"
+                placeholder="Örn: STK Başvuru Dilekçesi"
                 maxLength={200}
               />
             </div>
@@ -158,7 +158,7 @@ export default function DuzenleSablonPage({ params }: Props) {
                 placeholder="örn: musteri_tc, vekil_ad (virgülle ayırın)"
               />
               <p className="text-xs text-muted-foreground">
-                Özel değişkenler virgülle ayırarak ekleyin. {{değişken_adı}} formatında kullanılır.
+                Özel değişkenler virgülle ayırarak ekleyin. &#123;&#123;değişken_adı&#125;&#125; formatında kullanılır.
               </p>
             </div>
           </CardContent>

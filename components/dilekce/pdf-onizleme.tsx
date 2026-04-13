@@ -60,20 +60,32 @@ export function usePdfPreview() {
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   
-  const generatePreview = async (sablonId: number, dosyaId: number, customVariables: Record<string, string>) => {
+  const generatePreview = async (
+    sablonId: number, 
+    dosyaId: number, 
+    customVariables: Record<string, string>,
+    type: 'html' | 'odt' = 'html'
+  ) => {
     setIsGenerating(true)
     try {
-      const response = await fetch(`/api/dilekce/${sablonId}/pdf`, {
+      const endpoint = type === 'odt' ? '/api/dilekce-odt' : '/api/dilekce'
+      const response = await fetch(`${endpoint}/${sablonId}/pdf`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sablonId, dosyaId, customVariables }),
       })
       
-      if (!response.ok) throw new Error('PDF generation failed')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Bilinmeyen hata' }))
+        throw new Error(errorData.error || 'PDF generation failed')
+      }
       
       const blob = await response.blob()
       setPdfBlob(blob)
       setPdfUrl(URL.createObjectURL(blob))
+    } catch (error: any) {
+      console.error('PDF generation error:', error)
+      throw error
     } finally {
       setIsGenerating(false)
     }

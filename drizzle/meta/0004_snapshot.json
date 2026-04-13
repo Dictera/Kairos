@@ -1,0 +1,640 @@
+{
+  "id": "48853fb9-bdd1-4d79-a6a1-7ffbb2415113",
+  "prevId": "7f064c06-2ab0-42b4-9c7b-981cbc6a4a94",
+  "version": "6",
+  "dialect": "sqlite",
+  "tables": {
+    "schema_test": {
+      "name": "schema_test",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "sigorta_sirketi": {
+      "name": "sigorta_sirketi",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "ad": {
+          "name": "ad",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "sigorta_turu": {
+      "name": "sigorta_turu",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "ad": {
+          "name": "ad",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "mahkeme": {
+      "name": "mahkeme",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "ad": {
+          "name": "ad",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sehir": {
+          "name": "sehir",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "muvekkil": {
+      "name": "muvekkil",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "ad": {
+          "name": "ad",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "soyad": {
+          "name": "soyad",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "telefon": {
+          "name": "telefon",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tc_vergi_no": {
+          "name": "tc_vergi_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "adres": {
+          "name": "adres",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "notlar": {
+          "name": "notlar",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(datetime('now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(datetime('now'))"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "dosya": {
+      "name": "dosya",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "muvekkil_id": {
+          "name": "muvekkil_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "dosya_no": {
+          "name": "dosya_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tur": {
+          "name": "tur",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sigorta_turu_id": {
+          "name": "sigorta_turu_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "karsitaraf_sigorta_id": {
+          "name": "karsitaraf_sigorta_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "talep_tutari": {
+          "name": "talep_tutari",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "muvekkil_plaka": {
+          "name": "muvekkil_plaka",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "durum": {
+          "name": "durum",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'aktif'"
+        },
+        "aciklama": {
+          "name": "aciklama",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "surec_detay": {
+          "name": "surec_detay",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(datetime('now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(datetime('now'))"
+        }
+      },
+      "indexes": {
+        "idx_dosya_muvekkil": {
+          "name": "idx_dosya_muvekkil",
+          "columns": [
+            "muvekkil_id"
+          ],
+          "isUnique": false
+        },
+        "idx_dosya_durum": {
+          "name": "idx_dosya_durum",
+          "columns": [
+            "durum"
+          ],
+          "isUnique": false
+        },
+        "idx_dosya_tur": {
+          "name": "idx_dosya_tur",
+          "columns": [
+            "tur"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "dosya_muvekkil_id_muvekkil_id_fk": {
+          "name": "dosya_muvekkil_id_muvekkil_id_fk",
+          "tableFrom": "dosya",
+          "columnsFrom": [
+            "muvekkil_id"
+          ],
+          "tableTo": "muvekkil",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "dosya_sigorta_turu_id_sigorta_turu_id_fk": {
+          "name": "dosya_sigorta_turu_id_sigorta_turu_id_fk",
+          "tableFrom": "dosya",
+          "columnsFrom": [
+            "sigorta_turu_id"
+          ],
+          "tableTo": "sigorta_turu",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "dosya_karsitaraf_sigorta_id_sigorta_sirketi_id_fk": {
+          "name": "dosya_karsitaraf_sigorta_id_sigorta_sirketi_id_fk",
+          "tableFrom": "dosya",
+          "columnsFrom": [
+            "karsitaraf_sigorta_id"
+          ],
+          "tableTo": "sigorta_sirketi",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "taraf": {
+      "name": "taraf",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "dosya_id": {
+          "name": "dosya_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sigorta_sirketi_id": {
+          "name": "sigorta_sirketi_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "karsitaraf_ad": {
+          "name": "karsitaraf_ad",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "karsitaraf_vekil": {
+          "name": "karsitaraf_vekil",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "police_no": {
+          "name": "police_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "karsitaraf_plaka": {
+          "name": "karsitaraf_plaka",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "taraf_dosya_id_dosya_id_fk": {
+          "name": "taraf_dosya_id_dosya_id_fk",
+          "tableFrom": "taraf",
+          "columnsFrom": [
+            "dosya_id"
+          ],
+          "tableTo": "dosya",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "taraf_sigorta_sirketi_id_sigorta_sirketi_id_fk": {
+          "name": "taraf_sigorta_sirketi_id_sigorta_sirketi_id_fk",
+          "tableFrom": "taraf",
+          "columnsFrom": [
+            "sigorta_sirketi_id"
+          ],
+          "tableTo": "sigorta_sirketi",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "durusma": {
+      "name": "durusma",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "dosya_id": {
+          "name": "dosya_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tarih": {
+          "name": "tarih",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "saat": {
+          "name": "saat",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "mahkeme_kurum": {
+          "name": "mahkeme_kurum",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tur": {
+          "name": "tur",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "notlar": {
+          "name": "notlar",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(datetime('now'))"
+        }
+      },
+      "indexes": {
+        "idx_durusma_dosya": {
+          "name": "idx_durusma_dosya",
+          "columns": [
+            "dosya_id"
+          ],
+          "isUnique": false
+        },
+        "idx_durusma_tarih": {
+          "name": "idx_durusma_tarih",
+          "columns": [
+            "tarih"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "durusma_dosya_id_dosya_id_fk": {
+          "name": "durusma_dosya_id_dosya_id_fk",
+          "tableFrom": "durusma",
+          "columnsFrom": [
+            "dosya_id"
+          ],
+          "tableTo": "dosya",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "sure": {
+      "name": "sure",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "dosya_id": {
+          "name": "dosya_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ad": {
+          "name": "ad",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "son_tarih": {
+          "name": "son_tarih",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tur": {
+          "name": "tur",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "notlar": {
+          "name": "notlar",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(datetime('now'))"
+        }
+      },
+      "indexes": {
+        "idx_sure_dosya": {
+          "name": "idx_sure_dosya",
+          "columns": [
+            "dosya_id"
+          ],
+          "isUnique": false
+        },
+        "idx_sure_son_tarih": {
+          "name": "idx_sure_son_tarih",
+          "columns": [
+            "son_tarih"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "sure_dosya_id_dosya_id_fk": {
+          "name": "sure_dosya_id_dosya_id_fk",
+          "tableFrom": "sure",
+          "columnsFrom": [
+            "dosya_id"
+          ],
+          "tableTo": "dosya",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

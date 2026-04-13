@@ -3,7 +3,7 @@
 import { use } from 'react'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useTRPC } from '@/lib/trpc/client'
+import { useTRPC } from '@/lib/trpc/context'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -19,8 +19,8 @@ type Props = {
 }
 
 const KATEGORI_LABELS: Record<string, string> = {
-  'İtiraz Dilekçesi': 'İtiraz',
-  'Cevap Dilekçesi': 'Cevap',
+  'STK': 'STK',
+  'Mahkeme': 'Mahkeme',
   'Genel': 'Genel',
 }
 
@@ -30,15 +30,15 @@ export default function OlusturDilekcePage({ params }: Props) {
   const dosyaId = parseInt(resolvedParams.id, 10)
   
   const [selectedSablonId, setSelectedSablonId] = useState<number | null>(null)
-  const [selectedKategori, setSelectedKategori] = useState<string>('İtiraz Dilekçesi')
+  const [selectedKategori, setSelectedKategori] = useState<string>('STK')
   const [customVariables, setCustomVariables] = useState<Record<string, string>>({})
   const [previewOpen, setPreviewOpen] = useState(false)
   
   const { pdfUrl, isGenerating, generatePreview, downloadPdf, cleanup } = usePdfPreview()
   
   // Fetch case data
-  const { data: dosya } = useQuery(trpc.dosya.byId.queryOptions({ id: dosyaId }))
-  const { data: muvekkil } = useQuery(trpc.muvekkil.byId.queryOptions({ id: dosya?.muvekkil_id || 0 }))
+  const { data: dosya } = useQuery(trpc.dosya.getById.queryOptions({ id: dosyaId }))
+  const { data: muvekkil } = useQuery(trpc.muvekkil.getById.queryOptions({ id: dosya?.muvekkil_id || 0 }))
   
   // Fetch all templates
   const { data: sablonlar } = useQuery(trpc.dilekce.list.queryOptions())
@@ -101,12 +101,12 @@ export default function OlusturDilekcePage({ params }: Props) {
           <CardContent className="space-y-4">
             <Tabs value={selectedKategori} onValueChange={setSelectedKategori}>
               <TabsList className="grid grid-cols-3 w-full">
-                <TabsTrigger value="İtiraz Dilekçesi">İtiraz</TabsTrigger>
-                <TabsTrigger value="Cevap Dilekçesi">Cevap</TabsTrigger>
+                <TabsTrigger value="STK">STK</TabsTrigger>
+                <TabsTrigger value="Mahkeme">Mahkeme</TabsTrigger>
                 <TabsTrigger value="Genel">Genel</TabsTrigger>
               </TabsList>
               
-              {['İtiraz Dilekçesi', 'Cevap Dilekçesi', 'Genel'].map((kat) => (
+              {['STK', 'Mahkeme', 'Genel'].map((kat) => (
                 <TabsContent key={kat} value={kat} className="mt-4">
                   <div className="space-y-2">
                     {filteredSablonlar.filter(s => s.kategori === kat).length === 0 ? (
@@ -156,7 +156,7 @@ export default function OlusturDilekcePage({ params }: Props) {
                   <Label className="text-muted-foreground">Otomatik Doldurulan (Değiştirilebilir)</Label>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="musteri_ad" className="text-xs">Müşteri Adı</Label>
+                    <Label htmlFor="musteri_ad" className="text-xs">Müvekkil Adı</Label>
                     <Input
                       id="musteri_ad"
                       value={customVariables['müvekkil_adı'] || muvekkil.ad?.split(' ')[0] || ''}
@@ -165,7 +165,7 @@ export default function OlusturDilekcePage({ params }: Props) {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="musteri_soyad" className="text-xs">Müşteri Soyadı</Label>
+                    <Label htmlFor="musteri_soyad" className="text-xs">Müvekkil Soyadı</Label>
                     <Input
                       id="musteri_soyad"
                       value={customVariables['müvekkil_soyadı'] || muvekkil.ad?.split(' ').slice(1).join(' ') || ''}
@@ -193,7 +193,7 @@ export default function OlusturDilekcePage({ params }: Props) {
                 </div>
                 
                 {/* Custom variables from template */}
-                {(() => {
+                {(function() {
                   try {
                     const templateVars = JSON.parse(selectedSablon.degiskenler || '[]') as string[]
                     if (templateVars.length === 0) return null
@@ -201,20 +201,22 @@ export default function OlusturDilekcePage({ params }: Props) {
                     return (
                       <div className="space-y-3 pt-4 border-t">
                         <Label className="text-muted-foreground">Özel Değişkenler</Label>
-                        {templateVars.map((varName) => (
-                          <div key={varName} className="space-y-2">
-                            <Label htmlFor={varName} className="text-xs">{varName}</Label>
-                            <Input
-                              id={varName}
-                              value={customVariables[varName] || ''}
-                              onChange={(e) => handleVariableChange(varName, e.target.value)}
-                              placeholder={`{{${varName}}}`}
-                            />
-                          </div>
-                        ))
+                        {templateVars.map(function(varName) {
+                          return (
+                            <div key={varName} className="space-y-2">
+                              <Label htmlFor={varName} className="text-xs">{varName}</Label>
+                              <Input
+                                id={varName}
+                                value={customVariables[varName] || ''}
+                                onChange={(e) => handleVariableChange(varName, e.target.value)}
+                                placeholder={'{{' + varName + '}}'}
+                              />
+                            </div>
+                          )
+                        })}
                       </div>
                     )
-                  } catch {
+                  } catch (e) {
                     return null
                   }
                 })()}

@@ -1,44 +1,4 @@
-import pdfmake from 'pdfmake/build/pdfmake'
-import vfsFonts from 'pdfmake/build/vfs_fonts'
-import path from 'path'
-import fs from 'fs'
-
-// Initialize pdfmake with built-in Roboto fonts
-Object.keys(vfsFonts).forEach(key => {
-  pdfmake.virtualfs.storage[key] = Buffer.from(vfsFonts[key], 'base64')
-})
-
-// Add Arial fonts (supports all Turkish characters: ş ğ ü ö ç ı İ)
-// Located in C:\Windows\Fonts\ on Windows
-function getArialFonts() {
-  const windir = process.env.WINDIR || 'C:\\Windows'
-  return {
-    Arial: {
-      normal: path.join(windir, 'Fonts', 'arial.ttf'),
-      bold: path.join(windir, 'Fonts', 'arialbd.ttf'),
-      italics: path.join(windir, 'Fonts', 'ariali.ttf'),
-      bolditalics: path.join(windir, 'Fonts', 'arialbi.ttf'),
-    },
-  }
-}
-
-// Add Arial to vfs
-const arialFonts = getArialFonts()
-pdfmake.virtualfs.storage['Arial-Regular.ttf'] = fs.readFileSync(arialFonts.Arial.normal)
-pdfmake.virtualfs.storage['Arial-Bold.ttf'] = fs.readFileSync(arialFonts.Arial.bold)
-pdfmake.virtualfs.storage['Arial-Italic.ttf'] = fs.readFileSync(arialFonts.Arial.italics)
-pdfmake.virtualfs.storage['Arial-BoldItalic.ttf'] = fs.readFileSync(arialFonts.Arial.bolditalics)
-
-// Register fonts with pdfmake
-pdfmake.setFonts({
-  ...pdfmake.fonts,
-  Arial: {
-    normal: 'Arial-Regular.ttf',
-    bold: 'Arial-Bold.ttf',
-    italics: 'Arial-Italic.ttf',
-    bolditalics: 'Arial-BoldItalic.ttf',
-  },
-})
+import { jsPDF } from 'jspdf'
 
 export type PetitionDocDefinition = {
   title: string
@@ -46,53 +6,104 @@ export type PetitionDocDefinition = {
   variables: Record<string, string>
 }
 
-export async function generatePdfBuffer(docDefinition: any): Promise<Buffer> {
-  const pdfDoc = pdfmake.createPdf(docDefinition)
-  return pdfDoc.getBuffer() as Promise<Buffer>
+// Legacy pdfmake-style doc definition for backwards compatibility
+export type LegacyDocDefinition = {
+  content: any[]
+  defaultStyle?: {
+    font?: string
+    fontSize?: number
+  }
 }
 
 /**
- * Converts simple HTML from Tiptap to pdfmake content array.
- * Handles: <p>, <strong>, <em>, <u>, <ul>, <ol>, <li>, <h1>, <h2>, <br>
- * Strips all other HTML tags.
+ * Generates a PDF buffer from text content using jspdf.
+ * jspdf has proper Unicode/Turkish character support.
  */
-export function htmlToPdfmakeContent(html: string): any[] {
+export async function generatePdfBuffer(docDefinition: PetitionDocDefinition | LegacyDocDefinition): Promise<Buffer> {
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+  })
+
+  // Check if this is a legacy pdfmake-style document
+  if ('content' in docDefinition && Array.isArray(docDefinition.content)) {
+    // Legacy pdfmake-style document
+    doc.setFont('helvetica')
+    
+    let y = 20
+    for (const item of docDefinition.content) {
+      if (item.bold) {
+        doc.setFont('helvetica', 'bold')
+      } else {
+        doc.setFont('helvetica', 'normal')
+      }
+      if (item.fontSize) {
+        doc.setFontSize(item.fontSize)
+      } else {
+        doc.setFontSize(12)
+      }
+      
+      const text = item.text || ''
+      const lines = doc.splitTextToSize(text, 170)
+      const marginLeft = item.margin?.[0] || 20
+      doc.text(lines, marginLeft, y)
+      y += lines.length * 6 + (item.margin?.[1] || 5)
+    }
+  } else {
+    // New jspdf-style document - cast to PetitionDocDefinition
+    const newStyleDef = docDefinition as PetitionDocDefinition
+    doc.setFont('helvetica')
+
+    // Add title if present
+    if (newStyleDef.title) {
+      doc.setFontSize(16)
+      doc.setFont('helvetica', 'bold')
+      const titleLines = doc.splitTextToSize(newStyleDef.title, 170)
+      doc.text(titleLines, 20, 20)
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(12)
+    }
+
+    // Add body text
+    doc.setFontSize(12)
+    const bodyLines = doc.splitTextToSize(newStyleDef.body, 170)
+    doc.text(bodyLines, 20, newStyleDef.title ? 35 : 20)
+  }
+
+  // Return the PDF as a Buffer
+  const pdfOutput = doc.output('arraybuffer')
+  return Buffer.from(pdfOutput)
+}
+
+/**
+ * Converts HTML content to plain text for PDF generation
+ */
+export function htmlToPdfmakeContent(html: string): string {
   const text = html
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/p>/gi, '\n\n')
     .replace(/<\/h[1-6]>/gi, '\n\n')
     .replace(/<\/li>/gi, '\n')
-    .replace(/<[^>]+>/g, '') // Strip remaining tags
+    .replace(/<[^>]+>/g, '')
     .replace(/&nbsp;/g, ' ')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .trim()
-  
-  return text.split('\n\n').filter(p => p.trim()).map(para => ({
-    text: para.trim(),
-    font: 'Arial',
-  }))
+
+  return text.split('\n\n').filter(p => p.trim()).join('\n\n')
 }
 
 /**
- * Builds a pdfmake document from HTML content (Tiptap output).
- * Supports simple HTML tags: p, strong, em, u, ul, ol, li, h1-h6, br
+ * Builds a petition document definition from HTML content
  */
-export function buildPetitionDoc(htmlContent: string, title?: string): any {
-  const content = htmlToPdfmakeContent(htmlContent)
+export function buildPetitionDoc(htmlContent: string, title?: string): PetitionDocDefinition {
+  const body = htmlToPdfmakeContent(htmlContent)
   
   return {
-    content: [
-      ...(title ? [{ text: title, font: 'Arial', bold: true, fontSize: 16, margin: [0, 0, 0, 20] as [number,number,number,number] }] : []),
-      ...content,
-    ],
-    defaultStyle: {
-      font: 'Arial',
-      fontSize: 12,
-      lineHeight: 1.4,
-    },
-    pageSize: 'A4',
-    pageMargins: [72, 72, 72, 72] as [number,number,number,number],
+    title: title || '',
+    body,
+    variables: {},
   }
 }

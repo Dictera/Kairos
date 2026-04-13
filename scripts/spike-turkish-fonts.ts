@@ -37,13 +37,13 @@ console.log('Creating PDF...')
 const pdfDoc = pdfmake.createPdf(doc)
 console.log('PDF doc created, waiting for buffer...')
 
-pdfDoc.getBuffer().then(buffer => {
+pdfDoc.getBuffer().then((buffer: Buffer) => {
   console.log('buffer type:', typeof buffer)
   console.log('buffer length:', buffer.length)
   fs.writeFileSync('test-turkish-fonts.pdf', buffer)
   console.log('PDF saved!')
   process.exit(0)
-}).catch(err => {
+}).catch((err: Error) => {
   console.error('err:', err.message)
   process.exit(1)
 })

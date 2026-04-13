@@ -40,7 +40,7 @@ export async function POST(
   const pdfBuffer = await generatePdfBuffer(docDefinition)
   
   // Return PDF as binary
-  return new Response(pdfBuffer, {
+  return new Response(new Uint8Array(pdfBuffer), {
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="${sablon.baslik.replace(/[^a-zA-Z0-9şğüöçıİŞĞÜÖÇ]/g, '_')}.pdf"`,

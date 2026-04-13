@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMutation } from '@tanstack/react-query'
-import { useTRPC } from '@/lib/trpc/client'
+import { useTRPC } from '@/lib/trpc/context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SablonEditor } from '@/components/dilekce/sablon-editor'
 import { toast } from 'sonner'
 
-const KATEGORILER = ['İtiraz Dilekçesi', 'Cevap Dilekçesi', 'Genel'] as const
+const KATEGORILER = ['STK', 'Mahkeme', 'Genel'] as const
 
 export default function YeniSablonPage() {
   const router = useRouter()
@@ -46,7 +46,7 @@ export default function YeniSablonPage() {
     
     createMutation.mutate({
       baslik,
-      kategori: kategori as 'İtiraz Dilekçesi' | 'Cevap Dilekçesi' | 'Genel',
+      kategori: kategori as 'STK' | 'Mahkeme' | 'Genel',
       icerik,
       degiskenler: customVars,
     })
@@ -73,7 +73,7 @@ export default function YeniSablonPage() {
                 id="baslik"
                 value={baslik}
                 onChange={(e) => setBaslik(e.target.value)}
-                placeholder="Örn: İtiraz Dilekçesi - STK"
+                placeholder="Örn: STK Başvuru Dilekçesi"
                 maxLength={200}
               />
             </div>
@@ -101,7 +101,7 @@ export default function YeniSablonPage() {
                 placeholder="örn: musteri_tc, vekil_ad (virgülle ayırın)"
               />
               <p className="text-xs text-muted-foreground">
-                Özel değişkenler virgülle ayırarak ekleyin. {{değişken_adı}} formatında kullanılır.
+                Özel değişkenler virgülle ayırarak ekleyin. &#123;&#123;değişken_adı&#125;&#125; formatında kullanılır.
               </p>
             </div>
           </CardContent>
