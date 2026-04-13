@@ -1,11 +1,10 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.1
-milestone_name: Dosyalar ve Müvekkiller Sekmesi İyileştirmeleri
-status: planning
-stopped_at: Phase 10 planning
-last_updated: "2026-04-13"
-last_activity: 2026-04-13
+milestone_name: "**Goal:** Müvekkil ve dosya yönetiminde temizlik ve iyileştirme — gereksiz alan çıkarma, yeni alan ekleme, sekme düzeni ve UI/UX."
+status: Not started
+last_updated: "2026-04-13T20:38:45.737Z"
+last_activity: 2026-04-13 — v1.1 roadmap created
 progress:
   total_phases: 4
   completed_phases: 0
@@ -77,7 +76,7 @@ Progress: [░░░░░░░░░░] 0%
 
 ## Session Continuity
 
-Last session: 2026-04-13T13:11:00.192Z
+Last session: 2026-04-13T20:38:45.733Z
 Previous milestone: v1.0 shipped 2026-04-13
 Current milestone: v1.1 started 2026-04-13
 Roadmap file: .planning/ROADMAP.md
