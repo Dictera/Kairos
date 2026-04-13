@@ -175,10 +175,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 07-01: Turkish font validation spike — generate a test PDF with Roboto/DejaVu TTF embedded, verify all Turkish glyphs render correctly; select and lock in PDF library choice (`pdfmake` or `@react-pdf/renderer`)
-- [ ] 07-02: Petition template system — Drizzle schema for `dilekce_sablonu`; template create/edit UI with variable insertion helper; DILEKCE tRPC router
-- [ ] 07-03: PDF generation flow — variable substitution service (pulls case data into template), PDF preview route, download endpoint, optional save-to-belge action
-- [ ] 07-04: Reports page — portföy raporu and finansal rapor with PDF export; filtered dosya listesi Excel (XLSX) export
+- [x] 07-01-PLAN.md — Turkish font validation spike — generate a test PDF with Roboto TTF embedded, verify all Turkish glyphs render correctly
+- [x] 07-02-PLAN.md — Petition template system — Drizzle schema for `dilekce_sablonu`; template create/edit UI with Tiptap + variable insertion
+- [x] 07-03-PLAN.md — PDF generation flow — variable substitution service, PDF preview, download and save-to-belge
+- [x] 07-04-PLAN.md — Reports page — portföy raporu and finansal rapor with charts; PDF and Excel export
 
 **UI hint**: yes
 
@@ -212,7 +212,7 @@ Plans:
 | 4. Deadline Engine + Dashboard | 0/3 | Not started | - |
 | 5. Calendar View | 2/2 | Ready to execute | - |
 | 6. Documents + Finance | 3/3 | Ready to execute | - |
-| 7. Petition Templates + PDF + Reports | 0/4 | Not started | - |
+| 7. Petition Templates + PDF + Reports | 0/4 | Ready to execute | - |
 
 **Total plans:** 24
 
