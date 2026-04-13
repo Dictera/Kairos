@@ -6,6 +6,8 @@ import { surecRouter } from './surec'
 import { sureRouter } from './sure'
 import { dashboardRouter } from './dashboard'
 import { calendarRouter } from './calendar'
+import { belgeRouter } from './belge'
+import { finansRouter } from './finans'
 
 export const appRouter = createTRPCRouter({
   health: publicProcedure.query(() => ({
@@ -19,6 +21,8 @@ export const appRouter = createTRPCRouter({
   sure: sureRouter,
   dashboard: dashboardRouter,
   calendar: calendarRouter,
+  belge: belgeRouter,
+  finans: finansRouter,
 })
 
 export type AppRouter = typeof appRouter

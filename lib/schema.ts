@@ -190,6 +190,8 @@ export const dosyaRelations = relations(dosya, ({ one, many }) => ({
   taraflar: many(taraf),
   durusmalar: many(durusma),
   sureler: many(sure),
+  belgeler: many(belge),
+  finans_kalemleri: many(finans_kalemi),
 }))
 
 export const tarafRelations = relations(taraf, ({ one }) => ({
@@ -208,4 +210,50 @@ export const sigortaSirketiRelations = relations(sigortaSirketi, ({ many }) => (
 
 export const sigortaTuruRelations = relations(sigortaTuru, ({ many }) => ({
   dosyalar: many(dosya),
+}))
+
+// ── BELGE (Document) types ────────────────────────────────────────────────────
+
+export const BELGE_KATEGORILER = ['Dilekçe', 'Karar', 'Poliçe', 'Sigorta poliçesi', 'Hasar dosyası', 'Vekaletname', 'Diğer'] as const
+export type BelgeKategori = typeof BELGE_KATEGORILER[number]
+
+export const belge = sqliteTable('belge', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  dosya_id: integer('dosya_id').notNull().references(() => dosya.id, { onDelete: 'cascade' }),
+  dosya_no: text('dosya_no').notNull(),
+  kategori: text('kategori').notNull(), // BELGE_KATEGORILER enum stored as text
+  dosya_adi: text('dosya_adi').notNull(), // original filename
+  dosya_yolu: text('dosya_yolu').notNull(), // /api/files/{dosyaId}/{filename}
+  dosya_boyutu: integer('dosya_boyutu').notNull(), // bytes
+  mime_tur: text('mime_tur').notNull(),
+  created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
+}, (t) => [
+  index('idx_belge_dosya').on(t.dosya_id),
+  index('idx_belge_tarih').on(t.created_at),
+])
+
+export const belgeRelations = relations(belge, ({ one }) => ({
+  dosya: one(dosya, { fields: [belge.dosya_id], references: [dosya.id] }),
+}))
+
+// ── FINANS (Finance) types ───────────────────────────────────────────────────
+
+export const FINANS_TUR = ['Gelen', 'Giden', 'Masraf'] as const
+export type FinansTur = typeof FINANS_TUR[number]
+
+export const finans_kalemi = sqliteTable('finans_kalemi', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  dosya_id: integer('dosya_id').notNull().references(() => dosya.id, { onDelete: 'cascade' }),
+  tur: text('tur').notNull(), // FINANS_TUR enum stored as text
+  tutar: real('tutar').notNull(), // TL amount
+  tarih: text('tarih').notNull(), // YYYY-MM-DD
+  aciklama: text('aciklama'),
+  created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
+}, (t) => [
+  index('idx_finans_dosya').on(t.dosya_id),
+  index('idx_finans_tarih').on(t.tarih), // For dashboard aggregation
+])
+
+export const finans_kalemiRelations = relations(finans_kalemi, ({ one }) => ({
+  dosya: one(dosya, { fields: [finans_kalemi.dosya_id], references: [dosya.id] }),
 }))
