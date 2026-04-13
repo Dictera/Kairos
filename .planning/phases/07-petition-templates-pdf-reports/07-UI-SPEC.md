@@ -108,7 +108,7 @@ Three distinct UI areas in Phase 7, each with its own CTA and states:
 | Element | Copy | Source |
 |---------|------|--------|
 | Primary CTA | `Dilekçe Oluştur` (from case detail → Belgeler tab) | D-11/D-12 flow |
-| Action: Save to Belgeler | `Kaydet` | D-12 |
+| Action: Save to Belgeler | `Dilekçe Kaydet` | D-12 |
 | Action: Download PDF | `İndir` | D-12 |
 | Empty state (no templates) | `Bu dosya için uygun şablon bulunamadı.` | agent discretion |
 | Error state | `PDF oluşturulamadı. Değişkenleri kontrol edin veya tekrar deneyin.` | agent discretion |
@@ -147,7 +147,7 @@ Three distinct UI areas in Phase 7, each with its own CTA and states:
 | Component | shadcn | Usage |
 |-----------|--------|-------|
 | `dialog` | ✅ yes | PDF preview modal |
-| `button` | ✅ yes | Kaydet / İndir CTAs |
+| `button` | ✅ yes | Dilekçe Kaydet / İndir CTAs |
 | `select` | ✅ yes | Template selector |
 | `input` | ✅ yes | Custom variable overrides |
 | `tabs` | ✅ yes | Template categories in selector |
@@ -195,7 +195,7 @@ Three distinct UI areas in Phase 7, each with its own CTA and states:
 2. Variables auto-fill from case data — displayed as read-only chips
 3. User can override any variable value via input fields
 4. "Önizle" button shows PDF preview in modal (scrollable)
-5. Two actions: "Kaydet" (saves to case Belgeler) or "İndir" (direct download)
+5. Two actions: "Dilekçe Kaydet" (saves to case Belgeler) or "İndir" (direct download)
 6. Sonner toast confirms save success
 
 ### Reports Dashboard
@@ -206,13 +206,32 @@ Three distinct UI areas in Phase 7, each with its own CTA and states:
 
 ---
 
+## Visual Focal Points
+
+### Primary Screen: Template List (Area 1)
+**Focal point:** Template cards (`card` component) with title, category badge, and action menu — visually anchored as the main content area.
+
+**Rationale:** Template list is the primary workspace for Phase 7. Users first land here to manage templates, select one for petition generation, or create new ones. The card-based layout creates a clear visual hierarchy with orange accent on primary actions.
+
+**Focal point hierarchy:**
+1. Page title + primary CTA ("Dilekçe Şablonu Oluştur") — top of content area
+2. Template cards — main content, scannable grid
+3. Each card: title (heading weight), category badge (accent-alt), action dropdown
+
+### Secondary Focal Point: Reports Summary Stats (Area 3)
+**Focal point:** Summary stats cards at top of each reports tab — display key metrics prominently.
+
+---
+
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
+- [x] Dimension 1 Copywriting: PASS (Dilekçe Kaydet replaces generic Kaydet)
+- [x] Dimension 2 Visuals: PASS (focal point declared for primary screen)
 - [ ] Dimension 3 Color: PASS
 - [ ] Dimension 4 Typography: PASS
 - [ ] Dimension 5 Spacing: PASS
 - [ ] Dimension 6 Registry Safety: PASS
 
 **Approval:** pending
+
+(End of file - total 240 lines)
