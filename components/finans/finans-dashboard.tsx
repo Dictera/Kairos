@@ -156,7 +156,7 @@ export function FinansDashboard() {
                     const net = m.gelen - m.giden - m.masraf
                     return (
                       <TableRow key={m.ay}>
-                        <TableCell className="text-right">{turkishMonthsFull[parseInt(month) - 1]} {year}</TableCell>
+                        <TableCell className="text-right font-medium">{turkishMonthsFull[parseInt(month) - 1]} {year}</TableCell>
                         <TableCell className="text-right text-green-600">
                           {m.gelen.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
                         </TableCell>
@@ -193,7 +193,7 @@ export function FinansDashboard() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Yıl</TableHead>
+                    <TableHead className="text-right">Yıl</TableHead>
                     <TableHead className="text-right">Gelen</TableHead>
                     <TableHead className="text-right">Giden</TableHead>
                     <TableHead className="text-right">Masraf</TableHead>
@@ -205,7 +205,7 @@ export function FinansDashboard() {
                     const net = y.gelen - y.giden - y.masraf
                     return (
                       <TableRow key={y.yil}>
-                        <TableCell className="font-medium">{y.yil}</TableCell>
+                        <TableCell className="text-right font-medium">{y.yil}</TableCell>
                         <TableCell className="text-right text-green-600">
                           {y.gelen.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
                         </TableCell>
