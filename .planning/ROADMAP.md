@@ -148,12 +148,13 @@ Plans:
   4. User can log a finance entry (type: Gelen/Giden/Masraf, amount, date, description) against a case; it appears in the Dosya Finansı tab
   5. Dosya Finansı tab shows total received, total paid out, and net balance for the case
   6. The finance dashboard page shows monthly and yearly income/expense summaries across all cases
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
 - [x] 06-01-PLAN.md — Drizzle schema + file upload/download Route Handlers + belge/finans tRPC routers
 - [x] 06-02-PLAN.md — Belgeler tab UI (upload form, document list with category/date, delete action)
 - [x] 06-03-PLAN.md — Finans CRUD + Dosya Finansı tab UI + finance dashboard page
+- [x] 06-04-PLAN.md — Gap closure: datepicker standard, entry sorting, dashboard UI, belge tab fixes
 
 **UI hint**: yes
 
