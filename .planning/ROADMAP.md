@@ -2,8 +2,8 @@
 
 ## Milestones
 
-- ✅ **v1.0 MVP** — Phases 1–7 (shipped 2026-04-13)
-- 🚧 **v1.1** — Phases 8–9 (planned)
+- ✅ **v1.0 MVP** — Phases 1–9 (shipped 2026-04-13)
+- 🚧 **v1.1** — Phases 10–13 (planned)
 
 ## Phase Progress
 
@@ -16,60 +16,111 @@
 | 5. Calendar View | v1.0 | 2/2 | ✅ Complete |
 | 6. Documents + Finance | v1.0 | 4/4 | ✅ Complete |
 | 7. Petition Templates + PDF + Reports | v1.0 | 4/4 | ✅ Complete |
-| 8. UI Renewal (Navy + Turuncu) | v1.1 | 3/3 | 🚧 In Progress |
-| 9. Calendar Standardization | v1.1 | 2/2 | 📋 Planned |
+| 8. UI Renewal (Navy + Turuncu) | v1.1 | 3/3 | ✅ Complete |
+| 9. Calendar Standardization | v1.1 | 2/2 | ✅ Complete |
+| 10. Schema & Migration Foundation | v1.1 | TBD | 📋 Planned |
+| 11. Müvekkil Email Removal | v1.1 | TBD | 📋 Planned |
+| 12. Taraf Tab Driver Info UI | v1.1 | TBD | 📋 Planned |
+| 13. Tab Cleanup & UI/UX | v1.1 | TBD | 📋 Planned |
 
 ---
 
 ## Current Milestone: v1.1
 
-<details>
-<summary>✅ v1.0 MVP — SHIPPED 2026-04-13</summary>
+**Goal:** Müvekkil ve dosya yönetiminde temizlik ve iyileştirme — gereksiz alan çıkarma, yeni alan ekleme, sekme düzeni ve UI/UX.
 
-Full milestone details: `.planning/milestones/v1.0-ROADMAP.md`
+### Phase 10: Schema & Migration Foundation
 
-</details>
+**Goal**: Database schema supports new driver fields and email removal is prepared
 
----
+**Depends on**: Phase 9 (v1.0 last phase)
 
-## Phase 8: UI Renewal (Navy + Turuncu)
+**Requirements**: TARAF-06, TARAF-09, TARAF-10, MUVEK-06
 
-**Goal:** Replace the teal palette with Navy + Turuncu (#032539 / #FA991C / #1C768F / #FBF3F2), migrate the sidebar and login page off hardcoded colors, and front-load the 23 shadcn/ui components that Phase 2-7 feature work will consume.
+**Success Criteria** (what must be TRUE):
+1. `taraf` table has 5 new columns: surucu_ad, surucu_soyad, surucu_plaka, surucu_telefon, surucu_police_no
+2. Drizzle migration generated and applied to development database
+3. tRPC `tarafSchema` accepts all 5 new fields with Turkish phone validation (05XX XXX XX XX)
+4. tRPC `tarafSchema` accepts plaka field with Turkish plate validation (XX XXX XX format)
+5. Müvekkil email column dropped via Drizzle migration (data backed up prior)
 
-**Depends on:** Phase 7
+**Plans**: TBD
 
-**Plans:** 3 plans
-
-- [ ] 08-01: Theme tokens — replace globals.css palette with Navy + Turuncu oklch tokens
-- [ ] 08-02: Install 23 shadcn components for Phase 2-7 consumption
-- [ ] 08-03: Migrate sidebar and login page to new theme
-
----
-
-## Phase 9: Calendar Standardization
-
-**Goal:** Standardize all calendar/date-picker UI components to match the reference implementation — Turkish locale (dd.MM.yyyy format, Monday week start), Navy + Turuncu color palette, shared DatePickerField component.
-
-**Depends on:** Phase 8
-
-**Plans:** 2 plans
-
-- [ ] 09-01: Extract DatePickerField to shared component
-- [ ] 09-02: Update all forms to use shared DatePickerField
+**UI hint**: no
 
 ---
 
-## v1.0 Definition of Done
+### Phase 11: Müvekkil Email Removal
 
-1. `next dev` starts; login works with `.env` password
-2. 200+ case files with <1s list load; Turkish search works
-3. STK 9-stage + Mahkeme 8-stage tracker fully functional
-4. Multiple durusma records per case
-5. Calendar with clickable event links to case detail
-6. Deadline auto-calc (STK 10d, istinaf 14d, cevap 14d)
-7. Dashboard with hearings + deadlines + stats
-8. Document upload 20MB to E:/sigorta-belgeler/
-9. Finance entries + per-case net balance
-10. Petition templates with PDF generation (Turkish chars)
-11. Portfolio + financial reports (PDF + Excel export)
+**Goal**: Email field completely removed from müvekkil forms
 
+**Depends on**: Phase 10
+
+**Requirements**: MUVEK-05
+
+**Success Criteria** (what must be TRUE):
+1. Müvekkil create/edit form has no email input field
+2. tRPC `muvekkilRouter` create/update procedures accept no email field
+3. Existing müvekkil records display correctly without email
+4. Müvekkil list displays without email column
+
+**Plans**: TBD
+
+**UI hint**: yes
+
+---
+
+### Phase 12: Taraf Tab Driver Info UI
+
+**Goal**: Counter-party tab displays and captures driver information
+
+**Depends on**: Phase 10
+
+**Requirements**: TARAF-07, TARAF-08
+
+**Success Criteria** (what must be TRUE):
+1. "Diğer Sürücü Bilgileri" section visible in Taraf edit form with 5 fields
+2. Driver info displays in InfoRow format in view mode
+3. Form saves driver info via existing upsertTaraf mutation
+4. Turkish phone format (05XX XXX XX XX) validated on submit
+5. Turkish plate format (XX XXX XX) validated on submit
+
+**Plans**: TBD
+
+**UI hint**: yes
+
+---
+
+### Phase 13: Tab Cleanup & UI/UX
+
+**Goal**: Empty tab resolved, Dosyalar and Müvekkiller UI/UX improved
+
+**Depends on**: Phase 12
+
+**Requirements**: TAB-01, TAB-02, UIUX-01
+
+**Success Criteria** (what must be TRUE):
+1. "Notlar/Zaman Çizelgesi" tab either filled with notes placeholder OR removed with URL redirect
+2. Dosya detail tabs have required sections added/removed per TAB-02
+3. Müvekkil list and form pages show measurable UI/UX improvements
+4. Dosya list and form pages show measurable UI/UX improvements
+
+**Plans**: TBD
+
+**UI hint**: yes
+
+---
+
+## Progress Table
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 10. Schema & Migration Foundation | 0/5 | Not started | - |
+| 11. Müvekkil Email Removal | 0/4 | Not started | - |
+| 12. Taraf Tab Driver Info UI | 0/5 | Not started | - |
+| 13. Tab Cleanup & UI/UX | 0/4 | Not started | - |
+
+---
+
+*Roadmap created: 2026-04-13*
+*Phases: 10-13 (v1.1 milestone)*

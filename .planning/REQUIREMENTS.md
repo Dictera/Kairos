@@ -43,7 +43,7 @@ Explicitly excluded. Documented to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| Müvekkil e-postası koruma | Kullanıcı gereksiz olduğunu belirtti — eklenmeyecek |
+| Müvekkil e-postası koruma | Kullanıcı gereksiz olduğunu beltti — eklenmeyecek |
 | Çoklu kullanıcı desteği | Solo avukat — tek kullanıcı yeterli |
 | Bulut senkronizasyonu | Offline-first — lokal SQLite |
 
@@ -53,22 +53,22 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MUVEK-05 | — | Pending |
-| MUVEK-06 | — | Pending |
-| TARAF-06 | — | Pending |
-| TARAF-07 | — | Pending |
-| TARAF-08 | — | Pending |
-| TARAF-09 | — | Pending |
-| TARAF-10 | — | Pending |
-| TAB-01 | — | Pending |
-| TAB-02 | — | Pending |
-| UIUX-01 | — | Pending |
+| MUVEK-05 | Phase 11 | Pending |
+| MUVEK-06 | Phase 10 | Pending |
+| TARAF-06 | Phase 10 | Pending |
+| TARAF-07 | Phase 12 | Pending |
+| TARAF-08 | Phase 12 | Pending |
+| TARAF-09 | Phase 10 | Pending |
+| TARAF-10 | Phase 10 | Pending |
+| TAB-01 | Phase 13 | Pending |
+| TAB-02 | Phase 13 | Pending |
+| UIUX-01 | Phase 13 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 10 total
-- Mapped to phases: 0
-- Unmapped: 10 ⚠️
+- Mapped to phases: 10
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-13*
-*Last updated: 2026-04-13 after initial definition*
+*Last updated: 2026-04-13 after roadmap creation*
