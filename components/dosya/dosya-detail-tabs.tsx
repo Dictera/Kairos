@@ -9,6 +9,7 @@ import { Lock } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Separator } from '@/components/ui/separator'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +30,8 @@ import Link from 'next/link'
 import { GenelBilgilerTab } from './genel-bilgiler-tab'
 import { KarsitaraflarTab } from './karsitaraflar-tab'
 import { YargilamaSureciTab } from './yargilama-sureci-tab'
+import { BelgeUpload } from '@/components/belge/belge-upload'
+import { BelgeList } from '@/components/belge/belge-list'
 
 interface DosyaDetailTabsProps {
   dosyaId: number
@@ -195,8 +198,10 @@ export function DosyaDetailTabs({ dosyaId }: DosyaDetailTabsProps) {
           />
         </TabsContent>
 
-        <TabsContent value="belgeler" className="mt-4">
-          <EmptyTabContent />
+        <TabsContent value="belgeler" className="mt-4 space-y-4">
+          <BelgeUpload dosyaId={dosyaId} dosyaNo={data.dosya_no} />
+          <Separator />
+          <BelgeList dosyaId={dosyaId} />
         </TabsContent>
 
         <TabsContent value="notlar" className="mt-4">
