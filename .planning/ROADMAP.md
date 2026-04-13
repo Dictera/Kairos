@@ -18,7 +18,7 @@
 | 7. Petition Templates + PDF + Reports | v1.0 | 4/4 | ✅ Complete |
 | 8. UI Renewal (Navy + Turuncu) | v1.1 | 3/3 | ✅ Complete |
 | 9. Calendar Standardization | v1.1 | 2/2 | ✅ Complete |
-| 10. Schema & Migration Foundation | v1.1 | TBD | 📋 Planned |
+| 10. Schema & Migration Foundation | 2/2 | Complete   | 2026-04-13 |
 | 11. Müvekkil Email Removal | v1.1 | TBD | 📋 Planned |
 | 12. Taraf Tab Driver Info UI | v1.1 | TBD | 📋 Planned |
 | 13. Tab Cleanup & UI/UX | v1.1 | TBD | 📋 Planned |
@@ -44,10 +44,11 @@
 4. tRPC `tarafSchema` accepts plaka field without format validation (per D-02: user validates manually)
 5. Müvekkil email column dropped via Drizzle migration (no backup per D-04: emails unused)
 
-**Plans**: 2 plans
+**Plans**: 3 plans
 
-- [ ] 10-01-PLAN.md — Add 5 driver columns to taraf + tRPC validation + migration
-- [ ] 10-02-PLAN.md — Drop email column from muvekkil + migration
+- [x] 10-01-PLAN.md — Add 5 driver columns to taraf + tRPC validation + migration
+- [x] 10-02-PLAN.md — Drop email column from muvekkil + migration
+- [x] 10-03-PLAN.md — Gap closure: Remove email from muvekkil-form.tsx
 
 **UI hint**: no
 
