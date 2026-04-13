@@ -236,6 +236,22 @@ export const belgeRelations = relations(belge, ({ one }) => ({
   dosya: one(dosya, { fields: [belge.dosya_id], references: [dosya.id] }),
 }))
 
+export const dilekceSablonu = sqliteTable('dilekce_sablonu', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  baslik: text('baslik').notNull(),
+  icerik: text('icerik').notNull(), // HTML from Tiptap editor
+  kategori: text('kategori').notNull(), // 'İtiraz Dilekçesi' | 'Cevap Dilekçesi' | 'Genel'
+  degiskenler: text('degiskenler').notNull().default('[]'), // JSON array of custom variable names
+  created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
+  updated_at: text('updated_at').notNull().default(sql`(datetime('now'))`),
+}, (t) => [
+  index('idx_sablon_kategori').on(t.kategori),
+])
+
+export const dilekceSablonuRelations = relations(dilekceSablonu, ({ one }) => ({
+  // No relations needed for this phase
+}))
+
 // ── FINANS (Finance) types ───────────────────────────────────────────────────
 
 export const FINANS_TUR = ['Gelen', 'Giden', 'Masraf'] as const
