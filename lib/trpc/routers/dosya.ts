@@ -16,13 +16,22 @@ const dosyaSchema = z.object({
   aciklama: z.string().max(2000).nullable().optional().or(z.literal('')),
 })
 
-const tarafSchema = z.object({
+export const tarafSchema = z.object({
   dosya_id: z.number().int(),
   sigorta_sirketi_id: z.number().int().nullable().optional(),
   karsitaraf_ad: z.string().max(200).nullable().optional().or(z.literal('')),
   karsitaraf_vekil: z.string().max(200).nullable().optional().or(z.literal('')),
   police_no: z.string().max(100).nullable().optional().or(z.literal('')),
   karsitaraf_plaka: z.string().max(10).nullable().optional().or(z.literal('')),
+  surucu_ad: z.string().max(200).nullable().optional().or(z.literal('')),
+  surucu_soyad: z.string().max(200).nullable().optional().or(z.literal('')),
+  surucu_plaka: z.string().max(10).nullable().optional().or(z.literal('')),
+  surucu_telefon: z.string()
+    .regex(/^05[0-9]{9}$/, 'Geçersiz telefon formatı (05XXXXXXXXX gerekli)')
+    .nullable()
+    .optional()
+    .or(z.literal('')),
+  surucu_police_no: z.string().max(100).nullable().optional().or(z.literal('')),
 })
 
 export const dosyaRouter = createTRPCRouter({
