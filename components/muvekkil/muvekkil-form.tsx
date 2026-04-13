@@ -24,7 +24,6 @@ const formSchema = z.object({
   ad: z.string().min(1, 'Ad zorunludur'),
   soyad: z.string().min(1, 'Soyad zorunludur'),
   telefon: z.string().max(20).optional().or(z.literal('')),
-  email: z.string().email('Geçersiz e-posta formatı').optional().or(z.literal('')),
   tc_vergi_no: z.string().max(11).optional().or(z.literal('')),
   adres: z.string().max(500).optional().or(z.literal('')),
   notlar: z.string().max(2000).optional().or(z.literal('')),
@@ -49,7 +48,6 @@ function MuvekkilFormInner({ mode, defaultValues, muvekkilId }: MuvekkilFormProp
       ad: '',
       soyad: '',
       telefon: '',
-      email: '',
       tc_vergi_no: '',
       adres: '',
       notlar: '',
@@ -138,20 +136,6 @@ function MuvekkilFormInner({ mode, defaultValues, muvekkilId }: MuvekkilFormProp
                 <FormLabel>Telefon</FormLabel>
                 <FormControl>
                   <Input placeholder="Telefon numarası" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>E-posta</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="E-posta adresi" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
