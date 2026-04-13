@@ -1,7 +1,7 @@
 ---
 phase: 10
 slug: schema-migration-foundation
-status: draft
+status: approved
 shadcn_initialized: true
 preset: "radix-nova, neutral base, lucide icons"
 created: 2026-04-14
@@ -86,7 +86,7 @@ Geçersiz telefon formatı (05XXXXXXXXX gerekli)
 - [ ] Dimension 5 Spacing: N/A — no spacing usage
 - [ ] Dimension 6 Registry Safety: PASS — no new components
 
-**Approval:** pending
+**Approval:** approved 2026-04-14
 
 ---
 
