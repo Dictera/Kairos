@@ -92,11 +92,11 @@ export function FinansDashboard() {
             <CardHeader>
               <CardTitle>Aylık Özet {selectedYear ? `(${selectedYear})` : ''}</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="h-[250px] w-full">
-                <BarChart data={monthlyChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <XAxis dataKey="name" />
-                  <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+            <CardContent className="pt-4">
+              <div className="h-[300px] w-full min-h-[300px]">
+                <BarChart data={monthlyChartData} margin={{ top: 10, right: 30, left: 10, bottom: 30 }} width={600} height={280}>
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} width={50} />
                   <Tooltip 
                     formatter={(value) => typeof value === 'number' ? value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : String(value)}
                     contentStyle={{ textAlign: 'left' }}
@@ -115,11 +115,11 @@ export function FinansDashboard() {
             <CardHeader>
               <CardTitle>Aylık Trend {selectedYear ? `(${selectedYear})` : ''}</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="h-[250px] w-full">
-                <LineChart data={monthlyChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <XAxis dataKey="name" />
-                  <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+            <CardContent className="pt-4">
+              <div className="h-[300px] w-full min-h-[300px]">
+                <LineChart data={monthlyChartData} margin={{ top: 10, right: 30, left: 10, bottom: 30 }} width={600} height={280}>
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} width={50} />
                   <Tooltip 
                     formatter={(value) => typeof value === 'number' ? value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : String(value)}
                   />
