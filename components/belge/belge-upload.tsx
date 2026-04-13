@@ -158,8 +158,9 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
               </p>
             </div>
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
+              className="text-muted-foreground hover:text-foreground"
               onClick={(e) => { e.stopPropagation(); setFile(null); setError(null) }}
             >
               <X className="h-4 w-4" />

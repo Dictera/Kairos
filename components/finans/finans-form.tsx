@@ -5,6 +5,7 @@ import { useTRPC } from '@/lib/trpc/context'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
+import { DatePickerField } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -125,12 +126,10 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
       {/* Date */}
       <div className="space-y-2">
         <Label htmlFor="tarih">Tarih *</Label>
-        <Input
-          id="tarih"
-          type="date"
+        <DatePickerField
           value={tarih}
-          onChange={(e) => setTarih(e.target.value)}
-          className="w-[200px]"
+          onChange={(value) => setTarih(value ?? format(new Date(), 'yyyy-MM-dd'))}
+          placeholder="Tarih seçin"
         />
       </div>
       

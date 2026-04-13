@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { ArrowDownCircle, ArrowUpCircle, Receipt, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -68,9 +68,13 @@ export function FinansEntryList({ dosyaId }: FinansEntryListProps) {
     )
   }
   
+  const sortedEntries = [...entries].sort((a, b) => {
+    return parseISO(b.tarih).getTime() - parseISO(a.tarih).getTime()
+  })
+  
   return (
     <div className="space-y-2">
-      {entries.map((entry) => {
+      {sortedEntries.map((entry) => {
         const Icon = typeIcons[entry.tur as keyof typeof typeIcons] || Receipt
         const colorClass = typeColors[entry.tur as keyof typeof typeColors] || 'text-gray-600'
         const isEditing = editId === entry.id

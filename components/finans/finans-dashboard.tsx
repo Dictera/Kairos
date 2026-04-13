@@ -23,8 +23,9 @@ const LineChart = dynamic(() => import('recharts').then(m => m.LineChart), { ssr
 const Line = dynamic(() => import('recharts').then(m => m.Line), { ssr: false })
 
 // Turkish month names for chart labels
-const turkishMonths = [
-  'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'
+const turkishMonthsFull = [
+  'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+  'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
 ]
 
 export function FinansDashboard() {
@@ -56,7 +57,7 @@ export function FinansDashboard() {
   const monthlyChartData = monthly?.map(m => {
     const [year, month] = m.ay.split('-')
     return {
-      name: turkishMonths[parseInt(month) - 1],
+      name: turkishMonthsFull[parseInt(month) - 1],
       Gelen: m.gelen,
       Giden: m.giden,
       Masraf: m.masraf,
@@ -92,7 +93,7 @@ export function FinansDashboard() {
               <CardTitle>Aylık Özet {selectedYear ? `(${selectedYear})` : ''}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
+              <div className="h-[250px] w-full">
                 <BarChart data={monthlyChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <XAxis dataKey="name" />
                   <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
@@ -115,7 +116,7 @@ export function FinansDashboard() {
               <CardTitle>Aylık Trend {selectedYear ? `(${selectedYear})` : ''}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
+              <div className="h-[250px] w-full">
                 <LineChart data={monthlyChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <XAxis dataKey="name" />
                   <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
@@ -155,7 +156,7 @@ export function FinansDashboard() {
                     const net = m.gelen - m.giden - m.masraf
                     return (
                       <TableRow key={m.ay}>
-                        <TableCell>{turkishMonths[parseInt(month) - 1]} {year}</TableCell>
+                        <TableCell className="text-right">{turkishMonthsFull[parseInt(month) - 1]} {year}</TableCell>
                         <TableCell className="text-right text-green-600">
                           {m.gelen.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
                         </TableCell>
