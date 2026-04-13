@@ -1,7 +1,15 @@
-import { describe, it } from 'vitest'
+import { describe, it, expect } from 'vitest'
+import { muvekkil } from '@/lib/schema'
 
 describe('Schema: muvekkil table', () => {
-  it.todo('muvekkil table has correct columns: id, ad, soyad, telefon, email, tc_vergi_no, adres, created_at, updated_at')
+  it('muvekkil table has correct columns and no email', () => {
+    const expectedColumns = ['id', 'ad', 'soyad', 'telefon', 'tc_vergi_no', 'adres', 'notlar', 'created_at', 'updated_at']
+    for (const col of expectedColumns) {
+      expect(muvekkil).toHaveProperty(col)
+    }
+    // Explicit negative assertion — regression protection against re-adding email
+    expect(muvekkil).not.toHaveProperty('email')
+  })
   it.todo('dosya table has FK to muvekkil (muvekkil_id NOT NULL)')
   it.todo('taraf table has FK to dosya with ON DELETE CASCADE')
   it.todo('sigorta_turu table exists with id and ad columns')
