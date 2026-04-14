@@ -11,11 +11,16 @@ type DosyaDetail = {
   durum: 'aktif' | 'arsiv'
   talep_tutari: number | null
   muvekkil_plaka: string | null
+  hasar_dosya_no: string | null
+  kaza_tarihi: string | null
+  muvekkil_sigorta_id: number | null
+  kusur_orani_karsi: number | null
   aciklama: string | null
   created_at: string
   muvekkil: { id: number; ad: string; soyad: string }
   sigortaTuru: { id: number; ad: string } | null
   karsitarafSigorta: { id: number; ad: string } | null
+  muvekkilSigorta: { id: number; ad: string } | null
   taraflar: Array<{
     id: number
     police_no: string | null
@@ -93,9 +98,18 @@ export function GenelBilgilerTab({ dosya }: GenelBilgilerTabProps) {
           />
           <Row label="Sigorta Türü" value={dosya.sigortaTuru?.ad ?? '—'} />
           <Row label="Karşı Sigorta Şirketi" value={dosya.karsitarafSigorta?.ad ?? '—'} />
-          <Row label="Poliçe No" value={primaryTaraf?.police_no ?? '—'} />
+          <Row label="Müvekkil Poliçe No" value={primaryTaraf?.police_no ?? '—'} />
           <Row label="Talep Tutarı" value={formatTutar(dosya.talep_tutari)} />
           <Row label="Müvekkil Plaka No" value={dosya.muvekkil_plaka ?? '—'} />
+          <Row label="Hasar Dosya No" value={dosya.hasar_dosya_no ?? '—'} />
+          <Row label="Kaza Tarihi" value={dosya.kaza_tarihi ? formatDate(dosya.kaza_tarihi) : '—'} />
+          <Row label="Müvekkil Sigorta/Kasko Şirketi" value={dosya.muvekkilSigorta?.ad ?? '—'} />
+          {dosya.kusur_orani_karsi !== null && dosya.kusur_orani_karsi > 0 && (
+            <>
+              <Row label="Karşı Taraf Kusur Oranı" value={`${dosya.kusur_orani_karsi}%`} />
+              <Row label="Müvekkil Kusur Oranı" value={`${100 - dosya.kusur_orani_karsi}%`} />
+            </>
+          )}
           <Row label="Oluşturma Tarihi" value={formatDate(dosya.created_at)} />
           {dosya.aciklama && (
             <div className="col-span-full space-y-1">
