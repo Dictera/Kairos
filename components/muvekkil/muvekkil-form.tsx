@@ -19,11 +19,13 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
   ad: z.string().min(0),
   soyad: z.string().min(0),
   telefon: z.string().max(20).optional().or(z.literal('')),
+  iban: z.string().regex(/^TR\d{24}$/, 'Geçersiz IBAN formatı (TRXXXXXXXXXXXXXXXXXXXXXXXX)').optional().or(z.literal('')),
   tc_vergi_no: z.string().max(11).optional().or(z.literal('')),
   adres: z.string().max(500).optional().or(z.literal('')),
   notlar: z.string().max(2000).optional().or(z.literal('')),
@@ -48,6 +50,7 @@ function MuvekkilFormInner({ mode, defaultValues, muvekkilId }: MuvekkilFormProp
       ad: '',
       soyad: '',
       telefon: '',
+      iban: '',
       tc_vergi_no: '',
       adres: '',
       notlar: '',
@@ -94,33 +97,51 @@ function MuvekkilFormInner({ mode, defaultValues, muvekkilId }: MuvekkilFormProp
   return (
     <div className="max-w-2xl mx-auto">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Group 1: Kimlik Bilgileri */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold">Kimlik Bilgileri</h3>
+            <Separator />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="ad"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Ad <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ad" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="soyad"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Soyad <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Soyad" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
-              name="ad"
+              name="tc_vergi_no"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Ad <span className="text-destructive">*</span>
-                  </FormLabel>
+                  <FormLabel>TC No / Vergi No</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ad" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="soyad"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Soyad <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="Soyad" {...field} />
+                    <Input placeholder="TC Kimlik No veya Vergi No" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -128,61 +149,75 @@ function MuvekkilFormInner({ mode, defaultValues, muvekkilId }: MuvekkilFormProp
             />
           </div>
 
-          <FormField
-            control={form.control}
-            name="telefon"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Telefon</FormLabel>
-                <FormControl>
-                  <Input placeholder="Telefon numarası" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Group 2: İletişim */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold">İletişim</h3>
+            <Separator />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="telefon"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Telefon</FormLabel>
+                    <FormControl>
+                      <Input placeholder="05XX XXX XX XX" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="iban"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>IBAN</FormLabel>
+                    <FormControl>
+                      <Input placeholder="TRXXXXXXXXXXXXXXXXXXXXXXXX" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
 
-          <FormField
-            control={form.control}
-            name="tc_vergi_no"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>TC No / Vergi No</FormLabel>
-                <FormControl>
-                  <Input placeholder="TC Kimlik No veya Vergi No" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Group 3: Adres */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold">Adres</h3>
+            <Separator />
+            <FormField
+              control={form.control}
+              name="adres"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea placeholder="Adres bilgisi" rows={3} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-          <FormField
-            control={form.control}
-            name="adres"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Adres</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Adres bilgisi" rows={3} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="notlar"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Notlar</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="İsteğe bağlı notlar" rows={3} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Group 4: Notlar */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold">Notlar</h3>
+            <Separator />
+            <FormField
+              control={form.control}
+              name="notlar"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea placeholder="İsteğe bağlı notlar" rows={3} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <div className="flex items-center justify-between pt-2">
             <Button
@@ -234,6 +269,7 @@ export function MuvekkilForm(props: MuvekkilFormProps) {
         ad: data.ad,
         soyad: data.soyad,
         telefon: data.telefon ?? '',
+        iban: data.iban ?? '',
         tc_vergi_no: data.tc_vergi_no ?? '',
         adres: data.adres ?? '',
         notlar: data.notlar ?? '',
