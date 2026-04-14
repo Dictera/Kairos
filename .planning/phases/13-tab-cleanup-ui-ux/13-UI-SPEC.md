@@ -117,8 +117,12 @@ Destructive reserved for:
 | Kaza Tarihi label | Kaza Tarihi |
 | Müvekkil Sigorta/Kasko Şirketi label | Müvekkil Sigorta/Kasko Şirketi |
 | Müvekkil Poliçe No label (renamed) | Müvekkil Poliçe No |
-| Save button | Kaydet |
-| Cancel button | Vazgeç |
+| Save button (Note edit) | Notu Kaydet |
+| Cancel button (Note edit) | Düzenlemeden Vazgeç |
+| Save button (Dosya form) | Dosyayı Kaydet |
+| Cancel button (Dosya form) | Vazgeç |
+| Save button (Müvekkil form) | Müvekkili Kaydet |
+| Cancel button (Müvekkil form) | Vazgeç |
 
 ---
 
@@ -153,6 +157,37 @@ Components to be MODIFIED in this phase:
 | `lib/trpc/routers/dosya.ts` | New fields in schemas/routes |
 | `lib/trpc/routers/muvekkil.ts` | Add IBAN field |
 | `lib/trpc/routers/belge.ts` | Derive category enum from schema constant |
+
+---
+
+## Visual Anchors
+
+| Screen | Primary Focal Point |
+|--------|-------------------|
+| Notlar/Zaman Çizelgesi tab | "Not Ekle" primary button (top-right of Notlar section) |
+| Timeline section | Latest event dot + text (most recent activity at top) |
+| Dosya detail — Genel Bilgiler | Kusur Oranı display (visual bar if non-zero) |
+| Dosya form | "Dosyayı Kaydet" primary CTA (form footer) |
+| Müvekkil form | "Müvekkili Kaydet" primary CTA (form footer) |
+| Dosya list | First row (most recent dosya) — sortable by default |
+| Müvekkil list | First row (most recent müvekkil) — sortable by default |
+
+## Accessibility
+
+### Icon-only buttons
+
+All icon-only buttons (Pencil, Trash2, etc.) MUST include one of:
+- `aria-label` attribute (e.g., `aria-label="Notu düzenle"`, `aria-label="Notu sil"`)
+- OR a `Tooltip` wrapper with accessible label
+
+| Icon | Context | aria-label |
+|------|---------|-----------|
+| Pencil | Note edit | Notu düzenle |
+| Trash2 | Note delete | Notu sil |
+| Pencil | Dosya edit | Dosyayı düzenle |
+| Trash2 | Dosya delete | Dosyayı sil |
+| Pencil | Müvekkil edit | Müvekkili düzenle |
+| Trash2 | Müvekkil delete | Müvekkili sil |
 
 ---
 
@@ -204,7 +239,7 @@ Components to be MODIFIED in this phase:
 ### Note Edit/Delete (D-03)
 
 **Delete confirmation:** AlertDialog with "Bu notu silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
-**Edit:** Click edit icon → note content becomes Textarea with Save/Cancel buttons
+**Edit:** Click edit icon → note content becomes Textarea with "Notu Kaydet" / "Düzenlemeden Vazgeç" buttons
 
 ### Field Grouping in Forms (D-19, D-23)
 
