@@ -26,7 +26,7 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 - ✓ **Dilekçe Şablon Sistemi (DILEKCE-01–05)** — v1.0: Tiptap editor, variable substitution, Arial TTF Turkish PDF
 - ✓ **Raporlar (RAPOR-01–03)** — v1.0: Portfolio + financial reports, PDF + Excel export
 - ✓ **Müvekkil E-posta Kaldırma (MUVEK-06)** — v1.1: Müvekkil formlarından e-posta alanı kaldırma
-- ✓ **Sürücü Bilgileri (TARAF-06, 09, 10)** — v1.1: Dosya > Taraflar bölümüne sürücü bilgileri ekleme (Ad, Soyad, Plaka, Telefon, Poliçe No) + Turkish phone regex
+- ✓ **Sürücü Bilgileri (TARAF-06, 07, 08, 09, 10)** — v1.1: Dosya > Taraflar bölümüne sürücü bilgileri ekleme (Ad, Soyad, Plaka, Telefon, Poliçe No) + Turkish phone regex + UI Card
 
 ## Current Milestone: v1.1 Dosyalar ve Müvekkiller Sekmesi İyileştirmeleri
 
@@ -98,4 +98,4 @@ Bu belge faz geçişlerinde ve milestone sınırlarında güncellenir.
 4. Context güncelleme
 
 ---
-*Last updated: 2026-04-13 after v1.0 milestone, updated 2026-04-14 for v1.1 (Phase 10 complete)*
+*Last updated: 2026-04-14 after Phase 12 (Taraf Tab Driver Info UI)*
