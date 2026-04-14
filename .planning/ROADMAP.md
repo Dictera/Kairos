@@ -21,7 +21,7 @@
 | 10. Schema & Migration Foundation | 3/3 | Complete    | 2026-04-13 |
 | 11. Müvekkil Email Removal | 2/2 | Complete    | 2026-04-13 |
 | 12. Taraf Tab Driver Info UI | 1/1 | Complete    | 2026-04-14 |
-| 13. Tab Cleanup & UI/UX | v1.1 | TBD | 📋 Planned |
+| 13. Tab Cleanup & UI/UX | 4/4 | Complete    | 2026-04-14 |
 
 ---
 
@@ -109,12 +109,17 @@
 **Requirements**: TAB-01, TAB-02, UIUX-01
 
 **Success Criteria** (what must be TRUE):
-1. "Notlar/Zaman Çizelgesi" tab either filled with notes placeholder OR removed with URL redirect
-2. Dosya detail tabs have required sections added/removed per TAB-02
-3. Müvekkil list and form pages show measurable UI/UX improvements
-4. Dosya list and form pages show measurable UI/UX improvements
+1. "Notlar/Zaman Çizelgesi" tab filled with notes CRUD + activity timeline (D-01, D-02)
+2. Dosya detail tabs have new fields (D-05–D-11), restructured stages (D-12–D-15), expanded belge categories (D-16, D-17)
+3. Müvekkil form has IBAN field with TR validation, grouped layout (D-18–D-21)
+4. Dosya form has new fields with grouped layout, kusur oranı auto-calculation (D-22, D-23)
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+- [x] 13-01-PLAN.md — Schema & Migrations: New tables (dosyaNot, olayGunlugu), new columns (hasar_dosya_no, kaza_tarihi, muvekkil_sigorta_id, kusur_orani_karsi, iban), restructured stages, expanded belge categories, data migration
+- [x] 13-02-PLAN.md — Notes & Timeline UI: NotList, NotForm, Timeline components, replace EmptyTabContent, hook activity log into mutations
+- [x] 13-03-PLAN.md — Dosya Fields & Stage Restructure: Genel Bilgiler new fields, dosya form grouping, STK/Mahkeme stage/data updates, belge category expansion
+- [x] 13-04-PLAN.md — Müvekkil & Dosya UI/UX: IBAN field in müvekkil CRUD, form grouping, list/detail improvements
 
 **UI hint**: yes
 
@@ -127,7 +132,7 @@
 | 10. Schema & Migration Foundation | 0/2 | 📋 Planned | - |
 | 11. Müvekkil Email Removal | 0/4 | Not started | - |
 | 12. Taraf Tab Driver Info UI | 0/5 | Not started | - |
-| 13. Tab Cleanup & UI/UX | 0/4 | Not started | - |
+| 13. Tab Cleanup & UI/UX | 0/4 | 📋 Planned | - |
 
 ---
 
