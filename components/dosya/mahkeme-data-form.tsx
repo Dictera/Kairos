@@ -3,12 +3,9 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { toast } from 'sonner'
-import { format, parseISO } from 'date-fns'
-import { tr } from 'date-fns/locale/tr'
-import { CalendarIcon } from 'lucide-react'
 import { DatePickerField } from '@/components/ui/date-picker'
 import type { MahkemeSurecData } from '@/lib/schema'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,17 +19,29 @@ import {
   FormControl,
   FormMessage,
 } from '@/components/ui/form'
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
-import { Calendar } from '@/components/ui/calendar'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const mahkemeDataFormSchema = z.object({
-  esas_no: z.string().max(100).optional().or(z.literal('')),
-  karar_no: z.string().max(100).optional().or(z.literal('')),
-  mahkeme_id: z.number().int().optional().nullable(),
-  dava_tarihi: z.string().max(10).optional().or(z.literal('')),
-  tebligat_tarihi: z.string().max(10).optional().or(z.literal('')),
-  karar_tarihi: z.string().max(10).optional().or(z.literal('')),
+  ilk_derece_esas_no: z.string().max(100).optional().or(z.literal('')),
+  ilk_derece_karar_no: z.string().max(100).optional().or(z.literal('')),
+  ilk_derece_mahkeme_adi: z.string().max(200).optional().or(z.literal('')),
+  istinaf_esas_no: z.string().max(100).optional().or(z.literal('')),
+  istinaf_karar_no: z.string().max(100).optional().or(z.literal('')),
+  istinaf_mahkeme_adi: z.string().max(200).optional().or(z.literal('')),
+  temyiz_esas_no: z.string().max(100).optional().or(z.literal('')),
+  temyiz_karar_no: z.string().max(100).optional().or(z.literal('')),
+  temyiz_mahkeme_adi: z.string().max(200).optional().or(z.literal('')),
+  dava_dilekcesi_tebliğ_tarihi: z.string().max(10).optional().or(z.literal('')),
+  cevap_dilekcesi_tebliğ_tarihi: z.string().max(10).optional().or(z.literal('')),
+  replik_dilekcesi_tebliğ_tarihi: z.string().max(10).optional().or(z.literal('')),
+  duplik_dilekcesi_tebliğ_tarihi: z.string().max(10).optional().or(z.literal('')),
+  bilirkisi_ucret_talep_tarihi: z.string().max(10).optional().or(z.literal('')),
+  bilirkisi_raporu_tebliğ_tarihi: z.string().max(10).optional().or(z.literal('')),
+  karar_tebliğ_tarihi: z.string().max(10).optional().or(z.literal('')),
+  istinaf_dilekcesi_tebliğ_tarihi: z.string().max(10).optional().or(z.literal('')),
+  istinaf_karar_tebliğ_tarihi: z.string().max(10).optional().or(z.literal('')),
+  temyiz_dilekcesi_tebliğ_tarihi: z.string().max(10).optional().or(z.literal('')),
+  temyiz_karar_tebliğ_tarihi: z.string().max(10).optional().or(z.literal('')),
+  kesinlesme_tarihi: z.string().max(10).optional().or(z.literal('')),
 })
 
 type MahkemeDataFormValues = z.infer<typeof mahkemeDataFormSchema>
@@ -46,17 +55,30 @@ export function MahkemeDataForm({ dosyaId, initialData }: MahkemeDataFormProps) 
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  const { data: mahkemeler } = useQuery(trpc.ayarlar.mahkeme.list.queryOptions())
-
   const form = useForm<MahkemeDataFormValues>({
     resolver: zodResolver(mahkemeDataFormSchema),
     defaultValues: {
-      esas_no: initialData?.esas_no ?? '',
-      karar_no: initialData?.karar_no ?? '',
-      mahkeme_id: initialData?.mahkeme_id ?? undefined,
-      dava_tarihi: initialData?.dava_tarihi ?? '',
-      tebligat_tarihi: initialData?.tebligat_tarihi ?? '',
-      karar_tarihi: initialData?.karar_tarihi ?? '',
+      ilk_derece_esas_no: initialData?.ilk_derece_esas_no ?? '',
+      ilk_derece_karar_no: initialData?.ilk_derece_karar_no ?? '',
+      ilk_derece_mahkeme_adi: initialData?.ilk_derece_mahkeme_adi ?? '',
+      istinaf_esas_no: initialData?.istinaf_esas_no ?? '',
+      istinaf_karar_no: initialData?.istinaf_karar_no ?? '',
+      istinaf_mahkeme_adi: initialData?.istinaf_mahkeme_adi ?? '',
+      temyiz_esas_no: initialData?.temyiz_esas_no ?? '',
+      temyiz_karar_no: initialData?.temyiz_karar_no ?? '',
+      temyiz_mahkeme_adi: initialData?.temyiz_mahkeme_adi ?? '',
+      dava_dilekcesi_tebliğ_tarihi: initialData?.dava_dilekcesi_tebliğ_tarihi ?? '',
+      cevap_dilekcesi_tebliğ_tarihi: initialData?.cevap_dilekcesi_tebliğ_tarihi ?? '',
+      replik_dilekcesi_tebliğ_tarihi: initialData?.replik_dilekcesi_tebliğ_tarihi ?? '',
+      duplik_dilekcesi_tebliğ_tarihi: initialData?.duplik_dilekcesi_tebliğ_tarihi ?? '',
+      bilirkisi_ucret_talep_tarihi: initialData?.bilirkisi_ucret_talep_tarihi ?? '',
+      bilirkisi_raporu_tebliğ_tarihi: initialData?.bilirkisi_raporu_tebliğ_tarihi ?? '',
+      karar_tebliğ_tarihi: initialData?.karar_tebliğ_tarihi ?? '',
+      istinaf_dilekcesi_tebliğ_tarihi: initialData?.istinaf_dilekcesi_tebliğ_tarihi ?? '',
+      istinaf_karar_tebliğ_tarihi: initialData?.istinaf_karar_tebliğ_tarihi ?? '',
+      temyiz_dilekcesi_tebliğ_tarihi: initialData?.temyiz_dilekcesi_tebliğ_tarihi ?? '',
+      temyiz_karar_tebliğ_tarihi: initialData?.temyiz_karar_tebliğ_tarihi ?? '',
+      kesinlesme_tarihi: initialData?.kesinlesme_tarihi ?? '',
     },
   })
 
@@ -76,12 +98,27 @@ export function MahkemeDataForm({ dosyaId, initialData }: MahkemeDataFormProps) 
     saveMutation.mutate({
       dosya_id: dosyaId,
       data: {
-        esas_no: values.esas_no || undefined,
-        karar_no: values.karar_no || undefined,
-        mahkeme_id: values.mahkeme_id || undefined,
-        dava_tarihi: values.dava_tarihi || undefined,
-        tebligat_tarihi: values.tebligat_tarihi || undefined,
-        karar_tarihi: values.karar_tarihi || undefined,
+        ilk_derece_esas_no: values.ilk_derece_esas_no || undefined,
+        ilk_derece_karar_no: values.ilk_derece_karar_no || undefined,
+        ilk_derece_mahkeme_adi: values.ilk_derece_mahkeme_adi || undefined,
+        istinaf_esas_no: values.istinaf_esas_no || undefined,
+        istinaf_karar_no: values.istinaf_karar_no || undefined,
+        istinaf_mahkeme_adi: values.istinaf_mahkeme_adi || undefined,
+        temyiz_esas_no: values.temyiz_esas_no || undefined,
+        temyiz_karar_no: values.temyiz_karar_no || undefined,
+        temyiz_mahkeme_adi: values.temyiz_mahkeme_adi || undefined,
+        dava_dilekcesi_tebliğ_tarihi: values.dava_dilekcesi_tebliğ_tarihi || undefined,
+        cevap_dilekcesi_tebliğ_tarihi: values.cevap_dilekcesi_tebliğ_tarihi || undefined,
+        replik_dilekcesi_tebliğ_tarihi: values.replik_dilekcesi_tebliğ_tarihi || undefined,
+        duplik_dilekcesi_tebliğ_tarihi: values.duplik_dilekcesi_tebliğ_tarihi || undefined,
+        bilirkisi_ucret_talep_tarihi: values.bilirkisi_ucret_talep_tarihi || undefined,
+        bilirkisi_raporu_tebliğ_tarihi: values.bilirkisi_raporu_tebliğ_tarihi || undefined,
+        karar_tebliğ_tarihi: values.karar_tebliğ_tarihi || undefined,
+        istinaf_dilekcesi_tebliğ_tarihi: values.istinaf_dilekcesi_tebliğ_tarihi || undefined,
+        istinaf_karar_tebliğ_tarihi: values.istinaf_karar_tebliğ_tarihi || undefined,
+        temyiz_dilekcesi_tebliğ_tarihi: values.temyiz_dilekcesi_tebliğ_tarihi || undefined,
+        temyiz_karar_tebliğ_tarihi: values.temyiz_karar_tebliğ_tarihi || undefined,
+        kesinlesme_tarihi: values.kesinlesme_tarihi || undefined,
       },
     })
   }
@@ -95,77 +132,153 @@ export function MahkemeDataForm({ dosyaId, initialData }: MahkemeDataFormProps) 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* esas_no */}
+              {/* İlk Derece Mahkeme - Esas No */}
               <FormField
                 control={form.control}
-                name="esas_no"
+                name="ilk_derece_esas_no"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Esas No</FormLabel>
+                    <FormLabel>İlk Derece Esas No</FormLabel>
                     <FormControl>
-                      <Input placeholder="Esas numarası" {...field} />
+                      <Input placeholder="İlk derece esas numarası" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* karar_no */}
+              {/* İlk Derece Mahkeme - Karar No */}
               <FormField
                 control={form.control}
-                name="karar_no"
+                name="ilk_derece_karar_no"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Karar No</FormLabel>
+                    <FormLabel>İlk Derece Karar No</FormLabel>
                     <FormControl>
-                      <Input placeholder="Karar numarası" {...field} />
+                      <Input placeholder="İlk derece karar numarası" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* mahkeme_id - dropdown from ayarlar */}
+              {/* İlk Derece Mahkeme - Mahkeme Adı (free text per D-15) */}
               <FormField
                 control={form.control}
-                name="mahkeme_id"
+                name="ilk_derece_mahkeme_adi"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mahkeme Adı</FormLabel>
+                    <FormLabel>İlk Derece Mahkeme Adı</FormLabel>
                     <FormControl>
-                      <Select
-                        value={field.value?.toString() ?? ''}
-                        onValueChange={(val) => field.onChange(val ? parseInt(val, 10) : undefined)}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Mahkeme seçin" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {(mahkemeler ?? []).map((m) => (
-                            <SelectItem key={m.id} value={m.id.toString()}>
-                              {m.ad}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Input placeholder="İlk derece mahkeme adı" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* dava_tarihi */}
+              {/* İstinaf Esas No */}
               <FormField
                 control={form.control}
-                name="dava_tarihi"
+                name="istinaf_esas_no"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Dava Tarihi</FormLabel>
+                    <FormLabel>İstinaf Esas No</FormLabel>
+                    <FormControl>
+                      <Input placeholder="İstinaf esas numarası" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* İstinaf Karar No */}
+              <FormField
+                control={form.control}
+                name="istinaf_karar_no"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>İstinaf Karar No</FormLabel>
+                    <FormControl>
+                      <Input placeholder="İstinaf karar numarası" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* İstinaf Mahkeme Adı (free text per D-15) */}
+              <FormField
+                control={form.control}
+                name="istinaf_mahkeme_adi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>İstinaf Mahkeme Adı</FormLabel>
+                    <FormControl>
+                      <Input placeholder="İstinaf mahkeme adı" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Temyiz Esas No */}
+              <FormField
+                control={form.control}
+                name="temyiz_esas_no"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Temyiz Esas No</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Temyiz esas numarası" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Temyiz Karar No */}
+              <FormField
+                control={form.control}
+                name="temyiz_karar_no"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Temyiz Karar No</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Temyiz karar numarası" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Temyiz Mahkeme Adı (free text per D-15) */}
+              <FormField
+                control={form.control}
+                name="temyiz_mahkeme_adi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Temyiz Mahkeme Adı</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Temyiz mahkeme adı" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Dava Dilekçesi Tebliğ Tarihi */}
+              <FormField
+                control={form.control}
+                name="dava_dilekcesi_tebliğ_tarihi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dava Dilekçesi Tebliğ Tarihi</FormLabel>
                     <FormControl>
                       <DatePickerField
                         value={field.value}
                         onChange={field.onChange}
-                        placeholder="Dava tarihi"
+                        placeholder="Dava dilekçesi tebliğ tarihi"
                       />
                     </FormControl>
                     <FormMessage />
@@ -173,18 +286,18 @@ export function MahkemeDataForm({ dosyaId, initialData }: MahkemeDataFormProps) 
                 )}
               />
 
-              {/* tebligat_tarihi */}
+              {/* Cevap Dilekçesi Tebliğ Tarihi */}
               <FormField
                 control={form.control}
-                name="tebligat_tarihi"
+                name="cevap_dilekcesi_tebliğ_tarihi"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tebligat Tarihi</FormLabel>
+                    <FormLabel>Cevap Dilekçesi Tebliğ Tarihi</FormLabel>
                     <FormControl>
                       <DatePickerField
                         value={field.value}
                         onChange={field.onChange}
-                        placeholder="Tebligat tarihi"
+                        placeholder="Cevap dilekçesi tebliğ tarihi"
                       />
                     </FormControl>
                     <FormMessage />
@@ -192,18 +305,189 @@ export function MahkemeDataForm({ dosyaId, initialData }: MahkemeDataFormProps) 
                 )}
               />
 
-              {/* karar_tarihi */}
+              {/* Replik Dilekçesi Tebliğ Tarihi */}
               <FormField
                 control={form.control}
-                name="karar_tarihi"
+                name="replik_dilekcesi_tebliğ_tarihi"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Karar Tarihi</FormLabel>
+                    <FormLabel>Replik Dilekçesi Tebliğ Tarihi</FormLabel>
                     <FormControl>
                       <DatePickerField
                         value={field.value}
                         onChange={field.onChange}
-                        placeholder="Karar tarihi"
+                        placeholder="Replik dilekçesi tebliğ tarihi"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Duplik Dilekçesi Tebliğ Tarihi */}
+              <FormField
+                control={form.control}
+                name="duplik_dilekcesi_tebliğ_tarihi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Duplik Dilekçesi Tebliğ Tarihi</FormLabel>
+                    <FormControl>
+                      <DatePickerField
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Duplik dilekçesi tebliğ tarihi"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Bilirkişi Ücreti Talep Tarihi */}
+              <FormField
+                control={form.control}
+                name="bilirkisi_ucret_talep_tarihi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bilirkişi Ücreti Talep Tarihi</FormLabel>
+                    <FormControl>
+                      <DatePickerField
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Bilirkişi ücreti talep tarihi"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Bilirkişi Raporu Tebliğ Tarihi */}
+              <FormField
+                control={form.control}
+                name="bilirkisi_raporu_tebliğ_tarihi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bilirkişi Raporu Tebliğ Tarihi</FormLabel>
+                    <FormControl>
+                      <DatePickerField
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Bilirkişi raporu tebliğ tarihi"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Karar Tebliğ Tarihi */}
+              <FormField
+                control={form.control}
+                name="karar_tebliğ_tarihi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Karar Tebliğ Tarihi</FormLabel>
+                    <FormControl>
+                      <DatePickerField
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Karar tebliğ tarihi"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* İstinaf Dilekçesi Tebliğ Tarihi */}
+              <FormField
+                control={form.control}
+                name="istinaf_dilekcesi_tebliğ_tarihi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>İstinaf Dilekçesi Tebliğ Tarihi</FormLabel>
+                    <FormControl>
+                      <DatePickerField
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="İstinaf dilekçesi tebliğ tarihi"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* İstinaf Karar Tebliğ Tarihi */}
+              <FormField
+                control={form.control}
+                name="istinaf_karar_tebliğ_tarihi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>İstinaf Karar Tebliğ Tarihi</FormLabel>
+                    <FormControl>
+                      <DatePickerField
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="İstinaf karar tebliğ tarihi"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Temyiz Dilekçesi Tebliğ Tarihi */}
+              <FormField
+                control={form.control}
+                name="temyiz_dilekcesi_tebliğ_tarihi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Temyiz Dilekçesi Tebliğ Tarihi</FormLabel>
+                    <FormControl>
+                      <DatePickerField
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Temyiz dilekçesi tebliğ tarihi"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Temyiz Karar Tebliğ Tarihi */}
+              <FormField
+                control={form.control}
+                name="temyiz_karar_tebliğ_tarihi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Temyiz Karar Tebliğ Tarihi</FormLabel>
+                    <FormControl>
+                      <DatePickerField
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Temyiz karar tebliğ tarihi"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Kesinleşme Tarihi */}
+              <FormField
+                control={form.control}
+                name="kesinlesme_tarihi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kesinleşme Tarihi</FormLabel>
+                    <FormControl>
+                      <DatePickerField
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Kesinleşme tarihi"
                       />
                     </FormControl>
                     <FormMessage />

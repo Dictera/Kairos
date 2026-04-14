@@ -6,9 +6,6 @@ import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { toast } from 'sonner'
-import { format, parseISO } from 'date-fns'
-import { tr } from 'date-fns/locale/tr'
-import { CalendarIcon } from 'lucide-react'
 import { DatePickerField } from '@/components/ui/date-picker'
 import type { StkSurecData } from '@/lib/schema'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,18 +19,20 @@ import {
   FormControl,
   FormMessage,
 } from '@/components/ui/form'
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
-import { Calendar } from '@/components/ui/calendar'
 
 const stkDataFormSchema = z.object({
-  basvuru_no: z.string().max(100).optional().or(z.literal('')),
+  ihtar_tarihi: z.string().max(10).optional().or(z.literal('')),
+  arabuluculuk_son_tutanak_tarihi: z.string().max(10).optional().or(z.literal('')),
   basvuru_tarihi: z.string().max(10).optional().or(z.literal('')),
-  kabul_tarihi: z.string().max(10).optional().or(z.literal('')),
-  raportor_adi: z.string().max(200).optional().or(z.literal('')),
-  bilirkisi: z.string().max(200).optional().or(z.literal('')),
-  hakem_karar_tarihi: z.string().max(10).optional().or(z.literal('')),
-  tebligat_tarihi: z.string().max(10).optional().or(z.literal('')),
-  itiraz_tarihi: z.string().max(10).optional().or(z.literal('')),
+  stk_esas_no: z.string().max(100).optional().or(z.literal('')),
+  stk_karar_no: z.string().max(100).optional().or(z.literal('')),
+  stk_itiraz_esas_no: z.string().max(100).optional().or(z.literal('')),
+  stk_itiraz_karar_no: z.string().max(100).optional().or(z.literal('')),
+  bilirkisi_ucret_talep_tarihi: z.string().max(10).optional().or(z.literal('')),
+  bilirkisi_raporu_tebliğ_tarihi: z.string().max(10).optional().or(z.literal('')),
+  islah_tarihi: z.string().max(10).optional().or(z.literal('')),
+  karar_tarihi: z.string().max(10).optional().or(z.literal('')),
+  kesinlesme_tarihi: z.string().max(10).optional().or(z.literal('')),
 })
 
 type StkDataFormValues = z.infer<typeof stkDataFormSchema>
@@ -50,14 +49,18 @@ export function StkDataForm({ dosyaId, initialData }: StkDataFormProps) {
   const form = useForm<StkDataFormValues>({
     resolver: zodResolver(stkDataFormSchema),
     defaultValues: {
-      basvuru_no: initialData?.basvuru_no ?? '',
+      ihtar_tarihi: initialData?.ihtar_tarihi ?? '',
+      arabuluculuk_son_tutanak_tarihi: initialData?.arabuluculuk_son_tutanak_tarihi ?? '',
       basvuru_tarihi: initialData?.basvuru_tarihi ?? '',
-      kabul_tarihi: initialData?.kabul_tarihi ?? '',
-      raportor_adi: initialData?.raportor_adi ?? '',
-      bilirkisi: initialData?.bilirkisi ?? '',
-      hakem_karar_tarihi: initialData?.hakem_karar_tarihi ?? '',
-      tebligat_tarihi: initialData?.tebligat_tarihi ?? '',
-      itiraz_tarihi: initialData?.itiraz_tarihi ?? '',
+      stk_esas_no: initialData?.stk_esas_no ?? '',
+      stk_karar_no: initialData?.stk_karar_no ?? '',
+      stk_itiraz_esas_no: initialData?.stk_itiraz_esas_no ?? '',
+      stk_itiraz_karar_no: initialData?.stk_itiraz_karar_no ?? '',
+      bilirkisi_ucret_talep_tarihi: initialData?.bilirkisi_ucret_talep_tarihi ?? '',
+      bilirkisi_raporu_tebliğ_tarihi: initialData?.bilirkisi_raporu_tebliğ_tarihi ?? '',
+      islah_tarihi: initialData?.islah_tarihi ?? '',
+      karar_tarihi: initialData?.karar_tarihi ?? '',
+      kesinlesme_tarihi: initialData?.kesinlesme_tarihi ?? '',
     },
   })
 
@@ -77,14 +80,18 @@ export function StkDataForm({ dosyaId, initialData }: StkDataFormProps) {
     saveMutation.mutate({
       dosya_id: dosyaId,
       data: {
-        basvuru_no: values.basvuru_no || undefined,
+        ihtar_tarihi: values.ihtar_tarihi || undefined,
+        arabuluculuk_son_tutanak_tarihi: values.arabuluculuk_son_tutanak_tarihi || undefined,
         basvuru_tarihi: values.basvuru_tarihi || undefined,
-        kabul_tarihi: values.kabul_tarihi || undefined,
-        raportor_adi: values.raportor_adi || undefined,
-        bilirkisi: values.bilirkisi || undefined,
-        hakem_karar_tarihi: values.hakem_karar_tarihi || undefined,
-        tebligat_tarihi: values.tebligat_tarihi || undefined,
-        itiraz_tarihi: values.itiraz_tarihi || undefined,
+        stk_esas_no: values.stk_esas_no || undefined,
+        stk_karar_no: values.stk_karar_no || undefined,
+        stk_itiraz_esas_no: values.stk_itiraz_esas_no || undefined,
+        stk_itiraz_karar_no: values.stk_itiraz_karar_no || undefined,
+        bilirkisi_ucret_talep_tarihi: values.bilirkisi_ucret_talep_tarihi || undefined,
+        bilirkisi_raporu_tebliğ_tarihi: values.bilirkisi_raporu_tebliğ_tarihi || undefined,
+        islah_tarihi: values.islah_tarihi || undefined,
+        karar_tarihi: values.karar_tarihi || undefined,
+        kesinlesme_tarihi: values.kesinlesme_tarihi || undefined,
       },
     })
   }
@@ -98,15 +105,38 @@ export function StkDataForm({ dosyaId, initialData }: StkDataFormProps) {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* basvuru_no */}
+              {/* ihtar_tarihi */}
               <FormField
                 control={form.control}
-                name="basvuru_no"
+                name="ihtar_tarihi"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>STK Başvuru No</FormLabel>
+                    <FormLabel>İhtar Tarihi</FormLabel>
                     <FormControl>
-                      <Input placeholder="Başvuru numarası" {...field} />
+                      <DatePickerField
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="İhtar tarihi"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* arabuluculuk_son_tutanak_tarihi */}
+              <FormField
+                control={form.control}
+                name="arabuluculuk_son_tutanak_tarihi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Arabuluculuk Son Tutanak Tarihi</FormLabel>
+                    <FormControl>
+                      <DatePickerField
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Arabuluculuk son tutanak tarihi"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -132,18 +162,78 @@ export function StkDataForm({ dosyaId, initialData }: StkDataFormProps) {
                 )}
               />
 
-              {/* kabul_tarihi */}
+              {/* stk_esas_no */}
               <FormField
                 control={form.control}
-                name="kabul_tarihi"
+                name="stk_esas_no"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Kabul Tarihi</FormLabel>
+                    <FormLabel>STK Esas No</FormLabel>
+                    <FormControl>
+                      <Input placeholder="STK esas numarası" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* stk_karar_no */}
+              <FormField
+                control={form.control}
+                name="stk_karar_no"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>STK Karar No</FormLabel>
+                    <FormControl>
+                      <Input placeholder="STK karar numarası" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* stk_itiraz_esas_no */}
+              <FormField
+                control={form.control}
+                name="stk_itiraz_esas_no"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>STK İtiraz Esas No</FormLabel>
+                    <FormControl>
+                      <Input placeholder="İtiraz esas numarası" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* stk_itiraz_karar_no */}
+              <FormField
+                control={form.control}
+                name="stk_itiraz_karar_no"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>STK İtiraz Karar No</FormLabel>
+                    <FormControl>
+                      <Input placeholder="İtiraz karar numarası" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* bilirkisi_ucret_talep_tarihi */}
+              <FormField
+                control={form.control}
+                name="bilirkisi_ucret_talep_tarihi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bilirkişi Ücreti Talep Tarihi</FormLabel>
                     <FormControl>
                       <DatePickerField
                         value={field.value}
                         onChange={field.onChange}
-                        placeholder="Kabul tarihi"
+                        placeholder="Bilirkişi ücreti talep tarihi"
                       />
                     </FormControl>
                     <FormMessage />
@@ -151,48 +241,18 @@ export function StkDataForm({ dosyaId, initialData }: StkDataFormProps) {
                 )}
               />
 
-              {/* raportor_adi */}
+              {/* bilirkisi_raporu_tebliğ_tarihi */}
               <FormField
                 control={form.control}
-                name="raportor_adi"
+                name="bilirkisi_raporu_tebliğ_tarihi"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Raportör Adı</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Raportör adı" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* bilirkisi */}
-              <FormField
-                control={form.control}
-                name="bilirkisi"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bilirkişi</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Bilirkişi adı" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* hakem_karar_tarihi */}
-              <FormField
-                control={form.control}
-                name="hakem_karar_tarihi"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hakem Karar Tarihi</FormLabel>
+                    <FormLabel>Bilirkişi Raporu Tebliğ Tarihi</FormLabel>
                     <FormControl>
                       <DatePickerField
                         value={field.value}
                         onChange={field.onChange}
-                        placeholder="Hakem karar tarihi"
+                        placeholder="Bilirkişi raporu tebliğ tarihi"
                       />
                     </FormControl>
                     <FormMessage />
@@ -200,18 +260,18 @@ export function StkDataForm({ dosyaId, initialData }: StkDataFormProps) {
                 )}
               />
 
-              {/* tebligat_tarihi */}
+              {/* islah_tarihi */}
               <FormField
                 control={form.control}
-                name="tebligat_tarihi"
+                name="islah_tarihi"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tebligat Tarihi</FormLabel>
+                    <FormLabel>Islah Tarihi</FormLabel>
                     <FormControl>
                       <DatePickerField
                         value={field.value}
                         onChange={field.onChange}
-                        placeholder="Tebligat tarihi"
+                        placeholder="Islah tarihi"
                       />
                     </FormControl>
                     <FormMessage />
@@ -219,18 +279,37 @@ export function StkDataForm({ dosyaId, initialData }: StkDataFormProps) {
                 )}
               />
 
-              {/* itiraz_tarihi */}
+              {/* karar_tarihi */}
               <FormField
                 control={form.control}
-                name="itiraz_tarihi"
+                name="karar_tarihi"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>İtiraz Tarihi</FormLabel>
+                    <FormLabel>Karar Tarihi</FormLabel>
                     <FormControl>
                       <DatePickerField
                         value={field.value}
                         onChange={field.onChange}
-                        placeholder="İtiraz tarihi"
+                        placeholder="Karar tarihi"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* kesinlesme_tarihi */}
+              <FormField
+                control={form.control}
+                name="kesinlesme_tarihi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kesinleşme Tarihi</FormLabel>
+                    <FormControl>
+                      <DatePickerField
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Kesinleşme tarihi"
                       />
                     </FormControl>
                     <FormMessage />
