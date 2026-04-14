@@ -156,6 +156,7 @@ export function MuvekkilList() {
             <TableRow>
               <TableHead className="font-semibold">Ad Soyad</TableHead>
               <TableHead className="font-semibold">Telefon</TableHead>
+              <TableHead className="font-semibold">IBAN</TableHead>
               <TableHead className="font-semibold">TC / Vergi No</TableHead>
               <TableHead className="font-semibold">Bağlı Dosya Sayısı</TableHead>
               <TableHead className="font-semibold w-12">İşlemler</TableHead>
@@ -169,12 +170,13 @@ export function MuvekkilList() {
                   <TableCell><Skeleton className="h-4 w-full" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-full" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-full" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-8" /></TableCell>
                 </TableRow>
               ))
             ) : data?.rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-12">
+                <TableCell colSpan={6} className="text-center py-12">
                   {search ? (
                     <p className="text-sm text-muted-foreground">Arama kriterlerine uyan müvekkil bulunamadı.</p>
                   ) : (
@@ -199,6 +201,9 @@ export function MuvekkilList() {
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {row.telefon ?? '—'}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {row.iban ?? '—'}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {row.tc_vergi_no ?? '—'}

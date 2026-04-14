@@ -188,6 +188,10 @@ export function MuvekkilDetail({ muvekkilId }: MuvekkilDetailProps) {
               <dd className="text-sm mt-1">{data.telefon ?? '—'}</dd>
             </div>
             <div>
+              <dt className="text-sm font-semibold text-muted-foreground">IBAN</dt>
+              <dd className="text-sm mt-1">{data.iban ?? '—'}</dd>
+            </div>
+            <div>
               <dt className="text-sm font-semibold text-muted-foreground">TC / Vergi No</dt>
               <dd className="text-sm mt-1">{data.tc_vergi_no ?? '—'}</dd>
             </div>
