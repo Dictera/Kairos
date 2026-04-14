@@ -35,18 +35,11 @@ import { BelgeList } from '@/components/belge/belge-list'
 import { FinansForm } from '@/components/finans/finans-form'
 import { FinansSummary } from '@/components/finans/finans-summary'
 import { FinansEntryList } from '@/components/finans/finans-entry-list'
+import { NotList } from './not-list'
+import { Timeline } from './timeline'
 
 interface DosyaDetailTabsProps {
   dosyaId: number
-}
-
-function EmptyTabContent() {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
-      <Lock size={24} />
-      <p className="text-sm">Bu bölüm henüz yapılandırılmadı.</p>
-    </div>
-  )
 }
 
 export function DosyaDetailTabs({ dosyaId }: DosyaDetailTabsProps) {
@@ -207,8 +200,10 @@ export function DosyaDetailTabs({ dosyaId }: DosyaDetailTabsProps) {
           <BelgeList dosyaId={dosyaId} />
         </TabsContent>
 
-        <TabsContent value="notlar" className="mt-4">
-          <EmptyTabContent />
+        <TabsContent value="notlar" className="mt-4 space-y-6">
+          <NotList dosyaId={dosyaId} />
+          <Separator />
+          <Timeline dosyaId={dosyaId} />
         </TabsContent>
 
         <TabsContent value="karsitaraflar" className="mt-4">
