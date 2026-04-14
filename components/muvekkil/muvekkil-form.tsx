@@ -22,8 +22,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
-  ad: z.string().min(0),
-  soyad: z.string().min(0),
+  ad: z.string().min(1, 'Ad zorunludur').max(100),
+  soyad: z.string().min(1, 'Soyad zorunludur').max(100),
   telefon: z.string().max(20).optional().or(z.literal('')),
   iban: z.string().regex(/^TR\d{24}$/, 'Geçersiz IBAN formatı (TRXXXXXXXXXXXXXXXXXXXXXXXX)').optional().or(z.literal('')),
   tc_vergi_no: z.string().max(11).optional().or(z.literal('')),
