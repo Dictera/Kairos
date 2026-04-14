@@ -20,6 +20,8 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Separator } from '@/components/ui/separator'
+import { DatePickerField } from '@/components/ui/date-picker'
 import {
   Select,
   SelectContent,
@@ -47,8 +49,12 @@ const formSchema = z.object({
   tur: z.enum(TUR_VALUES, { required_error: 'Dosya türü zorunludur' }),
   sigorta_turu_id: z.number().int().nullable().optional(),
   karsitaraf_sigorta_id: z.number().int().nullable().optional(),
+  muvekkil_sigorta_id: z.number().int().nullable().optional(),
   talep_tutari: z.number().positive('Geçerli bir tutar giriniz').nullable().optional(),
   muvekkil_plaka: z.string().max(10).optional().or(z.literal('')),
+  hasar_dosya_no: z.string().max(200).nullable().optional().or(z.literal('')),
+  kaza_tarihi: z.string().max(10).nullable().optional().or(z.literal('')),
+  kusur_orani_karsi: z.number().int().min(0).max(100).nullable().optional(),
   aciklama: z.string().max(2000).optional().or(z.literal('')),
 })
 
@@ -60,8 +66,12 @@ const EMPTY_DEFAULTS: FormValues = {
   tur: 'STK',
   sigorta_turu_id: null,
   karsitaraf_sigorta_id: null,
+  muvekkil_sigorta_id: null,
   talep_tutari: null,
   muvekkil_plaka: '',
+  hasar_dosya_no: '',
+  kaza_tarihi: '',
+  kusur_orani_karsi: null,
   aciklama: '',
 }
 
@@ -97,8 +107,12 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
         tur: dosyaData.tur as (typeof TUR_VALUES)[number],
         sigorta_turu_id: dosyaData.sigorta_turu_id ?? null,
         karsitaraf_sigorta_id: dosyaData.karsitaraf_sigorta_id ?? null,
+        muvekkil_sigorta_id: (dosyaData as any).muvekkil_sigorta_id ?? null,
         talep_tutari: dosyaData.talep_tutari ?? null,
         muvekkil_plaka: dosyaData.muvekkil_plaka ?? '',
+        hasar_dosya_no: (dosyaData as any).hasar_dosya_no ?? '',
+        kaza_tarihi: (dosyaData as any).kaza_tarihi ?? '',
+        kusur_orani_karsi: (dosyaData as any).kusur_orani_karsi ?? null,
         aciklama: dosyaData.aciklama ?? '',
       })
     }
@@ -159,8 +173,12 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
         tur: values.tur,
         sigorta_turu_id: values.sigorta_turu_id ?? undefined,
         karsitaraf_sigorta_id: values.karsitaraf_sigorta_id ?? undefined,
+        muvekkil_sigorta_id: values.muvekkil_sigorta_id ?? undefined,
         talep_tutari: values.talep_tutari ?? undefined,
         muvekkil_plaka: values.muvekkil_plaka || undefined,
+        hasar_dosya_no: values.hasar_dosya_no || undefined,
+        kaza_tarihi: values.kaza_tarihi || undefined,
+        kusur_orani_karsi: values.kusur_orani_karsi ?? undefined,
         aciklama: values.aciklama || undefined,
       })
     } else {
@@ -171,8 +189,12 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
         tur: values.tur,
         sigorta_turu_id: values.sigorta_turu_id ?? undefined,
         karsitaraf_sigorta_id: values.karsitaraf_sigorta_id ?? undefined,
+        muvekkil_sigorta_id: values.muvekkil_sigorta_id ?? undefined,
         talep_tutari: values.talep_tutari ?? undefined,
         muvekkil_plaka: values.muvekkil_plaka || undefined,
+        hasar_dosya_no: values.hasar_dosya_no || undefined,
+        kaza_tarihi: values.kaza_tarihi || undefined,
+        kusur_orani_karsi: values.kusur_orani_karsi ?? undefined,
         aciklama: values.aciklama || undefined,
       })
     }
@@ -192,197 +214,317 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
 
   const isPending = createMutation.isPending || updateMutation.isPending
 
+  const kusur_orani_karsi = form.watch('kusur_orani_karsi')
+
   return (
     <div className="max-w-2xl">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* Dosya No */}
-          <FormField
-            control={form.control}
-            name="dosya_no"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Avukat Dosya No *</FormLabel>
-                <FormControl>
-                  <Input placeholder="2024/001" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Group 1: Temel Bilgiler */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold">Temel Bilgiler</h3>
+            <Separator />
 
-          {/* Müvekkil */}
-          <FormField
-            control={form.control}
-            name="muvekkil_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Müvekkil *</FormLabel>
-                <Select
-                  onValueChange={(v) => field.onChange(parseInt(v, 10))}
-                  value={field.value ? field.value.toString() : ''}
-                >
+            {/* Dosya No */}
+            <FormField
+              control={form.control}
+              name="dosya_no"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Avukat Dosya No *</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Müvekkil seçiniz" />
-                    </SelectTrigger>
+                    <Input placeholder="2024/001" {...field} />
                   </FormControl>
-                  <SelectContent>
-                    {muvekkilData?.rows.map((m) => (
-                      <SelectItem key={m.id} value={m.id.toString()}>
-                        {m.ad} {m.soyad}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Dosya Türü */}
-          <FormField
-            control={form.control}
-            name="tur"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Dosya Türü *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+            {/* Müvekkil */}
+            <FormField
+              control={form.control}
+              name="muvekkil_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Müvekkil *</FormLabel>
+                  <Select
+                    onValueChange={(v) => field.onChange(parseInt(v, 10))}
+                    value={field.value ? field.value.toString() : ''}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Müvekkil seçiniz" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {muvekkilData?.rows.map((m) => (
+                        <SelectItem key={m.id} value={m.id.toString()}>
+                          {m.ad} {m.soyad}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Dosya Türü */}
+            <FormField
+              control={form.control}
+              name="tur"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Dosya Türü *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Tür seçiniz" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="STK">STK</SelectItem>
+                      <SelectItem value="AT">Asliye Ticaret</SelectItem>
+                      <SelectItem value="AH">Asliye Hukuk</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Group 2: Sigorta Bilgileri */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold">Sigorta Bilgileri</h3>
+            <Separator />
+
+            {/* Sigorta Türü */}
+            <FormField
+              control={form.control}
+              name="sigorta_turu_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sigorta Türü</FormLabel>
+                  <Select
+                    onValueChange={(v) => field.onChange(v === 'none' ? null : parseInt(v, 10))}
+                    value={field.value != null ? field.value.toString() : 'none'}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seçiniz" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">Seçiniz</SelectItem>
+                      {sigortaTuruList?.map((s) => (
+                        <SelectItem key={s.id} value={s.id.toString()}>
+                          {s.ad}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Karşı Sigorta Şirketi */}
+            <FormField
+              control={form.control}
+              name="karsitaraf_sigorta_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Karşı Sigorta Şirketi</FormLabel>
+                  <Select
+                    onValueChange={(v) => field.onChange(v === 'none' ? null : parseInt(v, 10))}
+                    value={field.value != null ? field.value.toString() : 'none'}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Yok / Bilinmiyor" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">Yok / Bilinmiyor</SelectItem>
+                      {sigortaSirketiList?.map((s) => (
+                        <SelectItem key={s.id} value={s.id.toString()}>
+                          {s.ad}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Müvekkil Sigorta/Kasko Şirketi */}
+            <FormField
+              control={form.control}
+              name="muvekkil_sigorta_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Müvekkil Sigorta/Kasko Şirketi</FormLabel>
+                  <Select
+                    onValueChange={(v) => field.onChange(v === 'none' ? null : parseInt(v, 10))}
+                    value={field.value != null ? field.value.toString() : 'none'}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Yok / Bilinmiyor" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">Yok / Bilinmiyor</SelectItem>
+                      {sigortaSirketiList?.map((s) => (
+                        <SelectItem key={s.id} value={s.id.toString()}>
+                          {s.ad}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Talep Tutarı */}
+            <FormField
+              control={form.control}
+              name="talep_tutari"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Talep Tutarı</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Tür seçiniz" />
-                    </SelectTrigger>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                        ₺
+                      </span>
+                      <Input
+                        className="pl-7"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0,00"
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(e.target.value ? parseFloat(e.target.value) : null)
+                        }
+                      />
+                    </div>
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="STK">STK</SelectItem>
-                    <SelectItem value="AT">Asliye Ticaret</SelectItem>
-                    <SelectItem value="AH">Asliye Hukuk</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Sigorta Türü */}
-          <FormField
-            control={form.control}
-            name="sigorta_turu_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Sigorta Türü</FormLabel>
-                <Select
-                  onValueChange={(v) => field.onChange(v === 'none' ? null : parseInt(v, 10))}
-                  value={field.value != null ? field.value.toString() : 'none'}
-                >
+            {/* Hasar Dosya No */}
+            <FormField
+              control={form.control}
+              name="hasar_dosya_no"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Hasar Dosya No</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seçiniz" />
-                    </SelectTrigger>
+                    <Input placeholder="Sigorta Şirketi - 111" {...field} />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="none">Seçiniz</SelectItem>
-                    {sigortaTuruList?.map((s) => (
-                      <SelectItem key={s.id} value={s.id.toString()}>
-                        {s.ad}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-          {/* Karşı Sigorta Şirketi */}
-          <FormField
-            control={form.control}
-            name="karsitaraf_sigorta_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Karşı Sigorta Şirketi</FormLabel>
-                <Select
-                  onValueChange={(v) => field.onChange(v === 'none' ? null : parseInt(v, 10))}
-                  value={field.value != null ? field.value.toString() : 'none'}
-                >
+          {/* Group 3: Kaza Bilgileri */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold">Kaza Bilgileri</h3>
+            <Separator />
+
+            {/* Kaza Tarihi */}
+            <FormField
+              control={form.control}
+              name="kaza_tarihi"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kaza Tarihi</FormLabel>
+                  <DatePickerField
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    placeholder="Tarih seçin"
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Kusur Oranı - 2 column grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="kusur_orani_karsi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Karşı Taraf Kusur Oranı (%)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="1"
+                        placeholder="0"
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(e.target.value ? parseInt(e.target.value, 10) : null)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex items-end">
+                <div className="text-sm text-muted-foreground">
+                  Müvekkil Kusur Oranı: {kusur_orani_karsi !== null && kusur_orani_karsi >= 0 ? `${100 - kusur_orani_karsi}%` : '—'}
+                </div>
+              </div>
+            </div>
+
+            {/* Müvekkil Plaka No */}
+            <FormField
+              control={form.control}
+              name="muvekkil_plaka"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Müvekkil Plaka No</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Yok / Bilinmiyor" />
-                    </SelectTrigger>
+                    <Input placeholder="34 ABC 123" {...field} />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="none">Yok / Bilinmiyor</SelectItem>
-                    {sigortaSirketiList?.map((s) => (
-                      <SelectItem key={s.id} value={s.id.toString()}>
-                        {s.ad}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-          {/* Talep Tutarı */}
-          <FormField
-            control={form.control}
-            name="talep_tutari"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Talep Tutarı</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                      ₺
-                    </span>
-                    <Input
-                      className="pl-7"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="0,00"
-                      value={field.value ?? ''}
-                      onChange={(e) =>
-                        field.onChange(e.target.value ? parseFloat(e.target.value) : null)
-                      }
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Group 4: Açıklama */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold">Açıklama</h3>
+            <Separator />
 
-          {/* Müvekkil Plaka No */}
-          <FormField
-            control={form.control}
-            name="muvekkil_plaka"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Müvekkil Plaka No</FormLabel>
-                <FormControl>
-                  <Input placeholder="34 ABC 123" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Açıklama */}
-          <FormField
-            control={form.control}
-            name="aciklama"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Açıklama</FormLabel>
-                <FormControl>
-                  <Textarea rows={3} placeholder="Kısa açıklama..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            {/* Açıklama */}
+            <FormField
+              control={form.control}
+              name="aciklama"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Açıklama</FormLabel>
+                  <FormControl>
+                    <Textarea rows={3} placeholder="Kısa açıklama..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <div className="flex items-center gap-3 pt-2">
             {mode === 'edit' && dosyaId && (
