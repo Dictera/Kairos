@@ -14,6 +14,7 @@ const dosyaSchema = z.object({
   talep_tutari: z.number().positive().nullable().optional(),
   muvekkil_plaka: z.string().max(10).nullable().optional().or(z.literal('')),
   aciklama: z.string().max(2000).nullable().optional().or(z.literal('')),
+  durum: z.enum(['aktif', 'arsiv']).default('aktif').optional(),
 })
 
 export const tarafSchema = z.object({
