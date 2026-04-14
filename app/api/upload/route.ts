@@ -15,12 +15,17 @@ const BASE_PATH = 'E:/sigorta-belgeler'
 export async function POST(request: NextRequest) {
   const formData = await request.formData()
   const file = formData.get('file') as File | null
-  const dosyaId = formData.get('dosyaId') as string | null
+  const dosyaIdRaw = formData.get('dosyaId') as string | null
+  const dosyaId = parseInt(dosyaIdRaw ?? '', 10)
   const dosyaNo = formData.get('dosyaNo') as string | null
   const kategori = formData.get('kategori') as string | null
 
-  if (!file || !dosyaId) {
+  if (!file) {
     return NextResponse.json({ error: 'Eksik veri' }, { status: 400 })
+  }
+
+  if (isNaN(dosyaId)) {
+    return NextResponse.json({ error: 'Geçersiz dosya ID' }, { status: 400 })
   }
 
   // Validate file type
@@ -34,7 +39,10 @@ export async function POST(request: NextRequest) {
   }
 
   // Create directory if not exists
-  const uploadDir = path.join(BASE_PATH, dosyaId)
+  const uploadDir = path.join(BASE_PATH, String(dosyaId))
+  if (!path.resolve(uploadDir).startsWith(path.resolve(BASE_PATH))) {
+    return NextResponse.json({ error: 'Geçersiz dizin' }, { status: 400 })
+  }
   fs.mkdirSync(uploadDir, { recursive: true })
 
   // Generate unique filename: timestamp + category (if provided) or normalized original
