@@ -107,12 +107,12 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
         tur: dosyaData.tur as (typeof TUR_VALUES)[number],
         sigorta_turu_id: dosyaData.sigorta_turu_id ?? null,
         karsitaraf_sigorta_id: dosyaData.karsitaraf_sigorta_id ?? null,
-        muvekkil_sigorta_id: (dosyaData as any).muvekkil_sigorta_id ?? null,
+        muvekkil_sigorta_id: dosyaData.muvekkil_sigorta_id ?? null,
         talep_tutari: dosyaData.talep_tutari ?? null,
         muvekkil_plaka: dosyaData.muvekkil_plaka ?? '',
-        hasar_dosya_no: (dosyaData as any).hasar_dosya_no ?? '',
-        kaza_tarihi: (dosyaData as any).kaza_tarihi ?? '',
-        kusur_orani_karsi: (dosyaData as any).kusur_orani_karsi ?? null,
+        hasar_dosya_no: dosyaData.hasar_dosya_no ?? '',
+        kaza_tarihi: dosyaData.kaza_tarihi ?? '',
+        kusur_orani_karsi: dosyaData.kusur_orani_karsi ?? null,
         aciklama: dosyaData.aciklama ?? '',
       })
     }
