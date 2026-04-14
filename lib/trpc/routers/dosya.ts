@@ -202,18 +202,10 @@ export const dosyaRouter = createTRPCRouter({
     .input(tarafSchema)
     .mutation(async ({ input }) => {
       const { dosya_id, ...data } = input
-      const existing = await db.select().from(taraf).where(eq(taraf.dosya_id, dosya_id))
-
-      if (existing.length > 0) {
-        const [row] = await db
-          .update(taraf)
-          .set(data)
-          .where(eq(taraf.dosya_id, dosya_id))
-          .returning()
-        return row
-      } else {
-        const [row] = await db.insert(taraf).values({ dosya_id, ...data }).returning()
-        return row
-      }
+      const [row] = await db.insert(taraf)
+        .values({ dosya_id, ...data })
+        .onConflictDoUpdate({ target: taraf.dosya_id, set: data })
+        .returning()
+      return row
     }),
 })
