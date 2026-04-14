@@ -2,7 +2,7 @@ import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { db } from '@/lib/db'
 import { muvekkil, dosya } from '@/lib/schema'
-import { eq, count, desc, sql } from 'drizzle-orm'
+import { eq, count, desc, sql, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 
 export const muvekkilSchema = z.object({
@@ -61,7 +61,7 @@ export const muvekkillRouter = createTRPCRouter({
         const counts = await db
           .select({ muvekkil_id: dosya.muvekkil_id, cnt: count() })
           .from(dosya)
-          .where(sql`${dosya.muvekkil_id} IN (${sql.raw(ids.join(','))})`)
+          .where(inArray(dosya.muvekkil_id, ids))
           .groupBy(dosya.muvekkil_id)
         dosyaCounts = Object.fromEntries(counts.map(c => [c.muvekkil_id, c.cnt]))
       }
