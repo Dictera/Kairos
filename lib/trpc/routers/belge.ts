@@ -49,11 +49,16 @@ export const belgeRouter = createTRPCRouter({
       // Path: E:/sigorta-belgeler/{dosyaId}/{filename}
       const filePathParts = existing[0].dosya_yolu.replace('/api/files/', '').split('/')
       const fullPath = path.join('E:/sigorta-belgeler', ...filePathParts)
-      try { 
-        fs.unlinkSync(fullPath) 
-      } catch (e) {
-        // Log but don't throw — data integrity is primary
-        console.error(`Failed to delete file from disk: ${fullPath}`, e)
+      const basePath = path.resolve('E:/sigorta-belgeler')
+      if (!path.resolve(fullPath).startsWith(basePath)) {
+        console.error(`Path traversal attempt: ${fullPath}`)
+        // DB record already deleted — don't throw
+      } else {
+        try { 
+          fs.unlinkSync(fullPath) 
+        } catch (e) {
+          console.error(`Failed to delete file from disk: ${fullPath}`, e)
+        }
       }
       
       return { success: true }
