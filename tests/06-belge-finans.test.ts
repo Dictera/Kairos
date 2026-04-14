@@ -14,8 +14,12 @@ describe('Schema: belge + finans_kalemi tables', () => {
     expect(finans_kalemi).toBeDefined()
   })
 
-  it('BELGE_KATEGORILER has exactly 7 categories', () => {
-    expect(BELGE_KATEGORILER).toHaveLength(7)
+  it('BELGE_KATEGORILER has exactly 11 categories (expanded in Phase 13)', () => {
+    expect(BELGE_KATEGORILER).toHaveLength(11)
+    expect(BELGE_KATEGORILER).toContain('İhtarname')
+    expect(BELGE_KATEGORILER).toContain('Bilirkişi Raporu')
+    expect(BELGE_KATEGORILER).toContain('Tutanak')
+    expect(BELGE_KATEGORILER).toContain('Tebliği')
   })
 
   it('FINANS_TUR has 3 types: Gelen, Giden, Masraf', () => {
