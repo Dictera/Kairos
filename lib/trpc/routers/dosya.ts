@@ -2,10 +2,10 @@ import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { db } from '@/lib/db'
 import { dosya, taraf, muvekkil, sigortaTuru, sigortaSirketi } from '@/lib/schema'
-import { eq, count, desc, and, sql, inArray } from 'drizzle-orm'
+import { eq, count, desc, and, sql, inArray, aliasedTable } from 'drizzle-orm'
 import { z } from 'zod'
 
-const dosyaSchema = z.object({
+export const dosyaSchema = z.object({
   muvekkil_id: z.number().int(),
   dosya_no: z.string().min(1, 'Dosya numarası zorunludur').max(50),
   tur: z.enum(['STK', 'AT', 'AH']),
@@ -13,6 +13,10 @@ const dosyaSchema = z.object({
   karsitaraf_sigorta_id: z.number().int().nullable().optional(),
   talep_tutari: z.number().positive().nullable().optional(),
   muvekkil_plaka: z.string().max(10).nullable().optional().or(z.literal('')),
+  hasar_dosya_no: z.string().max(200).nullable().optional().or(z.literal('')),
+  kaza_tarihi: z.string().max(10).nullable().optional().or(z.literal('')),
+  muvekkil_sigorta_id: z.number().int().nullable().optional(),
+  kusur_orani_karsi: z.number().int().min(0).max(100).nullable().optional(),
   aciklama: z.string().max(2000).nullable().optional().or(z.literal('')),
   durum: z.enum(['aktif', 'arsiv']).default('aktif').optional(),
 })
@@ -65,6 +69,9 @@ export const dosyaRouter = createTRPCRouter({
       const where = conditions.length > 0 ? and(...conditions) : undefined
 
       // Left join muvekkil + sigortaTuru + sigortaSirketi for list display (D-03 columns)
+      // Aliased table for muvekkil_sigorta_id (second FK to sigortaSirketi)
+      const muvekkilSirketi = aliasedTable(sigortaSirketi, 'muvekkil_sirketi')
+
       const [rows, totalResult] = await Promise.all([
         db.select({
           id: dosya.id,
@@ -75,12 +82,17 @@ export const dosyaRouter = createTRPCRouter({
           muvekkil_ad: sql<string>`${muvekkil.ad} || ' ' || ${muvekkil.soyad}`,
           sigorta_turu_ad: sigortaTuru.ad,
           karsitaraf_sigorta_ad: sigortaSirketi.ad,
+          hasar_dosya_no: dosya.hasar_dosya_no,
+          kaza_tarihi: dosya.kaza_tarihi,
+          kusur_orani_karsi: dosya.kusur_orani_karsi,
+          muvekkil_sigorta_ad: muvekkilSirketi.ad,
           created_at: dosya.created_at,
         })
           .from(dosya)
           .leftJoin(muvekkil, eq(dosya.muvekkil_id, muvekkil.id))
           .leftJoin(sigortaTuru, eq(dosya.sigorta_turu_id, sigortaTuru.id))
           .leftJoin(sigortaSirketi, eq(dosya.karsitaraf_sigorta_id, sigortaSirketi.id))
+          .leftJoin(muvekkilSirketi, eq(dosya.muvekkil_sigorta_id, muvekkilSirketi.id))
           .where(where)
           .orderBy(desc(dosya.id))
           .limit(pageSize)
@@ -121,6 +133,7 @@ export const dosyaRouter = createTRPCRouter({
           muvekkil: { columns: { id: true, ad: true, soyad: true } },
           sigortaTuru: { columns: { id: true, ad: true } },
           karsitarafSigorta: { columns: { id: true, ad: true } },
+          muvekkilSigorta: { columns: { id: true, ad: true } },
           taraflar: true,
         },
       })

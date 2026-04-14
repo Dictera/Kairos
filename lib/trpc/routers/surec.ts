@@ -7,9 +7,9 @@ import {
   parseSurecDetay, serializeSurecDetay,
   type SurecDetay, type StkSurecData, type MahkemeSurecData,
 } from '@/lib/schema'
-import { eq, asc, sql, and } from 'drizzle-orm'
+import { eq, asc, sql } from 'drizzle-orm'
 import { z } from 'zod'
-import { calcStkItirazSuresi, calcIstinafBasvurusu, calcCevapDilekce } from '@/lib/deadline-service'
+
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -30,23 +30,42 @@ function prevAsama<T extends string>(stages: readonly T[], current: T | null): T
 // ── Zod schemas ──────────────────────────────────────────────────────────────
 
 const stkDataSchema = z.object({
-  basvuru_no: z.string().max(100).nullable().optional(),
+  ihtar_tarihi: z.string().max(10).nullable().optional(),
+  arabuluculuk_son_tutanak_tarihi: z.string().max(10).nullable().optional(),
   basvuru_tarihi: z.string().max(10).nullable().optional(),
-  kabul_tarihi: z.string().max(10).nullable().optional(),
-  raportor_adi: z.string().max(200).nullable().optional(),
-  bilirkisi: z.string().max(200).nullable().optional(),
-  hakem_karar_tarihi: z.string().max(10).nullable().optional(),
-  tebligat_tarihi: z.string().max(10).nullable().optional(),
-  itiraz_tarihi: z.string().max(10).nullable().optional(),
+  stk_esas_no: z.string().max(100).nullable().optional(),
+  stk_karar_no: z.string().max(100).nullable().optional(),
+  stk_itiraz_esas_no: z.string().max(100).nullable().optional(),
+  stk_itiraz_karar_no: z.string().max(100).nullable().optional(),
+  bilirkisi_ucret_talep_tarihi: z.string().max(10).nullable().optional(),
+  bilirkisi_raporu_tebliğ_tarihi: z.string().max(10).nullable().optional(),
+  islah_tarihi: z.string().max(10).nullable().optional(),
+  karar_tarihi: z.string().max(10).nullable().optional(),
+  kesinlesme_tarihi: z.string().max(10).nullable().optional(),
 })
 
 const mahkemeDataSchema = z.object({
-  esas_no: z.string().max(100).nullable().optional(),
-  karar_no: z.string().max(100).nullable().optional(),
-  mahkeme_id: z.number().int().nullable().optional(),
-  dava_tarihi: z.string().max(10).nullable().optional(),
-  tebligat_tarihi: z.string().max(10).nullable().optional(),
-  karar_tarihi: z.string().max(10).nullable().optional(),
+  ilk_derece_esas_no: z.string().max(100).nullable().optional(),
+  ilk_derece_karar_no: z.string().max(100).nullable().optional(),
+  ilk_derece_mahkeme_adi: z.string().max(200).nullable().optional(),
+  istinaf_esas_no: z.string().max(100).nullable().optional(),
+  istinaf_karar_no: z.string().max(100).nullable().optional(),
+  istinaf_mahkeme_adi: z.string().max(200).nullable().optional(),
+  temyiz_esas_no: z.string().max(100).nullable().optional(),
+  temyiz_karar_no: z.string().max(100).nullable().optional(),
+  temyiz_mahkeme_adi: z.string().max(200).nullable().optional(),
+  dava_dilekcesi_tebliğ_tarihi: z.string().max(10).nullable().optional(),
+  cevap_dilekcesi_tebliğ_tarihi: z.string().max(10).nullable().optional(),
+  replik_dilekcesi_tebliğ_tarihi: z.string().max(10).nullable().optional(),
+  duplik_dilekcesi_tebliğ_tarihi: z.string().max(10).nullable().optional(),
+  bilirkisi_ucret_talep_tarihi: z.string().max(10).nullable().optional(),
+  bilirkisi_raporu_tebliğ_tarihi: z.string().max(10).nullable().optional(),
+  karar_tebliğ_tarihi: z.string().max(10).nullable().optional(),
+  istinaf_dilekcesi_tebliğ_tarihi: z.string().max(10).nullable().optional(),
+  istinaf_karar_tebliğ_tarihi: z.string().max(10).nullable().optional(),
+  temyiz_dilekcesi_tebliğ_tarihi: z.string().max(10).nullable().optional(),
+  temyiz_karar_tebliğ_tarihi: z.string().max(10).nullable().optional(),
+  kesinlesme_tarihi: z.string().max(10).nullable().optional(),
 })
 
 const durusmaCreateSchema = z.object({
@@ -81,24 +100,14 @@ export const surecRouter = createTRPCRouter({
       const surec = parseSurecDetay(row.surec_detay)
       const updated: SurecDetay = {
         ...surec,
-        stk: { ...(surec.stk ?? { asama: null, basvuru_no: null, basvuru_tarihi: null, kabul_tarihi: null, raportor_adi: null, bilirkisi: null, hakem_karar_tarihi: null, tebligat_tarihi: null, itiraz_tarihi: null }), ...input.data } as StkSurecData,
+        stk: { ...(surec.stk ?? { asama: null, ihtar_tarihi: null, arabuluculuk_son_tutanak_tarihi: null, basvuru_tarihi: null, stk_esas_no: null, stk_karar_no: null, stk_itiraz_esas_no: null, stk_itiraz_karar_no: null, bilirkisi_ucret_talep_tarihi: null, bilirkisi_raporu_tebliğ_tarihi: null, islah_tarihi: null, karar_tarihi: null, kesinlesme_tarihi: null }), ...input.data } as StkSurecData,
       }
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
         .where(eq(dosya.id, input.dosya_id))
 
-      // D-07, D-11: Auto-calc STK itiraz süresi — upsert on tebligat_tarihi change
-      await db.delete(sure)
-        .where(and(eq(sure.dosya_id, input.dosya_id), eq(sure.tur, 'stk_itiraz')))
-      if (input.data.tebligat_tarihi) {
-        const sonTarih = calcStkItirazSuresi(input.data.tebligat_tarihi)
-        await db.insert(sure).values({
-          dosya_id: input.dosya_id,
-          ad: 'STK Karara İtiraz Süresi',
-          son_tarih: sonTarih,
-          tur: 'stk_itiraz',
-        })
-      }
+      // TODO: Re-enable deadline calculations with new field names
+      // Deadline auto-calc disabled — new STK structure has different date fields
 
       return { success: true }
     }),
@@ -118,7 +127,7 @@ export const surecRouter = createTRPCRouter({
 
       const updated: SurecDetay = {
         ...surec,
-        stk: { ...(surec.stk ?? { basvuru_no: null, basvuru_tarihi: null, kabul_tarihi: null, raportor_adi: null, bilirkisi: null, hakem_karar_tarihi: null, tebligat_tarihi: null, itiraz_tarihi: null }), asama: next } as StkSurecData,
+        stk: { ...(surec.stk ?? { asama: null, ihtar_tarihi: null, arabuluculuk_son_tutanak_tarihi: null, basvuru_tarihi: null, stk_esas_no: null, stk_karar_no: null, stk_itiraz_esas_no: null, stk_itiraz_karar_no: null, bilirkisi_ucret_talep_tarihi: null, bilirkisi_raporu_tebliğ_tarihi: null, islah_tarihi: null, karar_tarihi: null, kesinlesme_tarihi: null }), asama: next } as StkSurecData,
       }
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
@@ -161,37 +170,14 @@ export const surecRouter = createTRPCRouter({
       const surec = parseSurecDetay(row.surec_detay)
       const updated: SurecDetay = {
         ...surec,
-        mahkeme: { ...(surec.mahkeme ?? { asama: null, esas_no: null, karar_no: null, mahkeme_id: null, dava_tarihi: null, tebligat_tarihi: null, karar_tarihi: null }), ...input.data } as MahkemeSurecData,
+        mahkeme: { ...(surec.mahkeme ?? { asama: null, ilk_derece_esas_no: null, ilk_derece_karar_no: null, ilk_derece_mahkeme_adi: null, istinaf_esas_no: null, istinaf_karar_no: null, istinaf_mahkeme_adi: null, temyiz_esas_no: null, temyiz_karar_no: null, temyiz_mahkeme_adi: null, dava_dilekcesi_tebliğ_tarihi: null, cevap_dilekcesi_tebliğ_tarihi: null, replik_dilekcesi_tebliğ_tarihi: null, duplik_dilekcesi_tebliğ_tarihi: null, bilirkisi_ucret_talep_tarihi: null, bilirkisi_raporu_tebliğ_tarihi: null, karar_tebliğ_tarihi: null, istinaf_dilekcesi_tebliğ_tarihi: null, istinaf_karar_tebliğ_tarihi: null, temyiz_dilekcesi_tebliğ_tarihi: null, temyiz_karar_tebliğ_tarihi: null, kesinlesme_tarihi: null }), ...input.data } as MahkemeSurecData,
       }
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
         .where(eq(dosya.id, input.dosya_id))
 
-      // D-07, D-11: Auto-calc cevap dilekçesi — upsert on tebligat_tarihi change
-      await db.delete(sure)
-        .where(and(eq(sure.dosya_id, input.dosya_id), eq(sure.tur, 'cevap_dilekce')))
-      if (input.data.tebligat_tarihi) {
-        const sonTarih = calcCevapDilekce(input.data.tebligat_tarihi)
-        await db.insert(sure).values({
-          dosya_id: input.dosya_id,
-          ad: 'Cevap Dilekçesi Süresi',
-          son_tarih: sonTarih,
-          tur: 'cevap_dilekce',
-        })
-      }
-
-      // D-09: Auto-calc istinaf başvurusu — upsert on karar_tarihi change
-      await db.delete(sure)
-        .where(and(eq(sure.dosya_id, input.dosya_id), eq(sure.tur, 'istinaf')))
-      if (input.data.karar_tarihi) {
-        const sonTarih = calcIstinafBasvurusu(input.data.karar_tarihi)
-        await db.insert(sure).values({
-          dosya_id: input.dosya_id,
-          ad: 'İstinaf Başvurusu Süresi',
-          son_tarih: sonTarih,
-          tur: 'istinaf',
-        })
-      }
+      // TODO: Re-enable deadline calculations with new field names
+      // Deadline auto-calc disabled — new Mahkeme structure has different date fields
 
       return { success: true }
     }),
@@ -211,7 +197,7 @@ export const surecRouter = createTRPCRouter({
 
       const updated: SurecDetay = {
         ...surec,
-        mahkeme: { ...(surec.mahkeme ?? { esas_no: null, karar_no: null, mahkeme_id: null, dava_tarihi: null, tebligat_tarihi: null, karar_tarihi: null }), asama: next } as MahkemeSurecData,
+        mahkeme: { ...(surec.mahkeme ?? { asama: null, ilk_derece_esas_no: null, ilk_derece_karar_no: null, ilk_derece_mahkeme_adi: null, istinaf_esas_no: null, istinaf_karar_no: null, istinaf_mahkeme_adi: null, temyiz_esas_no: null, temyiz_karar_no: null, temyiz_mahkeme_adi: null, dava_dilekcesi_tebliğ_tarihi: null, cevap_dilekcesi_tebliğ_tarihi: null, replik_dilekcesi_tebliğ_tarihi: null, duplik_dilekcesi_tebliğ_tarihi: null, bilirkisi_ucret_talep_tarihi: null, bilirkisi_raporu_tebliğ_tarihi: null, karar_tebliğ_tarihi: null, istinaf_dilekcesi_tebliğ_tarihi: null, istinaf_karar_tebliğ_tarihi: null, temyiz_dilekcesi_tebliğ_tarihi: null, temyiz_karar_tebliğ_tarihi: null, kesinlesme_tarihi: null }), asama: next } as MahkemeSurecData,
       }
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
@@ -256,7 +242,7 @@ export const surecRouter = createTRPCRouter({
 
       const updated: SurecDetay = {
         ...surec,
-        mahkeme: { asama: null, esas_no: null, karar_no: null, mahkeme_id: null, dava_tarihi: null, tebligat_tarihi: null, karar_tarihi: null },
+        mahkeme: { asama: null, ilk_derece_esas_no: null, ilk_derece_karar_no: null, ilk_derece_mahkeme_adi: null, istinaf_esas_no: null, istinaf_karar_no: null, istinaf_mahkeme_adi: null, temyiz_esas_no: null, temyiz_karar_no: null, temyiz_mahkeme_adi: null, dava_dilekcesi_tebliğ_tarihi: null, cevap_dilekcesi_tebliğ_tarihi: null, replik_dilekcesi_tebliğ_tarihi: null, duplik_dilekcesi_tebliğ_tarihi: null, bilirkisi_ucret_talep_tarihi: null, bilirkisi_raporu_tebliğ_tarihi: null, karar_tebliğ_tarihi: null, istinaf_dilekcesi_tebliğ_tarihi: null, istinaf_karar_tebliğ_tarihi: null, temyiz_dilekcesi_tebliğ_tarihi: null, temyiz_karar_tebliğ_tarihi: null, kesinlesme_tarihi: null },
       }
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })

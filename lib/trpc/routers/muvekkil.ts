@@ -5,7 +5,7 @@ import { muvekkil, dosya } from '@/lib/schema'
 import { eq, count, desc, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
-const muvekkilSchema = z.object({
+export const muvekkilSchema = z.object({
   ad: z.string().min(1, 'Ad zorunludur').max(100),
   soyad: z.string().min(1, 'Soyad zorunludur').max(100),
   telefon: z
@@ -17,6 +17,7 @@ const muvekkilSchema = z.object({
   tc_vergi_no: z.string().max(11).optional().or(z.literal('')),
   adres: z.string().max(500).optional().or(z.literal('')),
   notlar: z.string().max(2000).optional().or(z.literal('')),
+  iban: z.string().regex(/^TR\d{24}$/, 'Geçersiz IBAN formatı (TRXXXXXXXXXXXXXXXXXXXXXXXX)').optional().or(z.literal('')),
 })
 
 export const muvekkillRouter = createTRPCRouter({
@@ -42,6 +43,7 @@ export const muvekkillRouter = createTRPCRouter({
           soyad: muvekkil.soyad,
           telefon: muvekkil.telefon,
           tc_vergi_no: muvekkil.tc_vergi_no,
+          iban: muvekkil.iban,
           created_at: muvekkil.created_at,
         })
           .from(muvekkil)

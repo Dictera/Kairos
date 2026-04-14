@@ -1,13 +1,13 @@
 import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { db } from '@/lib/db'
-import { belge } from '@/lib/schema'
+import { belge, BELGE_KATEGORILER } from '@/lib/schema'
 import { eq, desc } from 'drizzle-orm'
 import { z } from 'zod'
 import fs from 'fs'
 import path from 'path'
 
-const belgeKategoriEnum = z.enum(['Dilekçe', 'Karar', 'Poliçe', 'Sigorta poliçesi', 'Hasar dosyası', 'Vekaletname', 'Diğer'])
+const belgeKategoriEnum = z.enum(BELGE_KATEGORILER)
 
 export const belgeRouter = createTRPCRouter({
   list: protectedProcedure
