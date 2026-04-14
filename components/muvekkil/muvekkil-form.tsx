@@ -21,8 +21,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const formSchema = z.object({
-  ad: z.string().min(1, 'Ad zorunludur'),
-  soyad: z.string().min(1, 'Soyad zorunludur'),
+  ad: z.string().min(0),
+  soyad: z.string().min(0),
   telefon: z.string().max(20).optional().or(z.literal('')),
   tc_vergi_no: z.string().max(11).optional().or(z.literal('')),
   adres: z.string().max(500).optional().or(z.literal('')),
