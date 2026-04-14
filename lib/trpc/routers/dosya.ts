@@ -2,7 +2,7 @@ import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { db } from '@/lib/db'
 import { dosya, taraf, muvekkil, sigortaTuru, sigortaSirketi } from '@/lib/schema'
-import { eq, count, desc, and, sql } from 'drizzle-orm'
+import { eq, count, desc, and, sql, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 
 const dosyaSchema = z.object({
@@ -97,7 +97,7 @@ export const dosyaRouter = createTRPCRouter({
         const tarafRows = await db
           .select({ dosya_id: taraf.dosya_id, police_no: taraf.police_no })
           .from(taraf)
-          .where(sql`${taraf.dosya_id} IN (${sql.raw(ids.join(','))})`)
+          .where(inArray(taraf.dosya_id, ids))
         policeNos = Object.fromEntries(tarafRows.map(t => [t.dosya_id, t.police_no]))
       }
 
