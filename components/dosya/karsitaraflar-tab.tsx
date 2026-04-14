@@ -53,15 +53,14 @@ const editSchema = z.object({
   karsitaraf_vekil: z.string().max(200).optional().or(z.literal('')),
   police_no: z.string().max(100).optional().or(z.literal('')),
   karsitaraf_plaka: z.string().max(10).optional().or(z.literal('')),
-  surucu_ad: z.string().max(200).nullable().optional().or(z.literal('')),
-  surucu_soyad: z.string().max(200).nullable().optional().or(z.literal('')),
-  surucu_plaka: z.string().max(10).nullable().optional().or(z.literal('')),
+  surucu_ad: z.string().max(200).optional().or(z.literal('')),
+  surucu_soyad: z.string().max(200).optional().or(z.literal('')),
+  surucu_plaka: z.string().max(10).optional().or(z.literal('')),
   surucu_telefon: z.string()
     .regex(/^05[0-9]{9}$/, 'Geçersiz telefon formatı (05XXXXXXXXX gerekli)')
-    .nullable()
     .optional()
     .or(z.literal('')),
-  surucu_police_no: z.string().max(100).nullable().optional().or(z.literal('')),
+  surucu_police_no: z.string().max(100).optional().or(z.literal('')),
 })
 
 type EditValues = z.infer<typeof editSchema>
@@ -143,92 +142,159 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
 
   if (isEditing) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Karşı Taraf Bilgileri</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-lg">
-              <FormField
-                control={form.control}
-                name="sigorta_sirketi_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Karşı Sigorta Şirketi</FormLabel>
-                    <Select
-                      onValueChange={(v) => field.onChange(v === 'none' ? null : parseInt(v, 10))}
-                      value={field.value?.toString() ?? 'none'}
-                    >
+      <div className="space-y-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Karşı Taraf Bilgileri</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FormField
+                  control={form.control}
+                  name="sigorta_sirketi_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Karşı Sigorta Şirketi</FormLabel>
+                      <Select
+                        onValueChange={(v) => field.onChange(v === 'none' ? null : parseInt(v, 10))}
+                        value={field.value?.toString() ?? 'none'}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Yok / Bilinmiyor" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">Yok / Bilinmiyor</SelectItem>
+                          {sigortaSirketiList?.map((s) => (
+                            <SelectItem key={s.id} value={s.id.toString()}>
+                              {s.ad}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="karsitaraf_ad"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Karşı Vekil Adı</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Yok / Bilinmiyor" />
-                        </SelectTrigger>
+                        <Input placeholder="Av. Ad Soyad" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">Yok / Bilinmiyor</SelectItem>
-                        {sigortaSirketiList?.map((s) => (
-                          <SelectItem key={s.id} value={s.id.toString()}>
-                            {s.ad}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="karsitaraf_ad"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Karşı Vekil Adı</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Av. Ad Soyad" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="police_no"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Poliçe No</FormLabel>
-                    <FormControl>
-                      <Input placeholder="XXXXX" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="karsitaraf_plaka"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Karşı Taraf Plaka No</FormLabel>
-                    <FormControl>
-                      <Input placeholder="34 XYZ 456" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex gap-3">
-                <Button type="button" variant="ghost" onClick={() => setIsEditing(false)}>
-                  İptal
-                </Button>
-                <Button type="submit" disabled={upsertMutation.isPending}>
-                  {upsertMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="police_no"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Poliçe No</FormLabel>
+                      <FormControl>
+                        <Input placeholder="XXXXX" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="karsitaraf_plaka"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Karşı Taraf Plaka No</FormLabel>
+                      <FormControl>
+                        <Input placeholder="34 XYZ 456" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Diğer Sürücü Bilgileri</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="surucu_ad"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sürücü Adı</FormLabel>
+                        <FormControl><Input {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="surucu_soyad"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sürücü Soyadı</FormLabel>
+                        <FormControl><Input {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="surucu_plaka"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Plaka</FormLabel>
+                        <FormControl><Input placeholder="34 ABC 123" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="surucu_telefon"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Telefon</FormLabel>
+                        <FormControl><Input placeholder="05XXXXXXXXX" {...field} /></FormControl>
+                        <p className="text-xs text-muted-foreground">Format: 05XXXXXXXXX</p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="surucu_police_no"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Poliçe No</FormLabel>
+                        <FormControl><Input placeholder="XXXXX" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+            <div className="flex gap-3">
+              <Button type="button" variant="ghost" onClick={() => setIsEditing(false)}>
+                İptal
+              </Button>
+              <Button type="submit" disabled={upsertMutation.isPending}>
+                {upsertMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </div>
     )
   }
 
@@ -249,21 +315,39 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-base">Karşı Taraf Bilgileri</CardTitle>
-        <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-          Düzenle
-        </Button>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <InfoRow label="Karşı Sigorta Şirketi" value={karsitarafSirketAd} />
-          <InfoRow label="Karşı Vekil Adı" value={taraf?.karsitaraf_ad} />
-          <InfoRow label="Poliçe No" value={taraf?.police_no} />
-          <InfoRow label="Karşı Taraf Plaka No" value={taraf?.karsitaraf_plaka} />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-base">Karşı Taraf Bilgileri</CardTitle>
+          <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+            Düzenle
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InfoRow label="Karşı Sigorta Şirketi" value={karsitarafSirketAd} />
+            <InfoRow label="Karşı Vekil Adı" value={taraf?.karsitaraf_ad} />
+            <InfoRow label="Poliçe No" value={taraf?.police_no} />
+            <InfoRow label="Karşı Taraf Plaka No" value={taraf?.karsitaraf_plaka} />
+          </div>
+        </CardContent>
+      </Card>
+      {hasDriverInfo && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Diğer Sürücü Bilgileri</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InfoRow label="Sürücü Adı" value={taraf?.surucu_ad} />
+              <InfoRow label="Sürücü Soyadı" value={taraf?.surucu_soyad} />
+              <InfoRow label="Plaka" value={taraf?.surucu_plaka} />
+              <InfoRow label="Telefon" value={taraf?.surucu_telefon} />
+              <InfoRow label="Poliçe No" value={taraf?.surucu_police_no} />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   )
 }
