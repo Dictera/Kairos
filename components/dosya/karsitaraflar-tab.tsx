@@ -34,6 +34,11 @@ type TarafRow = {
   karsitaraf_vekil: string | null
   police_no: string | null
   karsitaraf_plaka: string | null
+  surucu_ad: string | null
+  surucu_soyad: string | null
+  surucu_plaka: string | null
+  surucu_telefon: string | null
+  surucu_police_no: string | null
 }
 
 interface KarsitaraflarTabProps {
@@ -48,6 +53,15 @@ const editSchema = z.object({
   karsitaraf_vekil: z.string().max(200).optional().or(z.literal('')),
   police_no: z.string().max(100).optional().or(z.literal('')),
   karsitaraf_plaka: z.string().max(10).optional().or(z.literal('')),
+  surucu_ad: z.string().max(200).nullable().optional().or(z.literal('')),
+  surucu_soyad: z.string().max(200).nullable().optional().or(z.literal('')),
+  surucu_plaka: z.string().max(10).nullable().optional().or(z.literal('')),
+  surucu_telefon: z.string()
+    .regex(/^05[0-9]{9}$/, 'Geçersiz telefon formatı (05XXXXXXXXX gerekli)')
+    .nullable()
+    .optional()
+    .or(z.literal('')),
+  surucu_police_no: z.string().max(100).nullable().optional().or(z.literal('')),
 })
 
 type EditValues = z.infer<typeof editSchema>
@@ -76,6 +90,11 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
       karsitaraf_vekil: taraf?.karsitaraf_vekil ?? '',
       police_no: taraf?.police_no ?? '',
       karsitaraf_plaka: taraf?.karsitaraf_plaka ?? '',
+      surucu_ad: taraf?.surucu_ad ?? '',
+      surucu_soyad: taraf?.surucu_soyad ?? '',
+      surucu_plaka: taraf?.surucu_plaka ?? '',
+      surucu_telefon: taraf?.surucu_telefon ?? '',
+      surucu_police_no: taraf?.surucu_police_no ?? '',
     },
   })
 
@@ -101,6 +120,11 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
       karsitaraf_vekil: values.karsitaraf_vekil || undefined,
       police_no: values.police_no || undefined,
       karsitaraf_plaka: values.karsitaraf_plaka || undefined,
+      surucu_ad: values.surucu_ad || undefined,
+      surucu_soyad: values.surucu_soyad || undefined,
+      surucu_plaka: values.surucu_plaka || undefined,
+      surucu_telefon: values.surucu_telefon || undefined,
+      surucu_police_no: values.surucu_police_no || undefined,
     })
   }
 
@@ -111,6 +135,11 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
       !taraf.police_no &&
       !taraf.karsitaraf_plaka &&
       !taraf.sigorta_sirketi_id)
+
+  const hasDriverInfo = !!(
+    taraf?.surucu_ad || taraf?.surucu_soyad ||
+    taraf?.surucu_plaka || taraf?.surucu_telefon || taraf?.surucu_police_no
+  )
 
   if (isEditing) {
     return (
