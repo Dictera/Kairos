@@ -84,6 +84,7 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
     formData.append('file', file)
     formData.append('dosyaId', dosyaId.toString())
     formData.append('dosyaNo', dosyaNo)
+    formData.append('kategori', kategori)
     
     let uploadResult
     try {

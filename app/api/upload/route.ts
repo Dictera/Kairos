@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
   const file = formData.get('file') as File | null
   const dosyaId = formData.get('dosyaId') as string | null
   const dosyaNo = formData.get('dosyaNo') as string | null
+  const kategori = formData.get('kategori') as string | null
 
   if (!file || !dosyaId) {
     return NextResponse.json({ error: 'Eksik veri' }, { status: 400 })
@@ -36,8 +37,30 @@ export async function POST(request: NextRequest) {
   const uploadDir = path.join(BASE_PATH, dosyaId)
   fs.mkdirSync(uploadDir, { recursive: true })
 
-  // Generate unique filename: timestamp + lowercase normalized original
+  // Generate unique filename: timestamp + category (if provided) or normalized original
   const timestamp = Date.now()
+  const ext = path.extname(file.name)
+  if (kategori) {
+    // Category-based naming: kategori + extension (e.g., "İhtarname.pdf")
+    const safeKategori = kategori.replace(/[^a-zA-Z0-9ÇçĞğıİıÖöŞşÜü\s-]/g, '').trim()
+    const filename = `${timestamp}-${safeKategori}${ext}`
+    const filePath = path.join(uploadDir, filename)
+
+    // Write file to E: drive
+    const buffer = Buffer.from(await file.arrayBuffer())
+    fs.writeFileSync(filePath, buffer)
+
+    // Return file metadata for tRPC mutation
+    return NextResponse.json({
+      filename,
+      dosya_yolu: `/api/files/${dosyaId}/${filename}`,
+      dosya_boyutu: file.size,
+      mime_tur: file.type,
+      dosya_adi: `${safeKategori}${ext}`, // category-based name as dosya_adi
+    })
+  }
+
+  // Fallback: timestamp + lowercase normalized original
   const normalizedName = file.name.toLowerCase().replace(/\s+/g, '-')
   const filename = `${timestamp}-${normalizedName}`
   const filePath = path.join(uploadDir, filename)
