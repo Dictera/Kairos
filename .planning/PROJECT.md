@@ -27,16 +27,17 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 - ✓ **Raporlar (RAPOR-01–03)** — v1.0: Portfolio + financial reports, PDF + Excel export
 - ✓ **Müvekkil E-posta Kaldırma (MUVEK-06)** — v1.1: Müvekkil formlarından e-posta alanı kaldırma
 - ✓ **Sürücü Bilgileri (TARAF-06, 07, 08, 09, 10)** — v1.1: Dosya > Taraflar bölümüne sürücü bilgileri ekleme (Ad, Soyad, Plaka, Telefon, Poliçe No) + Turkish phone regex + UI Card
+- ✓ **Sekme Temizliği ve UI/UX (TAB-01, TAB-02, UIUX-01)** — v1.1: Notlar/Zaman Çizelgesi tab replacement with Notes CRUD + Activity Timeline; Genel Bilgiler new fields; Müvekkil IBAN + form grouping
 
-## Current Milestone: v1.1 Dosyalar ve Müvekkiller Sekmesi İyileştirmeleri
+## Current Milestone: v1.1 — ✓ COMPLETE
 
 **Goal:** Müvekkil ve dosya yönetiminde temizlik ve iyileştirme — gereksiz alan çıkarma, yeni alan ekleme, sekme düzeni ve UI/UX.
 
 **Target features:**
-- Müvekkil formlarından e-posta alanı kaldırma
-- Dosya > Taraflar bölümüne diğer sürücü bilgileri ekleme (Ad, Soyad, Plaka, Telefon, Poliçe No)
-- Mevcut sekmelerde bölüm ekleme/çıkarma
-- Dosyalar ve Müvekkiller genel UI/UX iyileştirmeleri
+- Müvekkil formlarından e-posta alanı kaldırma ✓
+- Dosya > Taraflar bölümüne diğer sürücü bilgileri ekleme (Ad, Soyad, Plaka, Telefon, Poliçe No) ✓
+- Mevcut sekmelerde bölüm ekleme/çıkarma ✓
+- Dosyalar ve Müvekkiller genel UI/UX iyileştirmeleri ✓
 
 ### Out of Scope
 
@@ -98,4 +99,4 @@ Bu belge faz geçişlerinde ve milestone sınırlarında güncellenir.
 4. Context güncelleme
 
 ---
-*Last updated: 2026-04-14 after Phase 12 (Taraf Tab Driver Info UI)*
+*Last updated: 2026-04-14 after Phase 13 (tab-cleanup-ui-ux) — v1.1 COMPLETE*
