@@ -202,11 +202,9 @@ function EditForm({
 
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault()
-        const values = form.getValues()
+      onSubmit={form.handleSubmit((values) => {
         if (values.icerik.trim()) onSave(values.icerik)
-      }}
+      })}
       className="space-y-3"
     >
       <Textarea
