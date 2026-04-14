@@ -8,7 +8,12 @@ import { z } from 'zod'
 const muvekkilSchema = z.object({
   ad: z.string().min(1, 'Ad zorunludur').max(100),
   soyad: z.string().min(1, 'Soyad zorunludur').max(100),
-  telefon: z.string().max(20).optional().or(z.literal('')),
+  telefon: z
+    .string()
+    .regex(/^05[0-9]{9}$/, 'Geçersiz telefon formatı (05XXXXXXXXX gerekli)')
+    .max(20)
+    .optional()
+    .or(z.literal('')),
   tc_vergi_no: z.string().max(11).optional().or(z.literal('')),
   adres: z.string().max(500).optional().or(z.literal('')),
   notlar: z.string().max(2000).optional().or(z.literal('')),
