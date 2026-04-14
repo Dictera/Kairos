@@ -20,7 +20,7 @@
 | 9. Calendar Standardization | v1.1 | 2/2 | ✅ Complete |
 | 10. Schema & Migration Foundation | 3/3 | Complete    | 2026-04-13 |
 | 11. Müvekkil Email Removal | 2/2 | Complete    | 2026-04-13 |
-| 12. Taraf Tab Driver Info UI | v1.1 | TBD | 📋 Planned |
+| 12. Taraf Tab Driver Info UI | 1/1 | Complete    | 2026-04-14 |
 | 13. Tab Cleanup & UI/UX | v1.1 | TBD | 📋 Planned |
 
 ---
@@ -94,7 +94,7 @@
 
 **Plans**: 1 plan
 
-- [ ] 12-01-PLAN.md — Extend karsitaraflar-tab.tsx with driver info type/schema/form/view-mode
+- [x] 12-01-PLAN.md — Extend karsitaraflar-tab.tsx with driver info type/schema/form/view-mode
 
 **UI hint**: yes
 
