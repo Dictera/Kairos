@@ -19,7 +19,7 @@
 | 8. UI Renewal (Navy + Turuncu) | v1.1 | 3/3 | ✅ Complete |
 | 9. Calendar Standardization | v1.1 | 2/2 | ✅ Complete |
 | 10. Schema & Migration Foundation | 3/3 | Complete    | 2026-04-13 |
-| 11. Müvekkil Email Removal | v1.1 | TBD | 📋 Planned |
+| 11. Müvekkil Email Removal | 2/2 | Complete    | 2026-04-13 |
 | 12. Taraf Tab Driver Info UI | v1.1 | TBD | 📋 Planned |
 | 13. Tab Cleanup & UI/UX | v1.1 | TBD | 📋 Planned |
 
@@ -70,8 +70,8 @@
 
 **Plans**: 2 plans
 
-- [ ] 11-01-PLAN.md — Regenerate drizzle metadata (nuclear approach)
-- [ ] 11-02-PLAN.md — Schema verification test + visual verification
+- [x] 11-01-PLAN.md — Regenerate drizzle metadata (nuclear approach)
+- [x] 11-02-PLAN.md — Schema verification test + visual verification
 
 **UI hint**: yes
 
@@ -92,7 +92,9 @@
 4. Turkish phone format (05XX XXX XX XX) validated on submit
 5. Turkish plate format (XX XXX XX) validated on submit
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+- [ ] 12-01-PLAN.md — Extend karsitaraflar-tab.tsx with driver info type/schema/form/view-mode
 
 **UI hint**: yes
 
