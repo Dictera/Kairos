@@ -22,37 +22,58 @@ export const mahkeme = sqliteTable('mahkeme', {
 // ── STK & Mahkeme Stage Enums ─────────────────────────────────────────────
 
 export const STK_ASAMALAR = [
-  'BAŞVURU', 'KABUL', 'RAPORTÖR_ATANDI', 'RAPORTÖR_İNCELEME',
-  'HAKEM_KURULU', 'HAKEM_KARARI', 'İTİRAZ_SÜRESİ', 'İTİRAZ_DAVASI', 'KARAR_KESİNLEŞTİ',
+  'İHTAR', 'ARABULUCULUK', 'BAŞVURU', 'ÖN_İNCELEME',
+  'BİLİRKİŞİ', 'ISLAH', 'KARAR', 'İTİRAZ', 'KESİNLEŞME',
 ] as const
 export type StkAsama = typeof STK_ASAMALAR[number]
 
 export const MAHKEME_ASAMALAR = [
-  'DAVA_AÇILDI', 'TEBLİGAT', 'CEVAP_DİLEKÇESİ', 'TAHKİKAT',
-  'BİLİRKİŞİ', 'KARAR', 'İSTİNAF', 'KESİNLEŞTİ',
+  'DAVA_DİLEKÇESİ_TEBLİĞ', 'CEVAP_DİLEKÇESİ_TEBLİĞ',
+  'REPLİK_DİLEKÇESİ_TEBLİĞ', 'DUPLİK_DİLEKÇESİ_TEBLİĞ',
+  'ÖN_İNCELEME', 'BİLİRKİŞİ', 'DURUŞMALAR',
+  'KARAR', 'KARAR_TEBLİĞ', 'İSTİNAF', 'TEMYİZ', 'KESİNLEŞME',
 ] as const
 export type MahkemeAsama = typeof MAHKEME_ASAMALAR[number]
 
 export type StkSurecData = {
   asama: StkAsama | null
-  basvuru_no: string | null
+  ihtar_tarihi: string | null
+  arabuluculuk_son_tutanak_tarihi: string | null
   basvuru_tarihi: string | null
-  kabul_tarihi: string | null
-  raportor_adi: string | null
-  bilirkisi: string | null
-  hakem_karar_tarihi: string | null
-  tebligat_tarihi: string | null
-  itiraz_tarihi: string | null
+  stk_esas_no: string | null
+  stk_karar_no: string | null
+  stk_itiraz_esas_no: string | null
+  stk_itiraz_karar_no: string | null
+  bilirkisi_ucret_talep_tarihi: string | null
+  bilirkisi_raporu_tebliğ_tarihi: string | null
+  islah_tarihi: string | null
+  karar_tarihi: string | null
+  kesinlesme_tarihi: string | null
 }
 
 export type MahkemeSurecData = {
   asama: MahkemeAsama | null
-  esas_no: string | null
-  karar_no: string | null
-  mahkeme_id: number | null
-  dava_tarihi: string | null
-  tebligat_tarihi: string | null
-  karar_tarihi: string | null
+  ilk_derece_esas_no: string | null
+  ilk_derece_karar_no: string | null
+  ilk_derece_mahkeme_adi: string | null
+  istinaf_esas_no: string | null
+  istinaf_karar_no: string | null
+  istinaf_mahkeme_adi: string | null
+  temyiz_esas_no: string | null
+  temyiz_karar_no: string | null
+  temyiz_mahkeme_adi: string | null
+  dava_dilekcesi_tebliğ_tarihi: string | null
+  cevap_dilekcesi_tebliğ_tarihi: string | null
+  replik_dilekcesi_tebliğ_tarihi: string | null
+  duplik_dilekcesi_tebliğ_tarihi: string | null
+  bilirkisi_ucret_talep_tarihi: string | null
+  bilirkisi_raporu_tebliğ_tarihi: string | null
+  karar_tebliğ_tarihi: string | null
+  istinaf_dilekcesi_tebliğ_tarihi: string | null
+  istinaf_karar_tebliğ_tarihi: string | null
+  temyiz_dilekcesi_tebliğ_tarihi: string | null
+  temyiz_karar_tebliğ_tarihi: string | null
+  kesinlesme_tarihi: string | null
 }
 
 export type SurecDetay = {
@@ -96,26 +117,30 @@ export const sureRelations = relations(sure, ({ one }) => ({
 // ── Stage Labels ─────────────────────────────────────────────────────────────
 
 export const STK_ASAMA_LABELS: Record<StkAsama, string> = {
+  'İHTAR': 'İhtar',
+  'ARABULUCULUK': 'Arabuluculuk',
   'BAŞVURU': 'Başvuru',
-  'KABUL': 'Kabul',
-  'RAPORTÖR_ATANDI': 'Raportör Atandı',
-  'RAPORTÖR_İNCELEME': 'Raportör İnceleme',
-  'HAKEM_KURULU': 'Hakem Kurulu',
-  'HAKEM_KARARI': 'Hakem Kararı',
-  'İTİRAZ_SÜRESİ': 'İtiraz Süresi',
-  'İTİRAZ_DAVASI': 'İtiraz Davası',
-  'KARAR_KESİNLEŞTİ': 'Karar Kesinleşti',
+  'ÖN_İNCELEME': 'Ön İnceleme',
+  'BİLİRKİŞİ': 'Bilirkişi',
+  'ISLAH': 'Islah',
+  'KARAR': 'Karar',
+  'İTİRAZ': 'İtiraz',
+  'KESİNLEŞME': 'Kesinleşme',
 }
 
 export const MAHKEME_ASAMA_LABELS: Record<MahkemeAsama, string> = {
-  'DAVA_AÇILDI': 'Dava Açıldı',
-  'TEBLİGAT': 'Tebligat',
-  'CEVAP_DİLEKÇESİ': 'Cevap Dilekçesi',
-  'TAHKİKAT': 'Tahkikat',
+  'DAVA_DİLEKÇESİ_TEBLİĞ': 'Dava Dilekçesi Tebliğ',
+  'CEVAP_DİLEKÇESİ_TEBLİĞ': 'Cevap Dilekçesi Tebliğ',
+  'REPLİK_DİLEKÇESİ_TEBLİĞ': 'Replik Dilekçesi Tebliğ',
+  'DUPLİK_DİLEKÇESİ_TEBLİĞ': 'Duplik Dilekçesi Tebliğ',
+  'ÖN_İNCELEME': 'Ön İnceleme',
   'BİLİRKİŞİ': 'Bilirkişi',
+  'DURUŞMALAR': 'Duruşmalar',
   'KARAR': 'Karar',
+  'KARAR_TEBLİĞ': 'Karar Tebliğ',
   'İSTİNAF': 'İstinaf',
-  'KESİNLEŞTİ': 'Kesinleşti',
+  'TEMYİZ': 'Temyiz',
+  'KESİNLEŞME': 'Kesinleşme',
 }
 
 // ── Core entities ────────────────────────────────────────────────────────────
@@ -128,6 +153,7 @@ export const muvekkil = sqliteTable('muvekkil', {
   tc_vergi_no: text('tc_vergi_no'),
   adres: text('adres'),
   notlar: text('notlar'),
+  iban: text('iban'),
   created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
   updated_at: text('updated_at').notNull().default(sql`(datetime('now'))`),
 })
@@ -141,6 +167,10 @@ export const dosya = sqliteTable('dosya', {
   karsitaraf_sigorta_id: integer('karsitaraf_sigorta_id').references(() => sigortaSirketi.id),
   talep_tutari: real('talep_tutari'),
   muvekkil_plaka: text('muvekkil_plaka'),         // nullable — D-12
+  hasar_dosya_no: text('hasar_dosya_no'),
+  kaza_tarihi: text('kaza_tarihi'),
+  muvekkil_sigorta_id: integer('muvekkil_sigorta_id').references(() => sigortaSirketi.id),
+  kusur_orani_karsi: integer('kusur_orani_karsi'),
   durum: text('durum').notNull().default('aktif'), // 'aktif' | 'arsiv'
   aciklama: text('aciklama'),
   surec_detay: text('surec_detay'),  // JSON-encoded SurecDetay
@@ -191,11 +221,14 @@ export const dosyaRelations = relations(dosya, ({ one, many }) => ({
   muvekkil: one(muvekkil, { fields: [dosya.muvekkil_id], references: [muvekkil.id] }),
   sigortaTuru: one(sigortaTuru, { fields: [dosya.sigorta_turu_id], references: [sigortaTuru.id] }),
   karsitarafSigorta: one(sigortaSirketi, { fields: [dosya.karsitaraf_sigorta_id], references: [sigortaSirketi.id] }),
+  muvekkilSigorta: one(sigortaSirketi, { fields: [dosya.muvekkil_sigorta_id], references: [sigortaSirketi.id], relationName: 'muvekkilSigorta' }),
   taraflar: many(taraf),
   durusmalar: many(durusma),
   sureler: many(sure),
   belgeler: many(belge),
   finans_kalemleri: many(finans_kalemi),
+  notlar: many(dosyaNot),
+  olaylar: many(olayGunlugu),
 }))
 
 export const tarafRelations = relations(taraf, ({ one }) => ({
@@ -210,6 +243,7 @@ export const durusmaRelations = relations(durusma, ({ one }) => ({
 export const sigortaSirketiRelations = relations(sigortaSirketi, ({ many }) => ({
   dosyalar: many(dosya),
   taraflar: many(taraf),
+  muvekkilSigortaDosyalar: many(dosya, { relationName: 'muvekkilSigorta' }),
 }))
 
 export const sigortaTuruRelations = relations(sigortaTuru, ({ many }) => ({
@@ -218,7 +252,7 @@ export const sigortaTuruRelations = relations(sigortaTuru, ({ many }) => ({
 
 // ── BELGE (Document) types ────────────────────────────────────────────────────
 
-export const BELGE_KATEGORILER = ['Dilekçe', 'Karar', 'Poliçe', 'Sigorta poliçesi', 'Hasar dosyası', 'Vekaletname', 'Diğer'] as const
+export const BELGE_KATEGORILER = ['Dilekçe', 'Karar', 'Poliçe', 'Sigorta poliçesi', 'Hasar dosyası', 'Vekaletname', 'İhtarname', 'Bilirkişi Raporu', 'Tutanak', 'Tebliği', 'Diğer'] as const
 export type BelgeKategori = typeof BELGE_KATEGORILER[number]
 
 export const belge = sqliteTable('belge', {
@@ -239,6 +273,46 @@ export const belge = sqliteTable('belge', {
 export const belgeRelations = relations(belge, ({ one }) => ({
   dosya: one(dosya, { fields: [belge.dosya_id], references: [dosya.id] }),
 }))
+
+// ── dosyaNot (Note) table ────────────────────────────────────────────────────
+
+export const dosyaNot = sqliteTable('dosya_not', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  dosya_id: integer('dosya_id').notNull().references(() => dosya.id, { onDelete: 'cascade' }),
+  icerik: text('icerik').notNull(),
+  created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
+  updated_at: text('updated_at').notNull().default(sql`(datetime('now'))`),
+}, (t) => [
+  index('idx_dosya_not_dosya').on(t.dosya_id),
+])
+
+export const dosyaNotRelations = relations(dosyaNot, ({ one }) => ({
+  dosya: one(dosya, { fields: [dosyaNot.dosya_id], references: [dosya.id] }),
+}))
+
+// ── olayGunlugu (Activity Log) table ────────────────────────────────────────
+
+export const OLAY_TURLERI = [
+  'olusturma', 'durum_degisikligi', 'surec_asama', 'finans', 'belge', 'not', 'durusma', 'sure', 'guncelleme',
+] as const
+export type OlayTur = typeof OLAY_TURLERI[number]
+
+export const olayGunlugu = sqliteTable('olay_gunlugu', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  dosya_id: integer('dosya_id').notNull().references(() => dosya.id, { onDelete: 'cascade' }),
+  olay_turu: text('olay_turu').notNull(),
+  aciklama: text('aciklama').notNull(),
+  created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
+}, (t) => [
+  index('idx_olay_dosya').on(t.dosya_id),
+  index('idx_olay_tarih').on(t.created_at),
+])
+
+export const olayGunluguRelations = relations(olayGunlugu, ({ one }) => ({
+  dosya: one(dosya, { fields: [olayGunlugu.dosya_id], references: [dosya.id] }),
+}))
+
+// ── dilekceSablonu ─────────────────────────────────────────────────────────
 
 export const dilekceSablonu = sqliteTable('dilekce_sablonu', {
   id: integer('id').primaryKey({ autoIncrement: true }),
