@@ -85,7 +85,7 @@ export function MuvekkilDetail({ muvekkilId }: MuvekkilDetailProps) {
     trpc.muvekkil.delete.mutationOptions({
       onSuccess: () => {
         toast.success('Silindi.')
-        queryClient.invalidateQueries({ queryKey: ['muvekkil'] })
+        queryClient.invalidateQueries({ queryKey: [['muvekkil']] })
         router.push('/muvekkiller')
       },
       onError: (err) => {

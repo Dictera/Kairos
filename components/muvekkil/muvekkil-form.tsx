@@ -62,7 +62,7 @@ function MuvekkilFormInner({ mode, defaultValues, muvekkilId }: MuvekkilFormProp
     trpc.muvekkil.create.mutationOptions({
       onSuccess: (row) => {
         toast.success('Müvekkil başarıyla oluşturuldu.')
-        queryClient.invalidateQueries({ queryKey: ['muvekkil'] })
+        queryClient.invalidateQueries({ queryKey: [['muvekkil']] })
         router.push('/muvekkiller/' + row.id)
       },
       onError: () => {
@@ -75,7 +75,7 @@ function MuvekkilFormInner({ mode, defaultValues, muvekkilId }: MuvekkilFormProp
     trpc.muvekkil.update.mutationOptions({
       onSuccess: () => {
         toast.success('Kaydedildi.')
-        queryClient.invalidateQueries({ queryKey: ['muvekkil'] })
+        queryClient.invalidateQueries({ queryKey: [['muvekkil']] })
         router.push('/muvekkiller/' + muvekkilId)
       },
       onError: () => {
