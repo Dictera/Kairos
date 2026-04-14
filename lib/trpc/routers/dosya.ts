@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { dosya, taraf, muvekkil, sigortaTuru, sigortaSirketi } from '@/lib/schema'
 import { eq, count, desc, and, sql, inArray, aliasedTable } from 'drizzle-orm'
 import { z } from 'zod'
+import { logOlay } from './olay'
 
 export const dosyaSchema = z.object({
   muvekkil_id: z.number().int(),
@@ -153,6 +154,7 @@ export const dosyaRouter = createTRPCRouter({
         })
       }
       const [row] = await db.insert(dosya).values(input).returning()
+      await logOlay(row.id, 'olusturma', 'Dosya oluşturuldu')
       return row
     }),
 
@@ -188,6 +190,7 @@ export const dosyaRouter = createTRPCRouter({
         .where(eq(dosya.id, input.id))
         .returning()
       if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
+      await logOlay(input.id, 'durum_degisikligi', 'Dosya arşivlendi')
       return row
     }),
 
@@ -200,6 +203,7 @@ export const dosyaRouter = createTRPCRouter({
         .where(eq(dosya.id, input.id))
         .returning()
       if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
+      await logOlay(input.id, 'durum_degisikligi', 'Dosya aktif hale getirildi')
       return row
     }),
 

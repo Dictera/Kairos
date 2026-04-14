@@ -3,12 +3,13 @@ import { TRPCError } from '@trpc/server'
 import { db } from '@/lib/db'
 import {
   dosya, durusma, sure,
-  STK_ASAMALAR, MAHKEME_ASAMALAR,
+  STK_ASAMALAR, MAHKEME_ASAMALAR, STK_ASAMA_LABELS, MAHKEME_ASAMA_LABELS,
   parseSurecDetay, serializeSurecDetay,
   type SurecDetay, type StkSurecData, type MahkemeSurecData,
 } from '@/lib/schema'
 import { eq, asc, sql } from 'drizzle-orm'
 import { z } from 'zod'
+import { logOlay } from './olay'
 
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -132,6 +133,7 @@ export const surecRouter = createTRPCRouter({
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
         .where(eq(dosya.id, input.dosya_id))
+      await logOlay(input.dosya_id, 'surec_asama', `STK aşaması ilerletildi: ${STK_ASAMA_LABELS[next]}`)
       return { asama: next }
     }),
 
@@ -156,6 +158,7 @@ export const surecRouter = createTRPCRouter({
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
         .where(eq(dosya.id, input.dosya_id))
+      await logOlay(input.dosya_id, 'surec_asama', `STK aşaması geri alındı: ${STK_ASAMA_LABELS[prev]}`)
       return { asama: prev }
     }),
 
@@ -202,6 +205,7 @@ export const surecRouter = createTRPCRouter({
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
         .where(eq(dosya.id, input.dosya_id))
+      await logOlay(input.dosya_id, 'surec_asama', `Mahkeme aşaması ilerletildi: ${MAHKEME_ASAMA_LABELS[next]}`)
       return { asama: next }
     }),
 
@@ -226,6 +230,7 @@ export const surecRouter = createTRPCRouter({
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
         .where(eq(dosya.id, input.dosya_id))
+      await logOlay(input.dosya_id, 'surec_asama', `Mahkeme aşaması geri alındı: ${MAHKEME_ASAMA_LABELS[prev]}`)
       return { asama: prev }
     }),
 
