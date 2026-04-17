@@ -51,7 +51,6 @@ interface KarsitaraflarTabProps {
 const editSchema = z.object({
   sigorta_sirketi_id: z.number().int().nullable().optional(),
   avukat_id: z.number().int().nullable().optional(),
-  karsitaraf_ad: z.string().max(200).optional().or(z.literal('')),
   police_no: z.string().max(100).optional().or(z.literal('')),
   karsitaraf_plaka: z.string().max(10).optional().or(z.literal('')),
   surucu_ad: z.string().max(200).optional().or(z.literal('')),
@@ -87,7 +86,6 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
     defaultValues: {
       sigorta_sirketi_id: taraf?.sigorta_sirketi_id ?? null,
       avukat_id: taraf?.avukat_id ?? null,
-      karsitaraf_ad: taraf?.karsitaraf_ad ?? '',
       police_no: taraf?.police_no ?? '',
       karsitaraf_plaka: taraf?.karsitaraf_plaka ?? '',
       surucu_ad: taraf?.surucu_ad ?? '',
@@ -134,7 +132,6 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
       dosya_id: dosyaId,
       sigorta_sirketi_id: values.sigorta_sirketi_id ?? undefined,
       avukat_id: values.avukat_id ?? undefined,
-      karsitaraf_ad: values.karsitaraf_ad || undefined,
       police_no: values.police_no || undefined,
       karsitaraf_plaka: values.karsitaraf_plaka || undefined,
       surucu_ad: values.surucu_ad || undefined,
@@ -147,8 +144,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
 
   const isEmpty =
     !taraf ||
-    (!taraf.karsitaraf_ad &&
-      !taraf.avukat_id &&
+    (!taraf.avukat_id &&
       !taraf.police_no &&
       !taraf.karsitaraf_plaka &&
       !taraf.sigorta_sirketi_id)
@@ -221,19 +217,6 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="karsitaraf_ad"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Karşı Taraf Adı</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Av. Ad Soyad" {...field} />
-                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -374,7 +357,6 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InfoRow label="Karşı Sigorta Şirketi" value={karsitarafSirketAd} />
             <InfoRow label="Karşı Taraf Avukatı" value={taraf?.avukat?.ad ?? null} />
-            <InfoRow label="Karşı Taraf Adı" value={taraf?.karsitaraf_ad} />
             <InfoRow label="Poliçe No" value={taraf?.police_no} />
             <InfoRow label="Karşı Taraf Plaka No" value={taraf?.karsitaraf_plaka} />
           </div>
