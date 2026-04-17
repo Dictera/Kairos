@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { useForm } from 'react-hook-form'
@@ -39,6 +39,7 @@ type TarafRow = {
   surucu_plaka: string | null
   surucu_telefon: string | null
   surucu_police_no: string | null
+  avukat: { id: number; ad: string; tbb_sicil_no: string } | null
 }
 
 interface KarsitaraflarTabProps {
@@ -96,6 +97,18 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
       surucu_police_no: taraf?.surucu_police_no ?? '',
     },
   })
+
+  const selectedSirketId = form.watch('sigorta_sirketi_id')
+  const { data: avukatList } = useQuery(
+    trpc.ayarlar.avukat.bySirket.queryOptions(
+      { sigorta_sirketi_id: selectedSirketId ?? 0 },
+      { enabled: !!selectedSirketId }
+    )
+  )
+
+  useEffect(() => {
+    form.setValue('avukat_id', null)
+  }, [selectedSirketId, form])
 
   const upsertMutation = useMutation(
     trpc.dosya.upsertTaraf.mutationOptions({
@@ -170,6 +183,35 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
                           {sigortaSirketiList?.map((s) => (
                             <SelectItem key={s.id} value={s.id.toString()}>
                               {s.ad}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="avukat_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Karşı Taraf Avukatı</FormLabel>
+                      <Select
+                        onValueChange={(v) => field.onChange(v === 'none' ? null : parseInt(v, 10))}
+                        value={field.value?.toString() ?? 'none'}
+                        disabled={!selectedSirketId}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={selectedSirketId ? 'Avukat seçin...' : 'Önce sigorta şirketi seçin'} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">Yok / Bilinmiyor</SelectItem>
+                          {avukatList?.map((a) => (
+                            <SelectItem key={a.id} value={a.id.toString()}>
+                              {a.ad}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -326,6 +368,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InfoRow label="Karşı Sigorta Şirketi" value={karsitarafSirketAd} />
+            <InfoRow label="Karşı Taraf Avukatı" value={taraf?.avukat?.ad ?? null} />
             <InfoRow label="Karşı Vekil Adı" value={taraf?.karsitaraf_ad} />
             <InfoRow label="Poliçe No" value={taraf?.police_no} />
             <InfoRow label="Karşı Taraf Plaka No" value={taraf?.karsitaraf_plaka} />
