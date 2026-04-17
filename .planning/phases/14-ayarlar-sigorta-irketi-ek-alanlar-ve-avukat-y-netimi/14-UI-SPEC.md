@@ -48,7 +48,7 @@ Declared values (must be multiples of 4). Source: existing patterns in `ayarlar-
 Exceptions:
 - Action icon buttons: fixed 36px × 36px (`h-9 w-9`) — matches existing CRUD section pattern
 - Dialog inner spacing: `py-2` (8px) top/bottom, `space-y-4` (16px) between fields — matches existing Dialog pattern
-- Label-to-input gap: `space-y-1.5` (6px) — matches existing form pattern in `ayarlar-crud-section.tsx`
+- Label-to-input gap: `space-y-2` (8px) — next multiple of 4 above shadcn default; tight label-to-input gap consistent with the sm token
 
 ---
 
@@ -59,11 +59,11 @@ Source: `globals.css` CSS variables + existing component usage in `ayarlar-crud-
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px (text-sm) | 400 (regular) | 1.5 |
-| Label | 14px (text-sm) | 500 (medium, via Label component) | 1.25 |
 | Card heading | 16px (text-base) | 600 (semibold) | 1.2 |
-| Table header | 14px (text-sm) | 500 (medium) | 1.25 |
 
 Notes:
+- Label elements use the shadcn `Label` component which applies `font-medium` (500) internally via its own CSS class. This is a component-level concern, not a declared type-scale weight. Do not add a separate Label row to this table.
+- Table headers use `text-sm` at weight 400 (regular) — the `TableHead` component does not declare a separate weight token.
 - Dialog titles use `text-base font-semibold` — consistent with CardTitle pattern
 - Error messages use `text-sm text-destructive` — matches `ayarlar-crud-section.tsx` error pattern
 - Muted secondary text uses `text-sm text-muted-foreground` — for optional field hints, empty states
@@ -79,14 +79,14 @@ Source: `app/globals.css` — all values are CSS custom properties (oklch).
 | Dominant (60%) | `--background` | #F5F0E8 (warm beige) | Page background, form backgrounds |
 | Secondary (30%) | `--card` | ~#F7F3ED (warm white) | Card surfaces, dialog backgrounds, table rows |
 | Sidebar | `--sidebar` | #032539 (navy) | App sidebar — not modified in this phase |
-| Accent (10%) | `--primary` | #FA991C (orange) | Primary action buttons (Ekle, Kaydet), active states, focus ring |
+| Accent (10%) | `--primary` | #FA991C (orange) | Primary action buttons (Sigorta Şirketi Ekle, Kaydet), active states, focus ring |
 | Steel blue | `--accent` | #1C768F | No new usage in this phase (reserved for existing usages) |
 | Destructive | `--destructive` | ~#DC2626 (red) | Delete buttons, delete confirmation dialogs, validation errors |
 | Muted | `--muted-foreground` | ~#6B7280 | Placeholder text, empty state copy, optional field hints, `—` dash for null values |
 | Border | `--border` | ~#E5DDD4 | Input borders, table dividers, card borders |
 
 Accent (`--primary` orange) reserved for:
-- "Ekle" buttons (add new sigorta şirketi, add new avukat)
+- "Sigorta Şirketi Ekle" button (add new sigorta şirketi)
 - "Kaydet" buttons in all dialogs (create and edit)
 - Focus ring on active inputs (`--ring` = same orange token)
 - "Şirkete Bağla" / link-avukat-to-sirketi action button
@@ -125,13 +125,15 @@ New components to create (not installing new packages — composing from existin
 
 ## Layout Patterns
 
+**Primary focal point:** CardTitle "Sigorta Şirketleri" paired with the orange primary CTA "Sigorta Şirketi Ekle" in CardAction draws the initial eye. All other actions (edit, delete, expand, avukat management) are secondary and use icon-only or outline-variant buttons.
+
 ### Sigorta Şirketi Section (sigorta-sirketi-section.tsx)
 
 ```
 Card
   CardHeader
     CardTitle "Sigorta Şirketleri"
-    CardAction [Button "Ekle" size=sm + Plus icon]
+    CardAction [Button "Sigorta Şirketi Ekle" size=sm + Plus icon]
   CardContent
     Table
       TableHeader: Ad | Vergi No | İhtar Mail | [İşlemler — right-aligned]
@@ -262,7 +264,7 @@ FormField "Karşı Taraf Avukatı"
 
 | Element | Copy |
 |---------|------|
-| Primary CTA — sigorta şirketi | "Ekle" (with Plus icon) |
+| Primary CTA — sigorta şirketi | "Sigorta Şirketi Ekle" (with Plus icon) |
 | Primary CTA — avukat | "Avukat Ekle" (with Plus icon, outline variant) |
 | Primary CTA — save dialog | "Kaydet" |
 | Sigorta şirketi table columns | "Ad" / "Vergi No" / "İhtar Mail" / "İşlemler" |
