@@ -51,8 +51,6 @@ interface KarsitaraflarTabProps {
 const editSchema = z.object({
   sigorta_sirketi_id: z.number().int().nullable().optional(),
   avukat_id: z.number().int().nullable().optional(),
-  police_no: z.string().max(100).optional().or(z.literal('')),
-  karsitaraf_plaka: z.string().max(10).optional().or(z.literal('')),
   surucu_ad: z.string().max(200).optional().or(z.literal('')),
   surucu_soyad: z.string().max(200).optional().or(z.literal('')),
   surucu_plaka: z.string().max(10).optional().or(z.literal('')),
@@ -86,8 +84,6 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
     defaultValues: {
       sigorta_sirketi_id: taraf?.sigorta_sirketi_id ?? null,
       avukat_id: taraf?.avukat_id ?? null,
-      police_no: taraf?.police_no ?? '',
-      karsitaraf_plaka: taraf?.karsitaraf_plaka ?? '',
       surucu_ad: taraf?.surucu_ad ?? '',
       surucu_soyad: taraf?.surucu_soyad ?? '',
       surucu_plaka: taraf?.surucu_plaka ?? '',
@@ -132,8 +128,6 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
       dosya_id: dosyaId,
       sigorta_sirketi_id: values.sigorta_sirketi_id ?? undefined,
       avukat_id: values.avukat_id ?? undefined,
-      police_no: values.police_no || undefined,
-      karsitaraf_plaka: values.karsitaraf_plaka || undefined,
       surucu_ad: values.surucu_ad || undefined,
       surucu_soyad: values.surucu_soyad || undefined,
       surucu_plaka: values.surucu_plaka || undefined,
@@ -145,9 +139,12 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
   const isEmpty =
     !taraf ||
     (!taraf.avukat_id &&
-      !taraf.police_no &&
-      !taraf.karsitaraf_plaka &&
-      !taraf.sigorta_sirketi_id)
+      !taraf.sigorta_sirketi_id &&
+      !taraf.surucu_ad &&
+      !taraf.surucu_soyad &&
+      !taraf.surucu_plaka &&
+      !taraf.surucu_telefon &&
+      !taraf.surucu_police_no)
 
   const hasDriverInfo = !!(
     taraf?.surucu_ad || taraf?.surucu_soyad ||
@@ -161,7 +158,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Karşı Taraf Bilgileri</CardTitle>
+                <CardTitle className="text-base">Karşı Taraf Sigorta Bilgileri</CardTitle>
               </CardHeader>
               <CardContent>
                 <FormField
@@ -221,37 +218,11 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="police_no"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Poliçe No</FormLabel>
-                      <FormControl>
-                        <Input placeholder="XXXXX" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="karsitaraf_plaka"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Karşı Taraf Plaka No</FormLabel>
-                      <FormControl>
-                        <Input placeholder="34 XYZ 456" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Diğer Sürücü Bilgileri</CardTitle>
+                <CardTitle className="text-base">Karşı Taraf Bilgileri</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -332,7 +303,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Karşı Taraf Bilgileri</CardTitle>
+          <CardTitle className="text-base">Karşı Taraf Sigorta Bilgileri</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">Karşı taraf bilgisi henüz girilmedi.</p>
@@ -348,7 +319,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
     <div className="space-y-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base">Karşı Taraf Bilgileri</CardTitle>
+          <CardTitle className="text-base">Karşı Taraf Sigorta Bilgileri</CardTitle>
           <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
             Düzenle
           </Button>
@@ -357,15 +328,13 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InfoRow label="Karşı Sigorta Şirketi" value={karsitarafSirketAd} />
             <InfoRow label="Karşı Taraf Avukatı" value={taraf?.avukat?.ad ?? null} />
-            <InfoRow label="Poliçe No" value={taraf?.police_no} />
-            <InfoRow label="Karşı Taraf Plaka No" value={taraf?.karsitaraf_plaka} />
           </div>
         </CardContent>
       </Card>
       {hasDriverInfo && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Diğer Sürücü Bilgileri</CardTitle>
+            <CardTitle className="text-base">Karşı Taraf Bilgileri</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
