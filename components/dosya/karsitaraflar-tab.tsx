@@ -230,7 +230,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
                   name="karsitaraf_ad"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Karşı Vekil Adı</FormLabel>
+                      <FormLabel>Karşı Taraf Adı</FormLabel>
                       <FormControl>
                         <Input placeholder="Av. Ad Soyad" {...field} />
                       </FormControl>
@@ -374,7 +374,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InfoRow label="Karşı Sigorta Şirketi" value={karsitarafSirketAd} />
             <InfoRow label="Karşı Taraf Avukatı" value={taraf?.avukat?.ad ?? null} />
-            <InfoRow label="Karşı Vekil Adı" value={taraf?.karsitaraf_ad} />
+            <InfoRow label="Karşı Taraf Adı" value={taraf?.karsitaraf_ad} />
             <InfoRow label="Poliçe No" value={taraf?.police_no} />
             <InfoRow label="Karşı Taraf Plaka No" value={taraf?.karsitaraf_plaka} />
           </div>

@@ -1,7 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { db } from '@/lib/db'
-import { sigortaSirketi, mahkeme, sigortaTuru, avukat, avukatSigortaSirketi } from '@/lib/schema'
+import { sigortaSirketi, mahkeme, sigortaTuru, avukat, avukatSigortaSirketi, dosya, taraf } from '@/lib/schema'
 import { eq, asc, and, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { sigortaSirketiSchema, avukatSchema } from '@/lib/validators/ayarlar'
@@ -76,6 +76,8 @@ export const ayarlarRouter = createTRPCRouter({
     delete: protectedProcedure
       .input(z.object({ id: z.number().int() }))
       .mutation(async ({ input }) => {
+        await db.update(dosya).set({ karsitaraf_sigorta_id: null }).where(eq(dosya.karsitaraf_sigorta_id, input.id))
+        await db.update(taraf).set({ sigorta_sirketi_id: null }).where(eq(taraf.sigorta_sirketi_id, input.id))
         await db.delete(sigortaSirketi).where(eq(sigortaSirketi.id, input.id))
         return { success: true }
       }),
