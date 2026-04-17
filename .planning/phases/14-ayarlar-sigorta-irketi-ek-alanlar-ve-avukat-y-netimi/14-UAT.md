@@ -2,8 +2,8 @@
 status: complete
 phase: 14-ayarlar-sigorta-irketi-ek-alanlar-ve-avukat-y-netimi
 source: [14-01-SUMMARY.md, 14-02-SUMMARY.md, 14-03-SUMMARY.md, 14-04-SUMMARY.md, 14-05-SUMMARY.md]
-started: 2026-04-17T00:00:00Z
-updated: 2026-04-17T10:30:00Z
+started: 2026-04-17T10:45:00Z
+updated: 2026-04-17T11:15:00Z
 ---
 
 ## Current Test
@@ -12,100 +12,80 @@ updated: 2026-04-17T10:30:00Z
 
 ## Tests
 
-### 1. Ayarlar - Sigorta Şirketi Tablosu Görünümü
-expected: Ayarlar sayfasında Sigorta Şirketleri bölümüne git. Şirketler 4 sütunlu bir tabloda listelenmiş olmalı. Her satırın solunda bir genişletme (accordion) ikonu olmalı. Satıra tıklandığında alt kısımda o şirkete bağlı avukatlar alt listesi açılmalı.
+### 1. Sigorta Şirketi Tablosu Görünümü
+expected: Ayarlar sayfasına git. Sigorta Şirketleri bölümünü bul. Şirketler 4 sütunlu bir tabloda listelenmiş olmalı. Her satırın solunda genişletme (accordion) ikonu olmalı. Bir satıra tıklayınca o şirkete bağlı avukatların alt listesi açılmalı.
 result: issue
-reported: "3 sütun var, genişletme ikonu var ve çalışıyor. ama avukat ekleme yöntemini discussion'da bu şekilde kararlaştırmamıştık ayrıca mevcut olan sigorta şirketini silmeye çalıştığımda bu hatayı veriyor: FOREIGN KEY constraint failed"
-severity: blocker
+reported: "3 sütun var accordion butonu var ve çalışıyor"
+severity: minor
 
-### 2. Sigorta Şirketi Oluşturma/Düzenleme (6 alan)
-expected: Yeni Sigorta Şirketi ekle veya mevcut birini düzenle. Form 6 alan içermeli: Ad, Mersis No, Vergi No, Bağlı Olduğu Vergi Dairesi, İhtar Mail, KEP Mail. Kaydet'e tıklayınca tablo güncellenmeli.
-result: issue
-reported: "çalışıyor ama düzenleme yapınca bu hata çıkıyor: database is locked"
-severity: major
-
-### 3. Avukat Ekleme (Sigorta Şirketine Bağlı)
-expected: Ayarlar'da bir sigorta şirketi satırını genişlet. "Avukat Ekle" butonu görünmeli. Tıklayınca form diyalogu açılmalı: Ad, TBB Sicil No, IBAN, E-posta, Telefon alanları olmalı. Kaydet'e tıklayınca avukat alt listesinde görünmeli.
+### 2. Sigorta Şirketi Oluşturma (6 alan)
+expected: "Yeni Ekle" butonuna tıkla. Form diyalogu 6 alan içermeli: Ad, Mersis No, Vergi No, Bağlı Olduğu Vergi Dairesi, İhtar Mail, KEP Mail. Kaydet'e tıklayınca yeni şirket tabloda görünmeli.
 result: pass
 
-### 4. Avukat Silme / Bağlantı Kaldırma
-expected: Avukat alt listesinde bir avukatın yanındaki silme/kaldır butonuna tıkla. Bir onay diyalogu (AlertDialog) açılmalı. Onayla'ya tıklayınca avukat listeden kaldırılmalı.
+### 3. Sigorta Şirketi Düzenleme
+expected: Mevcut bir şirketi düzenle. Bir alanı değiştir ve kaydet. "database is locked" gibi bir hata çıkmamalı, değişiklik tabloya yansımalı.
 result: pass
 
-### 5. Karsıtaraflar - Cascading Avukat Dropdown
-expected: Bir dosyada Karşıtaraflar sekmesine git. Taraf düzenleme formunu aç. Sigorta Şirketi seçilmemişken Avukat dropdown'u devre dışı olmalı ("Önce sigorta şirketi seçin" yazısıyla). Sigorta şirketi seçince avukat dropdown'u o şirkete bağlı avukatları listelemelidir.
-result: issue
-reported: "çalışıyor ama bu karşı vekil adı neden formdan kaldırılmamış"
-severity: major
+### 4. Sigorta Şirketi Silme
+expected: Mevcut bir sigorta şirketini sil (avukat bağlı olmayan birini dene). Onay diyalogu açılmalı. Onayla'ya tıklayınca şirket listeden kaldırılmalı; "FOREIGN KEY constraint failed" hatası çıkmamalı.
+result: pass
 
-### 6. Karsıtaraflar - Görüntüleme Modunda Avukat
-expected: Bir tarafa avukat seçip kaydet. Görüntüleme modunda (view mode) "Karşı Taraf Avukatı" satırı avukatın adını göstermeli.
-result: issue
-reported: "avukat eklemeye çalıştığımda POST /api/trpc/dosya.upsertTaraf?batch=1 500 hatası veriyor, upsert çalışmıyor gibi router'da sorun olabilir"
-severity: blocker
+### 5. Avukat Ekleme (Şirkete Bağlı)
+expected: Bir sigorta şirketi satırını genişlet. "Avukat Ekle" butonu görünmeli. Tıklayınca form diyalogu açılmalı: Ad, TBB Sicil No, IBAN, E-posta, Telefon alanları olmalı. Kaydet'e tıklayınca avukat alt listesinde görünmeli.
+result: pass
 
-### 7. Karsıtaraflar - Şirket Değişince Avukat Sıfırlama
-expected: Bir taraf formunda sigorta şirketi seçip avukat seç. Ardından sigorta şirketini farklı bir şirkete değiştir. Avukat alanı otomatik olarak boşalmalı (null/placeholder'a dönmeli).
+### 6. Avukat Silme / Bağlantı Kaldırma
+expected: Avukat alt listesinde bir avukatın yanındaki silme/kaldır butonuna tıkla. Onay AlertDialog açılmalı. Onayla'ya tıklayınca avukat alt listeden kaldırılmalı.
+result: pass
+
+### 7. Karşıtaraflar - Karşı Vekil Alanı Kaldırıldı
+expected: Bir dosyada Karşıtaraflar sekmesine git. Taraf düzenleme formunu aç. Formda "Karşı Vekil Adı" veya benzeri bir serbest metin alanı OLMAMALI. Sadece Sigorta Şirketi ve Avukat dropdown'ları bulunmalı.
+result: pass
+
+### 8. Karşıtaraflar - Cascading Avukat Dropdown
+expected: Taraf düzenleme formunda: Sigorta Şirketi seçilmemişken Avukat dropdown'u devre dışı olmalı ("Önce sigorta şirketi seçin" yazısıyla). Sigorta şirketi seçince avukat dropdown'u o şirkete bağlı avukatları listelemelidir.
 result: issue
-reported: "sigorta şirketi seçmeye ve değiştirmeye çalıştığımda POST /api/trpc/dosya.upsertTaraf?batch=1 500 hatası alıyorum"
-severity: blocker
+reported: "devre dışı ama 'önce sigorta seçin' yazısı yok"
+severity: minor
+
+### 9. Karşıtaraflar - Taraf Kaydetme (avukat_id ile)
+expected: Bir tarafa sigorta şirketi seç, ardından avukat seç. Kaydet'e tıkla. 500 hatası çıkmamalı, taraf başarıyla kaydedilmeli.
+result: pass
+
+### 10. Karşıtaraflar - Görüntüleme Modunda Avukat
+expected: Avukatlı bir tarafı kaydedip görüntüleme moduna geç. "Karşı Taraf Avukatı" satırı avukatın adını göstermeli.
+result: pass
+
+### 11. Karşıtaraflar - Şirket Değişince Avukat Sıfırlama
+expected: Taraf formunda sigorta şirketi seç ve bir avukat seç. Ardından sigorta şirketini farklı bir şirketle değiştir. Avukat alanı otomatik boşalmalı (placeholder'a dönmeli).
+result: pass
 
 ## Summary
 
-total: 7
-passed: 2
-issues: 5
+total: 11
+passed: 9
+issues: 2
 pending: 0
 skipped: 0
 blocked: 0
 
 ## Gaps
 
-- truth: "Sigorta şirketi tablosu accordion açılınca avukat alt listesi görünmeli; silme işlemi hatasız çalışmalı"
+- truth: "Sigorta şirketi tablosu 4 sütunlu olmalı"
   status: failed
-  reason: "User reported: 3 sütun var, genişletme ikonu var ve çalışıyor. ama avukat ekleme yöntemini discussion'da bu şekilde kararlaştırmamıştık ayrıca mevcut olan sigorta şirketini silmeye çalıştığımda FOREIGN KEY constraint failed hatası veriyor"
-  severity: blocker
+  reason: "User reported: 3 sütun var accordion butonu var ve çalışıyor"
+  severity: minor
   test: 1
   root_cause: ""
   artifacts: []
   missing: []
   debug_session: ""
 
-- truth: "Sigorta şirketi düzenleme formu hatasız kaydedilmeli"
+- truth: "Avukat dropdown'u devre dışıyken 'Önce sigorta şirketi seçin' placeholder'ı görünmeli"
   status: failed
-  reason: "User reported: çalışıyor ama düzenleme yapınca bu hata çıkıyor: database is locked"
-  severity: major
-  test: 2
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
-
-- truth: "Karşıtaraflar formunda karsitaraf_vekil (serbest metin) alanı kaldırılmış olmalı, yerine avukat_id dropdown'u gelmeli"
-  status: failed
-  reason: "User reported: çalışıyor ama bu karşı vekil adı neden formdan kaldırılmamış"
-  severity: major
-  test: 5
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
-
-- truth: "dosya.upsertTaraf avukat_id içeren tarafı hatasız kaydedebilmeli"
-  status: failed
-  reason: "User reported: avukat eklemeye çalıştığımda POST /api/trpc/dosya.upsertTaraf?batch=1 500 hatası veriyor, upsert çalışmıyor gibi router'da sorun olabilir"
-  severity: blocker
-  test: 6
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
-
-- truth: "Sigorta şirketi değiştirilince avukat_id sıfırlanmalı, upsert hatasız çalışmalı"
-  status: failed
-  reason: "User reported: sigorta şirketi seçmeye ve değiştirmeye çalıştığımda POST /api/trpc/dosya.upsertTaraf?batch=1 500 hatası alıyorum"
-  severity: blocker
-  test: 7
+  reason: "User reported: devre dışı ama 'önce sigorta seçin' yazısı yok"
+  severity: minor
+  test: 8
   root_cause: ""
   artifacts: []
   missing: []
