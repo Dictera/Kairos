@@ -197,7 +197,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
                       <FormLabel>Karşı Taraf Avukatı</FormLabel>
                       <Select
                         onValueChange={(v) => field.onChange(v === 'none' ? null : parseInt(v, 10))}
-                        value={field.value?.toString() ?? 'none'}
+                        value={!selectedSirketId ? '' : (field.value?.toString() ?? 'none')}
                         disabled={!selectedSirketId}
                       >
                         <FormControl>
