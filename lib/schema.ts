@@ -1,4 +1,4 @@
-import { integer, text, real, sqliteTable, index } from 'drizzle-orm/sqlite-core'
+import { integer, text, real, sqliteTable, index, uniqueIndex } from 'drizzle-orm/sqlite-core'
 import { relations, sql } from 'drizzle-orm'
 
 // ── Lookup tables ────────────────────────────────────────────────────────────
@@ -30,7 +30,7 @@ export const avukatSigortaSirketi = sqliteTable('avukat_sigorta_sirketi', {
 }, (t) => [
   index('idx_avukat_sirketi_avukat').on(t.avukat_id),
   index('idx_avukat_sirketi_sirketi').on(t.sigorta_sirketi_id),
-  index('uniq_avukat_sirketi').on(t.avukat_id, t.sigorta_sirketi_id),
+  uniqueIndex('uniq_avukat_sirketi').on(t.avukat_id, t.sigorta_sirketi_id),
 ])
 
 export const sigortaTuru = sqliteTable('sigorta_turu', {
