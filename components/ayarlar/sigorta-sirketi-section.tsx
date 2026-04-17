@@ -49,11 +49,6 @@ import {
 import { sigortaSirketiSchema } from '@/lib/validators/ayarlar'
 import { AvukatFormDialog } from './avukat-form-dialog'
 
-type SigortaSirketiRow = NonNullable<
-  Awaited<ReturnType<ReturnType<typeof useTRPC>['ayarlar']['sigortaSirketi']['listWithAvukatlar']['queryOptions']>>
-> extends { queryFn: () => Promise<infer T> } ? T extends Array<infer U> ? U : never : never
-
-// Use a simpler inline type from the query data
 type ListItem = {
   id: number
   ad: string
