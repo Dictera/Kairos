@@ -25,8 +25,8 @@ export const dosyaSchema = z.object({
 export const tarafSchema = z.object({
   dosya_id: z.number().int(),
   sigorta_sirketi_id: z.number().int().nullable().optional(),
+  avukat_id: z.number().int().nullable().optional(),
   karsitaraf_ad: z.string().max(200).nullable().optional().or(z.literal('')),
-  karsitaraf_vekil: z.string().max(200).nullable().optional().or(z.literal('')),
   police_no: z.string().max(100).nullable().optional().or(z.literal('')),
   karsitaraf_plaka: z.string().max(10).nullable().optional().or(z.literal('')),
   surucu_ad: z.string().max(200).nullable().optional().or(z.literal('')),

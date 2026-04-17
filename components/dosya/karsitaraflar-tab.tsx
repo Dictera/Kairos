@@ -30,8 +30,8 @@ type TarafRow = {
   id: number
   dosya_id: number
   sigorta_sirketi_id: number | null
+  avukat_id: number | null
   karsitaraf_ad: string | null
-  karsitaraf_vekil: string | null
   police_no: string | null
   karsitaraf_plaka: string | null
   surucu_ad: string | null
@@ -49,8 +49,8 @@ interface KarsitaraflarTabProps {
 
 const editSchema = z.object({
   sigorta_sirketi_id: z.number().int().nullable().optional(),
+  avukat_id: z.number().int().nullable().optional(),
   karsitaraf_ad: z.string().max(200).optional().or(z.literal('')),
-  karsitaraf_vekil: z.string().max(200).optional().or(z.literal('')),
   police_no: z.string().max(100).optional().or(z.literal('')),
   karsitaraf_plaka: z.string().max(10).optional().or(z.literal('')),
   surucu_ad: z.string().max(200).optional().or(z.literal('')),
@@ -85,8 +85,8 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
     resolver: zodResolver(editSchema),
     defaultValues: {
       sigorta_sirketi_id: taraf?.sigorta_sirketi_id ?? null,
+      avukat_id: taraf?.avukat_id ?? null,
       karsitaraf_ad: taraf?.karsitaraf_ad ?? '',
-      karsitaraf_vekil: taraf?.karsitaraf_vekil ?? '',
       police_no: taraf?.police_no ?? '',
       karsitaraf_plaka: taraf?.karsitaraf_plaka ?? '',
       surucu_ad: taraf?.surucu_ad ?? '',
@@ -115,8 +115,8 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
     upsertMutation.mutate({
       dosya_id: dosyaId,
       sigorta_sirketi_id: values.sigorta_sirketi_id ?? undefined,
+      avukat_id: values.avukat_id ?? undefined,
       karsitaraf_ad: values.karsitaraf_ad || undefined,
-      karsitaraf_vekil: values.karsitaraf_vekil || undefined,
       police_no: values.police_no || undefined,
       karsitaraf_plaka: values.karsitaraf_plaka || undefined,
       surucu_ad: values.surucu_ad || undefined,
@@ -130,7 +130,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
   const isEmpty =
     !taraf ||
     (!taraf.karsitaraf_ad &&
-      !taraf.karsitaraf_vekil &&
+      !taraf.avukat_id &&
       !taraf.police_no &&
       !taraf.karsitaraf_plaka &&
       !taraf.sigorta_sirketi_id)

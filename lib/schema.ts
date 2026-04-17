@@ -6,7 +6,32 @@ import { relations, sql } from 'drizzle-orm'
 export const sigortaSirketi = sqliteTable('sigorta_sirketi', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   ad: text('ad').notNull(),
+  mersis_no: text('mersis_no'),
+  vergi_no: text('vergi_no').notNull().default(''),
+  bagli_oldugu_vergi_dairesi: text('bagli_oldugu_vergi_dairesi'),
+  ihtar_mail: text('ihtar_mail'),
+  kep_mail: text('kep_mail'),
 })
+
+export const avukat = sqliteTable('avukat', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  ad: text('ad').notNull(),
+  tbb_sicil_no: text('tbb_sicil_no').notNull(),
+  iban: text('iban'),
+  eposta: text('eposta'),
+  telefon: text('telefon'),
+  created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
+  updated_at: text('updated_at').notNull().default(sql`(datetime('now'))`),
+})
+
+export const avukatSigortaSirketi = sqliteTable('avukat_sigorta_sirketi', {
+  avukat_id: integer('avukat_id').notNull().references(() => avukat.id, { onDelete: 'cascade' }),
+  sigorta_sirketi_id: integer('sigorta_sirketi_id').notNull().references(() => sigortaSirketi.id, { onDelete: 'cascade' }),
+}, (t) => [
+  index('idx_avukat_sirketi_avukat').on(t.avukat_id),
+  index('idx_avukat_sirketi_sirketi').on(t.sigorta_sirketi_id),
+  index('uniq_avukat_sirketi').on(t.avukat_id, t.sigorta_sirketi_id),
+])
 
 export const sigortaTuru = sqliteTable('sigorta_turu', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -186,8 +211,8 @@ export const taraf = sqliteTable('taraf', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   dosya_id: integer('dosya_id').notNull().references(() => dosya.id, { onDelete: 'cascade' }),
   sigorta_sirketi_id: integer('sigorta_sirketi_id').references(() => sigortaSirketi.id),
+  avukat_id: integer('avukat_id').references(() => avukat.id, { onDelete: 'set null' }),
   karsitaraf_ad: text('karsitaraf_ad'),
-  karsitaraf_vekil: text('karsitaraf_vekil'),
   police_no: text('police_no'),
   karsitaraf_plaka: text('karsitaraf_plaka'),     // nullable — D-12
   surucu_ad: text('surucu_ad'),                    // nullable — surucu (driver) info
@@ -234,6 +259,7 @@ export const dosyaRelations = relations(dosya, ({ one, many }) => ({
 export const tarafRelations = relations(taraf, ({ one }) => ({
   dosya: one(dosya, { fields: [taraf.dosya_id], references: [dosya.id] }),
   sigortaSirketi: one(sigortaSirketi, { fields: [taraf.sigorta_sirketi_id], references: [sigortaSirketi.id] }),
+  avukat: one(avukat, { fields: [taraf.avukat_id], references: [avukat.id] }),
 }))
 
 export const durusmaRelations = relations(durusma, ({ one }) => ({
@@ -244,6 +270,17 @@ export const sigortaSirketiRelations = relations(sigortaSirketi, ({ many }) => (
   dosyalar: many(dosya),
   taraflar: many(taraf),
   muvekkilSigortaDosyalar: many(dosya, { relationName: 'muvekkilSigorta' }),
+  avukatlar: many(avukatSigortaSirketi),
+}))
+
+export const avukatRelations = relations(avukat, ({ many }) => ({
+  sigortaSirketleri: many(avukatSigortaSirketi),
+  taraflar: many(taraf),
+}))
+
+export const avukatSigortaSirketiRelations = relations(avukatSigortaSirketi, ({ one }) => ({
+  avukat: one(avukat, { fields: [avukatSigortaSirketi.avukat_id], references: [avukat.id] }),
+  sigortaSirketi: one(sigortaSirketi, { fields: [avukatSigortaSirketi.sigorta_sirketi_id], references: [sigortaSirketi.id] }),
 }))
 
 export const sigortaTuruRelations = relations(sigortaTuru, ({ many }) => ({
