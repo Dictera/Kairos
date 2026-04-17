@@ -5,29 +5,11 @@ import { useTRPC } from '@/lib/trpc/context'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AyarlarCrudSection } from './ayarlar-crud-section'
+import { SigortaSirketiSection } from './sigorta-sirketi-section'
 
 export function AyarlarPage() {
   const trpc = useTRPC()
   const qc = useQueryClient()
-
-  // Sigorta Şirketleri
-  const sigortaOpts = trpc.ayarlar.sigortaSirketi.list.queryOptions()
-  const { data: sigortaList, isLoading: sigortaLoading } = useQuery(sigortaOpts)
-  const addSigorta = useMutation(
-    trpc.ayarlar.sigortaSirketi.create.mutationOptions({
-      onSuccess: () => qc.invalidateQueries({ queryKey: sigortaOpts.queryKey }),
-    })
-  )
-  const editSigorta = useMutation(
-    trpc.ayarlar.sigortaSirketi.update.mutationOptions({
-      onSuccess: () => qc.invalidateQueries({ queryKey: sigortaOpts.queryKey }),
-    })
-  )
-  const delSigorta = useMutation(
-    trpc.ayarlar.sigortaSirketi.delete.mutationOptions({
-      onSuccess: () => qc.invalidateQueries({ queryKey: sigortaOpts.queryKey }),
-    })
-  )
 
   // Mahkemeler
   const mahkemeOpts = trpc.ayarlar.mahkeme.list.queryOptions()
@@ -69,14 +51,7 @@ export function AyarlarPage() {
 
   return (
     <div className="space-y-8">
-      <AyarlarCrudSection
-        title="Sigorta Şirketleri"
-        items={sigortaList}
-        isLoading={sigortaLoading}
-        onAdd={async (v) => { await addSigorta.mutateAsync(v) }}
-        onEdit={async (id, v) => { await editSigorta.mutateAsync({ id, ...v }) }}
-        onDelete={async (id) => { await delSigorta.mutateAsync({ id }) }}
-      />
+      <SigortaSirketiSection />
 
       <Separator />
 
