@@ -81,13 +81,17 @@ export function AvukatFormDialog({
   const createMutation = useMutation(
     trpc.ayarlar.avukat.create.mutationOptions({
       onSuccess: async (row) => {
-        await linkMutation.mutateAsync({
-          avukat_id: row.id,
-          sigorta_sirketi_id: sigortaSirketiId,
-        })
-        toast.success('Kaydedildi.')
-        onSuccess?.()
-        onOpenChange(false)
+        try {
+          await linkMutation.mutateAsync({
+            avukat_id: row.id,
+            sigorta_sirketi_id: sigortaSirketiId,
+          })
+          toast.success('Kaydedildi.')
+          onSuccess?.()
+          onOpenChange(false)
+        } catch {
+          toast.error('Avukat oluşturuldu fakat şirkete bağlanamadı. Lütfen tekrar deneyin.')
+        }
       },
       onError: () => {
         toast.error('Kaydedilemedi. Lütfen tekrar deneyin.')
