@@ -1,7 +1,7 @@
 ---
 phase: 13
 slug: tab-cleanup-ui-ux
-status: draft
+status: planned
 nyquist_compliant: false
 wave_0_complete: false
 created: 2026-04-14

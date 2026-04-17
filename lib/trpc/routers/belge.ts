@@ -2,6 +2,7 @@ import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { db } from '@/lib/db'
 import { belge, BELGE_KATEGORILER } from '@/lib/schema'
+import { logOlay } from './olay'
 import { eq, desc } from 'drizzle-orm'
 import { z } from 'zod'
 import fs from 'fs'
@@ -30,6 +31,7 @@ export const belgeRouter = createTRPCRouter({
     }))
     .mutation(async ({ input }) => {
       const [row] = await db.insert(belge).values(input).returning()
+      await logOlay(input.dosya_id, 'belge_eklendi', `Belge eklendi: ${input.dosya_adi}`)
       return row
     }),
 
@@ -61,6 +63,7 @@ export const belgeRouter = createTRPCRouter({
         }
       }
       
+      await logOlay(existing[0].dosya_id, 'belge_silindi', `Belge silindi: ${existing[0].dosya_adi}`)
       return { success: true }
     }),
 })

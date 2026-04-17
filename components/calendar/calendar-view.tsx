@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday } from "date-fns"
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, getDay } from "date-fns"
 import { tr } from "date-fns/locale/tr"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
@@ -51,6 +51,11 @@ export function CalendarView() {
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd })
+
+  // Monday-first offset: how many empty cells to prepend before day 1
+  // getDay() returns 0=Sun, 1=Mon, ..., 6=Sat
+  // Convert to Monday-first: Mon=0, Tue=1, ..., Sun=6
+  const startOffset = (getDay(monthStart) + 6) % 7
 
   const { data } = useQuery({
     ...trpc.calendar.getMonthEvents.queryOptions({
@@ -187,6 +192,11 @@ export function CalendarView() {
 
       {/* Calendar grid */}
       <div className="flex-1 grid grid-cols-7 gap-1 auto-rows-fr">
+        {/* Leading empty cells to align day 1 with the correct weekday */}
+        {Array.from({ length: startOffset }).map((_, i) => (
+          <div key={`offset-${i}`} />
+        ))}
+
         {daysInMonth.map((day) => {
           const dateStr = format(day, "yyyy-MM-dd")
           const dayEvents = eventsMap.get(dateStr) || []

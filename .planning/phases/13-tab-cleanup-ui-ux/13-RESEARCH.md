@@ -30,7 +30,7 @@ Phase 13 addresses four major areas: (1) replacing the empty "Notlar/Zaman Çize
 - **D-14:** Mahkeme aşamaları yeniden yapılandırılacak
 - **D-15:** Mahkeme veri noktaları güncellenecek
 - **D-16:** Belge kategorileri genişletilecek
-- **D-17:** Yüklenen belgenin dosya adı, kategori adıyla otomatik eşleşecek/önerilecek
+- **D-17:** Yüklenen belgenin dosya adı, seçilen kategori adıyla otomatik değiştirilecek (ör: "1.pdf" + "İhtarname" kategorisi → "İhtarname.pdf" olarak kaydedilecek)
 - **D-18:** Müvekkil listesinde sütun düzeni ve genel görünüm/his iyileştirmeleri
 - **D-19:** Müvekkil formunda alan gruplandırması, düzen ve UX iyileştirmeleri
 - **D-20:** Müvekkil detay sayfasında düzen ve okunaklık iyileştirmeleri
@@ -59,7 +59,7 @@ Phase 13 addresses four major areas: (1) replacing the empty "Notlar/Zaman Çize
 | ID | Description | Research Support |
 |----|-------------|------------------|
 | TAB-01 | Boş "Notlar/Zaman Çizelgesi" sekmesi değerlendirilir — doldurulur veya kaldırılır | New `not` table + `olay_gunlugu` table design; NoteList + Timeline UI components |
-| TAB-02 | Sekme içeriklerinde gerekli bölüm ekleme/çıkarma yapılır | Genel Bilgiler new columns; STK/Mahkeme stage restructure + data migration; Belge category expansion + filename suggestion |
+| TAB-02 | Sekme içeriklerinde gerekli bölüm ekleme/çıkarma yapılır | Genel Bilgiler new columns; STK/Mahkeme stage restructure + data migration; Belge category expansion + category-based file renaming |
 | UIUX-01 | Dosyalar ve Müvekkiller listesi/formlarında genel UI/UX iyileştirmeleri | List column reorder; form field grouping; detail page layout; IBAN field addition |
 </phase_requirements>
 
@@ -478,36 +478,47 @@ const belgeKategoriEnum = z.enum(BELGE_KATEGORILER)
 // Remove old hardcoded enum definition
 ```
 
-### Filename-to-Category Suggestion (D-17)
+### Category-Based File Renaming (D-17)
 ```typescript
-// components/belge/belge-upload.tsx — Auto-suggest category from filename
-function suggestCategory(filename: string): string | null {
-  const lower = filename.toLowerCase()
-  const mapping: Record<string, string> = {
-    'ihtar': 'İhtarname',
-    'dilekçe': 'Dilekçe',
-    'dilekce': 'Dilekçe',
-    'karar': 'Karar',
-    'poliçe': 'Poliçe',
-    'police': 'Poliçe',
-    'vekalet': 'Vekaletname',
-    'rapor': 'Bilirkişi Raporu',
-    'tutanak': 'Tutanak',
-    'tebligat': 'Tebliği',
-  }
-  for (const [keyword, category] of Object.entries(mapping)) {
-    if (lower.includes(keyword)) return category
-  }
-  return null
+// When user selects a category, rename uploaded file to match category name
+// Example: upload "1.pdf" + select "İhtarname" → saved as "İhtarname.pdf"
+
+// lib/trpc/routers/belge.ts — In upload mutation, derive stored filename from category
+import { BELGE_KATEGORILER } from '@/lib/schema'
+import { extname } from 'path'
+
+function getCategoryFilename(originalFilename: string, kategori: string): string {
+  const ext = extname(originalFilename) // ".pdf", ".jpg", ".docx" etc.
+  const sanitized = kategori.replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ\s]/g, '').trim()
+  return `${sanitized}${ext}` // e.g. "İhtarname.pdf"
 }
 
-// In BelgeUpload component: when file selected, auto-set kategori if match found
-const handleFile = useCallback((selectedFile: File) => {
-  // ... existing validation ...
-  setFile(selectedFile)
-  const suggested = suggestCategory(selectedFile.name)
-  if (suggested && !kategori) setKategori(suggested)
-}, [kategori])
+// In create mutation:
+create: protectedProcedure
+  .input(z.object({
+    dosya_id: z.number().int(),
+    kategori: z.enum(BELGE_KATEGORILER),
+    file: z.custom<File>(),
+  }))
+  .mutation(async ({ input }) => {
+    const storedName = getCategoryFilename(input.file.name, input.kategori)
+    // Write file to disk with storedName, save storedName in DB
+    // ...
+  })
+
+// Edge case: multiple files with same category (e.g. 2 İhtarname)
+// Solution: append counter suffix — "İhtarname.pdf", "İhtarname-2.pdf"
+async function getUniqueFilename(dir: string, baseName: string): Promise<string> {
+  const ext = extname(baseName)
+  const stem = baseName.slice(0, -ext.length)
+  let candidate = baseName
+  let counter = 2
+  while (existsSync(path.join(dir, candidate))) {
+    candidate = `${stem}-${counter}${ext}`
+    counter++
+  }
+  return candidate
+}
 ```
 
 ### Replacing EmptyTabContent with Notes + Timeline (D-01, D-02)

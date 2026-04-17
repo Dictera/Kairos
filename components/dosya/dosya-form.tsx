@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -80,43 +79,31 @@ interface DosyaFormProps {
   dosyaId?: number
 }
 
-export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
+// Inner form component — only mounted once all data is available, so defaultValues
+// are correct from the first render and Radix UI Select components initialise properly.
+function DosyaFormInner({
+  mode,
+  dosyaId,
+  defaultValues,
+  sigortaTuruList,
+  sigortaSirketiList,
+  muvekkilData,
+}: {
+  mode: 'create' | 'edit'
+  dosyaId?: number
+  defaultValues: FormValues
+  sigortaTuruList: Array<{ id: number; ad: string }>
+  sigortaSirketiList: Array<{ id: number; ad: string }>
+  muvekkilData: { rows: Array<{ id: number; ad: string; soyad: string }> }
+}) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const trpc = useTRPC()
 
-  const { data: sigortaTuruList } = useQuery(trpc.ayarlar.sigortaTuru.list.queryOptions())
-  const { data: sigortaSirketiList } = useQuery(trpc.ayarlar.sigortaSirketi.list.queryOptions())
-  const { data: muvekkilData } = useQuery(trpc.muvekkil.list.queryOptions({ pageSize: 100 }))
-  const { data: dosyaData, isLoading: dosyaLoading } = useQuery({
-    ...trpc.dosya.getById.queryOptions({ id: dosyaId! }),
-    enabled: mode === 'edit' && !!dosyaId,
-  })
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: EMPTY_DEFAULTS,
+    defaultValues,
   })
-
-  // Populate form when edit data loads
-  useEffect(() => {
-    if (dosyaData && mode === 'edit') {
-      form.reset({
-        muvekkil_id: dosyaData.muvekkil_id,
-        dosya_no: dosyaData.dosya_no,
-        tur: dosyaData.tur as (typeof TUR_VALUES)[number],
-        sigorta_turu_id: dosyaData.sigorta_turu_id ?? null,
-        karsitaraf_sigorta_id: dosyaData.karsitaraf_sigorta_id ?? null,
-        muvekkil_sigorta_id: dosyaData.muvekkil_sigorta_id ?? null,
-        talep_tutari: dosyaData.talep_tutari ?? null,
-        muvekkil_plaka: dosyaData.muvekkil_plaka ?? '',
-        hasar_dosya_no: dosyaData.hasar_dosya_no ?? '',
-        kaza_tarihi: dosyaData.kaza_tarihi ?? '',
-        kusur_orani_karsi: dosyaData.kusur_orani_karsi ?? null,
-        aciklama: dosyaData.aciklama ?? '',
-      })
-    }
-  }, [dosyaData, mode, form])
 
   const createMutation = useMutation(
     trpc.dosya.create.mutationOptions({
@@ -200,18 +187,6 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
     }
   }
 
-  const lookupsReady = !!sigortaTuruList && !!sigortaSirketiList && !!muvekkilData
-
-  if (mode === 'edit' && (dosyaLoading || !lookupsReady)) {
-    return (
-      <div className="max-w-2xl space-y-4">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-10 w-full" />
-        ))}
-      </div>
-    )
-  }
-
   const isPending = createMutation.isPending || updateMutation.isPending
 
   const kusur_orani_karsi = form.watch('kusur_orani_karsi')
@@ -257,7 +232,7 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {muvekkilData?.rows.map((m) => (
+                      {muvekkilData.rows.map((m) => (
                         <SelectItem key={m.id} value={m.id.toString()}>
                           {m.ad} {m.soyad}
                         </SelectItem>
@@ -317,7 +292,7 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">Seçiniz</SelectItem>
-                      {sigortaTuruList?.map((s) => (
+                      {sigortaTuruList.map((s) => (
                         <SelectItem key={s.id} value={s.id.toString()}>
                           {s.ad}
                         </SelectItem>
@@ -347,7 +322,7 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">Yok / Bilinmiyor</SelectItem>
-                      {sigortaSirketiList?.map((s) => (
+                      {sigortaSirketiList.map((s) => (
                         <SelectItem key={s.id} value={s.id.toString()}>
                           {s.ad}
                         </SelectItem>
@@ -377,7 +352,7 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">Yok / Bilinmiyor</SelectItem>
-                      {sigortaSirketiList?.map((s) => (
+                      {sigortaSirketiList.map((s) => (
                         <SelectItem key={s.id} value={s.id.toString()}>
                           {s.ad}
                         </SelectItem>
@@ -427,7 +402,7 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
                 <FormItem>
                   <FormLabel>Hasar Dosya No</FormLabel>
                   <FormControl>
-                    <Input placeholder="Sigorta Şirketi - 111" {...field} />
+                    <Input placeholder="Sigorta Şirketi - 111" value={field.value ?? ''} onChange={field.onChange} onBlur={field.onBlur} name={field.name} ref={field.ref} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -484,7 +459,7 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
               />
               <div className="flex items-end">
                 <div className="text-sm text-muted-foreground">
-                  Müvekkil Kusur Oranı: {kusur_orani_karsi !== null && kusur_orani_karsi >= 0 ? `${100 - kusur_orani_karsi}%` : '—'}
+                  Müvekkil Kusur Oranı: {kusur_orani_karsi != null && kusur_orani_karsi >= 0 ? `${100 - kusur_orani_karsi}%` : '—'}
                 </div>
               </div>
             </div>
@@ -569,5 +544,71 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
         </form>
       </Form>
     </div>
+  )
+}
+
+export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
+  const trpc = useTRPC()
+
+  const { data: sigortaTuruList } = useQuery(trpc.ayarlar.sigortaTuru.list.queryOptions())
+  const { data: sigortaSirketiList } = useQuery(trpc.ayarlar.sigortaSirketi.list.queryOptions())
+  const { data: muvekkilData } = useQuery(trpc.muvekkil.list.queryOptions({ pageSize: 100 }))
+  const { data: dosyaData, isLoading: dosyaLoading } = useQuery({
+    ...trpc.dosya.getById.queryOptions({ id: dosyaId! }),
+    enabled: mode === 'edit' && !!dosyaId,
+  })
+
+  const lookupsReady = !!sigortaTuruList && !!sigortaSirketiList && !!muvekkilData
+
+  if (mode === 'edit' && (dosyaLoading || !lookupsReady)) {
+    return (
+      <div className="max-w-2xl space-y-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-10 w-full" />
+        ))}
+      </div>
+    )
+  }
+
+  // For create mode, also wait for lookups
+  if (mode === 'create' && !lookupsReady) {
+    return (
+      <div className="max-w-2xl space-y-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-10 w-full" />
+        ))}
+      </div>
+    )
+  }
+
+  // Build defaultValues from loaded data — ensures Radix UI Select components
+  // are initialised with the correct value on first mount (not patched via reset()).
+  const defaultValues: FormValues = mode === 'edit' && dosyaData
+    ? {
+        muvekkil_id: dosyaData.muvekkil_id,
+        dosya_no: dosyaData.dosya_no,
+        tur: dosyaData.tur as (typeof TUR_VALUES)[number],
+        sigorta_turu_id: dosyaData.sigorta_turu_id ?? null,
+        karsitaraf_sigorta_id: dosyaData.karsitaraf_sigorta_id ?? null,
+        muvekkil_sigorta_id: dosyaData.muvekkil_sigorta_id ?? null,
+        talep_tutari: dosyaData.talep_tutari ?? null,
+        muvekkil_plaka: dosyaData.muvekkil_plaka ?? '',
+        hasar_dosya_no: dosyaData.hasar_dosya_no ?? '',
+        kaza_tarihi: dosyaData.kaza_tarihi ?? '',
+        kusur_orani_karsi: dosyaData.kusur_orani_karsi ?? null,
+        aciklama: dosyaData.aciklama ?? '',
+      }
+    : EMPTY_DEFAULTS
+
+  return (
+    <DosyaFormInner
+      key={dosyaData?.id ?? 'create'}
+      mode={mode}
+      dosyaId={dosyaId}
+      defaultValues={defaultValues}
+      sigortaTuruList={sigortaTuruList!}
+      sigortaSirketiList={sigortaSirketiList!}
+      muvekkilData={muvekkilData!}
+    />
   )
 }

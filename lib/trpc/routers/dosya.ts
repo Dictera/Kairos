@@ -183,6 +183,7 @@ export const dosyaRouter = createTRPCRouter({
         .where(eq(dosya.id, id))
         .returning()
       if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
+      await logOlay(id, 'guncelleme', 'Dosya bilgileri güncellendi')
       return row
     }),
 

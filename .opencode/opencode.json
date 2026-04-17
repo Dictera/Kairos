@@ -7,5 +7,27 @@
     "external_directory": {
       "D:/sigorta-takip/.opencode/get-shit-done/*": "allow"
     }
+  },
+  "mcp": {
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}"
+      }
+    },
+    "brave": {
+      "type": "local",
+      "command": ["npx.cmd", "-y", "@brave/brave-search-mcp-server"],
+      "enabled": true,
+      "environment": {
+        "BRAVE_API_KEY": "{env:BRAVE_API_KEY}"
+      }
+    },
+    "playwright": {
+      "type": "local",
+      "command": ["npx.cmd", "-y", "@playwright/mcp@latest"],
+      "enabled": true
+    }
   }
 }

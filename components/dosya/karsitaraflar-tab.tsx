@@ -109,6 +109,20 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
     form.setValue('avukat_id', null)
   }, [selectedSirketId, form])
 
+  const handleStartEditing = () => {
+    isMounted.current = false
+    form.reset({
+      sigorta_sirketi_id: taraf?.sigorta_sirketi_id ?? null,
+      avukat_id: taraf?.avukat_id ?? null,
+      surucu_ad: taraf?.surucu_ad ?? '',
+      surucu_soyad: taraf?.surucu_soyad ?? '',
+      surucu_plaka: taraf?.surucu_plaka ?? '',
+      surucu_telefon: taraf?.surucu_telefon ?? '',
+      surucu_police_no: taraf?.surucu_police_no ?? '',
+    })
+    setIsEditing(true)
+  }
+
   const upsertMutation = useMutation(
     trpc.dosya.upsertTaraf.mutationOptions({
       onSuccess: () => {
@@ -307,7 +321,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">Karşı taraf bilgisi henüz girilmedi.</p>
-          <Button variant="outline" onClick={() => setIsEditing(true)}>
+          <Button variant="outline" onClick={handleStartEditing}>
             Düzenle
           </Button>
         </CardContent>
@@ -320,7 +334,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Karşı Taraf Sigorta Bilgileri</CardTitle>
-          <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+          <Button variant="outline" size="sm" onClick={handleStartEditing}>
             Düzenle
           </Button>
         </CardHeader>
