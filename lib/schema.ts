@@ -209,7 +209,7 @@ export const dosya = sqliteTable('dosya', {
 
 export const taraf = sqliteTable('taraf', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  dosya_id: integer('dosya_id').notNull().references(() => dosya.id, { onDelete: 'cascade' }),
+  dosya_id: integer('dosya_id').notNull().unique().references(() => dosya.id, { onDelete: 'cascade' }),
   sigorta_sirketi_id: integer('sigorta_sirketi_id').references(() => sigortaSirketi.id),
   avukat_id: integer('avukat_id').references(() => avukat.id, { onDelete: 'set null' }),
   karsitaraf_ad: text('karsitaraf_ad'),
