@@ -135,7 +135,12 @@ export const dosyaRouter = createTRPCRouter({
           sigortaTuru: { columns: { id: true, ad: true } },
           karsitarafSigorta: { columns: { id: true, ad: true } },
           muvekkilSigorta: { columns: { id: true, ad: true } },
-          taraflar: true,
+          taraflar: {
+            with: {
+              sigortaSirketi: true,
+              avukat: true,
+            },
+          },
         },
       })
       if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
