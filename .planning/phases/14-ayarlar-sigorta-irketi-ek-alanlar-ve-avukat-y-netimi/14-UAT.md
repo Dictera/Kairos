@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 14-ayarlar-sigorta-irketi-ek-alanlar-ve-avukat-y-netimi
 source: [14-01-SUMMARY.md, 14-02-SUMMARY.md, 14-03-SUMMARY.md, 14-04-SUMMARY.md, 14-05-SUMMARY.md]
 started: 2026-04-17T10:45:00Z
@@ -76,17 +76,20 @@ blocked: 0
   reason: "User reported: 3 sütun var accordion butonu var ve çalışıyor"
   severity: minor
   test: 1
-  root_cause: ""
+  root_cause: "Tablo gerçekte 4 sütunlu (Ad, Vergi No, İhtar Mail, İşlemler). Accordion chevron İşlemler kolonuna gömülü. Spec karşılanmış — kullanıcı İşlemler kolonunu ayrı saymamış. Kod değişikliği gerekmez."
   artifacts: []
   missing: []
   debug_session: ""
 
 - truth: "Avukat dropdown'u devre dışıyken 'Önce sigorta şirketi seçin' placeholder'ı görünmeli"
-  status: failed
+  status: fixed
   reason: "User reported: devre dışı ama 'önce sigorta seçin' yazısı yok"
   severity: minor
   test: 8
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "Radix Select, value prop verildiğinde placeholder'ı göstermez. value her zaman 'none' veya gerçek ID ile doluydu. Fix: !selectedSirketId iken value='' geçilerek placeholder gösterildi."
+  artifacts:
+    - path: "components/dosya/karsitaraflar-tab.tsx"
+      issue: "value prop always set, preventing placeholder display"
+  missing:
+    - "Conditionally pass empty string as value when Select is disabled"
   debug_session: ""
