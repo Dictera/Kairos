@@ -28,16 +28,11 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 - ✓ **Müvekkil E-posta Kaldırma (MUVEK-06)** — v1.1: Müvekkil formlarından e-posta alanı kaldırma
 - ✓ **Sürücü Bilgileri (TARAF-06, 07, 08, 09, 10)** — v1.1: Dosya > Taraflar bölümüne sürücü bilgileri ekleme (Ad, Soyad, Plaka, Telefon, Poliçe No) + Turkish phone regex + UI Card
 - ✓ **Sekme Temizliği ve UI/UX (TAB-01, TAB-02, UIUX-01)** — v1.1: Notlar/Zaman Çizelgesi tab replacement with Notes CRUD + Activity Timeline; Genel Bilgiler new fields; Müvekkil IBAN + form grouping
+- ✓ **Avukat Yönetimi (Phase 14)** — v1.1: Avukat tablosu, sigorta şirketi ilişkisi (avukat_sigorta_sirketi join), karşıtaraf vekil alanı avukat seçimine dönüştürüldü; Ayarlar ekranından CRUD yönetimi
 
-## Current Milestone: v1.1 — ✓ COMPLETE
+## Next Milestone: v1.2 — Not Planned
 
-**Goal:** Müvekkil ve dosya yönetiminde temizlik ve iyileştirme — gereksiz alan çıkarma, yeni alan ekleme, sekme düzeni ve UI/UX.
-
-**Target features:**
-- Müvekkil formlarından e-posta alanı kaldırma ✓
-- Dosya > Taraflar bölümüne diğer sürücü bilgileri ekleme (Ad, Soyad, Plaka, Telefon, Poliçe No) ✓
-- Mevcut sekmelerde bölüm ekleme/çıkarma ✓
-- Dosyalar ve Müvekkiller genel UI/UX iyileştirmeleri ✓
+No requirements defined yet. Start with `/gsd-new-milestone`.
 
 ### Out of Scope
 
@@ -78,8 +73,11 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 | Pure deadline functions (no DB imports) | Testability, timezone safety | ✓ Confirmed — 13 unit tests pass |
 | Turkish locale (dd.MM.yyyy, Pazartesi hafta başı) | Turkish legal context | ✓ Confirmed |
 | Arial TTF for PDF (instead of Roboto) | Google Fonts blocked by network | ✓ Confirmed — all Turkish chars render |
-| Navy + Turuncu color palette | Brand refresh planned for v1.1 | — Pending (Phase 8) |
-| DatePickerField shared component | Standardization needed | — Pending (Phase 9) |
+| Navy + Turuncu color palette | Brand refresh planned for v1.1 | ✓ Confirmed — shipped Phase 8 |
+| DatePickerField shared component | Standardization needed | ✓ Confirmed — shipped Phase 9 |
+| karsitaraf_vekil → avukat_id FK | Free-text vekil replaced with structured avukat entity for better data integrity | ✓ Confirmed — Phase 14; stale template variable remains as tech debt |
+| logOlay activity log | All dosya/not/belge mutations hook into olay_gunlugu for Timeline | ✓ Confirmed — Phase 13; finans/sure mutations not yet hooked |
+| Drizzle relations graph | query.with() enables eager loading of avukat on taraf | ✓ Confirmed — Phase 14 |
 
 ## Evolution
 
@@ -99,4 +97,4 @@ Bu belge faz geçişlerinde ve milestone sınırlarında güncellenir.
 4. Context güncelleme
 
 ---
-*Last updated: 2026-04-14 after Phase 13 (tab-cleanup-ui-ux) — v1.1 COMPLETE*
+*Last updated: 2026-04-17 after v1.1 milestone — Temizlik ve İyileştirme SHIPPED*

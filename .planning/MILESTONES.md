@@ -1,5 +1,27 @@
 # Milestones
 
+## v1.1 Temizlik ve İyileştirme (Shipped: 2026-04-17)
+
+**Phases completed:** 5 phases, 15 plans, 32 tasks
+
+**Key accomplishments:**
+
+- None
+- Email column removed from muvekkil table, tRPC schemas updated, and Drizzle migration generated and applied
+- Email field removed from muvekkil-form.tsx to align with backend schema
+- Drizzle metadata regenerated via nuclear approach — single clean migration matching current schema, muvekkil table without email column
+- Replace stale `it.todo` with real column-verification test asserting 9 expected columns and explicit no-email negative assertion
+- Diğer Sürücü Bilgileri Card added to KarsitaraflarTab with 5 driver fields (surucu_ad, surucu_soyad, surucu_plaka, surucu_telefon, surucu_police_no), phone format validation, and conditional view mode display
+- New database schema with notes/timeline tables, expanded dosya fields, IBAN, restructured STK/Mahkeme stages, and expanded belge categories
+- NotForm + NotList + Timeline components created and integrated, activity log hooks in tRPC mutations
+- Genel Bilgiler tab updated with hasar dosya no, kaza tarihi, müvekkil sigorta, kusur oranı fields. Dosya form restructured with grouped layout. STK/Mahkeme data forms use new field names. Belge categories expanded with category-based file naming.
+- IBAN field added to müvekkil with TR regex validation, form restructured into grouped sections using Separator component
+- Extended sigortaSirketi with 5 new fields, created avukat + avukat_sigorta_sirketi join tables, added taraf.avukat_id FK
+- Generated and applied Phase 14 migration — 5 new sigorta_sirketi columns, avukat table, join table, taraf.avukat_id FK
+- Custom tRPC router for sigortaSirketi + avukat with Zod validation, exported schemas for testing, dosya.getById extended with taraf.avukat
+
+---
+
 ## v1.0 MVP (Shipped: 2026-04-13)
 
 **Phases completed:** 9 phases, 31 plans, 52 tasks

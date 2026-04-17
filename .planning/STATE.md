@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: "**Goal:** Müvekkil ve dosya yönetiminde temizlik ve iyileştirme — gereksiz alan çıkarma, yeni alan ekleme, sekme düzeni ve UI/UX."
 status: executing
-last_updated: "2026-04-14T20:47:05.730Z"
-last_activity: 2026-04-14
+last_updated: "2026-04-17T15:59:30.133Z"
+last_activity: 2026-04-17
 progress:
   total_phases: 5
-  completed_phases: 4
-  total_plans: 10
-  completed_plans: 10
+  completed_phases: 5
+  total_plans: 15
+  completed_plans: 15
   percent: 100
 ---
 
@@ -19,14 +19,14 @@ progress:
 
 **Project:** Sigorta Uyuşmazlık Takip
 **Core value:** Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kritik süreleri tek ekrandan görebilmek.
-**Current focus:** Phase 13 — tab-cleanup-ui-ux
+**Current focus:** Phase 14 — ayarlar-sigorta-irketi-ek-alanlar-ve-avukat-y-netimi
 
 ## Current Position
 
-Phase: 13
-Plan: Not started
-Status: Executing Phase 13
-Last activity: 2026-04-14
+Phase: 14 (ayarlar-sigorta-irketi-ek-alanlar-ve-avukat-y-netimi) — EXECUTING
+Plan: 1 of 5
+Status: Executing Phase 14
+Last activity: 2026-04-17
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 | 13 | 4 | - | - |
 
 *v1.1 metrics to be tracked separately*
+| Phase 14 P01 | 8min | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,18 @@ Progress: [░░░░░░░░░░] 0%
 |---------|-------|------------|
 | None currently | - | - |
 
+## Deferred Items
+
+Items acknowledged and deferred at milestone close on 2026-04-17:
+
+| Category | Item | Status |
+|----------|------|--------|
+| debug | dilekce-odt-olustur-pdf-onizleme | verifying |
+| verification | phase-14-no-verification-md | unverified |
+| tech_debt | belge-olay-turu-mismatch | open |
+| tech_debt | karsitaraf-vekil-stale-reference | open |
+| tech_debt | drizzle-journal-tag-mismatch | open |
+
 ### Roadmap Evolution
 
 - Phase 14 added: Ayarlar sigorta şirketi ek alanlar ve avukat yönetimi
@@ -84,7 +97,7 @@ Progress: [░░░░░░░░░░] 0%
 
 ## Session Continuity
 
-Last session: 2026-04-14T20:47:05.726Z
+Last session: 2026-04-17T10:52:23.775Z
 Previous milestone: v1.0 shipped 2026-04-13
 Current milestone: v1.1 started 2026-04-13
 Roadmap file: .planning/ROADMAP.md

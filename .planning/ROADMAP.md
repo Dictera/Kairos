@@ -3,138 +3,60 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1–9 (shipped 2026-04-13)
-- 🚧 **v1.1** — Phases 10–13 (planned)
+- ✅ **v1.1 Temizlik ve İyileştirme** — Phases 10–14 (shipped 2026-04-17)
 
-## Phase Progress
+## Phases
 
-| Phase | Milestone | Plans | Status |
-|-------|----------|-------|--------|
-| 1. Foundation | v1.0 | 5/5 | ✅ Complete |
-| 2. Core Case Management | v1.0 | 4/4 | ✅ Complete |
-| 3. STK & Mahkeme Process Tracking | v1.0 | 3/3 | ✅ Complete |
-| 4. Deadline Engine + Dashboard | v1.0 | 4/4 | ✅ Complete |
-| 5. Calendar View | v1.0 | 2/2 | ✅ Complete |
-| 6. Documents + Finance | v1.0 | 4/4 | ✅ Complete |
-| 7. Petition Templates + PDF + Reports | v1.0 | 4/4 | ✅ Complete |
-| 8. UI Renewal (Navy + Turuncu) | v1.1 | 3/3 | ✅ Complete |
-| 9. Calendar Standardization | v1.1 | 2/2 | ✅ Complete |
-| 10. Schema & Migration Foundation | 3/3 | Complete    | 2026-04-13 |
-| 11. Müvekkil Email Removal | 2/2 | Complete    | 2026-04-13 |
-| 12. Taraf Tab Driver Info UI | 1/1 | Complete    | 2026-04-14 |
-| 13. Tab Cleanup & UI/UX | 4/4 | Complete    | 2026-04-14 |
+<details>
+<summary>✅ v1.0 MVP (Phases 1–9) — SHIPPED 2026-04-13</summary>
 
----
+- [x] Phase 1: Foundation (5/5 plans) — Next.js, SQLite, tRPC, auth, shadcn scaffold
+- [x] Phase 2: Core Case Management (4/4 plans) — Müvekkil + Dosya CRUD, 6-tab shell
+- [x] Phase 3: STK & Mahkeme Process Tracking (3/3 plans) — SurecStepper, data forms, duruşma CRUD
+- [x] Phase 4: Deadline Engine + Dashboard (4/4 plans) — Pure deadline calc, sure CRUD, dashboard widgets
+- [x] Phase 5: Calendar View (2/2 plans) — Monthly grid, event badges, popover links
+- [x] Phase 6: Documents + Finance (4/4 plans) — Belge upload/download, finans CRUD, net balance
+- [x] Phase 7: Petition Templates + PDF + Reports (4/4 plans) — Tiptap editor, variable substitution, Arial TTF PDF, Excel/PDF reports
+- [x] Phase 8: UI Renewal (3/3 plans) — Navy + Turuncu palette, sidebar, component refresh
+- [x] Phase 9: Calendar Standardization (2/2 plans) — Shared DatePickerField, Turkish locale
 
-## Current Milestone: v1.1
+</details>
 
-**Goal:** Müvekkil ve dosya yönetiminde temizlik ve iyileştirme — gereksiz alan çıkarma, yeni alan ekleme, sekme düzeni ve UI/UX.
+<details>
+<summary>✅ v1.1 Temizlik ve İyileştirme (Phases 10–14) — SHIPPED 2026-04-17</summary>
 
-### Phase 10: Schema & Migration Foundation
+- [x] Phase 10: Schema & Migration Foundation (3/3 plans) — 5 driver cols on taraf, email drop, phone regex
+- [x] Phase 11: Müvekkil Email Removal (2/2 plans) — Drizzle meta regenerated, schema test added
+- [x] Phase 12: Taraf Tab Driver Info UI (1/1 plan) — "Diğer Sürücü Bilgileri" Card, form + view mode
+- [x] Phase 13: Tab Cleanup & UI/UX (4/4 plans) — Notes CRUD, Activity Timeline, new dosya/muvekkil fields, IBAN, expanded belge categories
+- [x] Phase 14: Ayarlar Sigorta/Avukat (5/5 plans) — Avukat entity, sigorta şirketi extended fields, cascading avukat select on taraf
 
-**Goal**: Database schema supports new driver fields and email removal is prepared
+</details>
 
-**Depends on**: Phase 9 (v1.0 last phase)
+### 📋 v1.2 — Not Planned
 
-**Requirements**: TARAF-06, TARAF-09, TARAF-10, MUVEK-06
-
-**Success Criteria** (what must be TRUE):
-1. `taraf` table has 5 new columns: surucu_ad, surucu_soyad, surucu_plaka, surucu_telefon, surucu_police_no
-2. Drizzle migration generated and applied to development database
-3. tRPC `tarafSchema` accepts all 5 new fields with Turkish phone validation (05XX XXX XX XX)
-4. tRPC `tarafSchema` accepts plaka field without format validation (per D-02: user validates manually)
-5. Müvekkil email column dropped via Drizzle migration (no backup per D-04: emails unused)
-
-**Plans**: 3 plans
-
-- [x] 10-01-PLAN.md — Add 5 driver columns to taraf + tRPC validation + migration
-- [x] 10-02-PLAN.md — Drop email column from muvekkil + migration
-- [x] 10-03-PLAN.md — Gap closure: Remove email from muvekkil-form.tsx
-
-**UI hint**: no
-
----
-
-### Phase 11: Müvekkil Email Removal
-
-**Goal**: Email field completely removed from müvekkil forms
-
-**Depends on**: Phase 10
-
-**Requirements**: MUVEK-05
-
-**Success Criteria** (what must be TRUE):
-1. Müvekkil create/edit form has no email input field
-2. tRPC `muvekkilRouter` create/update procedures accept no email field
-3. Existing müvekkil records display correctly without email
-4. Müvekkil list displays without email column
-
-**Plans**: 2 plans
-
-- [x] 11-01-PLAN.md — Regenerate drizzle metadata (nuclear approach)
-- [x] 11-02-PLAN.md — Schema verification test + visual verification
-
-**UI hint**: yes
-
----
-
-### Phase 12: Taraf Tab Driver Info UI
-
-**Goal**: Counter-party tab displays and captures driver information
-
-**Depends on**: Phase 10
-
-**Requirements**: TARAF-07, TARAF-08
-
-**Success Criteria** (what must be TRUE):
-1. "Diğer Sürücü Bilgileri" section visible in Taraf edit form with 5 fields
-2. Driver info displays in InfoRow format in view mode
-3. Form saves driver info via existing upsertTaraf mutation
-4. Turkish phone format (05XX XXX XX XX) validated on submit
-5. Turkish plate format (XX XXX XX) validated on submit
-
-**Plans**: 1 plan
-
-- [x] 12-01-PLAN.md — Extend karsitaraflar-tab.tsx with driver info type/schema/form/view-mode
-
-**UI hint**: yes
-
----
-
-### Phase 13: Tab Cleanup & UI/UX
-
-**Goal**: Empty tab resolved, Dosyalar and Müvekkiller UI/UX improved
-
-**Depends on**: Phase 12
-
-**Requirements**: TAB-01, TAB-02, UIUX-01
-
-**Success Criteria** (what must be TRUE):
-1. "Notlar/Zaman Çizelgesi" tab filled with notes CRUD + activity timeline (D-01, D-02)
-2. Dosya detail tabs have new fields (D-05–D-11), restructured stages (D-12–D-15), expanded belge categories (D-16, D-17)
-3. Müvekkil form has IBAN field with TR validation, grouped layout (D-18–D-21)
-4. Dosya form has new fields with grouped layout, kusur oranı auto-calculation (D-22, D-23)
-
-**Plans**: 4 plans
-
-- [x] 13-01-PLAN.md — Schema & Migrations: New tables (dosyaNot, olayGunlugu), new columns (hasar_dosya_no, kaza_tarihi, muvekkil_sigorta_id, kusur_orani_karsi, iban), restructured stages, expanded belge categories, data migration
-- [x] 13-02-PLAN.md — Notes & Timeline UI: NotList, NotForm, Timeline components, replace EmptyTabContent, hook activity log into mutations
-- [x] 13-03-PLAN.md — Dosya Fields & Stage Restructure: Genel Bilgiler new fields, dosya form grouping, STK/Mahkeme stage/data updates, belge category expansion
-- [x] 13-04-PLAN.md — Müvekkil & Dosya UI/UX: IBAN field in müvekkil CRUD, form grouping, list/detail improvements
-
-**UI hint**: yes
-
----
+Run `/gsd-new-milestone` to define next milestone.
 
 ## Progress Table
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 10. Schema & Migration Foundation | 0/2 | 📋 Planned | - |
-| 11. Müvekkil Email Removal | 0/4 | Not started | - |
-| 12. Taraf Tab Driver Info UI | 0/5 | Not started | - |
-| 13. Tab Cleanup & UI/UX | 0/4 | 📋 Planned | - |
+| Phase | Milestone | Plans | Status | Completed |
+|-------|-----------|-------|--------|-----------|
+| 1. Foundation | v1.0 | 5/5 | ✅ Complete | 2026-04-13 |
+| 2. Core Case Management | v1.0 | 4/4 | ✅ Complete | 2026-04-13 |
+| 3. STK & Mahkeme Process Tracking | v1.0 | 3/3 | ✅ Complete | 2026-04-13 |
+| 4. Deadline Engine + Dashboard | v1.0 | 4/4 | ✅ Complete | 2026-04-13 |
+| 5. Calendar View | v1.0 | 2/2 | ✅ Complete | 2026-04-13 |
+| 6. Documents + Finance | v1.0 | 4/4 | ✅ Complete | 2026-04-13 |
+| 7. Petition Templates + PDF + Reports | v1.0 | 4/4 | ✅ Complete | 2026-04-13 |
+| 8. UI Renewal | v1.0 | 3/3 | ✅ Complete | 2026-04-13 |
+| 9. Calendar Standardization | v1.0 | 2/2 | ✅ Complete | 2026-04-13 |
+| 10. Schema & Migration Foundation | v1.1 | 3/3 | ✅ Complete | 2026-04-14 |
+| 11. Müvekkil Email Removal | v1.1 | 2/2 | ✅ Complete | 2026-04-14 |
+| 12. Taraf Tab Driver Info UI | v1.1 | 1/1 | ✅ Complete | 2026-04-14 |
+| 13. Tab Cleanup & UI/UX | v1.1 | 4/4 | ✅ Complete | 2026-04-14 |
+| 14. Ayarlar Sigorta/Avukat | v1.1 | 5/5 | ✅ Complete | 2026-04-17 |
 
 ---
 
 *Roadmap created: 2026-04-13*
-*Phases: 10-13 (v1.1 milestone)*
+*Last updated: 2026-04-17 after v1.1 milestone close*
