@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { useMutation } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { toast } from 'sonner'
-import { avukatSchema } from '@/lib/trpc/routers/ayarlar'
+import { avukatSchema } from '@/lib/validators/ayarlar'
 
 import {
   Form,

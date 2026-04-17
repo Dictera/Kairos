@@ -46,7 +46,7 @@ import {
   FormControl,
   FormMessage,
 } from '@/components/ui/form'
-import { sigortaSirketiSchema } from '@/lib/trpc/routers/ayarlar'
+import { sigortaSirketiSchema } from '@/lib/validators/ayarlar'
 import { AvukatFormDialog } from './avukat-form-dialog'
 
 type SigortaSirketiRow = NonNullable<
