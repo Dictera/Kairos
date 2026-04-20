@@ -25,14 +25,26 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 - ✓ **Finans Takibi (FINANS-01–06)** — v1.0: Gelen/Giden/Masraf entries, net balance, finance dashboard
 - ✓ **Dilekçe Şablon Sistemi (DILEKCE-01–05)** — v1.0: Tiptap editor, variable substitution, Arial TTF Turkish PDF
 - ✓ **Raporlar (RAPOR-01–03)** — v1.0: Portfolio + financial reports, PDF + Excel export
+- ~~**Dilekçe Şablon Sistemi (DILEKCE-01–05)**~~ — v1.0 shipped, v1.2'de **emekliye ayrıldı** (yeni .docx + LibreOffice pipeline ile değiştirildi)
 - ✓ **Müvekkil E-posta Kaldırma (MUVEK-06)** — v1.1: Müvekkil formlarından e-posta alanı kaldırma
 - ✓ **Sürücü Bilgileri (TARAF-06, 07, 08, 09, 10)** — v1.1: Dosya > Taraflar bölümüne sürücü bilgileri ekleme (Ad, Soyad, Plaka, Telefon, Poliçe No) + Turkish phone regex + UI Card
 - ✓ **Sekme Temizliği ve UI/UX (TAB-01, TAB-02, UIUX-01)** — v1.1: Notlar/Zaman Çizelgesi tab replacement with Notes CRUD + Activity Timeline; Genel Bilgiler new fields; Müvekkil IBAN + form grouping
 - ✓ **Avukat Yönetimi (Phase 14)** — v1.1: Avukat tablosu, sigorta şirketi ilişkisi (avukat_sigorta_sirketi join), karşıtaraf vekil alanı avukat seçimine dönüştürüldü; Ayarlar ekranından CRUD yönetimi
 
-## Next Milestone: v1.2 — Not Planned
+## Current Milestone: v1.2 Şablon Belgeler
 
-No requirements defined yet. Start with `/gsd-new-milestone`.
+**Goal:** Avukatın kendi `.docx` şablonlarını yüklediği, dosya detayındaki tüm verilerle otomatik doldurulan, Python sidecar + LibreOffice headless üzerinden PDF üreten tek doğru belge pipeline'ını kurmak; iki eski sistemi (Tiptap editör + .odt upload) kod ve veriyle birlikte kaldırmak.
+
+**Target features:**
+- `.docx` şablon yükleme (ad + zorunlu kategori: STK / Mahkeme / Genel), otomatik `{{ degisken }}` çıkarımı
+- Python sidecar pipeline: `pydantic v2` + `docxtpl` + `jinja2` + `babel` + `python-slugify` + `structlog` + `tenacity`
+- Dosya detayındaki tüm veri şablona aktarılır (müvekkil, taraflar, sürücü, STK/mahkeme süreç, duruşma, süre, finans, notlar); ileride genişletilebilir
+- TR formatlama filtreleri (`tr_currency`, tarih) + Jinja2 koşullu bloklar / döngüler
+- LibreOffice headless ile PDF (`LIBREOFFICE_PATH` + `PYTHON_PATH` `.env`), kurulum kontrol + banner uyarı
+- Otomatik arşiv: `./uploads/sablon-pdf/YYYY/AA/{kategori-slug}/` **+** `belge` tablosuna otomatik kayıt
+- Dosya adı: `{müvekkil-slug}-{plaka-slug}-{seq}.pdf` (plaka yoksa atla, seq otomatik artar)
+- **Belgeler sekmesinde tek tuşla şablon → PDF üretimi** (ör. "İhtarname Üret" butonu → ihtarname.docx → PDF → dosyaya iliştir)
+- Eski sistemler temizliği: `dilekce` (Tiptap) + `dilekce-odt` routerları, UI, tablolar, dosya sistemindeki içerik silinir (export yok)
 
 ### Out of Scope
 
@@ -43,6 +55,10 @@ No requirements defined yet. Start with `/gsd-new-milestone`.
 | İstinaf / Temyiz özel modülü | v1'de yok, ileride eklenebilir |
 | Mobil uygulama | Web-first; masaüstü tarayıcı |
 | Geçmiş dosya aktarımı (Excel import) | Sıfırdan veri girişi yeterli |
+| Tiptap tabanlı dilekçe editörü (DILEKCE-01–05) | v1.2 .docx + LibreOffice pipeline ile değiştirildi |
+| .odt şablon yükleme (dilekce-odt) | v1.2 .docx + docxtpl akışına birleştirildi |
+| Uygulama içinde şablon düzenleme | Avukat Word'de düzenleyip yeniden yükler |
+| Mevcut Tiptap/ODT verisinin export'u | Kullanıcı onayı ile silinecek, tutulmayacak |
 
 ## Context
 
@@ -97,4 +113,4 @@ Bu belge faz geçişlerinde ve milestone sınırlarında güncellenir.
 4. Context güncelleme
 
 ---
-*Last updated: 2026-04-17 after v1.1 milestone — Temizlik ve İyileştirme SHIPPED*
+*Last updated: 2026-04-20 after v1.2 milestone started — Şablon Belgeler Pipeline*
