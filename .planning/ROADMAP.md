@@ -140,7 +140,7 @@
 | 12. Taraf Tab Driver Info UI | v1.1 | 1/1 | ✅ Complete | 2026-04-14 |
 | 13. Tab Cleanup & UI/UX | v1.1 | 4/4 | ✅ Complete | 2026-04-14 |
 | 14. Ayarlar Sigorta/Avukat | v1.1 | 5/5 | ✅ Complete | 2026-04-17 |
-| 15. Pipeline Temeli | v1.2 | 0/0 | 📋 Not started | - |
+| 15. Pipeline Temeli | v1.2 | 2/2 | ✅ Complete | 2026-04-20 |
 | 16. Şablon Şeması ve CRUD | v1.2 | 0/0 | 📋 Not started | - |
 | 17. PDF Üretim Motoru | v1.2 | 0/0 | 📋 Not started | - |
 | 18. Arşiv ve Belge Entegrasyonu | v1.2 | 0/0 | 📋 Not started | - |
