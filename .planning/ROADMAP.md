@@ -55,7 +55,9 @@
   3. Kullanıcı Ayarlar > Pipeline Durumu kartında LibreOffice ve Python sürüm bilgisi ile erişilebilirlik durumunu görür
   4. Node, Python sidecar'ını (`./scripts/docx-pipeline/` venv) `execa` üzerinden çağırır; JSON stdin / JSON stdout / JSONL stderr protokolü çalışır
   5. Sidecar sabit exit kodlarıyla (0=başarı, 1=validation, 2=render, 3=convert, 4=archive) döner ve tRPC bunları Türkçe hata mesajlarına çevirir
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 15-01-PLAN.md — Python sidecar + TypeScript infrastructure (config, protocol, error codes, health check, execa bridge, tRPC router)
+- [ ] 15-02-PLAN.md — Pipeline UI (health banner, status card, layout and settings integration)
 
 ### Phase 16: Şablon Şeması ve CRUD
 **Goal**: Kullanıcı `.docx` şablonlarını kategori ile yükleyebilir, listeler, siler ve değiştirebilir; değişkenler otomatik çıkarılıp şablon kaydında saklanır.
