@@ -13,6 +13,7 @@ import { dilekceOdtRouter } from './dilekce-odt'
 import { raporRouter } from './rapor'
 import { notlarRouter } from './notlar'
 import { olayRouter } from './olay'
+import { pipelineRouter } from './pipeline'
 
 export const appRouter = createTRPCRouter({
   health: publicProcedure.query(() => ({
@@ -33,6 +34,7 @@ export const appRouter = createTRPCRouter({
   rapor: raporRouter,
   notlar: notlarRouter,
   olay: olayRouter,
+  pipeline: pipelineRouter,
 })
 
 export type AppRouter = typeof appRouter

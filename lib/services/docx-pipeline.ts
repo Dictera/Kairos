@@ -1,0 +1,51 @@
+import execa from 'execa'
+import { getSidecarPythonPath, SIDECAR_DIR } from '@/lib/pipeline/config'
+import { CommandEnvelope, CommandResult } from '@/lib/pipeline/protocol'
+
+export interface SidecarResult extends CommandResult {
+  exitCode: number
+}
+
+/**
+ * Run a command via the Python sidecar using JSON stdin/stdout protocol.
+ * Uses reject:false to capture exit codes without throwing.
+ */
+export async function runSidecarCommand(envelope: CommandEnvelope): Promise<SidecarResult> {
+  const pythonPath = await getSidecarPythonPath()
+
+  if (!pythonPath) {
+    throw new Error(
+      'Python bulunamadı. PYTHON_PATH ortam değişkenini ayarlayın veya Python\'u PATH\'e ekleyin.'
+    )
+  }
+
+  const { stdout, stderr, exitCode } = await execa(pythonPath, ['main.py'], {
+    cwd: SIDECAR_DIR,
+    input: JSON.stringify(envelope),
+    timeout: 30_000,
+    reject: false,
+  })
+
+  // Log stderr lines from structlog JSONL output
+  if (stderr) {
+    for (const line of stderr.split('\n').filter(Boolean)) {
+      console.error('[sidecar]', line)
+    }
+  }
+
+  // Try to parse stdout as JSON
+  let result: CommandResult
+  try {
+    result = CommandResult.parse(JSON.parse(stdout))
+  } catch {
+    // Invalid JSON response
+    return {
+      status: 'error',
+      code: 99,
+      message: `Yanıt ayrıştırılamadı: ${stdout.slice(0, 200)}`,
+      exitCode,
+    }
+  }
+
+  return { ...result, exitCode }
+}
