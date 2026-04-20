@@ -1,170 +1,113 @@
-# Project Research Summary
+# Project Research Summary — v1.2 Şablon Belgeler
 
 **Project:** Sigorta Uyuşmazlık Takip
-**Domain:** Turkish insurance dispute case management (legal domain)
-**Researched:** 2026-04-13
-**Confidence:** HIGH
+**Milestone:** v1.2 — `.docx` şablon + Python sidecar + LibreOffice headless → PDF pipeline
+**Synthesized:** 2026-04-20
+**Confidence:** HIGH (4 research tracks: Stack, Features, Architecture, Pitfalls)
 
 ## Executive Summary
 
-This is a **v1.1 milestone** for an existing production legal case management system. The changes are targeted: (1) removing the email field from client (müvekkil) forms, (2) adding driver info fields to the counter-party (taraf) section, and (3) UI/UX improvements. No architecture shifts are needed — the existing stack (Next.js 15, Drizzle ORM, tRPC v11, react-hook-form, Zod, shadcn/ui, Tailwind CSS v4) fully supports all requirements. The existing patterns are well-established in the codebase.
+v1.2 ekler: Avukat `.docx` şablon yükler → Python sidecar (`pydantic + docxtpl + jinja2 + babel + slugify + structlog + tenacity`) şablonu dosya verisiyle doldurur → LibreOffice headless (`soffice --headless --convert-to pdf`) PDF üretir → otomatik `YYYY/AA/{kategori}/{müvekkil-slug}-{plaka-slug}-{seq}.pdf` arşivlenir + `belge` tablosuna kayıt. Eski `dilekce` (Tiptap) + `dilekce-odt` sistemleri veriyle birlikte silinir.
 
-**Key risk:** Database migrations. SQLite `DROP COLUMN` permanently deletes data. Email removal must be preceded by a backup, and migrations must be tested on a copy before production. The primary pitfall is applying schema changes without running the corresponding Drizzle migration, causing runtime crashes.
+**Hard constraints (kilitli):**
+- LibreOffice headless PDF adımı değiştirilemez (kullanıcı talebi)
+- Python 3.10+ + LibreOffice 24.8 LTS kullanıcı makinesine kurulmalı
+- Offline-first korunur; bulut / AI / e-imza kapsam dışı
 
-**Recommended approach:** Foundation-first. Complete schema + tRPC router changes BEFORE touching UI components. The build order from ARCHITECTURE.md (Schema → Router → Form) prevents the most common pitfalls (form validation mismatch, missing migration).
+## Stack additions
 
-## Key Findings
+**Python 3.11–3.12 (python.org, MS Store DEĞİL):**
 
-### Recommended Stack
+| Paket | Pin | Amaç |
+|---|---|---|
+| `docxtpl` | `>=0.19.1,<0.21.0` | Jinja2-in-Word templating |
+| `python-docx` | `>=1.1.2,<2.0.0` | Transitive, direkt pin |
+| `Jinja2` | `>=3.1.4,<4.0.0` | CVE-2024-56201 floor |
+| `pydantic` | `>=2.9.0,<3.0.0` | IPC payload doğrulama (v2 zorunlu) |
+| `Babel` | `>=2.16.0,<3.0.0` | `format_currency(_, 'TRY', locale='tr_TR')` |
+| `python-slugify` | `>=8.0.4,<9.0.0` | TR-safe slugs (Unidecode BACKEND DEĞİL — GPL) |
+| `structlog` | `>=24.4.0,<26.0.0` | stderr JSON logs |
+| `tenacity` | `>=9.0.0,<10.0.0` | soffice retry |
 
-**No new libraries required.** The existing stack handles all v1.1 requirements:
+**Node.js tarafı:** `execa@^9.5.0` (tek yeni npm dep) — hem Python sidecar hem soffice spawn için.
 
-- **react-hook-form 7.72.1** + **Zod 3.24.0** + **@hookform/resolvers 5.2.2** — form handling and validation
-- **Drizzle ORM 0.45.2** + **drizzle-kit 0.31.10** — SQLite schema migrations
-- **tRPC 11.16.0** — type-safe API layer with Zod input schemas
-- **shadcn/ui** + **Tailwind CSS 4.2.2** — UI components (already installed)
+**LibreOffice path detection:** Candidate path array + `fs.access`. Registry wrapper paketleri YOK.
 
-**Avoid:** Any new form library (react-hook-form is sufficient), Prisma (would require full rewrite), `drizzle-kit push` on production data.
+**NOT ekle:** `unoconv`, `docx2pdf`, `aspose-words`, `pywin32`+Word COM, `Unidecode`, `reportlab`/`fpdf2`/`weasyprint`/`jspdf`, `python-shell`, `click`/`typer` sidecar'da.
 
-### Expected Features
+## Feature table stakes (v1.2 kapsamı)
 
-**Must have (table stakes):**
-- Client name/phone/TC-Vergi number — legal identification, primary contact
-- Case party (taraf) fields — counter-party name, insurance company, policy number, plate
-- Driver info fields — name, surname, plate, phone, policy number for the OTHER driver in an incident
+1. `.docx` upload (ad + zorunlu kategori STK/Mahkeme/Genel)
+2. Auto değişken çıkarımı (`docxtpl.get_undeclared_template_variables()`)
+3. Değişken kataloğu view (bilinen vs bilinmeyen)
+4. Belgeler sekmesinde tek tuş "Üret" butonu (dosya context)
+5. Dosya adı: `{müvekkil-slug}-{plaka-slug}-{seq}.pdf`, seq per dosya
+6. Arşiv: `./uploads/sablon-pdf/YYYY/AA/{kategori-slug}/` **+ belge tablosu** (transactional)
+7. Jinja2 koşullu + döngü (`{% if %}`, `{% for %}`, `{%p %}`, `{%tr %}`)
+8. TR filtreler: `tr_currency`, `tarih`, `upper_tr`, `lower_tr`
+9. TR hata mesajları + install banner (LibreOffice/Python yoksa)
+10. Değişken cheat-sheet sayfası (registry'den auto-generated)
+11. Yeniden üretim (seq artar, eski PDF korunur)
+12. Şablon CRUD (sil / değiştir / tekrar yükle)
+13. LibreOffice + Python install-check banner
+14. Eski Tiptap + .odt sistemini emekliye ayır (router, tablo, dosya, UI, migration)
 
-**Should have (differentiators):**
-- Turkish-specific validation for plate (XX XXX XX format) and phone (05XX format)
-- Clear visual separation between counter-party company and driver info
-- Smooth tab navigation preserving form state
+**Promoted to v1.2 (differentiator → table stake):**
+- Missing-variable client-side pre-check + deep-link to the tab that owns the field
 
-**Defer (v2+):**
-- Multiple user/role authentication (single-user app, single .env password is sufficient)
-- Cloud sync (conflicts with offline-first value proposition)
-- Email field (solo lawyer uses phone primarily, not needed for court filings)
+## Architecture snapshot
 
-### Architecture Approach
+```
+Browser (shadcn-ui)
+  └─ tRPC (react-query)
+      └─ Next.js App Router (Node)
+          ├─ docxSablon router (CRUD + upload + extract)
+          ├─ belgeUret mutation (render + PDF + archive)
+          ├─ pipelineSaglik query (LibreOffice/Python check)
+          └─ lib/services/docx-pipeline.ts
+              └─ execa.spawn(python sidecar)  [JSON over stdin/stdout/stderr]
+                  └─ pydantic validate → docxtpl render → soffice headless → slugify archive
+```
 
-Next.js 15 App Router with tRPC v11 for type-safe API. Drizzle ORM manages SQLite schema. Forms use react-hook-form with Zod resolver. The case detail page uses a 6-tab shell (Genel Bilgiler, Yargılama Süreci, Belgeler, Notlar/Zaman Çizelgesi, Karşı Taraflar, Dosya Finansı) with URL hash sync.
+**New Drizzle tables:**
+- `docx_sablon` (id, ad, kategori, dosya_yolu, degiskenler JSON, created_at, updated_at)
+- `belge` tablosu reuse: nullable `sablon_id` FK + `tip` = "uretilen"
 
-**Critical pattern:** Driver info lives in `taraf` table (NOT `dosya`). All counter-party data (company, driver, plate, policy) goes to the same table. The existing `upsertTaraf` mutation handles both create and update — extend it, don't create a separate mutation.
+**Directory layout:**
+- `./scripts/docx-pipeline/` — Python package + `.venv-docpipe/`
+- `./uploads/docx-templates/{id}.docx`
+- `./uploads/sablon-pdf/YYYY/AA/{kategori}/...`
 
-### Critical Pitfalls
+**Retirement migration:**
+1. Freeze eski routerları (deprecated error)
+2. Migration: DROP tablo `dilekce_*`, `dilekce_odt_sablonu`
+3. Filesystem cleanup: `./uploads/odt-templates/` sil
+4. Route'ları sil: `app/(dashboard)/dilekce/*`, `app/api/dilekce*`
 
-1. **Production data loss during column removal** — Backup `./data/db.sqlite` before ANY migration. Use `drizzle-kit generate` + `drizzle-kit migrate`, never `push` on production.
+## Watch Out For (top 6 pitfalls)
 
-2. **Form validation schema mismatch** — Remove email systematically in order: (1) Zod schema, (2) defaultValues, (3) JSX field, (4) tRPC router input. Missing any step causes TypeScript errors or runtime crashes.
+1. **LibreOffice SingletonLock hang** — her `soffice` çağrısına `-env:UserInstallation=file:///TEMP` ekle, ayrı profil kullan
+2. **Windows Python venv path** — MS Store Python sandbox kırılır; `python.org` installer kullan, PATH'e ekle
+3. **docxtpl tag span bug** — Jinja tags Word'de farklı run'lara bölünürse render kaybolur; template yazım kuralı cheat-sheet'te belirt
+4. **Subprocess stdout deadlock** — büyük PDF path listesi stdout'u doldurursa Node bloklar; stderr JSON + stdout dar format
+5. **seq race condition** — aynı dosya için çift tıklama 2 paralel mutation; DB transaction içinde `SELECT MAX(seq) FOR UPDATE` + belge insert atomik
+6. **tenacity retry masking** — soffice exit code 1 retry etme (bozuk docx); sadece timeout + known-transient error retry
 
-3. **Missing database migration for new driver fields** — Schema edit alone doesn't update SQLite. Must run `drizzle-kit migrate` before testing form saves.
+## Build order (roadmap için)
 
-4. **Tab state reset on restructure** — Use stable `key` props on tab content (based on tab identifier, not index). Changing tab order breaks user muscle memory and may lose form state.
+1. **Foundation** — Python venv + execa + LibreOffice path detect + pipelineSaglik tRPC + Ayarlar banner
+2. **Drizzle schema** — docx_sablon tablo + belge.sablon_id FK migration
+3. **Template CRUD** — upload / list / delete + değişken extract + variable registry
+4. **Pipeline core** — docx-pipeline.ts + Python sidecar + IPC + render
+5. **PDF + Archive** — LibreOffice convert + slugify filename + belge insert transactional
+6. **UI integration** — Şablon Yönetimi sayfası + Belgeler tab "Üret" dropdown + cheat-sheet
+7. **Retirement** — eski router/table/UI/filesystem delete + migration
 
-5. **Missing Turkish validation** — Driver phone and plate fields need Turkish-specific patterns: `05XX XXX XX XX` for phone, `XX XXX XX` format for plates.
+## Open Questions (requirements/architecture'a taşı)
 
-## Implications for Roadmap
-
-Based on research, suggested phase structure:
-
-### Phase 1: Schema & Migration Foundation
-**Rationale:** All UI changes depend on schema being correct. Database migration must be verified before any code that uses the new fields.
-
-**Delivers:** 
-- 5 new columns added to `taraf` table (suruci_ad, suruci_soyad, suruci_plaka, suruci_telefon, suruci_police_no)
-- Drizzle migration file generated and applied
-- tRPC `tarafSchema` updated with new input fields
-
-**Avoids:** Pitfall #3 (missing DB migration)
-
----
-
-### Phase 2: Müvekkil Email Removal
-**Rationale:** Safe to do in parallel with Phase 1 but logically separate. Removing a field requires systematic order to avoid form validation mismatches.
-
-**Delivers:**
-- Email removed from `muvekkil-form.tsx` (Zod schema, defaultValues, JSX)
-- Email removed from `muvekkil` tRPC router input schema
-- Drizzle migration to drop `email` column
-
-**Avoids:** Pitfall #2 (schema mismatch)
-
----
-
-### Phase 3: Taraf Tab Driver Info UI
-**Rationale:** UI depends on schema (Phase 1) being complete. This is the main feature deliverable.
-
-**Delivers:**
-- Driver info fields added to `KarsitaraflarTab` edit form
-- InfoRow display for driver fields in view mode
-- "Diğer Sürücü Bilgileri" section header
-- Turkish validation for phone and plate formats
-
-**Implements:** `upsertTaraf` mutation extended with new fields
-
-**Avoids:** Pitfall #5 (Turkish validation)
-
----
-
-### Phase 4: Tab Cleanup (Optional)
-**Rationale:** The "Notlar/Zaman Çizelgesi" tab (index 3) is empty. Either fill with placeholder or remove with URL hash redirect.
-
-**Delivers:**
-- Either: Empty tab filled with basic notes placeholder
-- Or: Tab removed with `handleTabChange` redirect for `/#notlar` URLs
-
-**Avoids:** Pitfall #4 (tab state reset)
+- Variable registry: TS const (static) mi, Drizzle'dan introspect (dynamic) mi? → **Öneri: TS const + test ile senkron**
+- `sablon.default_aksiyon` alanı v1.2'de eklensin mi (v1.3'ü kolaylaştırır)? → **Öneri: kolon ekle, UI v1.3**
+- Silinen şablonun ürettiği PDF'ler? → **Öneri: belge rows kalır, sablon_id NULL olur (CASCADE DEĞİL)**
 
 ---
-
-### Phase Ordering Rationale
-
-1. **Schema first** — All code changes depend on correct schema. Migration verification prevents runtime crashes.
-2. **Email removal second** — Independent of driver info, but must follow systematic removal order.
-3. **Driver UI third** — Depends on schema migration (Phase 1). Uses existing `upsertTaraf` pattern, extends it.
-4. **Tab cleanup last** — Independent, only if scope allows.
-
-### Research Flags
-
-Phases with standard patterns (skip research-phase):
-- **Phase 1 (Schema):** Drizzle migration patterns are well-documented and established in codebase
-- **Phase 2 (Email removal):** Form field removal is straightforward — follow the systematic removal order from PITFALLS.md
-- **Phase 3 (Driver UI):** Uses existing `KarsitaraflarTab` patterns, `upsertTaraf` mutation, and shadcn/ui components
-
-Phases needing validation during planning:
-- **Phase 4 (Tab cleanup):** Decision needed: fill empty tab OR remove with redirect? User preference.
-- **Turkish validation:** Confirm exact plate format regex with user — Turkish plates have changed formats over time.
-
-## Confidence Assessment
-
-| Area | Confidence | Notes |
-|------|------------|-------|
-| Stack | HIGH | All technologies confirmed in package.json, existing codebase patterns |
-| Features | HIGH | Schema analysis + domain knowledge, clear rationale for each field |
-| Architecture | HIGH | Well-established patterns in codebase, anti-patterns clearly documented |
-| Pitfalls | MEDIUM | Based on general patterns applied to this domain, no external sources specifically for Turkish legal case management |
-
-**Overall confidence:** HIGH
-
-### Gaps to Address
-
-- **Turkish plate format:** Verify exact regex pattern with user. Old format (XX XXX XX) vs new format with dash. Document which format(s) to accept.
-- **Turkish phone validation:** Confirm mobile format `05XX XXX XX XX` is sufficient, or if landlines need to be supported.
-- **Phase 4 scope:** Tab cleanup is optional — depends on whether user wants the empty "Notlar" tab filled or removed.
-
-## Sources
-
-### Primary (HIGH confidence)
-- **Existing codebase** (`lib/schema.ts`, `components/muvekkil/muvekkil-form.tsx`, `components/dosya/karsitaraflar-tab.tsx`) — confirmed working patterns
-- **package.json** — verified installed versions
-
-### Secondary (MEDIUM confidence)
-- **Drizzle docs** — `dropColumn`, `addColumn` migration syntax
-- **General database migration patterns** — applied to SQLite/Drizzle context
-
-### Tertiary (LOW confidence)
-- **Turkish license plate format** — needs user validation for exact format to accept
-- **Turkish phone validation** — may need adjustment based on user feedback
-
----
-
-*Research completed: 2026-04-13*
-*Ready for roadmap: yes*
+*Synthesized from STACK.md, FEATURES.md, ARCHITECTURE.md, PITFALLS.md*
