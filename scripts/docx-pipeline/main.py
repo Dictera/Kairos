@@ -7,6 +7,7 @@ JSON stdin → JSON stdout protocol.
 from __future__ import annotations
 
 import json
+import logging
 import subprocess
 import sys
 from typing import Any, Literal
@@ -48,10 +49,13 @@ def handle_health_check(params: dict[str, Any]) -> dict[str, Any]:
     libreoffice_version: str | None = None
     libreoffice_accessible = False
 
-    # Try to detect LibreOffice
+    # Use provided libreoffice_path (from Node.js caller) or fall back to "soffice"
+    libreoffice_path: str | None = params.get("libreoffice_path")
+    libreoffice_cmd = libreoffice_path if libreoffice_path else "soffice"
+
     try:
         result = subprocess.run(
-            ["soffice", "--version"],
+            [libreoffice_cmd, "--version"],
             capture_output=True,
             text=True,
             timeout=5,
@@ -66,7 +70,7 @@ def handle_health_check(params: dict[str, Any]) -> dict[str, Any]:
         "health-check",
         python_version=python_version,
         libreoffice_version=libreoffice_version,
-        python_accessible=True,
+        libreoffice_path=libreoffice_path,
         libreoffice_accessible=libreoffice_accessible,
     )
 
@@ -75,7 +79,6 @@ def handle_health_check(params: dict[str, Any]) -> dict[str, Any]:
         "result": {
             "python_version": python_version,
             "libreoffice_version": libreoffice_version,
-            "python_accessible": True,
             "libreoffice_accessible": libreoffice_accessible,
         },
     }

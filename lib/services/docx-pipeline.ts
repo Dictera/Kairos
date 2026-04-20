@@ -1,4 +1,5 @@
 import { execa } from 'execa'
+import { join } from 'path'
 import { getSidecarPythonPath, SIDECAR_DIR } from '@/lib/pipeline/config'
 import { CommandEnvelope, CommandResult, CommandResultSchema } from '@/lib/pipeline/protocol'
 
@@ -19,7 +20,7 @@ export async function runSidecarCommand(envelope: CommandEnvelope): Promise<Side
     )
   }
 
-  const { stdout, stderr, exitCode } = await execa(pythonPath, ['main.py'], {
+  const { stdout, stderr, exitCode } = await execa(pythonPath, [join(SIDECAR_DIR, 'main.py')], {
     cwd: SIDECAR_DIR,
     input: JSON.stringify(envelope),
     timeout: 30_000,

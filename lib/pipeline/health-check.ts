@@ -24,23 +24,28 @@ interface HealthCache {
 }
 
 let healthCache: HealthCache | null = null
+let healthPending: Promise<HealthStatus> | null = null
 
 /**
  * Returns the cached health status if still valid, otherwise runs fresh checks.
- * Cache TTL is 5 minutes.
+ * Cache TTL is 5 minutes. Uses pending promise to prevent concurrent redundant checks.
  */
 export async function getHealthStatus(): Promise<HealthStatus> {
   if (healthCache && Date.now() < healthCache.expiresAt) {
     return healthCache.result
   }
 
-  const result = await runHealthChecks()
-  healthCache = {
-    result,
-    expiresAt: Date.now() + CACHE_TTL_MS,
+  if (healthPending) {
+    return healthPending
   }
 
-  return result
+  healthPending = runHealthChecks().then((result) => {
+    healthCache = { result, expiresAt: Date.now() + CACHE_TTL_MS }
+    healthPending = null
+    return result
+  })
+
+  return healthPending
 }
 
 /**
@@ -55,7 +60,8 @@ export async function runHealthChecks(): Promise<HealthStatus> {
 
   if (pythonPath) {
     try {
-      const result = await runSidecarCommand({ command: 'health-check', params: {} })
+      const libreofficePath = await getLibreOfficePath()
+      const result = await runSidecarCommand({ command: 'health-check', params: { libreoffice_path: libreofficePath ?? undefined } })
       if (result.status === 'success' && result.result) {
         const r = result.result as { python_version?: string; python_accessible?: boolean }
         pythonVersion = r.python_version ?? null

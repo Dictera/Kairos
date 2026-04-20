@@ -46,7 +46,7 @@ function StatusRow({
             </span>
           )}
           {version && (
-            <span className="text-xs text-muted-foreground">v{version}</span>
+            <span className="text-xs text-muted-foreground">{version}</span>
           )}
         </div>
         <Badge variant={accessible ? 'default' : 'destructive'}>

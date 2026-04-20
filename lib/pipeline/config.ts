@@ -2,8 +2,8 @@ import { existsSync } from 'fs'
 import { join, resolve } from 'path'
 import which from 'which'
 
-/** Absolute path to the sidecar directory */
-export const SIDECAR_DIR: string = resolve(process.cwd(), 'scripts/docx-pipeline')
+/** Absolute path to the sidecar directory (stable relative to this module) */
+export const SIDECAR_DIR: string = resolve(__dirname, '../../scripts/docx-pipeline')
 
 /**
  * Returns PYTHON_PATH env var if set, otherwise searches PATH for python3 then python.
