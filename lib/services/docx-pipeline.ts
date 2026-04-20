@@ -1,6 +1,6 @@
-import execa from 'execa'
+import { execa } from 'execa'
 import { getSidecarPythonPath, SIDECAR_DIR } from '@/lib/pipeline/config'
-import { CommandEnvelope, CommandResult } from '@/lib/pipeline/protocol'
+import { CommandEnvelope, CommandResult, CommandResultSchema } from '@/lib/pipeline/protocol'
 
 export interface SidecarResult extends CommandResult {
   exitCode: number
@@ -36,16 +36,16 @@ export async function runSidecarCommand(envelope: CommandEnvelope): Promise<Side
   // Try to parse stdout as JSON
   let result: CommandResult
   try {
-    result = CommandResult.parse(JSON.parse(stdout))
+    result = CommandResultSchema.parse(JSON.parse(stdout))
   } catch {
     // Invalid JSON response
     return {
       status: 'error',
       code: 99,
       message: `Yanıt ayrıştırılamadı: ${stdout.slice(0, 200)}`,
-      exitCode,
+      exitCode: exitCode ?? 99,
     }
   }
 
-  return { ...result, exitCode }
+  return { ...result, exitCode: exitCode ?? 99 }
 }

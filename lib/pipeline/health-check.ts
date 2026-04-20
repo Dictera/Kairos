@@ -1,4 +1,4 @@
-import execa from 'execa'
+import { execa } from 'execa'
 import { getSidecarPythonPath, getLibreOfficePath } from '@/lib/pipeline/config'
 import { runSidecarCommand } from '@/lib/services/docx-pipeline'
 

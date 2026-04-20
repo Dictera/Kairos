@@ -9,11 +9,10 @@ export function HealthBanner() {
   const trpc = useTRPC()
   const [dismissed, setDismissed] = useState(false)
 
-  const { data, isLoading } = useQuery(
-    trpc.pipeline.healthCheck.queryOptions({
-      refetchInterval: 5 * 60 * 1000,
-    })
-  )
+  const { data, isLoading } = useQuery({
+    ...trpc.pipeline.healthCheck.queryOptions(),
+    refetchInterval: 5 * 60 * 1000,
+  })
 
   if (dismissed || isLoading || !data) return null
 
