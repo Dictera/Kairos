@@ -107,64 +107,62 @@ Explicitly excluded. Documented to prevent scope creep.
 
 ## Traceability
 
-Roadmap tarafından doldurulur.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PIPE-01 | — | Pending |
-| PIPE-02 | — | Pending |
-| PIPE-03 | — | Pending |
-| PIPE-04 | — | Pending |
-| PIPE-05 | — | Pending |
-| PIPE-06 | — | Pending |
-| PIPE-07 | — | Pending |
-| SABLON-01 | — | Pending |
-| SABLON-02 | — | Pending |
-| SABLON-03 | — | Pending |
-| SABLON-04 | — | Pending |
-| SABLON-05 | — | Pending |
-| SABLON-06 | — | Pending |
-| SABLON-07 | — | Pending |
-| SABLON-08 | — | Pending |
-| PDF-01 | — | Pending |
-| PDF-02 | — | Pending |
-| PDF-03 | — | Pending |
-| PDF-04 | — | Pending |
-| PDF-05 | — | Pending |
-| PDF-06 | — | Pending |
-| PDF-07 | — | Pending |
-| PDF-08 | — | Pending |
-| PDF-09 | — | Pending |
-| PDF-10 | — | Pending |
-| ARSIV-01 | — | Pending |
-| ARSIV-02 | — | Pending |
-| ARSIV-03 | — | Pending |
-| ARSIV-04 | — | Pending |
-| ARSIV-05 | — | Pending |
-| ARSIV-06 | — | Pending |
-| BUI-01 | — | Pending |
-| BUI-02 | — | Pending |
-| BUI-03 | — | Pending |
-| BUI-04 | — | Pending |
-| BUI-05 | — | Pending |
-| BUI-06 | — | Pending |
-| BUI-07 | — | Pending |
-| BUI-08 | — | Pending |
-| BUI-09 | — | Pending |
-| TEMIZ-01 | — | Pending |
-| TEMIZ-02 | — | Pending |
-| TEMIZ-03 | — | Pending |
-| TEMIZ-04 | — | Pending |
-| TEMIZ-05 | — | Pending |
-| TEMIZ-06 | — | Pending |
-| TEMIZ-07 | — | Pending |
-| TEMIZ-08 | — | Pending |
+| PIPE-01 | Phase 15 | Pending |
+| PIPE-02 | Phase 15 | Pending |
+| PIPE-03 | Phase 15 | Pending |
+| PIPE-04 | Phase 15 | Pending |
+| PIPE-05 | Phase 15 | Pending |
+| PIPE-06 | Phase 15 | Pending |
+| PIPE-07 | Phase 15 | Pending |
+| SABLON-01 | Phase 16 | Pending |
+| SABLON-02 | Phase 16 | Pending |
+| SABLON-03 | Phase 16 | Pending |
+| SABLON-04 | Phase 16 | Pending |
+| SABLON-05 | Phase 16 | Pending |
+| SABLON-06 | Phase 16 | Pending |
+| SABLON-07 | Phase 16 | Pending |
+| SABLON-08 | Phase 16 | Pending |
+| PDF-01 | Phase 17 | Pending |
+| PDF-02 | Phase 17 | Pending |
+| PDF-03 | Phase 17 | Pending |
+| PDF-04 | Phase 17 | Pending |
+| PDF-05 | Phase 17 | Pending |
+| PDF-06 | Phase 17 | Pending |
+| PDF-07 | Phase 17 | Pending |
+| PDF-08 | Phase 17 | Pending |
+| PDF-09 | Phase 17 | Pending |
+| PDF-10 | Phase 17 | Pending |
+| ARSIV-01 | Phase 18 | Pending |
+| ARSIV-02 | Phase 18 | Pending |
+| ARSIV-03 | Phase 18 | Pending |
+| ARSIV-04 | Phase 18 | Pending |
+| ARSIV-05 | Phase 18 | Pending |
+| ARSIV-06 | Phase 18 | Pending |
+| BUI-01 | Phase 19 | Pending |
+| BUI-02 | Phase 19 | Pending |
+| BUI-03 | Phase 19 | Pending |
+| BUI-04 | Phase 19 | Pending |
+| BUI-05 | Phase 19 | Pending |
+| BUI-06 | Phase 19 | Pending |
+| BUI-07 | Phase 19 | Pending |
+| BUI-08 | Phase 19 | Pending |
+| BUI-09 | Phase 19 | Pending |
+| TEMIZ-01 | Phase 20 | Pending |
+| TEMIZ-02 | Phase 20 | Pending |
+| TEMIZ-03 | Phase 20 | Pending |
+| TEMIZ-04 | Phase 20 | Pending |
+| TEMIZ-05 | Phase 20 | Pending |
+| TEMIZ-06 | Phase 20 | Pending |
+| TEMIZ-07 | Phase 20 | Pending |
+| TEMIZ-08 | Phase 20 | Pending |
 
 **Coverage:**
-- v1.2 requirements: 47 total
-- Mapped to phases: 0 (roadmap aşamasında doldurulacak)
-- Unmapped: 47 ⚠️
+- v1.2 requirements: 48 total (PIPE 7 + SABLON 8 + PDF 10 + ARSIV 6 + BUI 9 + TEMIZ 8)
+- Mapped to phases: 48 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-20*
-*Last updated: 2026-04-20 after initial definition*
+*Last updated: 2026-04-20 — traceability populated after v1.2 roadmap (phases 15–20) created*

@@ -1,12 +1,12 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.2
-milestone_name: "Şablon Belgeler Pipeline — .docx + Python sidecar + LibreOffice headless"
-status: planning
-last_updated: "2026-04-20T00:00:00.000Z"
-last_activity: 2026-04-20
+milestone_name: Şablon Belgeler
+status: Ready to plan phases
+last_updated: "2026-04-20T15:30:00.000Z"
+last_activity: 2026-04-20 — v1.2 roadmap (phases 15–20) created
 progress:
-  total_phases: 0
+  total_phases: 6
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -19,24 +19,25 @@ progress:
 
 **Project:** Sigorta Uyuşmazlık Takip
 **Core value:** Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kritik süreleri tek ekrandan görebilmek.
-**Current focus:** v1.2 Şablon Belgeler — defining requirements
+**Current focus:** v1.2 Şablon Belgeler — ready to plan Phase 15 (Pipeline Temeli)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 15 — Pipeline Temeli (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-20 — Milestone v1.2 started
+Status: Ready to plan phases
+Last activity: 2026-04-20 — v1.2 roadmap (phases 15–20) created
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [░░░░░░░░░░] 0% (0/6 phases)
 
 ## Performance Metrics
 
 **Velocity:**
 
 - Total plans completed (v1.0): 31
+- Total plans completed (v1.1): 15
 - Average duration: —
-- Total execution time: 0 hours (v1.0 tracked separately)
+- Total execution time: v1.0 + v1.1 tracked separately
 
 **By Phase:**
 
@@ -55,18 +56,24 @@ Progress: [░░░░░░░░░░] 0%
 | 11 | 2 | - | - |
 | 12 | 1 | - | - |
 | 13 | 4 | - | - |
-
-*v1.1 metrics to be tracked separately*
-| Phase 14 P01 | 8min | 1 tasks | 3 files |
+| 14 | 5 | - | - |
+| 15 | TBD | - | - |
+| 16 | TBD | - | - |
+| 17 | TBD | - | - |
+| 18 | TBD | - | - |
+| 19 | TBD | - | - |
+| 20 | TBD | - | - |
 
 ## Accumulated Context
 
 ### Decisions
 
-- **Database first approach:** Schema changes (Phase 10) must complete before UI changes
-- **Turkish validation required:** Phone (05XX XXX XX XX) and plate (XX XXX XX) formats
-- **Migration safety:** Email column drop requires data backup before migration
-- **Tab cleanup decision:** TAB-01 requires user decision — fill empty tab OR remove with redirect
+- **Sidecar boundary:** All Python subprocess calls funnel through `lib/services/docx-pipeline.ts`; tRPC routers never spawn directly
+- **Per-invocation LibreOffice profile:** Every `soffice` call uses `-env:UserInstallation=file:///TEMP/lo-{uuid}` to avoid SingletonLock hang
+- **Variable registry as TS const:** `lib/docx/variable-registry.ts` is the single source of truth; cheat-sheet + unknown-var detection both consume it
+- **Transactional archive:** PDF write and `belge` insert are atomic — DB failure triggers disk rollback
+- **No data export on retirement:** User pre-approved deletion of Tiptap + `.odt` data; only DB backup (`.pre-v1.2.bak`) retained as safety
+- **Retirement last:** Phase 20 executes only after Phase 19 is user-validated end-to-end so rollback stays possible
 
 ### Blockers
 
@@ -80,7 +87,7 @@ Items acknowledged and deferred at milestone close on 2026-04-17:
 
 | Category | Item | Status |
 |----------|------|--------|
-| debug | dilekce-odt-olustur-pdf-onizleme | verifying |
+| debug | dilekce-odt-olustur-pdf-onizleme | superseded by v1.2 retirement (Phase 20) |
 | verification | phase-14-no-verification-md | unverified |
 | tech_debt | belge-olay-turu-mismatch | open |
 | tech_debt | karsitaraf-vekil-stale-reference | open |
@@ -88,18 +95,19 @@ Items acknowledged and deferred at milestone close on 2026-04-17:
 
 ### Roadmap Evolution
 
-- Phase 14 added: Ayarlar sigorta şirketi ek alanlar ve avukat yönetimi
+- v1.2 milestone opened: 6 phases (15–20) covering 48 requirements across PIPE / SABLON / PDF / ARSIV / BUI / TEMIZ categories
 
 ### Research Flags
 
-- Turkish plate format needs user confirmation (XX XXX XX vs newer formats)
-- TAB-01 scope: fill or remove empty tab — user preference needed
+- Re-verify `docxtpl`, `tenacity`, `structlog`, `python-slugify`, Drizzle `onConflictDoUpdate`, LibreOffice filter data JSON via Context7 before implementation (per CLAUDE.md policy)
+- Confirm exact package upper bounds with `pip index versions` + `npm view execa versions --json` before writing `requirements.txt` / `package.json`
+- Verify Turkish character rendering end-to-end via Playwright on a canary template (`çÇğĞıİöÖşŞüÜ İstanbul şirket müvekkil`) — Phase 17 verification gate
 
 ## Session Continuity
 
-Last session: 2026-04-17T10:52:23.775Z
-Previous milestone: v1.0 shipped 2026-04-13
-Current milestone: v1.1 started 2026-04-13
+Last session: 2026-04-20T15:30:00.000Z
+Previous milestone: v1.1 shipped 2026-04-17
+Current milestone: v1.2 Şablon Belgeler (phases 15–20 planned)
 Roadmap file: .planning/ROADMAP.md
 
 ---
