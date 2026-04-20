@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Şablon Belgeler
-status: Ready to plan phases
-last_updated: "2026-04-20T15:30:00.000Z"
-last_activity: 2026-04-20 — v1.2 roadmap (phases 15–20) created
+status: Plan 01 complete
+last_updated: "2026-04-20T19:50:00.000Z"
+last_activity: 2026-04-20 — Phase 15 Plan 01 (Pipeline Temeli) completed
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 6
+  completed_plans: 1
+  percent: 16
 ---
 
 # Project State
@@ -23,10 +23,10 @@ progress:
 
 ## Current Position
 
-Phase: 15 — Pipeline Temeli (not started)
-Plan: —
-Status: Ready to plan phases
-Last activity: 2026-04-20 — v1.2 roadmap (phases 15–20) created
+Phase: 15 — Pipeline Temeli
+Plan: 01 (completed)
+Status: Ready for Plan 02
+Last activity: 2026-04-20 — Phase 15 Plan 01 completed (21 min, 22 tests passing)
 
 Progress: [░░░░░░░░░░] 0% (0/6 phases)
 
@@ -57,7 +57,7 @@ Progress: [░░░░░░░░░░] 0% (0/6 phases)
 | 12 | 1 | - | - |
 | 13 | 4 | - | - |
 | 14 | 5 | - | - |
-| 15 | TBD | - | - |
+| 15 | 1/6 | 1 | 21min |
 | 16 | TBD | - | - |
 | 17 | TBD | - | - |
 | 18 | TBD | - | - |
@@ -69,6 +69,9 @@ Progress: [░░░░░░░░░░] 0% (0/6 phases)
 ### Decisions
 
 - **Sidecar boundary:** All Python subprocess calls funnel through `lib/services/docx-pipeline.ts`; tRPC routers never spawn directly
+- **Sidecar protocol:** JSON stdin/stdout with pydantic v2 `CommandEnvelope` — commands: extract-vars, render, convert, health-check
+- **Exit codes:** 0=success, 1=validation, 2=render, 3=convert, 4=archive, 99=internal — mapped to Turkish messages via `getTurkishErrorMessage()`
+- **Health check cache:** 5-minute TTL, module-level singleton pattern, exposed via `getHealthStatus()` and `invalidateHealthCache()`
 - **Per-invocation LibreOffice profile:** Every `soffice` call uses `-env:UserInstallation=file:///TEMP/lo-{uuid}` to avoid SingletonLock hang
 - **Variable registry as TS const:** `lib/docx/variable-registry.ts` is the single source of truth; cheat-sheet + unknown-var detection both consume it
 - **Transactional archive:** PDF write and `belge` insert are atomic — DB failure triggers disk rollback
