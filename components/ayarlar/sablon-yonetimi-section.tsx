@@ -46,6 +46,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { VariableCatalogModal } from './variable-catalog-modal'
 import { Badge } from '@/components/ui/badge'
 // WARN-3 fix: canonical kategori tuple from Drizzle schema (single source of truth);
 // do NOT redeclare locally. Plan 01 exports this as `as const`.
@@ -71,6 +72,7 @@ export default function SablonYonetimiSection() {
   const [overwriteTarget, setOverwriteTarget] = useState<(typeof templates)[number] | null>(null)
   const [overwriteBelgeTuru, setOverwriteBelgeTuru] = useState<(typeof BELGE_KATEGORILER)[number] | undefined>(undefined)
   const [deleteTarget, setDeleteTarget] = useState<(typeof templates)[number] | null>(null)
+  const [catalogTarget, setCatalogTarget] = useState<(typeof templates)[number] | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
 
@@ -233,7 +235,7 @@ export default function SablonYonetimiSection() {
               </TableHeader>
               <TableBody>
                 {filtered.map((t) => (
-                  <TableRow key={t.id}>
+                  <TableRow key={t.id} className="cursor-pointer" onClick={() => setCatalogTarget(t)}>
                     <TableCell>{t.ad}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{t.kategori}</Badge>
@@ -245,7 +247,7 @@ export default function SablonYonetimiSection() {
                     <TableCell className="text-muted-foreground">
                       {new Date(t.created_at).toLocaleDateString('tr-TR')}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex justify-end gap-1">
                         <Button
                           variant="ghost"
@@ -496,6 +498,11 @@ export default function SablonYonetimiSection() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <VariableCatalogModal
+        sablon={catalogTarget}
+        onOpenChange={(open) => { if (!open) setCatalogTarget(null) }}
+      />
     </>
   )
 }

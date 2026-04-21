@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { format } from 'date-fns'
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 // Icon mapping for document categories
@@ -44,7 +46,13 @@ export function BelgeList({ dosyaId }: BelgeListProps) {
   const { data: belgeler, isLoading } = useQuery(
     trpc.belge.list.queryOptions({ dosya_id: dosyaId })
   )
-  
+
+  const { data: templates = [] } = useQuery(trpc.sablon.list.queryOptions())
+  const templateById = useMemo(
+    () => new Map(templates.map((t) => [t.id, t])),
+    [templates]
+  )
+
   const deleteMutation = useMutation(
     trpc.belge.delete.mutationOptions({
       onSuccess: () => {
@@ -79,14 +87,21 @@ export function BelgeList({ dosyaId }: BelgeListProps) {
   return (
     <div className="space-y-2">
       {belgeler.map((belge) => {
-        const Icon = kategoriIcons[belge.kategori] || FileIcon
+        const isGenerated = belge.sablon_id != null
+        const sablonAdi = isGenerated ? templateById.get(belge.sablon_id as number)?.ad : undefined
+        const seqMatch = belge.dosya_adi.match(/-(\d+)\.pdf$/i)
+        const seq = seqMatch?.[1]
+        const Icon = isGenerated ? FileText : (kategoriIcons[belge.kategori] || FileIcon)
         const colorClass = kategoriColors[belge.kategori] || 'bg-gray-100 text-gray-800'
         const fileUrl = belge.dosya_yolu // /api/files/{dosyaId}/{filename}
-        
+
         return (
           <div
             key={belge.id}
-            className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+            className={cn(
+              "flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors",
+              isGenerated && "border-l-4 border-l-[var(--accent)]"
+            )}
           >
             <div className="flex items-center gap-3 min-w-0">
               <Icon className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
@@ -96,6 +111,11 @@ export function BelgeList({ dosyaId }: BelgeListProps) {
                   <Badge className={colorClass} variant="secondary">
                     {belge.kategori}
                   </Badge>
+                  {isGenerated && (
+                    <span className="text-[var(--accent)]">
+                      Şablon: {sablonAdi ?? '—'}{seq ? ` • #${seq}` : ''}
+                    </span>
+                  )}
                   <span>{format(new Date(belge.created_at), 'dd MMM yyyy', { locale: tr })}</span>
                   <span>{(belge.dosya_boyutu / 1024 / 1024).toFixed(2)} MB</span>
                 </div>
