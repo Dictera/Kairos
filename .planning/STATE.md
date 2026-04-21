@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Şablon Belgeler
-status: Plan 02 complete
-last_updated: "2026-04-20T20:01:00.000Z"
-last_activity: 2026-04-20 — Phase 15 Plan 02 (Pipeline UI Components) completed
+status: executing
+last_updated: "2026-04-21T07:42:32.141Z"
+last_activity: 2026-04-21 -- Phase 16 planning complete
 progress:
   total_phases: 6
-  completed_phases: 0
-  total_plans: 6
+  completed_phases: 1
+  total_plans: 7
   completed_plans: 2
-  percent: 33
+  percent: 29
 ---
 
 # Project State
@@ -23,12 +23,19 @@ progress:
 
 ## Current Position
 
-Phase: 15 — Pipeline Temeli
+Phase: 16 — Şablon Şeması ve CRUD
 Plan: 02 (completed)
-Status: Ready for Plan 03
-Last activity: 2026-04-20 — Phase 15 Plan 02 completed (8 min)
+Status: Ready to execute next plan (03)
+Last activity: 2026-04-21 -- Phase 16 Plan 02 complete
 
 Progress: [░░░░░░░░░░] 0% (0/6 phases)
+
+## Session Continuity
+
+Last session: 2026-04-21T10:59:37.000Z
+Previous milestone: v1.1 shipped 2026-04-17
+Current milestone: v1.2 Şablon Belgeler (phases 15–20 planned)
+Roadmap file: .planning/ROADMAP.md
 
 ## Performance Metrics
 
@@ -106,13 +113,5 @@ Items acknowledged and deferred at milestone close on 2026-04-17:
 - Confirm exact package upper bounds with `pip index versions` + `npm view execa versions --json` before writing `requirements.txt` / `package.json`
 - Verify Turkish character rendering end-to-end via Playwright on a canary template (`çÇğĞıİöÖşŞüÜ İstanbul şirket müvekkil`) — Phase 17 verification gate
 
-## Session Continuity
-
-Last session: 2026-04-20T15:30:00.000Z
-Previous milestone: v1.1 shipped 2026-04-17
-Current milestone: v1.2 Şablon Belgeler (phases 15–20 planned)
-Roadmap file: .planning/ROADMAP.md
-
 ---
-
 *State managed by GSD workflow*
