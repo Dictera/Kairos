@@ -366,6 +366,7 @@ export const docxSablon = sqliteTable('docx_sablon', {
     .notNull()
     .default(sql`(json_array())`),
   default_aksiyon: text('default_aksiyon'),
+  belge_turu: text('belge_turu'),
   created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
   updated_at: text('updated_at').notNull().default(sql`(datetime('now'))`),
 }, (t) => [
