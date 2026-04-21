@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AyarlarCrudSection } from './ayarlar-crud-section'
 import { SigortaSirketiSection } from './sigorta-sirketi-section'
 import SablonYonetimiSection from './sablon-yonetimi-section'
+import { CheatSheetSummaryCard } from './cheat-sheet-summary-card'
 import { PipelineStatus } from '@/components/pipeline/pipeline-status'
 
 export function AyarlarPage() {
@@ -125,6 +126,10 @@ export function AyarlarPage() {
       <Separator />
 
       <SablonYonetimiSection />
+
+      <Separator />
+
+      <CheatSheetSummaryCard />
 
       <Separator />
 
