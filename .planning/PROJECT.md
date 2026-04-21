@@ -30,6 +30,7 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 - ✓ **Sürücü Bilgileri (TARAF-06, 07, 08, 09, 10)** — v1.1: Dosya > Taraflar bölümüne sürücü bilgileri ekleme (Ad, Soyad, Plaka, Telefon, Poliçe No) + Turkish phone regex + UI Card
 - ✓ **Sekme Temizliği ve UI/UX (TAB-01, TAB-02, UIUX-01)** — v1.1: Notlar/Zaman Çizelgesi tab replacement with Notes CRUD + Activity Timeline; Genel Bilgiler new fields; Müvekkil IBAN + form grouping
 - ✓ **Avukat Yönetimi (Phase 14)** — v1.1: Avukat tablosu, sigorta şirketi ilişkisi (avukat_sigorta_sirketi join), karşıtaraf vekil alanı avukat seçimine dönüştürüldü; Ayarlar ekranından CRUD yönetimi
+- ✓ **PDF Üretim Motoru (PDF-01–10)** — v1.2: docxtpl Jinja2 render, TR filtreleri (tr_currency, tarih, upper_tr, lower_tr), LibreOffice headless PDF convert, tenacity retry, missing-variable pre-check with tab deep-links, tRPC pdfRouter.generate
 
 ## Current Milestone: v1.2 Şablon Belgeler
 
@@ -113,4 +114,4 @@ Bu belge faz geçişlerinde ve milestone sınırlarında güncellenir.
 4. Context güncelleme
 
 ---
-*Last updated: 2026-04-20 after v1.2 milestone started — Şablon Belgeler Pipeline*
+*Last updated: 2026-04-21 after Phase 17 complete — PDF Üretim Motoru validated*
