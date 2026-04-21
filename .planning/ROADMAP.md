@@ -69,7 +69,12 @@
   3. Kullanıcı yüklediği şablonların listesini kategori + ad ile görür; mevcut şablonu silebilir veya yeniden yükleyerek (overwrite) güncelleyebilir
   4. `docx_sablon` tablosu Drizzle schema'ya eklenir (id, ad, kategori NOT NULL CHECK, dosya_yolu, degiskenler JSON, default_aksiyon nullable, timestamps)
   5. `belge` tablosuna nullable `sablon_id` FK alanı eklenir (şablon silindiğinde SET NULL) ve üretilmiş PDF'ler etkilenmez
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 16-01-PLAN.md — Schema + migration + Zod validators (docx_sablon table, belge.sablon_id FK)
+- [ ] 16-02-PLAN.md — Python sidecar handle_extract_vars implementation + test fixture
+- [ ] 16-03-PLAN.md — /api/templates/upload multipart route (.docx-only, 10 MB cap, path-traversal guard)
+- [ ] 16-04-PLAN.md — sablonRouter (list/create/delete/update) + appRouter registration
+- [ ] 16-05-PLAN.md — Şablon Yönetimi UI section + Ayarlar page mount + checkpoint
 **UI hint**: yes
 
 ### Phase 17: PDF Üretim Motoru
@@ -141,7 +146,7 @@
 | 13. Tab Cleanup & UI/UX | v1.1 | 4/4 | ✅ Complete | 2026-04-14 |
 | 14. Ayarlar Sigorta/Avukat | v1.1 | 5/5 | ✅ Complete | 2026-04-17 |
 | 15. Pipeline Temeli | v1.2 | 2/2 | ✅ Complete | 2026-04-20 |
-| 16. Şablon Şeması ve CRUD | v1.2 | 0/0 | 📋 Not started | - |
+| 16. Şablon Şeması ve CRUD | v1.2 | 0/5 | 📋 Not started | - |
 | 17. PDF Üretim Motoru | v1.2 | 0/0 | 📋 Not started | - |
 | 18. Arşiv ve Belge Entegrasyonu | v1.2 | 0/0 | 📋 Not started | - |
 | 19. Belgeler UI ve Şablon Yönetimi Ekranı | v1.2 | 0/0 | 📋 Not started | - |

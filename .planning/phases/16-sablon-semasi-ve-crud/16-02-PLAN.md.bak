@@ -1,0 +1,353 @@
+---
+phase: 16
+plan: 02
+type: execute
+wave: 2
+depends_on: [01]
+files_modified:
+  - scripts/docx-pipeline/main.py
+  - tests/16-sidecar-extract-vars.test.ts
+  - tests/fixtures/test-template.docx
+autonomous: true
+requirements: [SABLON-03]
+must_haves:
+  truths:
+    - "Sidecar handle_extract_vars reads .docx, extracts {{var}} and {%p var%} placeholders, returns deduplicated string array"
+    - "Invalid .docx (missing word/document.xml) returns status='error' with code=1"
+    - "Invalid file path returns error code=1 with Turkish message"
+    - "runSidecarCommand({command:'extract-vars',params:{file_path}}) round-trips correctly"
+  artifacts:
+    - path: "scripts/docx-pipeline/main.py"
+      provides: "handle_extract_vars implementation replacing the Phase 15 stub"
+      contains: "def handle_extract_vars"
+    - path: "tests/fixtures/test-template.docx"
+      provides: "Reference .docx with known variables for sidecar testing"
+    - path: "tests/16-sidecar-extract-vars.test.ts"
+      provides: "Integration test invoking sidecar via runSidecarCommand"
+  key_links:
+    - from: "scripts/docx-pipeline/main.py"
+      to: "handler routing dict"
+      via: "extract-vars key"
+      pattern: "\"extract-vars\".*handle_extract_vars"
+    - from: "lib/services/docx-pipeline.ts (Phase 15)"
+      to: "scripts/docx-pipeline/main.py"
+      via: "execa JSON stdin/stdout"
+      pattern: "runSidecarCommand.*extract-vars"
+---
+
+<objective>
+Implement the Python `handle_extract_vars` function in the existing docx-pipeline sidecar to extract Jinja2 placeholders (`{{ var }}` and `{%p var %}`) from uploaded `.docx` files. The Phase 15 sidecar already routes the `extract-vars` command to a stub that returns "Not implemented in Phase 15" — this plan replaces the stub with a real implementation.
+
+Purpose: Provide the variable extraction backend that the tRPC router (Plan 04) will call during template upload. Per D-02, extraction is synchronous; per D-05, only variable names are stored.
+
+Output: Working sidecar handler + test fixture + integration test.
+</objective>
+
+<execution_context>
+@D:/sigorta-takip/.claude/get-shit-done/workflows/execute-plan.md
+@D:/sigorta-takip/.claude/get-shit-done/templates/summary.md
+</execution_context>
+
+<context>
+@.planning/PROJECT.md
+@.planning/ROADMAP.md
+@.planning/phases/16-sablon-semasi-ve-crud/16-CONTEXT.md
+@.planning/phases/16-sablon-semasi-ve-crud/16-RESEARCH.md
+@.planning/phases/16-sablon-semasi-ve-crud/16-PATTERNS.md
+
+@scripts/docx-pipeline/main.py
+@lib/services/docx-pipeline.ts
+@lib/pipeline/protocol.ts
+
+<interfaces>
+<!-- Existing Phase 15 sidecar contract — see lib/pipeline/protocol.ts -->
+
+CommandEnvelope (input on stdin, JSON):
+```json
+{
+  "command": "extract-vars",
+  "params": { "file_path": "/abs/path/to/template.docx" }
+}
+```
+
+CommandResult (output on stdout, JSON):
+```json
+// success
+{ "status": "success", "result": { "variables": ["muvekkil_ad", "dosya_no", ...] } }
+// error
+{ "status": "error", "code": 1, "message": "Türkçe hata mesajı" }
+```
+
+Exit codes (per Phase 15 contract):
+  0 = success, 1 = validation error, 2 = render/processing error, 3 = convert, 4 = archive, 99 = internal
+
+Existing handler routing in main.py (lines ~120-125) already maps "extract-vars" → handle_extract_vars stub.
+</interfaces>
+</context>
+
+<tasks>
+
+<task type="auto">
+  <name>Task 1: Create test fixture .docx with known Jinja2 placeholders</name>
+  <read_first>
+    - .planning/phases/16-sablon-semasi-ve-crud/16-RESEARCH.md (Wave 0 Gaps section — fixture requirement)
+    - scripts/docx-pipeline/main.py (existing handle_health_check shape)
+  </read_first>
+  <files>tests/fixtures/test-template.docx</files>
+  <behavior>
+    - The .docx file unzips to contain word/document.xml.
+    - The XML body text contains exactly the placeholders: `{{ muvekkil_ad }}`, `{{ dosya_no }}`, `{%p paragraf_blok %}`, `{{ muvekkil_ad }}` (duplicate to validate dedup).
+    - Expected extracted variable list: `['muvekkil_ad', 'dosya_no', 'paragraf_blok']` (order: first-seen, dedup).
+  </behavior>
+  <action>
+    1. Ensure `tests/fixtures/` directory exists; create it if missing.
+    2. Generate the fixture programmatically (do NOT commit a hand-authored .docx — use Python's zipfile module to build a minimal valid .docx). Create and run a one-off generator script (delete after — do not commit the script):
+       ```bash
+       python -c "
+       import zipfile, io, os
+       os.makedirs('tests/fixtures', exist_ok=True)
+       content_types = '''<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>
+       <Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\">
+         <Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>
+         <Default Extension=\"xml\" ContentType=\"application/xml\"/>
+         <Override PartName=\"/word/document.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml\"/>
+       </Types>'''
+       rels = '''<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>
+       <Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">
+         <Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument\" Target=\"word/document.xml\"/>
+       </Relationships>'''
+       doc = '''<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>
+       <w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\">
+         <w:body>
+           <w:p><w:r><w:t>Sayin {{ muvekkil_ad }}, dosya {{ dosya_no }} hakkinda.</w:t></w:r></w:p>
+           <w:p><w:r><w:t>{%p paragraf_blok %}</w:t></w:r></w:p>
+           <w:p><w:r><w:t>Tekrar {{ muvekkil_ad }}.</w:t></w:r></w:p>
+         </w:body>
+       </w:document>'''
+       with zipfile.ZipFile('tests/fixtures/test-template.docx','w',zipfile.ZIP_DEFLATED) as z:
+         z.writestr('[Content_Types].xml', content_types)
+         z.writestr('_rels/.rels', rels)
+         z.writestr('word/document.xml', doc)
+       print('fixture created')
+       "
+       ```
+    3. Verify the file:
+       ```bash
+       python -c "import zipfile; z=zipfile.ZipFile('tests/fixtures/test-template.docx'); print(z.namelist()); print(z.read('word/document.xml').decode()[:300])"
+       ```
+       Output must include `word/document.xml` and visible `{{ muvekkil_ad }}` text.
+    4. Commit the .docx binary file.
+  </action>
+  <verify>
+    <automated>ls tests/fixtures/test-template.docx &amp;&amp; python -c "import zipfile; z=zipfile.ZipFile('tests/fixtures/test-template.docx'); assert 'word/document.xml' in z.namelist(); xml=z.read('word/document.xml').decode(); assert 'muvekkil_ad' in xml and 'dosya_no' in xml and 'paragraf_blok' in xml; print('OK')"</automated>
+  </verify>
+  <acceptance_criteria>
+    - File `tests/fixtures/test-template.docx` exists.
+    - Python verification command above prints `OK`.
+    - File size is &gt; 200 bytes and &lt; 5 KB.
+  </acceptance_criteria>
+  <done>Fixture .docx is a valid OpenXML package containing the three target placeholders.</done>
+</task>
+
+<task type="auto" tdd="true">
+  <name>Task 2: Implement handle_extract_vars in scripts/docx-pipeline/main.py replacing the Phase 15 stub</name>
+  <read_first>
+    - scripts/docx-pipeline/main.py (full file — locate handle_health_check ~lines 45-85 for shape, stub at ~lines 88-90, handler routing dict ~lines 120-125)
+    - .planning/phases/16-sablon-semasi-ve-crud/16-RESEARCH.md (Code Examples → "Python sidecar extract-vars handler")
+    - .planning/phases/16-sablon-semasi-ve-crud/16-PATTERNS.md (scripts/docx-pipeline/main.py section)
+    - lib/pipeline/protocol.ts (Phase 15 contract — confirm response shape `{status, result|code|message}`)
+  </read_first>
+  <files>scripts/docx-pipeline/main.py</files>
+  <behavior>
+    - Calling `handle_extract_vars({"file_path": "tests/fixtures/test-template.docx"})` returns `{"status": "success", "result": {"variables": ["muvekkil_ad", "dosya_no", "paragraf_blok"]}}`.
+    - Calling with missing file_path returns `{"status": "error", "code": 1, "message": "file_path param gerekli"}`.
+    - Calling with non-existent file path returns `{"status": "error", "code": 2, ...}`.
+    - Calling with a non-zip file returns `{"status": "error", "code": 2, ...}`.
+    - Calling with a zip lacking `word/document.xml` returns `{"status": "error", "code": 1, "message": "Geçersiz .docx dosyası"}`.
+    - Variables are deduped preserving first-seen order.
+  </behavior>
+  <action>
+    1. Open `scripts/docx-pipeline/main.py`. Add to the imports block at the top of the file (alongside existing imports):
+       ```python
+       import io
+       import re
+       import zipfile
+       ```
+       Skip any that are already imported.
+    2. Locate the existing `handle_extract_vars` stub (search for `"Not implemented in Phase 15"` or `def handle_extract_vars`). Replace the function body entirely with this implementation — copy verbatim from RESEARCH.md "Python sidecar extract-vars handler", adapted to use the project's existing `logger` (structlog from Phase 15):
+       ```python
+       def handle_extract_vars(params: dict[str, Any]) -> dict[str, Any]:
+           """Extract {{var}} and {%p var%} placeholders from a .docx file."""
+           file_path = params.get("file_path")
+           if not file_path:
+               return {"status": "error", "code": 1, "message": "file_path param gerekli"}
+
+           try:
+               with open(file_path, "rb") as f:
+                   zip_data = f.read()
+           except FileNotFoundError:
+               logger.error("extract-vars-missing-file", file_path=file_path)
+               return {"status": "error", "code": 2, "message": f"Dosya bulunamadi: {file_path}"}
+           except OSError as e:
+               logger.error("extract-vars-io-error", file_path=file_path, error=str(e))
+               return {"status": "error", "code": 2, "message": f"Dosya okunamadi: {e}"}
+
+           try:
+               with zipfile.ZipFile(io.BytesIO(zip_data)) as zf:
+                   if "word/document.xml" not in zf.namelist():
+                       return {"status": "error", "code": 1, "message": "Geçersiz .docx dosyası"}
+                   xml_content = zf.read("word/document.xml").decode("utf-8")
+           except zipfile.BadZipFile:
+               return {"status": "error", "code": 1, "message": "Geçersiz .docx dosyası"}
+
+           try:
+               # Strip XML tags + entities to recover text where placeholders live.
+               text_content = re.sub(r"<[^>]+>", " ", xml_content)
+               text_content = re.sub(r"&\w+;", " ", text_content)
+               text_content = re.sub(r"\s+", " ", text_content)
+
+               double_brace = re.findall(r"\{\{\s*([^}]+?)\s*\}\}", text_content)
+               paragraph_tags = re.findall(r"\{%p\s+([^%]+?)%\}", text_content)
+
+               combined = [v.strip() for v in (double_brace + paragraph_tags) if v.strip()]
+               # Dedupe preserving first-seen order.
+               variables = list(dict.fromkeys(combined))
+
+               logger.info("extract-vars-success", file_path=file_path, var_count=len(variables))
+               return {"status": "success", "result": {"variables": variables}}
+           except Exception as e:
+               logger.error("extract-vars-error", file_path=file_path, error=str(e))
+               return {"status": "error", "code": 2, "message": f"Değişken çıkarma hatası: {e}"}
+       ```
+    3. Confirm the handler routing dict (search for `"extract-vars"`) still maps to `handle_extract_vars`. No change needed if Phase 15 already registered it.
+    4. Smoke test the function directly:
+       ```bash
+       cd scripts/docx-pipeline &amp;&amp; python -c "
+       import sys; sys.path.insert(0,'.')
+       from main import handle_extract_vars
+       r = handle_extract_vars({'file_path': '../../tests/fixtures/test-template.docx'})
+       print(r)
+       assert r['status'] == 'success', r
+       assert r['result']['variables'] == ['muvekkil_ad', 'dosya_no', 'paragraf_blok'], r
+       print('PASS')
+       "
+       ```
+       Expected output ends with `PASS`.
+  </action>
+  <verify>
+    <automated>cd scripts/docx-pipeline &amp;&amp; python -c "import sys; sys.path.insert(0,'.'); from main import handle_extract_vars; r = handle_extract_vars({'file_path': '../../tests/fixtures/test-template.docx'}); assert r['status']=='success' and r['result']['variables']==['muvekkil_ad','dosya_no','paragraf_blok'], r; r2 = handle_extract_vars({}); assert r2['status']=='error' and r2['code']==1, r2; print('PASS')"</automated>
+  </verify>
+  <acceptance_criteria>
+    - `grep -c "def handle_extract_vars" scripts/docx-pipeline/main.py` returns 1.
+    - `grep -c "Not implemented in Phase 15" scripts/docx-pipeline/main.py` returns 0 (stub removed).
+    - `grep -c "import zipfile" scripts/docx-pipeline/main.py` returns 1.
+    - `grep -c "{{[^}]*}}" scripts/docx-pipeline/main.py` matches the regex literal in the implementation.
+    - `grep -c "Geçersiz .docx dosyası" scripts/docx-pipeline/main.py` returns at least 1 (Turkish error message present).
+    - The smoke test command above prints `PASS`.
+  </acceptance_criteria>
+  <done>Sidecar handler implemented, smoke-tested directly via Python import.</done>
+</task>
+
+<task type="auto" tdd="true">
+  <name>Task 3: Add Vitest integration test invoking sidecar via runSidecarCommand</name>
+  <read_first>
+    - lib/services/docx-pipeline.ts (full file — confirm `runSidecarCommand` signature)
+    - tests/06-belge-finans.test.ts (vitest test file shape analog)
+    - lib/pipeline/protocol.ts (CommandResult type for assertion)
+  </read_first>
+  <files>tests/16-sidecar-extract-vars.test.ts</files>
+  <behavior>
+    - Test "extract-vars returns variable list for valid .docx fixture": calls runSidecarCommand({command:'extract-vars',params:{file_path:absPath}}) → `result.status === 'success'`, `result.result.variables` deep-equals `['muvekkil_ad','dosya_no','paragraf_blok']`.
+    - Test "extract-vars returns error on missing file_path": calls with empty params → `result.status === 'error'`, `result.code === 1`.
+    - Test "extract-vars returns error on non-existent file": → `result.status === 'error'`.
+  </behavior>
+  <action>
+    1. Create `tests/16-sidecar-extract-vars.test.ts`:
+       ```ts
+       import { describe, it, expect } from 'vitest'
+       import path from 'path'
+       import { runSidecarCommand } from '@/lib/services/docx-pipeline'
+
+       const fixture = path.resolve(process.cwd(), 'tests/fixtures/test-template.docx')
+
+       describe('Sidecar: extract-vars (SABLON-03)', () => {
+         it('extracts {{var}} and {%p var%} placeholders, deduped', async () => {
+           const result = await runSidecarCommand({
+             command: 'extract-vars',
+             params: { file_path: fixture },
+           })
+           expect(result.status).toBe('success')
+           // @ts-expect-error narrow
+           expect(result.result.variables).toEqual(['muvekkil_ad', 'dosya_no', 'paragraf_blok'])
+         }, 30_000)
+
+         it('returns code=1 when file_path param is missing', async () => {
+           const result = await runSidecarCommand({
+             command: 'extract-vars',
+             params: {},
+           })
+           expect(result.status).toBe('error')
+           // @ts-expect-error narrow
+           expect(result.code).toBe(1)
+         }, 30_000)
+
+         it('returns error when file does not exist', async () => {
+           const result = await runSidecarCommand({
+             command: 'extract-vars',
+             params: { file_path: '/nonexistent/path.docx' },
+           })
+           expect(result.status).toBe('error')
+         }, 30_000)
+       })
+       ```
+    2. Run `npm test -- tests/16-sidecar-extract-vars.test.ts` and confirm all three tests pass.
+    3. If the test fails because `runSidecarCommand`'s param type doesn't allow extra keys, cast input as needed — but DO NOT modify `lib/services/docx-pipeline.ts` or `lib/pipeline/protocol.ts` in this plan (Phase 15 surface is frozen for Phase 16).
+  </action>
+  <verify>
+    <automated>npm test -- tests/16-sidecar-extract-vars.test.ts 2>&amp;1 | tail -25</automated>
+  </verify>
+  <acceptance_criteria>
+    - File `tests/16-sidecar-extract-vars.test.ts` exists.
+    - `grep -c "extract-vars" tests/16-sidecar-extract-vars.test.ts` returns at least 3.
+    - `npm test -- tests/16-sidecar-extract-vars.test.ts` exits 0 with all 3 tests passing.
+  </acceptance_criteria>
+  <done>Integration test green; sidecar→runSidecarCommand round-trip verified.</done>
+</task>
+
+</tasks>
+
+<threat_model>
+## Trust Boundaries
+
+| Boundary | Description |
+|----------|-------------|
+| Node tRPC layer → Python sidecar | JSON IPC over stdin/stdout; Python receives untrusted file_path string from upload route |
+| Python sidecar → filesystem | Sidecar opens user-provided file_path with `open()` |
+| .docx file → ZIP/XML parser | Untrusted user-uploaded ZIP archive parsed by Python's zipfile + regex |
+
+## STRIDE Threat Register
+
+| Threat ID | Category | Component | Disposition | Mitigation Plan |
+|-----------|----------|-----------|-------------|-----------------|
+| T-16-05 | Denial of Service | zipfile.ZipFile parsing untrusted .docx | mitigate | Upload route in Plan 03 enforces 10 MB size cap before sidecar is invoked; zipfile reads fully into BytesIO so a >10MB compressed bomb cannot reach this code path |
+| T-16-06 | Tampering | file_path parameter from Node → Python | mitigate | Path validation done at upload route (Plan 03) which only allows files under `./uploads/templates/`; sidecar trusts the validated path |
+| T-16-07 | Information Disclosure | Error messages may leak filesystem paths | accept | Local-only deployment per PROJECT.md; error messages display in app for debugging |
+| T-16-08 | DoS | Regex catastrophic backtracking on malicious XML | mitigate | Used non-greedy `[^}]+?` and `[^%]+?` patterns bounded by literal terminators; no nested quantifiers |
+</threat_model>
+
+<verification>
+- Smoke test: `python` direct call returns expected variable list on fixture
+- Integration test: `npm test -- tests/16-sidecar-extract-vars.test.ts` passes (3 tests)
+- Stub removed: `grep -c "Not implemented in Phase 15" scripts/docx-pipeline/main.py` returns 0
+</verification>
+
+<success_criteria>
+- `handle_extract_vars` returns success with correct variable array for fixture
+- All three error paths (missing param, missing file, invalid zip) return correct status/code
+- Vitest integration test passes
+- Sidecar dispatch routing unchanged (Phase 15 contract preserved)
+</success_criteria>
+
+<output>
+After completion, create `.planning/phases/16-sablon-semasi-ve-crud/16-02-SUMMARY.md`
+</output>

@@ -1,0 +1,354 @@
+---
+phase: 16
+plan: 03
+type: execute
+wave: 2
+depends_on: [01]
+files_modified:
+  - app/api/templates/upload/route.ts
+  - tests/16-templates-upload-route.test.ts
+autonomous: true
+requirements: [SABLON-01]
+must_haves:
+  truths:
+    - "POST /api/templates/upload accepts multipart with 'file' field, validates .docx extension AND MIME, enforces 10 MB cap, saves to ./uploads/templates/, returns JSON {filename, filePath, fileSize, fileName}"
+    - "Non-.docx uploads return HTTP 400 with Turkish error 'Sadece .docx dosyaları kabul edilir'"
+    - "Files exceeding 10 MB return HTTP 400 with Turkish error 'Dosya boyutu 10 MB'ı aşamaz'"
+    - "Path-traversal attempts (filenames with ../) are sanitized before disk write"
+    - "Upload directory is created automatically if missing"
+  artifacts:
+    - path: "app/api/templates/upload/route.ts"
+      provides: "Multipart upload handler for .docx templates"
+      exports: ["POST"]
+    - path: "tests/16-templates-upload-route.test.ts"
+      provides: "Source-string regression test for upload constants and validation"
+  key_links:
+    - from: "app/api/templates/upload/route.ts"
+      to: "uploads/templates/"
+      via: "fs.writeFileSync after path-traversal guard"
+      pattern: "path.resolve.*uploads.*templates"
+---
+
+<objective>
+Implement the multipart upload API route at `app/api/templates/upload/route.ts` per D-01 (API route + filesystem upload) and D-04 (`./uploads/templates/` storage path). The route validates `.docx` extension + MIME, enforces a 10 MB size cap (CONTEXT discretion default), sanitizes filenames, writes to disk under the project-local templates directory, and returns metadata that the tRPC `sablon.create` mutation (Plan 04) consumes.
+
+Purpose: Provide the file ingress that the UI's two-step submit flow (upload → mutate) calls before the tRPC layer records the template. Per SABLON-01 only `.docx` is accepted.
+
+Output: New API route + regression test.
+</objective>
+
+<execution_context>
+@D:/sigorta-takip/.claude/get-shit-done/workflows/execute-plan.md
+@D:/sigorta-takip/.claude/get-shit-done/templates/summary.md
+</execution_context>
+
+<context>
+@.planning/PROJECT.md
+@.planning/phases/16-sablon-semasi-ve-crud/16-CONTEXT.md
+@.planning/phases/16-sablon-semasi-ve-crud/16-RESEARCH.md
+@.planning/phases/16-sablon-semasi-ve-crud/16-PATTERNS.md
+
+@app/api/upload/route.ts
+@lib/trpc/routers/dilekce-odt.ts
+
+<interfaces>
+<!-- Existing analog: app/api/upload/route.ts (88 lines) — multipart route returning JSON metadata -->
+<!-- Existing analog: lib/trpc/routers/dilekce-odt.ts:41 — filename sanitization pattern -->
+
+POST /api/templates/upload contract (this plan defines):
+```
+Request:
+  Content-Type: multipart/form-data
+  Body: FormData with field "file" (File)
+
+Response (200):
+  { filename: string,    // sanitized on-disk name with timestamp prefix
+    filePath: string,    // absolute path
+    fileSize: number,    // bytes
+    fileName: string }   // original name (display-only)
+
+Response (400):
+  { error: string }      // Turkish
+
+Storage location:
+  process.cwd()/uploads/templates/{Date.now()}_{sanitized-original}.docx
+```
+
+Constants the route uses:
+  ALLOWED_EXTENSIONS = ['.docx']
+  ALLOWED_MIME_TYPES = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+  MAX_SIZE = 10 * 1024 * 1024  // 10 MB
+  UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'templates')
+</interfaces>
+</context>
+
+<tasks>
+
+<task type="auto" tdd="true">
+  <name>Task 1: Create app/api/templates/upload/route.ts implementing the multipart .docx upload handler</name>
+  <read_first>
+    - app/api/upload/route.ts (full file — exact analog: imports, validation block, path-traversal guard, write pattern)
+    - lib/trpc/routers/dilekce-odt.ts (line ~41 for filename sanitization pattern: `${Date.now()}_${input.dosyaAdi.replace(/[^a-zA-Z0-9._-]/g, '_')}`)
+    - .planning/phases/16-sablon-semasi-ve-crud/16-PATTERNS.md (`app/api/templates/upload/route.ts` section)
+    - .planning/phases/16-sablon-semasi-ve-crud/16-RESEARCH.md (Pattern 1: API Route + tRPC Mutation Upload, Common Pitfalls #3 path traversal)
+  </read_first>
+  <files>app/api/templates/upload/route.ts</files>
+  <behavior>
+    - POST with valid .docx FormData → 200 + JSON `{filename, filePath, fileSize, fileName}`; file written to disk under uploads/templates/.
+    - POST with no file field → 400 + `{error:'Eksik veri'}`.
+    - POST with .pdf → 400 + `{error:'Sadece .docx dosyaları kabul edilir'}`.
+    - POST with file.size &gt; 10 MB → 400 + `{error:"Dosya boyutu 10 MB'ı aşamaz"}`.
+    - POST with malicious filename `../../etc/passwd.docx` → file written under uploads/templates/ only (sanitized), NOT escaping the directory.
+    - Upload directory auto-created if missing.
+    - Both extension AND MIME validated (RESEARCH security threat: spoofing).
+  </behavior>
+  <action>
+    1. Create directory `app/api/templates/upload/` if it does not exist.
+    2. Create `app/api/templates/upload/route.ts` with the following structure (adapted from `app/api/upload/route.ts`, with constants per `<interfaces>`):
+       ```ts
+       import { NextRequest, NextResponse } from 'next/server'
+       import fs from 'fs'
+       import path from 'path'
+
+       const ALLOWED_EXTENSIONS = ['.docx'] as const
+       const ALLOWED_MIME_TYPES = [
+         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+       ] as const
+       const MAX_SIZE = 10 * 1024 * 1024 // 10 MB (CONTEXT discretion)
+       const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'templates') // D-04
+
+       export async function POST(request: NextRequest) {
+         const formData = await request.formData()
+         const file = formData.get('file') as File | null
+
+         if (!file) {
+           return NextResponse.json({ error: 'Eksik veri' }, { status: 400 })
+         }
+
+         // Validate extension AND MIME (defense in depth — spoofing mitigation)
+         const ext = path.extname(file.name).toLowerCase()
+         if (!ALLOWED_EXTENSIONS.includes(ext as typeof ALLOWED_EXTENSIONS[number])) {
+           return NextResponse.json(
+             { error: 'Sadece .docx dosyaları kabul edilir' },
+             { status: 400 },
+           )
+         }
+         if (!ALLOWED_MIME_TYPES.includes(file.type as typeof ALLOWED_MIME_TYPES[number])) {
+           return NextResponse.json(
+             { error: 'Sadece .docx dosyaları kabul edilir' },
+             { status: 400 },
+           )
+         }
+         if (file.size > MAX_SIZE) {
+           return NextResponse.json(
+             { error: "Dosya boyutu 10 MB'ı aşamaz" },
+             { status: 400 },
+           )
+         }
+
+         // Ensure upload directory exists.
+         if (!fs.existsSync(UPLOAD_DIR)) {
+           fs.mkdirSync(UPLOAD_DIR, { recursive: true })
+         }
+
+         // Path-traversal guard — sanitize filename, then verify resolved path is inside base.
+         const sanitized = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+         const filename = `${Date.now()}_${sanitized}`
+         const filePath = path.join(UPLOAD_DIR, filename)
+
+         const basePath = path.resolve(UPLOAD_DIR)
+         if (!path.resolve(filePath).startsWith(basePath)) {
+           return NextResponse.json({ error: 'Geçersiz dosya yolu' }, { status: 400 })
+         }
+
+         const buffer = Buffer.from(await file.arrayBuffer())
+         fs.writeFileSync(filePath, buffer)
+
+         return NextResponse.json({
+           filename,
+           filePath,
+           fileSize: file.size,
+           fileName: file.name,
+         })
+       }
+       ```
+    3. Verify TypeScript compiles: `npx tsc --noEmit`.
+    4. Smoke-test the route by starting the dev server is NOT required — the regression test in Task 2 covers it via source-string + runtime FormData simulation.
+  </action>
+  <verify>
+    <automated>npx tsc --noEmit 2>&amp;1 | grep -E "app/api/templates" | head -5; ls app/api/templates/upload/route.ts</automated>
+  </verify>
+  <acceptance_criteria>
+    - File `app/api/templates/upload/route.ts` exists.
+    - `grep -c "export async function POST" app/api/templates/upload/route.ts` returns 1.
+    - `grep -c "'.docx'" app/api/templates/upload/route.ts` returns at least 1.
+    - `grep -c "10 \* 1024 \* 1024" app/api/templates/upload/route.ts` returns 1.
+    - `grep -c "uploads.*templates" app/api/templates/upload/route.ts` matches the UPLOAD_DIR constant.
+    - `grep -c "Sadece .docx dosyaları kabul edilir" app/api/templates/upload/route.ts` returns at least 1.
+    - `grep -c "Dosya boyutu 10 MB'ı aşamaz" app/api/templates/upload/route.ts` returns 1.
+    - `grep -c "path.resolve.*startsWith" app/api/templates/upload/route.ts` returns 1.
+    - `grep -c "[^a-zA-Z0-9._-]" app/api/templates/upload/route.ts` returns 1 (sanitization regex).
+    - `npx tsc --noEmit` exits 0.
+  </acceptance_criteria>
+  <done>Upload route exists, compiles, enforces extension + MIME + size + path-traversal guard.</done>
+</task>
+
+<task type="auto" tdd="true">
+  <name>Task 2: Add regression test asserting upload route constants and validation behavior</name>
+  <read_first>
+    - tests/06-belge-finans.test.ts (route source-string check pattern around lines 34-52)
+    - app/api/templates/upload/route.ts (the file just created)
+  </read_first>
+  <files>tests/16-templates-upload-route.test.ts</files>
+  <behavior>
+    - Source-string tests assert ALLOWED_EXTENSIONS, MIME, MAX_SIZE, UPLOAD_DIR constants present in route source.
+    - Behavioral tests invoke `POST` directly with a NextRequest carrying FormData:
+      - Empty body → 400.
+      - .pdf file → 400 with Turkish error.
+      - .docx 1KB file → 200 + JSON with filePath under uploads/templates/.
+      - 11 MB file → 400.
+  </behavior>
+  <action>
+    1. Create `tests/16-templates-upload-route.test.ts`:
+       ```ts
+       import { describe, it, expect, afterAll } from 'vitest'
+       import { readFileSync, rmSync, existsSync, readdirSync } from 'fs'
+       import path from 'path'
+       import { POST } from '@/app/api/templates/upload/route'
+
+       const ROUTE_PATH = 'app/api/templates/upload/route.ts'
+       const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'templates')
+
+       function makeRequest(formData: FormData): Request {
+         return new Request('http://localhost/api/templates/upload', {
+           method: 'POST',
+           body: formData,
+         })
+       }
+
+       afterAll(() => {
+         // Clean up only test-created files (those starting with our timestamp prefix from these tests).
+         if (existsSync(UPLOAD_DIR)) {
+           for (const f of readdirSync(UPLOAD_DIR)) {
+             if (f.includes('_test-upload-')) {
+               try { rmSync(path.join(UPLOAD_DIR, f)) } catch {}
+             }
+           }
+         }
+       })
+
+       describe('Upload route source: SABLON-01 constants', () => {
+         it('declares .docx as the only allowed extension', () => {
+           const src = readFileSync(ROUTE_PATH, 'utf-8')
+           expect(src).toContain("'.docx'")
+         })
+         it('declares 10 MB size cap', () => {
+           const src = readFileSync(ROUTE_PATH, 'utf-8')
+           expect(src).toContain('10 * 1024 * 1024')
+         })
+         it('uses uploads/templates as upload directory', () => {
+           const src = readFileSync(ROUTE_PATH, 'utf-8')
+           expect(src).toMatch(/uploads['"\s,]+['"\s,]*templates/)
+         })
+         it('contains path-traversal guard', () => {
+           const src = readFileSync(ROUTE_PATH, 'utf-8')
+           expect(src).toMatch(/path\.resolve\([^)]+\)\.startsWith/)
+         })
+       })
+
+       describe('Upload route behavior: SABLON-01 validation', () => {
+         it('returns 400 when no file', async () => {
+           const fd = new FormData()
+           const res = await POST(makeRequest(fd) as any)
+           expect(res.status).toBe(400)
+         })
+
+         it('rejects .pdf with Turkish error', async () => {
+           const fd = new FormData()
+           fd.append('file', new File([new Uint8Array([0x25, 0x50, 0x44, 0x46])], 'test-upload-doc.pdf', { type: 'application/pdf' }))
+           const res = await POST(makeRequest(fd) as any)
+           expect(res.status).toBe(400)
+           const body = await res.json()
+           expect(body.error).toMatch(/\.docx/)
+         })
+
+         it('accepts a small .docx and writes to uploads/templates/', async () => {
+           // Build a minimal valid docx-like file (zip with word/document.xml).
+           const docxBytes = readFileSync(path.join(process.cwd(), 'tests/fixtures/test-template.docx'))
+           const fd = new FormData()
+           fd.append('file', new File([docxBytes], 'test-upload-tiny.docx', {
+             type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+           }))
+           const res = await POST(makeRequest(fd) as any)
+           expect(res.status).toBe(200)
+           const body = await res.json()
+           expect(body.filePath).toContain(path.join('uploads', 'templates'))
+           expect(body.fileName).toBe('test-upload-tiny.docx')
+           expect(existsSync(body.filePath)).toBe(true)
+         })
+
+         it('rejects file larger than 10 MB', async () => {
+           const big = new Uint8Array(11 * 1024 * 1024)
+           const fd = new FormData()
+           fd.append('file', new File([big], 'test-upload-big.docx', {
+             type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+           }))
+           const res = await POST(makeRequest(fd) as any)
+           expect(res.status).toBe(400)
+           const body = await res.json()
+           expect(body.error).toMatch(/10 MB/)
+         })
+       })
+       ```
+    2. Run `npm test -- tests/16-templates-upload-route.test.ts`. All tests must pass.
+    3. Note: This test depends on `tests/fixtures/test-template.docx` from Plan 02. If Plan 02 has not yet run when this test executes locally, the "small .docx" test will fail — that is expected and resolves once Plan 02 lands. Both Plan 02 and Plan 03 share Wave 2; CI/execute-phase orders waves so by the time the full suite runs at end-of-phase, the fixture exists.
+  </action>
+  <verify>
+    <automated>npm test -- tests/16-templates-upload-route.test.ts 2>&amp;1 | tail -25</automated>
+  </verify>
+  <acceptance_criteria>
+    - File `tests/16-templates-upload-route.test.ts` exists.
+    - `grep -c "10 \* 1024 \* 1024" tests/16-templates-upload-route.test.ts` returns at least 1.
+    - `grep -c "Sadece" tests/16-templates-upload-route.test.ts` returns 0 (we test for `.docx` substring not the full message — keeps test resilient).
+    - `npm test -- tests/16-templates-upload-route.test.ts` exits 0 with all tests passing (assuming Plan 02 fixture exists).
+  </acceptance_criteria>
+  <done>Regression test green; upload route validation verified end-to-end.</done>
+</task>
+
+</tasks>
+
+<threat_model>
+## Trust Boundaries
+
+| Boundary | Description |
+|----------|-------------|
+| Browser → /api/templates/upload | Untrusted multipart body crosses HTTP boundary; filename, MIME, size all attacker-controlled |
+| API route → filesystem | path.join with sanitized filename writes to disk under project-local uploads/templates/ |
+
+## STRIDE Threat Register
+
+| Threat ID | Category | Component | Disposition | Mitigation Plan |
+|-----------|----------|-----------|-------------|-----------------|
+| T-16-09 | Spoofing | file.type MIME header | mitigate | Validate BOTH file extension AND MIME — even though MIME is client-controlled, attacker must spoof both consistently to pass; coupled with sidecar's zipfile parse failure on non-zip content (Plan 02), end-to-end pipeline rejects non-docx |
+| T-16-10 | Tampering | filename path traversal (`../../etc/passwd.docx`) | mitigate | Sanitize filename via `replace(/[^a-zA-Z0-9._-]/g, '_')` removing all path separators; additionally verify `path.resolve(filePath).startsWith(basePath)` before write |
+| T-16-11 | Denial of Service | Oversized file upload | mitigate | Hard 10 MB cap enforced server-side via `file.size > MAX_SIZE` check before any disk write |
+| T-16-12 | Denial of Service | ZIP bomb (.docx is a zip) | mitigate | Phase 16 only WRITES the file in this route; sidecar (Plan 02) reads via `BytesIO` after the size cap already limits compressed input to ≤10 MB |
+| T-16-13 | Information Disclosure | Error responses leaking stack/path info | accept | Local-only deployment per PROJECT.md; error messages are user-facing Turkish strings, no stack traces returned |
+| T-16-14 | Tampering | Race between upload and sidecar read (TOCTOU) | accept | Local single-user app; no cross-process attacker can swap the file between write and sidecar read in Plan 04 |
+</threat_model>
+
+<verification>
+- `npx tsc --noEmit` exits 0
+- `npm test -- tests/16-templates-upload-route.test.ts` passes (5 tests)
+- Manual smoke (optional): `curl -X POST -F "file=@tests/fixtures/test-template.docx" http://localhost:3000/api/templates/upload` returns 200 with JSON
+</verification>
+
+<success_criteria>
+- Route file exists with all required constants and validation
+- Tests assert SABLON-01 enforcement (extension, MIME, size, path traversal)
+- Files land under `./uploads/templates/` only
+</success_criteria>
+
+<output>
+After completion, create `.planning/phases/16-sablon-semasi-ve-crud/16-03-SUMMARY.md`
+</output>

@@ -554,14 +554,14 @@ export const sablonRouter = createTRPCRouter({
 | A3 | `drizzle-kit generate` + `migrate` works correctly for adding nullable FK column to existing table | Common Pitfalls | Migration may need manual SQL if drizzle-kit struggles with ALTER TABLE + FK |
 | A4 | `text({ mode: 'json' })` with `default(sql\`(json_array())\`)` produces valid SQLite default for existing rows | Code Examples | If default fails, existing rows get NULL instead of `[]` — handled by `.notNull()` constraint |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should variable extraction happen in Node.js (docxtemplater) or Python (sidecar)?**
+1. **RESOLVED — Q1: Variable extraction in Node.js (docxtemplater) vs Python (sidecar)?** → Python sidecar chosen (implemented in Plan 16-02). Rationale: sidecar already exists from Phase 15, single parsing stack, no duplicate npm dependency. Risk of Word fragmenting `{{` across `<w:t>` (Pitfall #1) mitigated by Plan 16-02's fragmented-fixture test.
    - What we know: Phase 15 sidecar already has `extract-vars` command stub. D-02 says "call sidecar extract-vars."
    - What's unclear: Python-side extraction needs to handle OpenXML correctly. Node.js docxtemplater is battle-tested for this.
    - Recommendation: Implement Python-side extraction with simple regex on text-extracted XML for Phase 16 (names only, D-05). If reliability issues emerge, switch to Node.js docxtemplater in a future iteration. The Python approach keeps the sidecar as single source of truth for all docx operations.
 
-2. **Should the upload API route be under `/api/templates/upload` or reuse existing `/api/upload`?**
+2. **RESOLVED — Q2: Upload route at `/api/templates/upload` vs reuse `/api/upload`?** → Separate route `/api/templates/upload` chosen (implemented in Plan 16-03). Rationale: clean separation, distinct storage path (`./uploads/templates/`), .docx-only validation differs from generic upload.
    - What we know: Existing `/api/upload` saves to `E:/sigorta-belgeler/{dosyaId}/`.
    - What's unclear: Reusing the same route would require path discrimination logic.
    - Recommendation: Separate route at `/api/templates/upload` for clean separation. Different storage path (D-04: `./uploads/templates/`), different validation rules (.docx only, no dosyaId).
