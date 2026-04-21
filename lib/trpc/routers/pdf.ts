@@ -9,6 +9,7 @@ import { buildJinja2Context } from '@/lib/docx/context-builder'
 import { getMissingVariables } from '@/lib/docx/variable-registry'
 import { getLibreOfficePath } from '@/lib/pipeline/config'
 import { getTurkishErrorMessage } from '@/lib/pipeline/error-codes'
+import { archivePdfAndCreateBelge, generateSlugs } from '@/lib/docx/archive'
 import { join } from 'path'
 import { tmpdir } from 'os'
 import { randomUUID } from 'crypto'
@@ -142,6 +143,38 @@ export const pdfRouter = createTRPCRouter({
       // Clean up rendered DOCX (PDF is handed to Phase 18 for archiving)
       if (fs.existsSync(renderedDocxPath)) fs.unlinkSync(renderedDocxPath)
 
-      return { pdfPath }
+      const muvekkilAd = rows.muvekkil
+        ? `${rows.muvekkil.ad} ${rows.muvekkil.soyad}`.trim()
+        : null
+      const plaka = rows.muvekkil_plaka || null
+      const dosyaNo = rows.dosya_no
+
+      const { muvekkilSlug, plakaSlug } = await generateSlugs(
+        muvekkilAd,
+        dosyaNo,
+        plaka
+      )
+
+      const belgeTuru = template.belge_turu ?? 'Diğer'
+      const kategoriSlug = template.kategori.toLowerCase()
+
+      try {
+        const archivedBelge = await archivePdfAndCreateBelge(
+          pdfPath,
+          rows.id,
+          dosyaNo,
+          template.id,
+          template.ad,
+          belgeTuru,
+          muvekkilSlug,
+          plakaSlug,
+          kategoriSlug
+        )
+
+        return { success: true, belge: archivedBelge }
+      } catch (archiveError) {
+        if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath)
+        throw archiveError
+      }
     }),
 })
