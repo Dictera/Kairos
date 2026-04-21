@@ -104,7 +104,7 @@
   4. Üretim sonunda `belge` tablosuna kayıt eklenir (dosya_id, kategori="Üretilen Belge", file_path, sablon_id) ve olay_gunlugu satırı yazılır; PDF yazımı ve DB insert atomik çalışır
   5. DB insert başarısız olursa yazılmış PDF diskten silinir (rollback); DB'de dangling bir `belge` satırı kalmaz
 **Plans**: 3 plans
-- [ ] 18-01-PLAN.md — Schema migration, sidecar slug command, and sablon router belge_turu support
+- [x] 18-01-PLAN.md — Schema migration, sidecar slug command, and sablon router belge_turu support
 - [ ] 18-02-PLAN.md — Archive module with compensating transaction and unit tests
 - [ ] 18-03-PLAN.md — pdfRouter archive integration and template UI belge_turu dropdown
 
@@ -155,7 +155,7 @@
 | 15. Pipeline Temeli | v1.2 | 2/2 | ✅ Complete | 2026-04-20 |
 | 16. Şablon Şeması ve CRUD | v1.2 | 5/5 | ✅ Complete | 2026-04-21 |
 | 17. PDF Üretim Motoru | v1.2 | 4/4 | ✅ Complete | 2026-04-21 |
-| 18. Arşiv ve Belge Entegrasyonu | v1.2 | 0/3 | 📋 Planned | - |
+| 18. Arşiv ve Belge Entegrasyonu | v1.2 | 1/3 | 🚧 In Progress | 2026-04-21 |
 | 19. Belgeler UI ve Şablon Yönetimi Ekranı | v1.2 | 0/0 | 📋 Not started | - |
 | 20. Eski Sistemler Temizliği | v1.2 | 0/0 | 📋 Not started | - |
 

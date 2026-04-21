@@ -44,9 +44,9 @@
 
 - [ ] **ARSIV-01**: Üretilen PDF `./uploads/sablon-pdf/YYYY/AA/{kategori-slug}/` dizinine yazılır (otomatik klasör oluşturma)
 - [ ] **ARSIV-02**: Dosya adı `{müvekkil-slug}-{plaka-slug}-{seq}.pdf` formatında üretilir; plaka yoksa segment atlanır (`{müvekkil-slug}-{seq}.pdf`)
-- [ ] **ARSIV-03**: Müvekkil ve plaka slug'ları `python-slugify` ile ASCII-safe, Türkçe karakter normalize edilmiş formatta üretilir
+- [x] **ARSIV-03**: Müvekkil ve plaka slug'ları `python-slugify` ile ASCII-safe, Türkçe karakter normalize edilmiş formatta üretilir
 - [ ] **ARSIV-04**: `seq` numarası aynı dosyada aynı şablondan daha önce üretilen PDF sayısı +1'dir (DB transaction içinde hesaplanır, race condition engellenir)
-- [ ] **ARSIV-05**: Üretim sonunda `belge` tablosuna kayıt eklenir (dosya_id, kategori="Üretilen Belge", file_path, sablon_id); PDF yazımı ve DB insert transactional olarak atomiktir
+- [x] **ARSIV-05**: Üretim sonunda `belge` tablosuna kayıt eklenir (dosya_id, kategori="Üretilen Belge", file_path, sablon_id); PDF yazımı ve DB insert transactional olarak atomiktir
 - [ ] **ARSIV-06**: DB insert başarısız olursa yazılan PDF disk'ten silinir (rollback)
 
 ### Belgeler UI
@@ -136,9 +136,9 @@ Explicitly excluded. Documented to prevent scope creep.
 | PDF-10 | Phase 17 | Pending |
 | ARSIV-01 | Phase 18 | Pending |
 | ARSIV-02 | Phase 18 | Pending |
-| ARSIV-03 | Phase 18 | Pending |
+| ARSIV-03 | Phase 18 | ✅ Complete |
 | ARSIV-04 | Phase 18 | Pending |
-| ARSIV-05 | Phase 18 | Pending |
+| ARSIV-05 | Phase 18 | ✅ Complete |
 | ARSIV-06 | Phase 18 | Pending |
 | BUI-01 | Phase 19 | Pending |
 | BUI-02 | Phase 19 | Pending |

@@ -9,7 +9,7 @@ progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 11
-  completed_plans: 8
+  completed_plans: 9
   percent: 67
 ---
 
@@ -23,10 +23,10 @@ progress:
 
 ## Current Position
 
-Phase: 17 — PDF Üretim Motoru
-Plan: 04 (completed)
-Status: Ready for verification
-Last activity: 2026-04-21 -- Phase 17 all plans complete
+Phase: 18 — Arşiv ve Belge Entegrasyonu
+Plan: 01 (completed)
+Status: executing
+Last activity: 2026-04-21 -- Phase 18 Plan 01 complete
 
 Progress: [██░░░░░░░░] 17% (1/6 phases)
 
@@ -88,6 +88,8 @@ Roadmap file: .planning/ROADMAP.md
 - **Jinja2 context builder isolation:** `lib/docx/context-builder.ts` is the single mapping layer between Drizzle relations and template variable namespace; new fields extend here
 - **Numeric preservation in Jinja2 context:** `talep_tutari` and `tutar` remain numbers (not sanitized to empty string) so Python `tr_currency` filter receives numeric input
 - **Temp file lifecycle in pdfRouter:** `renderedDocxPath` is unlinked via `fs.unlinkSync` in success path and before every error throw to prevent disk accumulation
+- **Turkish char pre-transliteration in slugify:** `handle_slug` maps Turkish chars (`İ→I`, `Ş→S`, `Ç→C`, `Ö→O`, `Ü→U`, `Ğ→G` and lowercase variants) via `str.maketrans` before calling `python-slugify` for consistent ASCII output across environments
+- **Optional belge_turu on templates:** `docxSablon.belge_turu` is nullable text with Zod enum validation (`BELGE_KATEGORILER`) crossing the tRPC API boundary; stored as NULL when undefined
 
 ### Blockers
 
