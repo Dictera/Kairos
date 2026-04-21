@@ -138,14 +138,98 @@ def handle_extract_vars(params: dict[str, Any]) -> dict[str, Any]:
         return {"status": "error", "code": 2, "message": f"Değişken çıkarma hatası: {e}"}
 
 
+def _sanitize_context(obj: Any) -> Any:
+    """Recursively replace None with empty string for Jinja2 rendering."""
+    if obj is None:
+        return ""
+    if isinstance(obj, dict):
+        return {k: _sanitize_context(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_sanitize_context(item) for item in obj]
+    return obj
+
+
 def handle_render(params: dict[str, Any]) -> dict[str, Any]:
-    """Render a docx template with variables. Not yet implemented."""
-    return {"status": "error", "code": 2, "message": "Render is not yet implemented"}
+    """Render a docx template with Jinja2 variables using docxtpl."""
+    template_path = params.get("template_path")
+    output_path = params.get("output_path")
+    context = params.get("context")
+
+    if not template_path or not output_path or context is None:
+        return {
+            "status": "error",
+            "code": 1,
+            "message": "template_path, output_path ve context parametreleri zorunludur.",
+        }
+
+    try:
+        from docxtpl import DocxTemplate
+        import jinja2
+
+        from filters import tr_currency, tarih, upper_tr, lower_tr
+
+        jinja_env = jinja2.Environment()
+        jinja_env.filters["tr_currency"] = tr_currency
+        jinja_env.filters["tarih"] = tarih
+        jinja_env.filters["upper_tr"] = upper_tr
+        jinja_env.filters["lower_tr"] = lower_tr
+
+        sanitized_context = _sanitize_context(context)
+
+        doc = DocxTemplate(template_path)
+        doc.render(sanitized_context, jinja_env)
+        doc.save(output_path)
+
+        return {"status": "success", "result": {"output_path": output_path}}
+    except Exception as e:
+        logger.error("render-error", error=str(e))
+        return {
+            "status": "error",
+            "code": 2,
+            "message": f"Şablon doldurma hatası: {e}",
+        }
 
 
 def handle_convert(params: dict[str, Any]) -> dict[str, Any]:
-    """Convert a docx to PDF via LibreOffice. Not yet implemented."""
-    return {"status": "error", "code": 3, "message": "Convert is not yet implemented"}
+    """Convert a rendered DOCX to PDF via LibreOffice headless."""
+    input_path = params.get("input_path")
+    output_dir = params.get("output_dir")
+    libreoffice_path = params.get("libreoffice_path")
+    timeout = params.get("timeout", 120)
+
+    if not input_path or not output_dir or not libreoffice_path:
+        return {
+            "status": "error",
+            "code": 1,
+            "message": "input_path, output_dir ve libreoffice_path parametreleri zorunludur.",
+        }
+
+    try:
+        from convert import convert_with_libreoffice, LibreOfficeError
+
+        pdf_path = convert_with_libreoffice(
+            input_path, output_dir, libreoffice_path, timeout=timeout
+        )
+        return {"status": "success", "result": {"output_path": pdf_path}}
+    except LibreOfficeError as e:
+        return {
+            "status": "error",
+            "code": 3,
+            "message": f"PDF dönüştürme hatası: {e}",
+        }
+    except subprocess.TimeoutExpired:
+        return {
+            "status": "error",
+            "code": 3,
+            "message": "LibreOffice zaman aşımına uğradı (3 deneme sonrası).",
+        }
+    except Exception as e:
+        logger.error("convert-error", error=str(e))
+        return {
+            "status": "error",
+            "code": 99,
+            "message": f"Beklenmeyen dönüştürme hatası: {e}",
+        }
 
 
 def main() -> None:
