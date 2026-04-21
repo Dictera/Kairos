@@ -328,14 +328,14 @@ export default function SablonYonetimiSection() {
 
               {/* Drop zone */}
               <div className="space-y-2">
-                <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-accent transition-colors">
+                <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-accent transition-colors relative">
                   <Upload className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
                   <p className="text-sm font-medium">.docx dosyasını sürükle &amp; bırak veya tıkla</p>
                   <p className="text-xs text-muted-foreground mt-1">Maks. 10 MB</p>
                   <input
                     type="file"
                     accept=".docx"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                     onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
                   />
                 </div>
@@ -382,16 +382,16 @@ export default function SablonYonetimiSection() {
                 <strong>{overwriteTarget.ad}</strong> — {overwriteTarget.kategori}
               </p>
               <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-accent transition-colors relative">
-                <Upload className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                <p className="text-sm font-medium">.docx dosyasını sürükle &amp; bırak veya tıkla</p>
-                <p className="text-xs text-muted-foreground mt-1">Maks. 10 MB</p>
-                <input
-                  type="file"
-                  accept=".docx"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
-                />
-              </div>
+                  <Upload className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+                  <p className="text-sm font-medium">.docx dosyasını sürükle &amp; bırak veya tıkla</p>
+                  <p className="text-xs text-muted-foreground mt-1">Maks. 10 MB</p>
+                  <input
+                    type="file"
+                    accept=".docx"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
+                  />
+                </div>
               {file && (
                 <p className="text-sm text-muted-foreground">
                   Seçilen: {file.name}
