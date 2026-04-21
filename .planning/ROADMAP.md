@@ -38,7 +38,7 @@
 
 - [ ] **Phase 15: Pipeline Temeli** — Python sidecar kurulumu, execa IPC, LibreOffice path detect, sağlık kontrolü banner
 - [x] **Phase 16: Şablon Şeması ve CRUD** — `docx_sablon` tablosu, `.docx` upload, değişken otomatik çıkarım, şablon listesi
-- [ ] **Phase 17: PDF Üretim Motoru** — docxtpl render, TR filtreler, LibreOffice headless convert, tenacity retry, missing-var pre-check
+- [x] **Phase 17: PDF Üretim Motoru** — docxtpl render, TR filtreler, LibreOffice headless convert, tenacity retry, missing-var pre-check
 - [ ] **Phase 18: Arşiv ve Belge Entegrasyonu** — Slug+seq dosya adı, yıl/ay/kategori klasörü, `belge` transactional insert, rollback
 - [ ] **Phase 19: Belgeler UI ve Şablon Yönetimi Ekranı** — Belgeler tab "Şablondan Üret" butonu, şablon yönetimi sayfası, değişken cheat-sheet, variable registry
 - [ ] **Phase 20: Eski Sistemler Temizliği** — Tiptap `dilekce` + `.odt` routers/routes/tablolar/dosyalar/bağımlılıklar silinir
@@ -151,7 +151,7 @@
 | 14. Ayarlar Sigorta/Avukat | v1.1 | 5/5 | ✅ Complete | 2026-04-17 |
 | 15. Pipeline Temeli | v1.2 | 2/2 | ✅ Complete | 2026-04-20 |
 | 16. Şablon Şeması ve CRUD | v1.2 | 5/5 | ✅ Complete | 2026-04-21 |
-| 17. PDF Üretim Motoru | v1.2 | 2/4 | 🚧 In Progress | 2026-04-21 |
+| 17. PDF Üretim Motoru | v1.2 | 4/4 | ✅ Complete | 2026-04-21 |
 | 18. Arşiv ve Belge Entegrasyonu | v1.2 | 0/0 | 📋 Not started | - |
 | 19. Belgeler UI ve Şablon Yönetimi Ekranı | v1.2 | 0/0 | 📋 Not started | - |
 | 20. Eski Sistemler Temizliği | v1.2 | 0/0 | 📋 Not started | - |
@@ -159,4 +159,4 @@
 ---
 
 *Roadmap created: 2026-04-13*
-*Last updated: 2026-04-21 — Plan 17-03 complete (2/4 plans)*
+*Last updated: 2026-04-21 — Phase 17 complete (4/4 plans)*
