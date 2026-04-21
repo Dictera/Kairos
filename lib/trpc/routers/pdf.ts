@@ -149,11 +149,16 @@ export const pdfRouter = createTRPCRouter({
       const plaka = rows.muvekkil_plaka || null
       const dosyaNo = rows.dosya_no
 
-      const { muvekkilSlug, plakaSlug } = await generateSlugs(
-        muvekkilAd,
-        dosyaNo,
-        plaka
-      )
+      let muvekkilSlug: string
+      let plakaSlug: string | null
+      try {
+        const result = await generateSlugs(muvekkilAd, dosyaNo, plaka)
+        muvekkilSlug = result.muvekkilSlug
+        plakaSlug = result.plakaSlug
+      } catch (e) {
+        if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath)
+        throw e
+      }
 
       const belgeTuru = template.belge_turu ?? 'Diğer'
       const kategoriSlug = template.kategori.toLowerCase()

@@ -13,13 +13,15 @@ const TEMPLATES_BASE_PATH = path.resolve(process.cwd(), 'uploads', 'templates')
 
 function safeUnlink(filePath: string) {
   try {
-    if (!path.resolve(filePath).startsWith(TEMPLATES_BASE_PATH)) {
-      console.error(`Path traversal attempt: ${filePath}`)
+    const resolved = path.resolve(filePath)
+    const baseResolved = path.resolve(TEMPLATES_BASE_PATH)
+    const rel = path.relative(baseResolved, resolved)
+    if (rel.startsWith('..') || path.isAbsolute(rel)) {
       return
     }
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
   } catch (e) {
-    console.error(`Failed to delete file from disk: ${filePath}`, e)
+    // Swallow errors per pattern
   }
 }
 

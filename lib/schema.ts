@@ -307,6 +307,7 @@ export const belge = sqliteTable('belge', {
   index('idx_belge_dosya').on(t.dosya_id),
   index('idx_belge_tarih').on(t.created_at),
   index('idx_belge_sablon').on(t.sablon_id),
+  check('belge_kategori_check', sql`${t.kategori} IN ('Dilekçe', 'Karar', 'Poliçe', 'Sigorta poliçesi', 'Hasar dosyası', 'Vekaletname', 'İhtarname', 'Bilirkişi Raporu', 'Tutanak', 'Tebliği', 'Diğer')`),
 ])
 
 export const belgeRelations = relations(belge, ({ one }) => ({
@@ -366,11 +367,12 @@ export const docxSablon = sqliteTable('docx_sablon', {
     .notNull()
     .default(sql`(json_array())`),
   default_aksiyon: text('default_aksiyon'),
-  belge_turu: text('belge_turu'),
+  belge_turu: text('belge_turu').$type<BelgeKategori | null>(),
   created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
   updated_at: text('updated_at').notNull().default(sql`(datetime('now'))`),
 }, (t) => [
   check('kategori_check', sql`${t.kategori} IN ('STK', 'Mahkeme', 'Genel')`),
+  check('belge_turu_check', sql`${t.belge_turu} IS NULL OR ${t.belge_turu} IN ('Dilekçe', 'Karar', 'Poliçe', 'Sigorta poliçesi', 'Hasar dosyası', 'Vekaletname', 'İhtarname', 'Bilirkişi Raporu', 'Tutanak', 'Tebliği', 'Diğer')`),
   index('idx_sablon_kategori').on(t.kategori),
 ])
 

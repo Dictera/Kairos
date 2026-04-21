@@ -1,5 +1,6 @@
 import path from 'path'
 import fs from 'fs'
+import { randomUUID } from 'crypto'
 import { db } from '@/lib/db'
 import { belge, olayGunlugu } from '@/lib/schema'
 import { sql } from 'drizzle-orm'
@@ -16,13 +17,16 @@ export function isReservedWindowsName(name: string): boolean {
 
 export function safeUnlinkArchive(filePath: string): void {
   try {
-    if (!path.resolve(filePath).startsWith(ARCHIVE_BASE)) {
-      console.error(`Path traversal attempt: ${filePath}`)
+    const resolved = path.resolve(filePath)
+    const baseResolved = path.resolve(ARCHIVE_BASE)
+    const rel = path.relative(baseResolved, resolved)
+    if (rel.startsWith('..') || path.isAbsolute(rel)) {
+      // Path traversal attempt
       return
     }
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
   } catch (e) {
-    console.error(`Failed to delete file from disk: ${filePath}`, e)
+    // Failed to delete file from disk
   }
 }
 
@@ -30,8 +34,7 @@ export function buildArchivePath(
   date: Date,
   kategoriSlug: string,
   muvekkilSlug: string,
-  plakaSlug: string | null,
-  seq: number
+  plakaSlug: string | null
 ): { dir: string; filePath: string; relativePath: string; fileName: string } {
   const year = String(date.getFullYear())
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -52,10 +55,14 @@ export function buildArchivePath(
     baseName = `${baseName}-belge`
   }
 
-  const fileName = `${baseName}-${seq}.pdf`
+  const fileName = `${baseName}-${randomUUID().slice(0, 8)}.pdf`
   const filePath = path.join(dir, fileName)
 
-  if (!path.resolve(filePath).startsWith(ARCHIVE_BASE)) {
+  // Use path.relative approach for robust path traversal check
+  const resolved = path.resolve(filePath)
+  const baseResolved = path.resolve(ARCHIVE_BASE)
+  const rel = path.relative(baseResolved, resolved)
+  if (rel.startsWith('..') || path.isAbsolute(rel)) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
       message: 'Geçersiz arşiv yolu: dizin geçişi tespit edildi.',
@@ -84,7 +91,13 @@ export async function generateSlugs(
     })
   }
 
-  const muvekkilSlug = String(muvekkilResult.result ?? '')
+  const muvekkilSlug = String((muvekkilResult.result as { slug?: string })?.slug ?? '')
+  if (!muvekkilSlug) {
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Müvekkil slug boş döndü.',
+    })
+  }
 
   let plakaSlug: string | null = null
   if (plaka && plaka.trim().length > 0) {
@@ -100,7 +113,13 @@ export async function generateSlugs(
       })
     }
 
-    plakaSlug = String(plakaResult.result ?? '')
+    plakaSlug = String((plakaResult.result as { slug?: string })?.slug ?? '')
+    if (!plakaSlug) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Plaka slug boş döndü.',
+      })
+    }
   }
 
   return { muvekkilSlug, plakaSlug }
@@ -117,20 +136,12 @@ export async function archivePdfAndCreateBelge(
   plakaSlug: string | null,
   kategoriSlug: string
 ) {
-  const countResult = await db
-    .select({ count: sql<number>`count(*)` })
-    .from(belge)
-    .where(sql`${belge.dosya_id} = ${dosyaId} AND ${belge.sablon_id} = ${sablonId}`)
-
-  const seq = (countResult[0]?.count ?? 0) + 1
-
   const now = new Date()
   const { dir, filePath, relativePath, fileName } = buildArchivePath(
     now,
     kategoriSlug,
     muvekkilSlug,
-    plakaSlug,
-    seq
+    plakaSlug
   )
 
   fs.mkdirSync(dir, { recursive: true })
@@ -152,6 +163,9 @@ export async function archivePdfAndCreateBelge(
     }
   }
 
+  // Stat BEFORE transaction to avoid filesystem I/O inside DB transaction
+  const fileSize = fs.statSync(filePath).size
+
   try {
     const insertedBelge = await db.transaction(
       async (tx) => {
@@ -163,7 +177,7 @@ export async function archivePdfAndCreateBelge(
             kategori: belgeTuru,
             dosya_adi: fileName,
             dosya_yolu: relativePath,
-            dosya_boyutu: fs.statSync(filePath).size,
+            dosya_boyutu: fileSize,
             mime_tur: 'application/pdf',
             sablon_id: sablonId,
           })
@@ -172,7 +186,7 @@ export async function archivePdfAndCreateBelge(
         await tx.insert(olayGunlugu).values({
           dosya_id: dosyaId,
           olay_turu: 'belge',
-          aciklama: `${sablonAdi} şablonundan PDF üretildi (seq: ${seq})`,
+          aciklama: `${sablonAdi} şablonundan PDF üretildi`,
         })
 
         return row
