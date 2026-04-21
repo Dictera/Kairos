@@ -49,3 +49,10 @@ data/db.sqlite-shm
 
 # GSD quick tasks (ephemeral, not worth tracking)
 .planning/quick/
+
+# Agent-generated artifacts
+.claude/
+.playwright-mcp/
+
+# Python cache
+scripts/docx-pipeline/__pycache__/
