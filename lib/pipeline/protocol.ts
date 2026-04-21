@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const CommandEnvelopeSchema = z.object({
-  command: z.enum(['extract-vars', 'render', 'convert', 'health-check']),
+  command: z.enum(['extract-vars', 'render', 'convert', 'health-check', 'slug']),
   params: z.record(z.unknown()).default({}),
 })
 export type CommandEnvelope = z.infer<typeof CommandEnvelopeSchema>

@@ -17,6 +17,7 @@ from typing import Any, Literal
 
 import structlog
 from pydantic import BaseModel, Field
+from slugify import slugify
 
 # Configure structlog for JSONL stderr output
 structlog.configure(
@@ -37,12 +38,21 @@ logger = structlog.get_logger()
 class CommandEnvelope(BaseModel):
     """Command envelope from Node.js stdin."""
 
-    command: Literal["extract-vars", "render", "convert", "health-check"] = Field(
+    command: Literal["extract-vars", "render", "convert", "health-check", "slug"] = Field(
         description="Command to execute"
     )
     params: dict[str, Any] = Field(default_factory=dict, description="Command parameters")
 
     model_config = {"extra": "forbid"}
+
+
+def handle_slug(params: dict[str, Any]) -> dict[str, Any]:
+    """Generate ASCII-safe slug from text using python-slugify."""
+    text = params.get("text", "")
+    if not isinstance(text, str):
+        return {"status": "error", "code": 1, "message": "text parametresi string olmalı."}
+    slug = slugify(text, allow_unicode=False)
+    return {"status": "success", "result": {"slug": slug}}
 
 
 def handle_health_check(params: dict[str, Any]) -> dict[str, Any]:
@@ -254,6 +264,7 @@ def main() -> None:
             "extract-vars": handle_extract_vars,
             "render": handle_render,
             "convert": handle_convert,
+            "slug": handle_slug,
         }
 
         handler = handler_map.get(envelope.command)
