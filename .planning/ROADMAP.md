@@ -87,7 +87,11 @@
   3. Python sidecar docxtpl ile şablonu doldurur; LibreOffice headless (`soffice --headless --convert-to pdf`) ile PDF üretir; her çağrıya `-env:UserInstallation=file:///TEMP/lo-{uuid}` eklenir ve çağrı sonunda temp profil silinir
   4. LibreOffice timeout (varsayılan 120 sn) aşılırsa `tenacity` ile 3 denemeye kadar exponential backoff ile yeniden denenir; deterministic hatalarda (missing binary, docxtpl render) retry yapılmaz
   5. Eksik değişken varsa üretim başlamadan client-side pre-check hata verir ve eksik alanın bulunduğu sekmeye deep-link gösterir (örn. "Mahkeme esas numarası henüz girilmemiş — Süreç sekmesinden ekleyin")
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 17-01-PLAN.md — Python sidecar render & convert (filters.py, convert.py, handle_render/handle_convert)
+- [ ] 17-02-PLAN.md — TypeScript protocol extension + variable registry with tab mapping
+- [ ] 17-03-PLAN.md — pdfRouter + Jinja2 context builder + missing-variable pre-check
+- [ ] 17-04-PLAN.md — Integration test: canary template with Turkish chars end-to-end
 
 ### Phase 18: Arşiv ve Belge Entegrasyonu
 **Goal**: Üretilen her PDF kalıcı ve tahmin edilebilir bir yola yazılır ve aynı anda `belge` tablosuna işlenir; iki yazım işlemi atomic olur.
@@ -147,7 +151,7 @@
 | 14. Ayarlar Sigorta/Avukat | v1.1 | 5/5 | ✅ Complete | 2026-04-17 |
 | 15. Pipeline Temeli | v1.2 | 2/2 | ✅ Complete | 2026-04-20 |
 | 16. Şablon Şeması ve CRUD | v1.2 | 5/5 | ✅ Complete | 2026-04-21 |
-| 17. PDF Üretim Motoru | v1.2 | 0/0 | 📋 Not started | - |
+| 17. PDF Üretim Motoru | v1.2 | 0/4 | 📋 Planned | - |
 | 18. Arşiv ve Belge Entegrasyonu | v1.2 | 0/0 | 📋 Not started | - |
 | 19. Belgeler UI ve Şablon Yönetimi Ekranı | v1.2 | 0/0 | 📋 Not started | - |
 | 20. Eski Sistemler Temizliği | v1.2 | 0/0 | 📋 Not started | - |
@@ -155,4 +159,4 @@
 ---
 
 *Roadmap created: 2026-04-13*
-*Last updated: 2026-04-20 — v1.2 Şablon Belgeler phases 15–20 planned*
+*Last updated: 2026-04-21 — Phase 17 planned (4 plans)*
