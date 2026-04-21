@@ -103,7 +103,7 @@ describe('buildArchivePath', () => {
     expect(result.dir).toBe(path.join(ARCHIVE_BASE, '2026', '04', 'stk'))
     expect(result.fileName).toMatch(/^ali-veli-34-abc-123-[a-f0-9]{8}\.pdf$/)
     expect(result.filePath).toBe(path.join(ARCHIVE_BASE, '2026', '04', 'stk', result.fileName))
-    expect(result.relativePath).toMatch(/uploads\/sablon-pdf\/2026\/04\/stk\/ali-veli-34-abc-123-[a-f0-9]{8}\.pdf$/)
+    expect(result.relativePath).toMatch(/\/uploads\/sablon-pdf\/2026\/04\/stk\/ali-veli-34-abc-123-[a-f0-9]{8}\.pdf$/)
   })
 
   it('returns filename with only muvekkil slug when plaka is null', () => {
@@ -146,12 +146,13 @@ describe('buildArchivePath', () => {
     expect(() => buildArchivePath(date, 'stk', 'muvekkil', '../../../../etc')).toThrow(TRPCError)
   })
 
-  it('produces relativePath with forward slashes', () => {
+  it('produces relativePath with forward slashes and leading slash', () => {
     const date = new Date(2026, 3, 15)
     const result = buildArchivePath(date, 'stk', 'muvekkil', null)
 
     expect(result.relativePath).not.toContain('\\')
-    expect(result.relativePath).toMatch(/uploads\/sablon-pdf\/2026\/04\/stk\/muvekkil-[a-f0-9]{8}\.pdf$/)
+    expect(result.relativePath).toMatch(/\/uploads\/sablon-pdf\/2026\/04\/stk\/muvekkil-[a-f0-9]{8}\.pdf$/)
+    expect(result.relativePath.startsWith('/')).toBe(true)
   })
 })
 

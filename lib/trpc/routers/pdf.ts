@@ -100,10 +100,9 @@ export const pdfRouter = createTRPCRouter({
           },
         },
         120_000
-      ) // 120s timeout per D-05
+      )
 
       if (renderResult.status === 'error') {
-        // Clean up temp file if created
         if (fs.existsSync(renderedDocxPath)) fs.unlinkSync(renderedDocxPath)
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -125,7 +124,7 @@ export const pdfRouter = createTRPCRouter({
           },
         },
         180_000
-      ) // 180s timeout for convert (render + convert buffer)
+      )
 
       if (convertResult.status === 'error') {
         if (fs.existsSync(renderedDocxPath)) fs.unlinkSync(renderedDocxPath)

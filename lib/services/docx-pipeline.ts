@@ -43,7 +43,6 @@ export async function runSidecarCommand(
   try {
     result = CommandResultSchema.parse(JSON.parse(stdout))
   } catch {
-    // Invalid JSON response
     return {
       status: 'error',
       code: 99,

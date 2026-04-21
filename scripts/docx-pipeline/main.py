@@ -70,22 +70,38 @@ def handle_health_check(params: dict[str, Any]) -> dict[str, Any]:
     libreoffice_version: str | None = None
     libreoffice_accessible = False
 
-    # Use provided libreoffice_path (from Node.js caller) or fall back to "soffice"
     libreoffice_path: str | None = params.get("libreoffice_path")
     libreoffice_cmd = libreoffice_path if libreoffice_path else "soffice"
 
-    try:
-        result = subprocess.run(
-            [libreoffice_cmd, "--version"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        if result.returncode == 0:
-            libreoffice_version = result.stdout.strip()
-            libreoffice_accessible = True
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        pass
+    if sys.platform == "win32" and libreoffice_path:
+        import os
+        lo_dir = os.path.dirname(libreoffice_path)
+        version_ini = os.path.join(lo_dir, "version.ini")
+        if os.path.exists(version_ini):
+            try:
+                with open(version_ini, "r", encoding="utf-8", errors="ignore") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line.lower().startswith("buildid="):
+                            buildid = line.split("=", 1)[1].strip()
+                            libreoffice_version = f"LibreOffice {buildid}"
+                            break
+            except OSError:
+                pass
+        libreoffice_accessible = os.path.exists(libreoffice_path)
+    else:
+        try:
+            result = subprocess.run(
+                [libreoffice_cmd, "--version"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if result.returncode == 0:
+                libreoffice_version = result.stdout.strip()
+                libreoffice_accessible = True
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            pass
 
     logger.info(
         "health-check",

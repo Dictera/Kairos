@@ -45,7 +45,7 @@ export default async function BelgelerPage() {
                 </p>
               </Link>
               <a
-                href={belge.dosya_yolu}
+                href={belge.dosya_yolu.startsWith('/') ? belge.dosya_yolu : `/${belge.dosya_yolu}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline ml-4"

@@ -3,7 +3,6 @@ import fs from 'fs'
 import { randomUUID } from 'crypto'
 import { db } from '@/lib/db'
 import { belge, olayGunlugu } from '@/lib/schema'
-import { sql } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { runSidecarCommand } from '@/lib/services/docx-pipeline'
 
@@ -21,7 +20,6 @@ export function safeUnlinkArchive(filePath: string): void {
     const baseResolved = path.resolve(ARCHIVE_BASE)
     const rel = path.relative(baseResolved, resolved)
     if (rel.startsWith('..') || path.isAbsolute(rel)) {
-      // Path traversal attempt
       return
     }
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
@@ -40,7 +38,6 @@ export function buildArchivePath(
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const dir = path.join(ARCHIVE_BASE, year, month, kategoriSlug)
 
-  // Reject path traversal attempts early (defense in depth)
   for (const segment of [kategoriSlug, muvekkilSlug, plakaSlug ?? '']) {
     if (segment.includes('..')) {
       throw new TRPCError({
@@ -58,7 +55,6 @@ export function buildArchivePath(
   const fileName = `${baseName}-${randomUUID().slice(0, 8)}.pdf`
   const filePath = path.join(dir, fileName)
 
-  // Use path.relative approach for robust path traversal check
   const resolved = path.resolve(filePath)
   const baseResolved = path.resolve(ARCHIVE_BASE)
   const rel = path.relative(baseResolved, resolved)
@@ -69,7 +65,7 @@ export function buildArchivePath(
     })
   }
 
-  const relativePath = path.relative(process.cwd(), filePath).replace(/\\/g, '/')
+  const relativePath = '/' + path.relative(process.cwd(), filePath).replace(/\\/g, '/')
 
   return { dir, filePath, relativePath, fileName }
 }
@@ -163,36 +159,28 @@ export async function archivePdfAndCreateBelge(
     }
   }
 
-  // Stat BEFORE transaction to avoid filesystem I/O inside DB transaction
   const fileSize = fs.statSync(filePath).size
 
   try {
-    const insertedBelge = await db.transaction(
-      async (tx) => {
-        const [row] = await tx
-          .insert(belge)
-          .values({
-            dosya_id: dosyaId,
-            dosya_no: dosyaNo,
-            kategori: belgeTuru,
-            dosya_adi: fileName,
-            dosya_yolu: relativePath,
-            dosya_boyutu: fileSize,
-            mime_tur: 'application/pdf',
-            sablon_id: sablonId,
-          })
-          .returning()
+    const [insertedBelge] = await db
+      .insert(belge)
+      .values({
+        dosya_id: dosyaId,
+        dosya_no: dosyaNo,
+        kategori: belgeTuru,
+        dosya_adi: fileName,
+        dosya_yolu: relativePath,
+        dosya_boyutu: fileSize,
+        mime_tur: 'application/pdf',
+        sablon_id: sablonId,
+      })
+      .returning()
 
-        await tx.insert(olayGunlugu).values({
-          dosya_id: dosyaId,
-          olay_turu: 'belge',
-          aciklama: `${sablonAdi} şablonundan PDF üretildi`,
-        })
-
-        return row
-      },
-      { behavior: 'immediate' }
-    )
+    await db.insert(olayGunlugu).values({
+      dosya_id: dosyaId,
+      olay_turu: 'belge',
+      aciklama: `${sablonAdi} şablonundan PDF üretildi`,
+    })
 
     return insertedBelge
   } catch (error) {

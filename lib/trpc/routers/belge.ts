@@ -7,6 +7,7 @@ import { eq, desc } from 'drizzle-orm'
 import { z } from 'zod'
 import fs from 'fs'
 import path from 'path'
+import { ARCHIVE_BASE, safeUnlinkArchive } from '@/lib/docx/archive'
 
 const belgeKategoriEnum = z.enum(BELGE_KATEGORILER)
 
@@ -38,31 +39,20 @@ export const belgeRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.number().int() }))
     .mutation(async ({ input }) => {
-      // Get file path first (need it for disk delete)
       const existing = await db.select().from(belge).where(eq(belge.id, input.id))
       if (!existing[0]) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Belge bulunamadı.' })
       }
-      
-      // Delete DB record first (has FK constraint)
+
       await db.delete(belge).where(eq(belge.id, input.id))
-      
-      // Then delete file from E: drive
-      // Path: E:/sigorta-belgeler/{dosyaId}/{filename}
-      const filePathParts = existing[0].dosya_yolu.replace('/api/files/', '').split('/')
-      const fullPath = path.join('E:/sigorta-belgeler', ...filePathParts)
-      const basePath = path.resolve('E:/sigorta-belgeler')
-      if (!path.resolve(fullPath).startsWith(basePath)) {
-        console.error(`Path traversal attempt: ${fullPath}`)
-        // DB record already deleted — don't throw
-      } else {
-        try { 
-          fs.unlinkSync(fullPath) 
-        } catch (e) {
-          console.error(`Failed to delete file from disk: ${fullPath}`, e)
-        }
+
+      const dosyaYolu = existing[0].dosya_yolu
+      if (dosyaYolu) {
+        const cleanPath = dosyaYolu.startsWith('/') ? dosyaYolu.slice(1) : dosyaYolu
+        const fullPath = path.join(ARCHIVE_BASE, cleanPath)
+        safeUnlinkArchive(fullPath)
       }
-      
+
       await logOlay(existing[0].dosya_id, 'belge_silindi', `Belge silindi: ${existing[0].dosya_adi}`)
       return { success: true }
     }),

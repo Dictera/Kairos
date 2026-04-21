@@ -1,8 +1,26 @@
-import { execa } from 'execa'
+import { existsSync, readFileSync } from 'fs'
+import { dirname, join } from 'path'
 import { getSidecarPythonPath, getLibreOfficePath } from '@/lib/pipeline/config'
 import { runSidecarCommand } from '@/lib/services/docx-pipeline'
 
-const CACHE_TTL_MS = 5 * 60 * 1000
+const CACHE_TTL_MS = 2 * 60 * 60 * 1000
+
+function readLibreOfficeVersionFromIni(libreofficePath: string): string | null {
+  try {
+    const loDir = dirname(libreofficePath)
+    const versionIni = join(loDir, 'version.ini')
+    if (!existsSync(versionIni)) return null
+
+    const content = readFileSync(versionIni, 'utf-8')
+    const buildIdMatch = content.match(/buildid=(.+)/i)
+    if (buildIdMatch) {
+      return `LibreOffice ${buildIdMatch[1].trim()}`
+    }
+    return null
+  } catch {
+    return null
+  }
+}
 
 interface HealthStatus {
   python: {
@@ -26,10 +44,6 @@ interface HealthCache {
 let healthCache: HealthCache | null = null
 let healthPending: Promise<HealthStatus> | null = null
 
-/**
- * Returns the cached health status if still valid, otherwise runs fresh checks.
- * Cache TTL is 5 minutes. Uses pending promise to prevent concurrent redundant checks.
- */
 export async function getHealthStatus(): Promise<HealthStatus> {
   if (healthCache && Date.now() < healthCache.expiresAt) {
     return healthCache.result
@@ -48,9 +62,6 @@ export async function getHealthStatus(): Promise<HealthStatus> {
   return healthPending
 }
 
-/**
- * Runs fresh health checks for Python sidecar and LibreOffice binary.
- */
 export async function runHealthChecks(): Promise<HealthStatus> {
   const pythonPath = await getSidecarPythonPath()
   const libreofficePath = await getLibreOfficePath()
@@ -60,7 +71,6 @@ export async function runHealthChecks(): Promise<HealthStatus> {
 
   if (pythonPath) {
     try {
-      const libreofficePath = await getLibreOfficePath()
       const result = await runSidecarCommand({ command: 'health-check', params: { libreoffice_path: libreofficePath ?? undefined } })
       if (result.status === 'success' && result.result) {
         const r = result.result as { python_version?: string; python_accessible?: boolean }
@@ -76,15 +86,20 @@ export async function runHealthChecks(): Promise<HealthStatus> {
   let libreofficeVersion: string | null = null
 
   if (libreofficePath) {
-    try {
-      const { stdout } = await execa(libreofficePath, ['--version'], {
-        timeout: 5_000,
-        reject: false,
-      })
-      libreofficeVersion = stdout.trim() || null
-      libreofficeAccessible = true
-    } catch {
-      libreofficeAccessible = false
+    libreofficeAccessible = true
+    if (process.platform === 'win32') {
+      libreofficeVersion = readLibreOfficeVersionFromIni(libreofficePath)
+    } else {
+      try {
+        const { execa } = await import('execa')
+        const { stdout } = await execa(libreofficePath, ['--version'], {
+          timeout: 5_000,
+          reject: false,
+        })
+        libreofficeVersion = stdout.trim() || null
+      } catch {
+        libreofficeVersion = null
+      }
     }
   }
 
@@ -108,4 +123,5 @@ export async function runHealthChecks(): Promise<HealthStatus> {
  */
 export function invalidateHealthCache(): void {
   healthCache = null
+  healthPending = null
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, type ElementType } from 'react'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { format } from 'date-fns'
@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 // Icon mapping for document categories
-const kategoriIcons: Record<string, React.ElementType> = {
+const kategoriIcons: Record<string, ElementType> = {
   'Dilekçe': FileText,
   'Karar': Scale,
   'Poliçe': Shield,
@@ -88,12 +88,12 @@ export function BelgeList({ dosyaId }: BelgeListProps) {
     <div className="space-y-2">
       {belgeler.map((belge) => {
         const isGenerated = belge.sablon_id != null
-        const sablonAdi = isGenerated ? templateById.get(belge.sablon_id as number)?.ad : undefined
+        const sablonAdi = isGenerated && belge.sablon_id != null ? templateById.get(belge.sablon_id)?.ad : undefined
         const seqMatch = belge.dosya_adi.match(/-(\d+)\.pdf$/i)
         const seq = seqMatch?.[1]
         const Icon = isGenerated ? FileText : (kategoriIcons[belge.kategori] || FileIcon)
         const colorClass = kategoriColors[belge.kategori] || 'bg-gray-100 text-gray-800'
-        const fileUrl = belge.dosya_yolu // /api/files/{dosyaId}/{filename}
+        const fileUrl = belge.dosya_yolu.startsWith('/') ? belge.dosya_yolu : `/${belge.dosya_yolu}`
 
         return (
           <div
