@@ -4,7 +4,7 @@ milestone: v1.2
 milestone_name: Şablon Belgeler
 status: executing
 last_updated: "2026-04-21T07:42:32.141Z"
-last_activity: 2026-04-21 -- Phase 16 planning complete
+last_activity: 2026-04-21 -- Phase 16 complete
 progress:
   total_phases: 6
   completed_phases: 1
@@ -24,9 +24,9 @@ progress:
 ## Current Position
 
 Phase: 16 — Şablon Şeması ve CRUD
-Plan: 02 (completed)
-Status: Ready to execute next plan (03)
-Last activity: 2026-04-21 -- Phase 16 Plan 02 complete
+Plan: 05 (completed)
+Status: Ready to execute next phase
+Last activity: 2026-04-21 -- Phase 16 complete
 
 Progress: [░░░░░░░░░░] 0% (0/6 phases)
 
@@ -64,8 +64,8 @@ Roadmap file: .planning/ROADMAP.md
 | 12 | 1 | - | - |
 | 13 | 4 | - | - |
 | 14 | 5 | - | - |
-| 15 | 2/6 | 2 | 14.5min |
-| 16 | TBD | - | - |
+| 15 | 2/2 | 2 | 14.5min |
+| 16 | 5/5 | 5 | - |
 | 17 | TBD | - | - |
 | 18 | TBD | - | - |
 | 19 | TBD | - | - |
