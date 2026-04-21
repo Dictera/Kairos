@@ -51,6 +51,7 @@ export const sablonRouter = createTRPCRouter({
         kategori: input.kategori,
         dosya_yolu: input.filePath,
         degiskenler: variables,
+        belge_turu: input.belge_turu ?? null,
       }).returning()
 
       return row
@@ -104,6 +105,7 @@ export const sablonRouter = createTRPCRouter({
         .set({
           dosya_yolu: input.filePath,
           degiskenler: variables,
+          belge_turu: input.belge_turu ?? null,
           updated_at: sql`(datetime('now'))`,
         })
         .where(eq(docxSablon.id, input.id))

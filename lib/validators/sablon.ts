@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { SABLON_KATEGORILER } from '@/lib/schema'
+import { BELGE_KATEGORILER, SABLON_KATEGORILER } from '@/lib/schema'
 
 export const sablonKategoriSchema = z.enum(SABLON_KATEGORILER)
 
@@ -9,10 +9,12 @@ export const sablonCreateSchema = z.object({
   filePath: z.string().min(1),
   fileName: z.string().min(1),
   fileSize: z.number().int().nonnegative(),
+  belge_turu: z.enum(BELGE_KATEGORILER).optional(),
 })
 
 export const sablonUpdateSchema = z.object({
   id: z.number().int(),
   filePath: z.string().min(1),
   fileName: z.string().min(1),
+  belge_turu: z.enum(BELGE_KATEGORILER).optional(),
 })
