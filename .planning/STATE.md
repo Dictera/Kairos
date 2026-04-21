@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Şablon Belgeler
 status: executing
-last_updated: "2026-04-21T21:01:21Z"
-last_activity: 2026-04-21 -- Phase 17 Wave 3 complete
+last_updated: "2026-04-21T22:47:00Z"
+last_activity: 2026-04-21 -- Phase 18 Plan 02 complete
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 11
-  completed_plans: 9
-  percent: 67
+  total_plans: 12
+  completed_plans: 10
+  percent: 71
 ---
 
 # Project State
@@ -24,15 +24,15 @@ progress:
 ## Current Position
 
 Phase: 18 — Arşiv ve Belge Entegrasyonu
-Plan: 01 (completed)
+Plan: 02 (completed)
 Status: executing
-Last activity: 2026-04-21 -- Phase 18 Plan 01 complete
+Last activity: 2026-04-21 -- Phase 18 Plan 02 complete
 
-Progress: [██░░░░░░░░] 17% (1/6 phases)
+Progress: [██░░░░░░░░] 20% (2/6 phases)
 
 ## Session Continuity
 
-Last session: 2026-04-21T20:41:26Z
+Last session: 2026-04-21T22:47:00Z
 Previous milestone: v1.1 shipped 2026-04-17
 Current milestone: v1.2 Şablon Belgeler (phases 15–20 planned)
 Roadmap file: .planning/ROADMAP.md
@@ -67,7 +67,7 @@ Roadmap file: .planning/ROADMAP.md
 | 15 | 2/2 | 2 | 14.5min |
 | 16 | 5/5 | 5 | - |
 | 17 | 4/4 | - | 7.5min |
-| 18 | TBD | - | - |
+| 18 | 2/4 | - | - |
 | 19 | TBD | - | - |
 | 20 | TBD | - | - |
 
@@ -90,6 +90,7 @@ Roadmap file: .planning/ROADMAP.md
 - **Temp file lifecycle in pdfRouter:** `renderedDocxPath` is unlinked via `fs.unlinkSync` in success path and before every error throw to prevent disk accumulation
 - **Turkish char pre-transliteration in slugify:** `handle_slug` maps Turkish chars (`İ→I`, `Ş→S`, `Ç→C`, `Ö→O`, `Ü→U`, `Ğ→G` and lowercase variants) via `str.maketrans` before calling `python-slugify` for consistent ASCII output across environments
 - **Optional belge_turu on templates:** `docxSablon.belge_turu` is nullable text with Zod enum validation (`BELGE_KATEGORILER`) crossing the tRPC API boundary; stored as NULL when undefined
+- **Defense-in-depth path traversal guard:** `buildArchivePath` rejects any slug segment containing `..` before path construction, in addition to the post-join `path.resolve` guard, because `path.join` treats `../` inside dash-joined filename segments as literal characters
 
 ### Blockers
 
