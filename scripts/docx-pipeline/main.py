@@ -6,10 +6,13 @@ JSON stdin → JSON stdout protocol.
 
 from __future__ import annotations
 
+import io
 import json
 import logging
+import re
 import subprocess
 import sys
+import zipfile
 from typing import Any, Literal
 
 import structlog
@@ -78,6 +81,7 @@ def handle_health_check(params: dict[str, Any]) -> dict[str, Any]:
         "status": "success",
         "result": {
             "python_version": python_version,
+            "python_accessible": True,
             "libreoffice_version": libreoffice_version,
             "libreoffice_accessible": libreoffice_accessible,
         },
@@ -85,18 +89,63 @@ def handle_health_check(params: dict[str, Any]) -> dict[str, Any]:
 
 
 def handle_extract_vars(params: dict[str, Any]) -> dict[str, Any]:
-    """Extract variables from a docx template. Not yet implemented."""
-    return {"status": "error", "code": 1, "message": "Not implemented in Phase 15"}
+    """Extract {{var}} and {%p var%} placeholders from a .docx file."""
+    file_path = params.get("file_path")
+    if not file_path:
+        return {"status": "error", "code": 1, "message": "file_path param gerekli"}
+
+    try:
+        with open(file_path, "rb") as f:
+            zip_data = f.read()
+    except FileNotFoundError:
+        logger.error("extract-vars-missing-file", file_path=file_path)
+        return {"status": "error", "code": 2, "message": f"Dosya bulunamadi: {file_path}"}
+    except OSError as e:
+        logger.error("extract-vars-io-error", file_path=file_path, error=str(e))
+        return {"status": "error", "code": 2, "message": f"Dosya okunamadi: {e}"}
+
+    try:
+        with zipfile.ZipFile(io.BytesIO(zip_data)) as zf:
+            if "word/document.xml" not in zf.namelist():
+                return {"status": "error", "code": 1, "message": "Geçersiz .docx dosyası"}
+            xml_content = zf.read("word/document.xml").decode("utf-8")
+    except zipfile.BadZipFile:
+        return {"status": "error", "code": 1, "message": "Geçersiz .docx dosyası"}
+
+    try:
+        # Strip XML tags + entities to recover text where placeholders live.
+        # CRITICAL: this collapses Word's fragmented {{ var }} across multiple <w:t> nodes
+        # back into a single matchable text stream. See RESEARCH.md Common Pitfalls #1.
+        text_content = re.sub(r"<[^>]+>", " ", xml_content)
+        text_content = re.sub(r"&\w+;", " ", text_content)
+        text_content = re.sub(r"\s+", " ", text_content)
+
+        def normalize_var(v: str) -> str:
+            """Remove all whitespace from extracted variable name (Word fragments insert spaces across <w:t> nodes)."""
+            return re.sub(r"\s+", "", v.strip())
+
+        double_brace = re.findall(r"\{\{\s*([^}]+?)\s*\}\}", text_content)
+        paragraph_tags = re.findall(r"\{%p\s+([^%]+?)%\}", text_content)
+
+        combined = [normalize_var(v) for v in (double_brace + paragraph_tags) if v.strip()]
+        # Dedupe preserving first-seen order.
+        variables = list(dict.fromkeys(combined))
+
+        logger.info("extract-vars-success", file_path=file_path, var_count=len(variables))
+        return {"status": "success", "result": {"variables": variables}}
+    except Exception as e:
+        logger.error("extract-vars-error", file_path=file_path, error=str(e))
+        return {"status": "error", "code": 2, "message": f"Değişken çıkarma hatası: {e}"}
 
 
 def handle_render(params: dict[str, Any]) -> dict[str, Any]:
     """Render a docx template with variables. Not yet implemented."""
-    return {"status": "error", "code": 1, "message": "Not implemented in Phase 15"}
+    return {"status": "error", "code": 2, "message": "Render is not yet implemented"}
 
 
 def handle_convert(params: dict[str, Any]) -> dict[str, Any]:
     """Convert a docx to PDF via LibreOffice. Not yet implemented."""
-    return {"status": "error", "code": 1, "message": "Not implemented in Phase 15"}
+    return {"status": "error", "code": 3, "message": "Convert is not yet implemented"}
 
 
 def main() -> None:
