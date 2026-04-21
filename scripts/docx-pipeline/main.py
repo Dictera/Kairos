@@ -51,6 +51,14 @@ def handle_slug(params: dict[str, Any]) -> dict[str, Any]:
     text = params.get("text", "")
     if not isinstance(text, str):
         return {"status": "error", "code": 1, "message": "text parametresi string olmalı."}
+    # Pre-transliterate Turkish chars before slugify to ensure correct ASCII mapping.
+    # python-slugify 8.0.4 can drop Turkish chars incorrectly with default settings.
+    turkish_map = str.maketrans({
+        'İ': 'I', 'ı': 'i', 'Ş': 'S', 'ş': 's',
+        'Ç': 'C', 'ç': 'c', 'Ö': 'O', 'ö': 'o',
+        'Ü': 'U', 'ü': 'u', 'Ğ': 'G', 'ğ': 'g',
+    })
+    text = text.translate(turkish_map)
     slug = slugify(text, allow_unicode=False)
     return {"status": "success", "result": {"slug": slug}}
 
