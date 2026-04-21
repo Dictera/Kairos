@@ -23,17 +23,17 @@ type SigortaSirketiRow = InferSelectModel<typeof sigortaSirketi>
 type AvukatRow = InferSelectModel<typeof avukat>
 
 export interface DosyaWithRelations extends DosyaRow {
-  muvekkil?: MuvekkilRow
-  taraflar?: Array<
+  muvekkil: MuvekkilRow | null
+  taraflar: Array<
     TarafRow & {
-      sigortaSirketi?: SigortaSirketiRow
-      avukat?: AvukatRow
+      sigortaSirketi: SigortaSirketiRow | null
+      avukat: AvukatRow | null
     }
   >
-  durusmalar?: Array<DurusmaRow>
-  sureler?: Array<SureRow>
-  finans_kalemleri?: Array<FinansKalemiRow>
-  notlar?: Array<DosyaNotRow>
+  durusmalar: Array<DurusmaRow>
+  sureler: Array<SureRow>
+  finans_kalemleri: Array<FinansKalemiRow>
+  notlar: Array<DosyaNotRow>
 }
 
 export function buildJinja2Context(
@@ -64,7 +64,7 @@ export function buildJinja2Context(
       durum: dosya.durum,
       aciklama: dosya.aciklama,
     },
-    taraf: dosya.taraflar?.[0]
+    taraf: dosya.taraflar[0]
       ? {
           karsitaraf_ad: dosya.taraflar[0].karsitaraf_ad,
           police_no: dosya.taraflar[0].police_no,
@@ -89,26 +89,26 @@ export function buildJinja2Context(
       : null,
     stk: surecDetay.stk ?? null,
     mahkeme: surecDetay.mahkeme ?? null,
-    durusmalar: (dosya.durusmalar ?? []).map((d) => ({
+    durusmalar: dosya.durusmalar.map((d) => ({
       tarih: d.tarih,
       saat: d.saat,
       mahkeme_kurum: d.mahkeme_kurum,
       tur: d.tur,
       notlar: d.notlar,
     })),
-    sureler: (dosya.sureler ?? []).map((s) => ({
+    sureler: dosya.sureler.map((s) => ({
       ad: s.ad,
       son_tarih: s.son_tarih,
       tur: s.tur,
       notlar: s.notlar,
     })),
-    finans_kalemleri: (dosya.finans_kalemleri ?? []).map((f) => ({
+    finans_kalemleri: dosya.finans_kalemleri.map((f) => ({
       tur: f.tur,
       tutar: f.tutar,
       tarih: f.tarih,
       aciklama: f.aciklama,
     })),
-    notlar: (dosya.notlar ?? []).map((n) => ({
+    notlar: dosya.notlar.map((n) => ({
       icerik: n.icerik,
       created_at: n.created_at,
     })),
