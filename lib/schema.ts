@@ -1,4 +1,4 @@
-import { integer, text, real, sqliteTable, index, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import { integer, text, real, sqliteTable, index, uniqueIndex, check } from 'drizzle-orm/sqlite-core'
 import { relations, sql } from 'drizzle-orm'
 
 // ── Lookup tables ────────────────────────────────────────────────────────────
@@ -301,10 +301,12 @@ export const belge = sqliteTable('belge', {
   dosya_yolu: text('dosya_yolu').notNull(), // /api/files/{dosyaId}/{filename}
   dosya_boyutu: integer('dosya_boyutu').notNull(), // bytes
   mime_tur: text('mime_tur').notNull(),
+  sablon_id: integer('sablon_id').references(() => docxSablon.id, { onDelete: 'set null' }),
   created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
 }, (t) => [
   index('idx_belge_dosya').on(t.dosya_id),
   index('idx_belge_tarih').on(t.created_at),
+  index('idx_belge_sablon').on(t.sablon_id),
 ])
 
 export const belgeRelations = relations(belge, ({ one }) => ({
@@ -348,6 +350,28 @@ export const olayGunlugu = sqliteTable('olay_gunlugu', {
 export const olayGunluguRelations = relations(olayGunlugu, ({ one }) => ({
   dosya: one(dosya, { fields: [olayGunlugu.dosya_id], references: [dosya.id] }),
 }))
+
+// ── DOCX Şablon (docx_sablon) ──────────────────────────────────────────────
+
+export const SABLON_KATEGORILER = ['STK', 'Mahkeme', 'Genel'] as const
+export type SablonKategori = typeof SABLON_KATEGORILER[number]
+
+export const docxSablon = sqliteTable('docx_sablon', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  ad: text('ad').notNull(),
+  kategori: text('kategori').notNull(),
+  dosya_yolu: text('dosya_yolu').notNull(),
+  degiskenler: text('degiskenler', { mode: 'json' })
+    .$type<string[]>()
+    .notNull()
+    .default(sql`(json_array())`),
+  default_aksiyon: text('default_aksiyon'),
+  created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
+  updated_at: text('updated_at').notNull().default(sql`(datetime('now'))`),
+}, (t) => [
+  check('kategori_check', sql`${t.kategori} IN ('STK', 'Mahkeme', 'Genel')`),
+  index('idx_sablon_kategori').on(t.kategori),
+])
 
 // ── dilekceSablonu ─────────────────────────────────────────────────────────
 
