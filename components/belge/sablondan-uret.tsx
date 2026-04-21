@@ -27,7 +27,14 @@ export function SablondanUret({ dosyaId }: SablondanUretProps) {
   const queryClient = useQueryClient()
 
   const [filter, setFilter] = useState<'all' | 'STK' | 'Mahkeme' | 'Genel'>('all')
-  const [selected, setSelected] = useState<(Awaited<ReturnType<typeof trpc.sablon.list.queryOptions>>[number]) | null>(null)
+  const [selected, setSelected] = useState<{
+    id: number
+    ad: string
+    kategori: string
+    dosya_yolu: string
+    degiskenler: string[]
+    belge_turu: string | null
+  } | null>(null)
   const [progressOpen, setProgressOpen] = useState(false)
   const [step, setStep] = useState<'idle' | 'render' | 'convert' | 'archive'>('idle')
 
@@ -124,7 +131,7 @@ export function SablondanUret({ dosyaId }: SablondanUretProps) {
       {/* Selected template indicator */}
       {selected && (
         <p className="text-sm text-muted-foreground">
-          Şablon seçin: <span className="font-medium text-foreground">{selected.ad}</span>
+          Şablon seçin… <span className="font-medium text-foreground">{selected.ad}</span>
         </p>
       )}
 
