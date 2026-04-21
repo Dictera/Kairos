@@ -11,7 +11,10 @@ export interface SidecarResult extends CommandResult {
  * Run a command via the Python sidecar using JSON stdin/stdout protocol.
  * Uses reject:false to capture exit codes without throwing.
  */
-export async function runSidecarCommand(envelope: CommandEnvelope): Promise<SidecarResult> {
+export async function runSidecarCommand(
+  envelope: CommandEnvelope,
+  timeout?: number
+): Promise<SidecarResult> {
   const pythonPath = await getSidecarPythonPath()
 
   if (!pythonPath) {
@@ -20,10 +23,11 @@ export async function runSidecarCommand(envelope: CommandEnvelope): Promise<Side
     )
   }
 
-  const { stdout, stderr, exitCode } = await execa(pythonPath, [join(SIDECAR_DIR, 'main.py')], {
+  const mainPy = join(SIDECAR_DIR, 'main.py')
+  const { stdout, stderr, exitCode } = await execa(pythonPath, [mainPy], {
     cwd: SIDECAR_DIR,
     input: JSON.stringify(envelope),
-    timeout: 30_000,
+    timeout: timeout ?? 30_000,
     reject: false,
   })
 
