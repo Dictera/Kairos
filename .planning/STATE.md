@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Şablon Belgeler
 status: executing
-last_updated: "2026-04-21T20:41:26Z"
-last_activity: 2026-04-21 -- Plan 17-02 complete
+last_updated: "2026-04-21T21:01:21Z"
+last_activity: 2026-04-21 -- Plan 17-03 complete
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 7
-  completed_plans: 3
-  percent: 43
+  completed_plans: 4
+  percent: 57
 ---
 
 # Project State
@@ -24,11 +24,11 @@ progress:
 ## Current Position
 
 Phase: 17 — PDF Üretim Motoru
-Plan: 03–04 (executing)
+Plan: 04 (executing)
 Status: executing
-Last activity: 2026-04-21 -- Plan 17-02 complete
+Last activity: 2026-04-21 -- Plan 17-03 complete
 
-Progress: [█░░░░░░░░░] 17% (1/6 phases)
+Progress: [██░░░░░░░░] 17% (1/6 phases)
 
 ## Session Continuity
 
@@ -66,7 +66,7 @@ Roadmap file: .planning/ROADMAP.md
 | 14 | 5 | - | - |
 | 15 | 2/2 | 2 | 14.5min |
 | 16 | 5/5 | 5 | - |
-| 17 | 1/4 | - | 6min |
+| 17 | 2/4 | - | 7.5min |
 | 18 | TBD | - | - |
 | 19 | TBD | - | - |
 | 20 | TBD | - | - |
@@ -85,6 +85,9 @@ Roadmap file: .planning/ROADMAP.md
 - **Transactional archive:** PDF write and `belge` insert are atomic — DB failure triggers disk rollback
 - **No data export on retirement:** User pre-approved deletion of Tiptap + `.odt` data; only DB backup (`.pre-v1.2.bak`) retained as safety
 - **Retirement last:** Phase 20 executes only after Phase 19 is user-validated end-to-end so rollback stays possible
+- **Jinja2 context builder isolation:** `lib/docx/context-builder.ts` is the single mapping layer between Drizzle relations and template variable namespace; new fields extend here
+- **Numeric preservation in Jinja2 context:** `talep_tutari` and `tutar` remain numbers (not sanitized to empty string) so Python `tr_currency` filter receives numeric input
+- **Temp file lifecycle in pdfRouter:** `renderedDocxPath` is unlinked via `fs.unlinkSync` in success path and before every error throw to prevent disk accumulation
 
 ### Blockers
 
