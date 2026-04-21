@@ -89,7 +89,7 @@
   5. Eksik değişken varsa üretim başlamadan client-side pre-check hata verir ve eksik alanın bulunduğu sekmeye deep-link gösterir (örn. "Mahkeme esas numarası henüz girilmemiş — Süreç sekmesinden ekleyin")
 **Plans**: 4 plans
 - [ ] 17-01-PLAN.md — Python sidecar render & convert (filters.py, convert.py, handle_render/handle_convert)
-- [ ] 17-02-PLAN.md — TypeScript protocol extension + variable registry with tab mapping
+- [x] 17-02-PLAN.md — TypeScript protocol extension + variable registry with tab mapping
 - [ ] 17-03-PLAN.md — pdfRouter + Jinja2 context builder + missing-variable pre-check
 - [ ] 17-04-PLAN.md — Integration test: canary template with Turkish chars end-to-end
 
@@ -151,7 +151,7 @@
 | 14. Ayarlar Sigorta/Avukat | v1.1 | 5/5 | ✅ Complete | 2026-04-17 |
 | 15. Pipeline Temeli | v1.2 | 2/2 | ✅ Complete | 2026-04-20 |
 | 16. Şablon Şeması ve CRUD | v1.2 | 5/5 | ✅ Complete | 2026-04-21 |
-| 17. PDF Üretim Motoru | v1.2 | 0/4 | 📋 Planned | - |
+| 17. PDF Üretim Motoru | v1.2 | 1/4 | 🚧 In Progress | 2026-04-21 |
 | 18. Arşiv ve Belge Entegrasyonu | v1.2 | 0/0 | 📋 Not started | - |
 | 19. Belgeler UI ve Şablon Yönetimi Ekranı | v1.2 | 0/0 | 📋 Not started | - |
 | 20. Eski Sistemler Temizliği | v1.2 | 0/0 | 📋 Not started | - |

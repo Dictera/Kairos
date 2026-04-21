@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Şablon Belgeler
 status: executing
-last_updated: "2026-04-21T07:42:32.141Z"
-last_activity: 2026-04-21 -- Phase 16 complete
+last_updated: "2026-04-21T20:41:26Z"
+last_activity: 2026-04-21 -- Plan 17-02 complete
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 7
-  completed_plans: 2
-  percent: 29
+  completed_plans: 3
+  percent: 43
 ---
 
 # Project State
@@ -19,20 +19,20 @@ progress:
 
 **Project:** Sigorta Uyuşmazlık Takip
 **Core value:** Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kritik süreleri tek ekrandan görebilmek.
-**Current focus:** v1.2 Şablon Belgeler — ready to plan Phase 15 (Pipeline Temeli)
+**Current focus:** v1.2 Şablon Belgeler — executing Phase 17 (PDF Üretim Motoru)
 
 ## Current Position
 
-Phase: 16 — Şablon Şeması ve CRUD
-Plan: 05 (completed)
-Status: Ready to execute next phase
-Last activity: 2026-04-21 -- Phase 16 complete
+Phase: 17 — PDF Üretim Motoru
+Plan: 03–04 (executing)
+Status: executing
+Last activity: 2026-04-21 -- Plan 17-02 complete
 
-Progress: [░░░░░░░░░░] 0% (0/6 phases)
+Progress: [█░░░░░░░░░] 17% (1/6 phases)
 
 ## Session Continuity
 
-Last session: 2026-04-21T10:59:37.000Z
+Last session: 2026-04-21T20:41:26Z
 Previous milestone: v1.1 shipped 2026-04-17
 Current milestone: v1.2 Şablon Belgeler (phases 15–20 planned)
 Roadmap file: .planning/ROADMAP.md
@@ -66,7 +66,7 @@ Roadmap file: .planning/ROADMAP.md
 | 14 | 5 | - | - |
 | 15 | 2/2 | 2 | 14.5min |
 | 16 | 5/5 | 5 | - |
-| 17 | TBD | - | - |
+| 17 | 1/4 | - | 6min |
 | 18 | TBD | - | - |
 | 19 | TBD | - | - |
 | 20 | TBD | - | - |
@@ -81,6 +81,7 @@ Roadmap file: .planning/ROADMAP.md
 - **Health check cache:** 5-minute TTL, module-level singleton pattern, exposed via `getHealthStatus()` and `invalidateHealthCache()`
 - **Per-invocation LibreOffice profile:** Every `soffice` call uses `-env:UserInstallation=file:///TEMP/lo-{uuid}` to avoid SingletonLock hang
 - **Variable registry as TS const:** `lib/docx/variable-registry.ts` is the single source of truth; cheat-sheet + unknown-var detection both consume it
+- **Co-located tests in lib/**/__tests__:** `vitest.config.ts` extended to include `lib/**/__tests__/**/*.test.ts` alongside `tests/` for unit tests that live next to their source modules
 - **Transactional archive:** PDF write and `belge` insert are atomic — DB failure triggers disk rollback
 - **No data export on retirement:** User pre-approved deletion of Tiptap + `.odt` data; only DB backup (`.pre-v1.2.bak`) retained as safety
 - **Retirement last:** Phase 20 executes only after Phase 19 is user-validated end-to-end so rollback stays possible
