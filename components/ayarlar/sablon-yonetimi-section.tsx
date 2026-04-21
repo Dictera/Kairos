@@ -357,7 +357,7 @@ export default function SablonYonetimiSection() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={!file || !form.formState.isValid || uploading}
+                  disabled={!file || uploading}
                 >
                   {uploading ? 'Yükleniyor...' : 'Şablon Yükle'}
                 </Button>
