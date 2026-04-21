@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AyarlarCrudSection } from './ayarlar-crud-section'
 import { SigortaSirketiSection } from './sigorta-sirketi-section'
+import SablonYonetimiSection from './sablon-yonetimi-section'
 import { PipelineStatus } from '@/components/pipeline/pipeline-status'
 
 export function AyarlarPage() {
@@ -120,6 +121,10 @@ export function AyarlarPage() {
           </p>
         </CardContent>
       </Card>
+
+      <Separator />
+
+      <SablonYonetimiSection />
 
       <Separator />
 
