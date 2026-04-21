@@ -11,12 +11,19 @@ LOWER_TR_TABLE = str.maketrans({"İ": "i", "I": "ı"})
 
 
 def tr_currency(value):
-    """Format a number as Turkish Lira with TR locale separators."""
+    """Format a number as Turkish Lira with TR locale separators.
+
+    Output format: ``150.000,00 ₺`` (amount first, symbol last).
+    """
     if value is None or value == "":
         return ""
     if isinstance(value, str):
         value = float(value)
-    return format_currency(value, "TRY", locale="tr_TR")
+    result = format_currency(value, "TRY", locale="tr_TR")
+    # Babel tr_TR produces "₺150.000,00" — move symbol to end with space
+    if result.startswith("₺"):
+        result = result[1:].strip() + " ₺"
+    return result
 
 
 def tarih(value):
