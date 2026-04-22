@@ -4,35 +4,62 @@ type StatCardsProps = {
   totalDosya: number
   aktivDosya: number
   buAyAcilan: number
+  totalDelta?: number
+  aktivDelta?: number
+  buAyDelta?: number
 }
 
-export function StatCards({ totalDosya, aktivDosya, buAyAcilan }: StatCardsProps) {
+function StatCard({
+  label,
+  value,
+  delta,
+}: {
+  label: string
+  value: number
+  delta?: number
+}) {
   return (
-    <div className="grid grid-cols-3 gap-6">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-muted-foreground">Toplam Dosya</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-3xl font-semibold">{totalDosya}</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-muted-foreground">Aktif Dosya</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-3xl font-semibold">{aktivDosya}</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-muted-foreground">Bu Ay Açılan</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-3xl font-semibold">{buAyAcilan}</p>
-        </CardContent>
-      </Card>
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {label}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-1">
+        <p className="text-4xl font-semibold tracking-tight leading-none">{value}</p>
+        {delta !== undefined && (
+          <p className="text-xs text-muted-foreground">
+            <span
+              className={
+                delta >= 0
+                  ? 'text-green-600 font-medium'
+                  : 'text-destructive font-medium'
+              }
+            >
+              {delta >= 0 ? '+' : ''}
+              {delta}
+            </span>{' '}
+            geçen aya göre
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+export function StatCards({
+  totalDosya,
+  aktivDosya,
+  buAyAcilan,
+  totalDelta,
+  aktivDelta,
+  buAyDelta,
+}: StatCardsProps) {
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      <StatCard label="Toplam Dosya" value={totalDosya} delta={totalDelta} />
+      <StatCard label="Aktif Dosya"  value={aktivDosya}  delta={aktivDelta} />
+      <StatCard label="Bu Ay Açılan" value={buAyAcilan}  delta={buAyDelta} />
     </div>
   )
 }
