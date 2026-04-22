@@ -43,7 +43,7 @@ const navGroups = [
       { label: 'Takvim', href: '/takvim', icon: Calendar },
       { label: 'Belgeler', href: '/belgeler', icon: FileText },
       { label: 'Finans', href: '/finans', icon: DollarSign },
-      { label: 'Dilekçeler', href: '/dilekce', icon: FileEdit },
+      { label: 'Şablon Yönetimi', href: '/ayarlar', icon: Settings },
       { label: 'Raporlar', href: '/raporlar', icon: BarChart2 },
     ],
   },
