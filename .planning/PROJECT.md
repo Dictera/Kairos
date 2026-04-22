@@ -23,29 +23,27 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 - ✓ **Takvim (TAKVIM-01–02)** — v1.0: Monthly calendar grid, clickable event links
 - ✓ **Belge Yönetimi (BELGE-01–04)** — v1.0: Upload/download 20MB, category badges, delete
 - ✓ **Finans Takibi (FINANS-01–06)** — v1.0: Gelen/Giden/Masraf entries, net balance, finance dashboard
-- ✓ **Dilekçe Şablon Sistemi (DILEKCE-01–05)** — v1.0: Tiptap editor, variable substitution, Arial TTF Turkish PDF
 - ✓ **Raporlar (RAPOR-01–03)** — v1.0: Portfolio + financial reports, PDF + Excel export
-- ~~**Dilekçe Şablon Sistemi (DILEKCE-01–05)**~~ — v1.0 shipped, v1.2'de **emekliye ayrıldı** (yeni .docx + LibreOffice pipeline ile değiştirildi)
 - ✓ **Müvekkil E-posta Kaldırma (MUVEK-06)** — v1.1: Müvekkil formlarından e-posta alanı kaldırma
 - ✓ **Sürücü Bilgileri (TARAF-06, 07, 08, 09, 10)** — v1.1: Dosya > Taraflar bölümüne sürücü bilgileri ekleme (Ad, Soyad, Plaka, Telefon, Poliçe No) + Turkish phone regex + UI Card
 - ✓ **Sekme Temizliği ve UI/UX (TAB-01, TAB-02, UIUX-01)** — v1.1: Notlar/Zaman Çizelgesi tab replacement with Notes CRUD + Activity Timeline; Genel Bilgiler new fields; Müvekkil IBAN + form grouping
 - ✓ **Avukat Yönetimi (Phase 14)** — v1.1: Avukat tablosu, sigorta şirketi ilişkisi (avukat_sigorta_sirketi join), karşıtaraf vekil alanı avukat seçimine dönüştürüldü; Ayarlar ekranından CRUD yönetimi
-- ✓ **PDF Üretim Motoru (PDF-01–10)** — v1.2: docxtpl Jinja2 render, TR filtreleri (tr_currency, tarih, upper_tr, lower_tr), LibreOffice headless PDF convert, tenacity retry, missing-variable pre-check with tab deep-links, tRPC pdfRouter.generate
+- ✓ **Python Sidecar Pipeline (PIPE-01..07)** — v1.2: Python sidecar with pydantic v2 IPC, execa bridge, health-check with 5-min TTL cache
+- ✓ **Şablon Yönetimi (SABLON-01..08)** — v1.2: docx_sablon table, .docx upload, auto variable extraction, CRUD UI
+- ✓ **PDF Üretim Motoru (PDF-01..10)** — v1.2: docxtpl Jinja2 render, TR filtreleri, LibreOffice headless convert, tenacity retry, missing-var pre-check
+- ✓ **Arşiv Entegrasyonu (ARSIV-01..06)** — v1.2: Transactional PDF archive, slug-based naming, belge_turu categorization
+- ✓ **Belgeler UI (BUI-01..09)** — v1.2: SablondanUret, VariableCatalogModal, CheatSheetPage, Şablon Yönetimi
+- ✓ **Eski Sistem Temizliği (TEMIZ-01..08)** — v1.2: Tiptap/ODT routers/routes/services/tables deleted, jspdf/adm-zip/uninstalled, sidebar nav updated
+- ~~**Dilekçe Şablon Sistemi (DILEKCE-01–05)**~~ — v1.0 shipped, **emekliye ayrıldı** v1.2 (yeni .docx + LibreOffice pipeline ile değiştirildi)
 
-## Current Milestone: v1.2 Şablon Belgeler
+## Current Milestone: v1.3 (Planning)
 
-**Goal:** Avukatın kendi `.docx` şablonlarını yüklediği, dosya detayındaki tüm verilerle otomatik doldurulan, Python sidecar + LibreOffice headless üzerinden PDF üreten tek doğru belge pipeline'ını kurmak; iki eski sistemi (Tiptap editör + .odt upload) kod ve veriyle birlikte kaldırmak.
+Next milestone will focus on Quick Actions & Template Improvements.
 
-**Target features:**
-- `.docx` şablon yükleme (ad + zorunlu kategori: STK / Mahkeme / Genel), otomatik `{{ degisken }}` çıkarımı
-- Python sidecar pipeline: `pydantic v2` + `docxtpl` + `jinja2` + `babel` + `python-slugify` + `structlog` + `tenacity`
-- Dosya detayındaki tüm veri şablona aktarılır (müvekkil, taraflar, sürücü, STK/mahkeme süreç, duruşma, süre, finans, notlar); ileride genişletilebilir
-- TR formatlama filtreleri (`tr_currency`, tarih) + Jinja2 koşullu bloklar / döngüler
-- LibreOffice headless ile PDF (`LIBREOFFICE_PATH` + `PYTHON_PATH` `.env`), kurulum kontrol + banner uyarı
-- Otomatik arşiv: `./uploads/sablon-pdf/YYYY/AA/{kategori-slug}/` **+** `belge` tablosuna otomatik kayıt
-- Dosya adı: `{müvekkil-slug}-{plaka-slug}-{seq}.pdf` (plaka yoksa atla, seq otomatik artar)
-- **Belgeler sekmesinde tek tuşla şablon → PDF üretimi** (ör. "İhtarname Üret" butonu → ihtarname.docx → PDF → dosyaya iliştir)
-- Eski sistemler temizliği: `dilekce` (Tiptap) + `dilekce-odt` routerları, UI, tablolar, dosya sistemindeki içerik silinir (export yok)
+### Proposed for v1.3
+
+- **Quick Actions (QUICK-01..05):** Named quick-action buttons on belge tab (e.g., "İhtarname Üret"), dry-run preview, batch multi-template, fuzzy-match typo warnings, generation history
+- **Template Improvements (ADV-01..02):** Deterministic PDF rendering (metadata strip), template versioning/diff/rollback
 
 ### Out of Scope
 
@@ -68,7 +66,8 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 - **Deployment:** Lokal only — `next dev` → `localhost:3000`
 - **Storage:** `./data/db.sqlite`, `./public/uploads`
 - **User:** Solo avukat; ağırlıklı Kasko/Trafik ve Sağlık/Hayat sigortaları
-- **User feedback themes:** Demand for shape tools in reports; Turkish character rendering critical; calendar integration with case detail is primary workflow
+- **User feedback themes:** v1.2 shipped; waiting on user feedback for quick-action buttons and template improvements
+- **Legacy removed:** Tiptap dilekçe editörü, .odt şablon sistemi, jspdf/adm-zip/npm packages — clean v1.2 baseline
 
 ## Constraints
 
@@ -95,6 +94,10 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 | karsitaraf_vekil → avukat_id FK | Free-text vekil replaced with structured avukat entity for better data integrity | ✓ Confirmed — Phase 14; stale template variable remains as tech debt |
 | logOlay activity log | All dosya/not/belge mutations hook into olay_gunlugu for Timeline | ✓ Confirmed — Phase 13; finans/sure mutations not yet hooked |
 | Drizzle relations graph | query.with() enables eager loading of avukat on taraf | ✓ Confirmed — Phase 14 |
+| JSON stdin/stdout IPC | Python sidecar uses pydantic v2 CommandEnvelope over stdin/stdout | ✓ Confirmed — v1.2; simpler than named pipes, cross-platform |
+| Turkish char pre-transliteration | Explicit `str.maketrans` before `python-slugify` for consistent ASCII output | ✓ Confirmed — v1.2; defensive correctness across environments |
+| UUID over seq in filename | Race condition on seq calculation → replaced with UUID suffix | ✓ Confirmed — v1.2; deterministic and collision-free |
+| DROP TABLE IF EXISTS | Legacy table cleanup uses idempotent migration pattern | ✓ Confirmed — v1.2; safe to re-run |
 
 ## Evolution
 
@@ -114,4 +117,4 @@ Bu belge faz geçişlerinde ve milestone sınırlarında güncellenir.
 4. Context güncelleme
 
 ---
-*Last updated: 2026-04-21 after Phase 17 complete — PDF Üretim Motoru validated*
+*Last updated: 2026-04-22 after v1.2 Şablon Belgeler milestone — PDF pipeline shipped, legacy systems retired*

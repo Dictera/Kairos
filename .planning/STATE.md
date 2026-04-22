@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Şablon Belgeler
-status: executing
-last_updated: "2026-04-22T00:59:00Z"
-last_activity: 2026-04-22 -- Phase 20 UAT complete, v1.2 all phases done
+status: complete
+last_updated: "2026-04-22T14:35:00Z"
+last_activity: 2026-04-22 -- v1.2 Şablon Belgeler milestone archived
 progress:
   total_phases: 6
   completed_phases: 6
@@ -100,15 +100,19 @@ Roadmap file: .planning/ROADMAP.md
 
 ## Deferred Items
 
-Items acknowledged and deferred at milestone close on 2026-04-17:
+Items acknowledged and deferred at milestone close on 2026-04-22 (v1.2 Şablon Belgeler):
 
 | Category | Item | Status |
 |----------|------|--------|
 | debug | dilekce-odt-olustur-pdf-onizleme | superseded by v1.2 retirement (Phase 20) |
-| verification | phase-14-no-verification-md | unverified |
+| quick_task | 260411-505-fix-git-tree-10000-uncommitted-files-vis | missing — no fix needed |
+| uat_gap | Phase 15 UAT [testing] | 0 pending scenarios, not re-run |
+| uat_gap | Phase 18 UAT [partial] | 0 pending scenarios, not re-run |
 | tech_debt | belge-olay-turu-mismatch | open |
 | tech_debt | karsitaraf-vekil-stale-reference | open |
 | tech_debt | drizzle-journal-tag-mismatch | open |
+
+**Note:** Items from previous milestone close (2026-04-17) remain as previously recorded above.
 
 ### Roadmap Evolution
 

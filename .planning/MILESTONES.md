@@ -1,5 +1,35 @@
 # Milestones
 
+## v1.2 Şablon Belgeler (Shipped: 2026-04-22)
+
+**Phases completed:** 6 phases (15–20), 21 plans
+**Requirements:** 48 (PIPE 7 + SABLON 8 + PDF 10 + ARSIV 6 + BUI 9 + TEMIZ 8)
+**Known deferred items at close:** 4 (see STATE.md Deferred Items)
+
+**Key accomplishments:**
+
+- Python sidecar (`scripts/docx-pipeline/`) with pydantic v2 IPC, JSON stdin/stdout protocol, execa bridge, health-check with 5-min TTL cache, and 7 Python packages (docxtpl, jinja2, babel, python-slugify, structlog, tenacity)
+- TR custom Jinja2 filters: `tr_currency` (150.000,00 TL format), `tarih` (dd.MM.yyyy), `upper_tr`/`lower_tr` (Turkish i↔İ)
+- LibreOffice headless PDF conversion with tenacity retry (3 attempts, exponential backoff), per-invocation temp profile to avoid SingletonLock
+- `docx_sablon` schema + `belge.sablon_id` FK, Zod validators, 10MB .docx-only upload route with path-traversal guard
+- `handle_extract_vars` in Python sidecar using python-docx XML parsing for automatic `{{ degisken }}` extraction
+- `handle_slug` command with Turkish char pre-transliteration (İ→I, Ş→S, Ç→C, Ö→O, Ü→U, Ğ→G)
+- Transactional PDF archive: `./uploads/sablon-pdf/YYYY/AA/{kategori-slug}/{müvekkil-slug}-{plaka-slug}-{seq}.pdf` + `belge` insert atomically; rollback on DB failure
+- SablondanUret component: category-tabs (Tümü/STK/Mahkeme/Genel), searchable Command dropdown, non-dismissible progress modal with step labels
+- VariableCatalogModal with "✓ Bilinen" / "⚠ Bilinmeyen" badges, Turkish locale sort
+- CheatSheetPage at /ayarlar/degiskenler auto-generated from variable registry
+- Şablon Yönetimi page in Ayarlar with full CRUD (create, list, delete, overwrite)
+- Variable registry (`lib/docx/variable-registry.ts`) as single source of truth for all supported template variables
+- Report PDF routes migrated from Tiptap to pdfmake; `/dilekce` redirects for compatibility
+- Tiptap/ODT routers, routes, services, tables, and uploads/odt-templates/ folder deleted
+- 63 npm packages uninstalled (jspdf, adm-zip, @xmldom/xmldom, 4x @tiptap/extension-*)
+- DROP TABLE IF EXISTS migration for `dilekce_sablonu` and `dilekce_odt_sablonu`
+- Sidebar nav: "Dilekçeler" removed, "Şablon Yönetimi" added
+- Retirement modal with user confirmation before cleanup
+- npm build passes (21 routes, 289 tests passing)
+
+---
+
 ## v1.1 Temizlik ve İyileştirme (Shipped: 2026-04-17)
 
 **Phases completed:** 5 phases, 15 plans, 32 tasks
