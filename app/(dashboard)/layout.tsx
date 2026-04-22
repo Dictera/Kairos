@@ -3,6 +3,7 @@ import { SidebarProvider } from '@/components/ui/sidebar'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AppSidebar } from '@/components/app-sidebar'
 import { HealthBanner } from '@/components/pipeline/health-banner'
+import { RetirementModal } from '@/components/retirement-modal'
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
@@ -13,6 +14,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <HealthBanner />
           {children}
         </main>
+        <RetirementModal />
       </SidebarProvider>
     </TooltipProvider>
   )
