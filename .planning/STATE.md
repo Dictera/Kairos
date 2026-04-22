@@ -124,5 +124,11 @@ Items acknowledged and deferred at milestone close on 2026-04-22 (v1.2 Şablon B
 - Confirm exact package upper bounds with `pip index versions` + `npm view execa versions --json` before writing `requirements.txt` / `package.json`
 - Verify Turkish character rendering end-to-end via Playwright on a canary template (`çÇğĞıİöÖşŞüÜ İstanbul şirket müvekkil`) — Phase 17 verification gate
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260422-001 | Dashboard UI güncelleme — yeni layout, delta kartları, Son Dosyalar tablosu | 2026-04-22 | 3b482d1 | [260422-001-dashboard-ui-guncelleme](./quick/260422-001-dashboard-ui-guncelleme/) |
+
 ---
 *State managed by GSD workflow*
