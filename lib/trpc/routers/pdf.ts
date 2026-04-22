@@ -53,6 +53,8 @@ export const pdfRouter = createTRPCRouter({
           sureler: true,
           finans_kalemleri: true,
           notlar: true,
+          karsitarafSigorta: true,
+          muvekkilSigorta: true,
         },
       })
       if (!rows) {

@@ -8,6 +8,7 @@ export const VARIABLE_REGISTRY: VariableInfo[] = [
   // muvekkil — genel
   { path: 'muvekkil.ad', tab: 'genel', label: 'Müvekkil adı' },
   { path: 'muvekkil.soyad', tab: 'genel', label: 'Müvekkil soyadı' },
+  { path: 'muvekkil.ad_soyad', tab: 'genel', label: 'Müvekkil adı soyadı' },
   { path: 'muvekkil.telefon', tab: 'genel', label: 'Müvekkil telefonu' },
   { path: 'muvekkil.tc_vergi_no', tab: 'genel', label: 'Müvekkil TC/Vergi No' },
   { path: 'muvekkil.adres', tab: 'genel', label: 'Müvekkil adresi' },
@@ -24,6 +25,8 @@ export const VARIABLE_REGISTRY: VariableInfo[] = [
   { path: 'dosya.kusur_orani_karsi', tab: 'genel', label: 'Karşı taraf kusur oranı' },
   { path: 'dosya.durum', tab: 'genel', label: 'Dosya durumu' },
   { path: 'dosya.aciklama', tab: 'genel', label: 'Dosya açıklaması' },
+  { path: 'dosya.karsitaraf_sigorta', tab: 'genel', label: 'Karşı taraf sigorta şirketi' },
+  { path: 'dosya.muvekkil_sigorta', tab: 'genel', label: 'Müvekkil sigorta şirketi' },
 
   // taraf — taraflar
   { path: 'taraf.karsitaraf_ad', tab: 'taraflar', label: 'Karşı taraf adı' },
@@ -31,6 +34,7 @@ export const VARIABLE_REGISTRY: VariableInfo[] = [
   { path: 'taraf.karsitaraf_plaka', tab: 'taraflar', label: 'Karşı taraf plaka' },
   { path: 'taraf.surucu_ad', tab: 'taraflar', label: 'Sürücü adı' },
   { path: 'taraf.surucu_soyad', tab: 'taraflar', label: 'Sürücü soyadı' },
+  { path: 'taraf.surucu_ad_soyad', tab: 'taraflar', label: 'Sürücü adı soyadı' },
   { path: 'taraf.surucu_plaka', tab: 'taraflar', label: 'Sürücü plaka' },
   { path: 'taraf.surucu_telefon', tab: 'taraflar', label: 'Sürücü telefonu' },
   { path: 'taraf.surucu_police_no', tab: 'taraflar', label: 'Sürücü poliçe no' },

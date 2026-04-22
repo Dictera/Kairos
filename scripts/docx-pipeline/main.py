@@ -269,7 +269,7 @@ def handle_convert(params: dict[str, Any]) -> dict[str, Any]:
 def main() -> None:
     """Read JSON command from stdin, route to handler, write response to stdout."""
     try:
-        raw_input = sys.stdin.read()
+        raw_input = sys.stdin.buffer.read().decode('utf-8')
         if not raw_input.strip():
             error_response = {"status": "error", "code": 99, "message": "No input received"}
             print(json.dumps(error_response), file=sys.stdout)

@@ -32,6 +32,7 @@ import { KarsitaraflarTab } from './karsitaraflar-tab'
 import { YargilamaSureciTab } from './yargilama-sureci-tab'
 import { BelgeUpload } from '@/components/belge/belge-upload'
 import { BelgeList } from '@/components/belge/belge-list'
+import { SablondanUret } from '@/components/belge/sablondan-uret'
 import { FinansForm } from '@/components/finans/finans-form'
 import { FinansSummary } from '@/components/finans/finans-summary'
 import { FinansEntryList } from '@/components/finans/finans-entry-list'
@@ -195,6 +196,8 @@ export function DosyaDetailTabs({ dosyaId }: DosyaDetailTabsProps) {
         </TabsContent>
 
         <TabsContent value="belgeler" className="mt-4 space-y-4">
+          <SablondanUret dosyaId={dosyaId} />
+          <Separator />
           <BelgeUpload dosyaId={dosyaId} dosyaNo={data.dosya_no} />
           <Separator />
           <BelgeList dosyaId={dosyaId} />

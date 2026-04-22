@@ -463,22 +463,22 @@ function VariableCatalog({ variables }: { variables: string[] }) {
 | A4 | No new shadcn components need installation — `Dialog`, `Command`, `Tabs`, `Badge`, `Skeleton`, `Progress` all exist | Standard Stack | If a component is missing, plan needs `npx shadcn add` step |
 | A5 | Seq number is not directly available on `belge` row; it must be parsed from `dosya_adi` (e.g., `{slug}-{seq}.pdf`) | Pattern 2 | If seq is stored separately, parsing logic changes |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should `belgeRouter.list` join `docx_sablon` to return `sablon_ad`?**
    - What we know: Currently returns raw `belge` rows. Template name is needed for BUI-05 subtitle.
    - What's unclear: Whether to modify the router (backend change) or do client-side lookup.
-   - Recommendation: Client-side lookup via `sablon.list` query is lower risk and stays within Phase 19 scope. If performance becomes an issue with 100+ templates, enhance the router later.
+   - **RESOLVED:** Client-side lookup via `sablon.list` query is lower risk and stays within Phase 19 scope. If performance becomes an issue with 100+ templates, enhance the router later.
 
 2. **Should the cheat-sheet page be a static route or a client component?**
    - What we know: `VARIABLE_REGISTRY` is a static const; no server data needed.
    - What's unclear: Whether to use Server Component for faster initial load.
-   - Recommendation: Server Component (no `'use client'`) since it only renders static data. The Ayarlas summary card links to it via `<Link>`.
+   - **RESOLVED:** Server Component (no `'use client'`) since it only renders static data. The Ayarlas summary card links to it via `<Link>`.
 
 3. **How should seq number be displayed in `BelgeList`?**
    - What we know: Filename format is `{muvekkil-slug}-{plaka-slug}-{seq}.pdf` (or without plaka).
    - What's unclear: Whether seq is embedded in filename or available as a separate column.
-   - Recommendation: Parse seq from `dosya_adi` using regex `/-(\d+)\.pdf$/` or similar. Document the parsing assumption.
+   - **RESOLVED:** Parse seq from `dosya_adi` using regex `/-(\d+)\.pdf$/` or similar. Document the parsing assumption.
 
 ## Environment Availability
 

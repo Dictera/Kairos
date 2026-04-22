@@ -4,13 +4,13 @@ milestone: v1.2
 milestone_name: Şablon Belgeler
 status: executing
 last_updated: "2026-04-22T00:59:00Z"
-last_activity: 2026-04-22 -- Phase 19 Plan 01 complete
+last_activity: 2026-04-22 -- Phase 20 UAT complete, v1.2 all phases done
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 6
   total_plans: 14
-  completed_plans: 14
-  percent: 79
+  completed_plans: 18
+  percent: 100
 ---
 
 # Project State
@@ -19,16 +19,16 @@ progress:
 
 **Project:** Sigorta Uyuşmazlık Takip
 **Core value:** Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kritik süreleri tek ekrandan görebilmek.
-**Current focus:** v1.2 Şablon Belgeler — Phase 18 complete, ready for verification
+**Current focus:** v1.2 Şablon Belgeler — Phase 20 complete, milestone complete
 
 ## Current Position
 
-Phase: 19 — Belgeler UI ve Şablon Yönetimi Ekranı
-Plan: 03 (completed)
-Status: Executing
-Last activity: 2026-04-22 -- Phase 19 Plan 03 complete
+Phase: 20 — Eski Sistemler Temizliği
+Plan: 04 (complete)
+Status: Complete
+Last activity: 2026-04-22 -- Phase 20 UAT complete (6/6 tests passed), v1.2 milestone complete
 
-Progress: [███░░░░░░░] 33% (3/6 phases)
+Progress: [██████████] 100% (6/6 phases)
 
 ## Session Continuity
 
@@ -69,7 +69,7 @@ Roadmap file: .planning/ROADMAP.md
 | 17 | 4/4 | - | 7.5min |
 | 18     | 3/3 | - | ~5.8min |
 | 19 | 1/3 | 1 | 3min |
-| 20 | TBD | - | - |
+| 20 | 4/4 | 4 | 3min |
 
 ## Accumulated Context
 

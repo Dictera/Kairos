@@ -235,7 +235,13 @@ export default function SablonYonetimiSection() {
               </TableHeader>
               <TableBody>
                 {filtered.map((t) => (
-                  <TableRow key={t.id} className="cursor-pointer" onClick={() => setCatalogTarget(t)}>
+                  <TableRow
+                    key={t.id}
+                    className="cursor-pointer"
+                    tabIndex={0}
+                    onClick={() => setCatalogTarget(t)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCatalogTarget(t) } }}
+                  >
                     <TableCell>{t.ad}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{t.kategori}</Badge>
@@ -486,7 +492,7 @@ export default function SablonYonetimiSection() {
           <AlertDialogFooter>
             <AlertDialogCancel>İptal</AlertDialogCancel>
             <AlertDialogAction
-              variant="destructive"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={async () => {
                 if (deleteTarget) {
                   await deleteSablon.mutateAsync({ id: deleteTarget.id })

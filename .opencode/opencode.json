@@ -28,6 +28,13 @@
       "type": "local",
       "command": ["npx.cmd", "-y", "@playwright/mcp@latest"],
       "enabled": true
+    },
+    "yargi-mcp": {
+      "type": "remote",
+      "url": "https://yargimcp.fastmcp.app/mcp/",
+      "headers": {
+        "Content-Type": "application/json"
+      }
     }
   }
 }

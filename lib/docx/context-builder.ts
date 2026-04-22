@@ -34,6 +34,8 @@ export interface DosyaWithRelations extends DosyaRow {
   sureler: Array<SureRow>
   finans_kalemleri: Array<FinansKalemiRow>
   notlar: Array<DosyaNotRow>
+  karsitarafSigorta: SigortaSirketiRow | null
+  muvekkilSigorta: SigortaSirketiRow | null
 }
 
 export function buildJinja2Context(
@@ -46,6 +48,7 @@ export function buildJinja2Context(
       ? {
           ad: dosya.muvekkil.ad,
           soyad: dosya.muvekkil.soyad,
+          ad_soyad: `${dosya.muvekkil.ad} ${dosya.muvekkil.soyad}`.trim(),
           telefon: dosya.muvekkil.telefon,
           tc_vergi_no: dosya.muvekkil.tc_vergi_no,
           adres: dosya.muvekkil.adres,
@@ -63,6 +66,8 @@ export function buildJinja2Context(
       kusur_orani_karsi: dosya.kusur_orani_karsi,
       durum: dosya.durum,
       aciklama: dosya.aciklama,
+      karsitaraf_sigorta: dosya.karsitarafSigorta?.ad ?? '',
+      muvekkil_sigorta: dosya.muvekkilSigorta?.ad ?? '',
     },
     taraf: dosya.taraflar[0]
       ? {
@@ -71,6 +76,7 @@ export function buildJinja2Context(
           karsitaraf_plaka: dosya.taraflar[0].karsitaraf_plaka,
           surucu_ad: dosya.taraflar[0].surucu_ad,
           surucu_soyad: dosya.taraflar[0].surucu_soyad,
+          surucu_ad_soyad: `${dosya.taraflar[0].surucu_ad ?? ''} ${dosya.taraflar[0].surucu_soyad ?? ''}`.trim(),
           surucu_plaka: dosya.taraflar[0].surucu_plaka,
           surucu_telefon: dosya.taraflar[0].surucu_telefon,
           surucu_police_no: dosya.taraflar[0].surucu_police_no,

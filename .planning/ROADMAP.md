@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 MVP** — Phases 1–9 (shipped 2026-04-13)
 - ✅ **v1.1 Temizlik ve İyileştirme** — Phases 10–14 (shipped 2026-04-17)
-- 🚧 **v1.2 Şablon Belgeler** — Phases 15–20 (started 2026-04-20)
+- ✅ **v1.2 Şablon Belgeler** — Phases 15–20 (shipped 2026-04-22)
 
 ## Phases
 
@@ -41,7 +41,7 @@
 - [x] **Phase 17: PDF Üretim Motoru** — docxtpl render, TR filtreler, LibreOffice headless convert, tenacity retry, missing-var pre-check
 - [x] **Phase 18: Arşiv ve Belge Entegrasyonu** — Slug+seq dosya adı, yıl/ay/kategori klasörü, `belge` transactional insert, rollback
 - [x] **Phase 19: Belgeler UI ve Şablon Yönetimi Ekranı** — Belgeler tab "Şablondan Üret" butonu, şablon yönetimi sayfası, değişken cheat-sheet, variable registry
-- [ ] **Phase 20: Eski Sistemler Temizliği** — Tiptap `dilekce` + `.odt` routers/routes/tablolar/dosyalar/bağımlılıklar silinir
+- [x] **Phase 20: Eski Sistemler Temizliği** — Tiptap `dilekce` + `.odt` routers/routes/tablolar/dosyalar/bağımlılıklar silinir (4/4 plans)
 
 ## Phase Details
 
@@ -135,10 +135,10 @@
   4. Drizzle migration `dilekce_sablonu` ve `dilekce_odt_sablonu` tablolarını DROP eder; `./uploads/odt-templates/` klasörü silinir
   5. Navigasyon/sidebar menüsünden "Dilekçeler" linki kaldırılmıştır; yerine "Şablon Yönetimi" linki eklenmiştir
 **Plans**: 4 plans
-- [ ] 20-01-PLAN.md — Report PDF migration to pdfmake + Next.js redirects + sidebar nav update
-- [ ] 20-02-PLAN.md — Legacy code deletion (routers, routes, components, services, schema)
-- [ ] 20-03-PLAN.md — Retirement modal + tRPC API for DB/file cleanup
-- [ ] 20-04-PLAN.md — Drizzle migration + npm uninstall + final build validation
+- [x] 20-01-PLAN.md — Report PDF migration to pdfmake + Next.js redirects + sidebar nav update
+- [x] 20-02-PLAN.md — Legacy code deletion (routers, routes, components, services, schema)
+- [x] 20-03-PLAN.md — Retirement modal + tRPC API for DB/file cleanup
+- [x] 20-04-PLAN.md — Drizzle migration + npm uninstall + final build validation
 **UI hint**: yes
 
 ## Progress Table
@@ -164,7 +164,7 @@
 | 17. PDF Üretim Motoru | v1.2 | 4/4 | ✅ Complete | 2026-04-21 |
 | 18. Arşiv ve Belge Entegrasyonu | v1.2 | 3/3 | ✅ Complete | 2026-04-21 |
 | 19. Belgeler UI ve Şablon Yönetimi Ekranı | v1.2 | 3/3 | ✅ Complete | 2026-04-22 |
-| 20. Eski Sistemler Temizliği | v1.2 | 0/4 | 📋 Planned | - |
+| 20. Eski Sistemler Temizliği | v1.2 | 4/4 | ✅ Complete | 2026-04-22 |
 
 ---
 

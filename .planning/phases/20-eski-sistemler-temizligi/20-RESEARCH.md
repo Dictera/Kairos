@@ -8,11 +8,11 @@
 
 Phase 20 is a **destructive cleanup phase** that permanently removes two legacy petition (dilekçe) pipelines — Tiptap-based HTML editor and ODT template upload — along with all supporting code, database tables, uploaded files, and unused npm dependencies. The phase executes only after Phase 19 (new DOCX pipeline) is validated end-to-end.
 
-The primary research discovery is a **critical dependency conflict**: `lib/pdf/pdf-generator.ts` (which uses `jspdf`) is required by two report routes (`/api/raporlar/finans/pdf` and `/api/raporlar/portfy/pdf`) that are **not** part of the legacy dilekçe system. The planner must decide whether to migrate these report routes to `pdfmake` (already in `package.json`) or keep `jspdf` and `pdf-generator.ts` as a shared report utility.
+The primary research discovery is a **dependency conflict** that the user has resolved: `lib/pdf/pdf-generator.ts` (which uses `jspdf`) is required by two report routes (`/api/raporlar/finans/pdf` and `/api/raporlar/portfy/pdf`) that are **not** part of the legacy dilekçe system. The user has decided to **migrate these report routes to `pdfmake`** (already in `package.json`) as a sub-task of Phase 20.
 
 Additionally, four `@tiptap/extension-*` packages exist in `package.json` but have **zero imports** in source files — they were installed for the Tiptap editor that is being removed and should be uninstalled.
 
-**Primary recommendation:** Delete all legacy dilekçe/ODT code first, migrate report PDF routes to `pdfmake`, then uninstall `jspdf` + `adm-zip` + `@xmldom/xmldom` + Tiptap extensions, and finally run `next build` as the validation gate.
+**Primary recommendation:** Migrate report PDF routes to `pdfmake` first, then delete all legacy dilekçe/ODT code, uninstall `jspdf` + `adm-zip` + `@xmldom/xmldom` + Tiptap extensions, and finally run `next build` as the validation gate.
 
 ## User Constraints (from CONTEXT.md)
 
@@ -47,7 +47,7 @@ Additionally, four `@tiptap/extension-*` packages exist in `package.json` but ha
 | TEMIZ-01 | `lib/trpc/routers/dilekce.ts` and `lib/trpc/routers/dilekce-odt.ts` deletion + router unregistration | Verified: both files exist; unregister by removing imports+keys from `_app.ts` |
 | TEMIZ-02 | `app/(dashboard)/dilekce/` route folder deletion | Verified: 6 files exist including `[id]/page.tsx`, `yeni/page.tsx`, `odt-yukle/page.tsx` |
 | TEMIZ-03 | `app/api/dilekce/` and `app/api/dilekce-odt/` API route deletion | Verified: 2 API route files exist |
-| TEMIZ-04 | `lib/services/odt-to-pdf.ts`, `lib/pdf/pdf-generator.ts` deletion + `jspdf`, `adm-zip`, `@xmldom/xmldom` npm uninstall | **BLOCKER**: `pdf-generator.ts` is used by 2 report routes. Must migrate reports first or defer package removal. |
+| TEMIZ-04 | `lib/services/odt-to-pdf.ts`, `lib/pdf/pdf-generator.ts` deletion + `jspdf`, `adm-zip`, `@xmldom/xmldom` npm uninstall | **RESOLVED**: Report routes will be migrated to `pdfmake` before `jspdf` + `pdf-generator.ts` are removed. |
 | TEMIZ-05 | Drizzle migration dropping `dilekce_sablonu` and `dilekce_odt_sablonu` tables | Verified: tables defined in `lib/schema.ts` lines 381–408; migration pattern confirmed in `drizzle/` folder |
 | TEMIZ-06 | `./uploads/odt-templates/` folder deletion | Verified: 4 `.odt` files exist in folder |
 | TEMIZ-07 | Sidebar nav "Dilekçeler" → "Şablon Yönetimi" | Verified: nav item in `components/app-sidebar.tsx` line 46 |
@@ -333,7 +333,7 @@ useEffect(() => {
 ### Pitfall 1: Report PDF Routes Break After `jspdf` Removal
 **What goes wrong:** `app/api/raporlar/finans/pdf/route.ts` and `app/api/raporlar/portfy/pdf/route.ts` import `generatePdfBuffer` from `lib/pdf/pdf-generator.ts`, which depends on `jspdf`. Deleting `pdf-generator.ts` and uninstalling `jspdf` breaks these routes.
 **Why it happens:** The report routes are not part of the legacy dilekçe system, but they share the PDF generation utility.
-**How to avoid:** Before uninstalling `jspdf`, migrate the two report routes to use `pdfmake` (already in `package.json`). See Code Examples section for a `pdfmake` pattern.
+**How to avoid:** **Migrate the two report routes to `pdfmake` (already in `package.json`) BEFORE deleting `pdf-generator.ts` and uninstalling `jspdf`.** See Code Examples section for a `pdfmake` pattern. This is now a confirmed sub-task of Phase 20.
 **Warning signs:** `next build` fails with `Module not found: Can't resolve 'jspdf'` or `Cannot find module '@/lib/pdf/pdf-generator'`.
 
 ### Pitfall 2: Tiptap Packages Left Behind
@@ -506,10 +506,7 @@ function deleteLegacyUploads() {
 
 ## Open Questions
 
-1. **Report PDF migration priority**
-   - What we know: Two report routes use `jspdf` via `pdf-generator.ts`. `pdfmake` is already a dependency.
-   - What's unclear: Should report PDF migration be a sub-task of Phase 20, or should `jspdf` removal be deferred to a separate tech-debt phase?
-   - Recommendation: Include report route migration as a prerequisite task within Phase 20 (TEMIZ-04 scope), since `pdfmake` is already available and the routes are simple text layouts.
+1. ~~**Report PDF migration priority**~~ — **RESOLVED by user decision:** Report routes (`/api/raporlar/finans/pdf` and `/api/raporlar/portfy/pdf`) will be migrated to `pdfmake` as a sub-task of Phase 20 before `jspdf` and `pdf-generator.ts` are removed.
 
 2. **Tiptap core packages**
    - What we know: `@tiptap/extension-*` packages have zero imports.

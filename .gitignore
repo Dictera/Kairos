@@ -56,3 +56,4 @@ data/db.sqlite-shm
 
 # Python cache
 scripts/docx-pipeline/__pycache__/
+uploads/sablon-pdf/
