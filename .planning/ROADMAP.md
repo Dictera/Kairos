@@ -40,7 +40,7 @@
 - [x] **Phase 16: Şablon Şeması ve CRUD** — `docx_sablon` tablosu, `.docx` upload, değişken otomatik çıkarım, şablon listesi
 - [x] **Phase 17: PDF Üretim Motoru** — docxtpl render, TR filtreler, LibreOffice headless convert, tenacity retry, missing-var pre-check
 - [x] **Phase 18: Arşiv ve Belge Entegrasyonu** — Slug+seq dosya adı, yıl/ay/kategori klasörü, `belge` transactional insert, rollback
-- [ ] **Phase 19: Belgeler UI ve Şablon Yönetimi Ekranı** — Belgeler tab "Şablondan Üret" butonu, şablon yönetimi sayfası, değişken cheat-sheet, variable registry
+- [x] **Phase 19: Belgeler UI ve Şablon Yönetimi Ekranı** — Belgeler tab "Şablondan Üret" butonu, şablon yönetimi sayfası, değişken cheat-sheet, variable registry
 - [ ] **Phase 20: Eski Sistemler Temizliği** — Tiptap `dilekce` + `.odt` routers/routes/tablolar/dosyalar/bağımlılıklar silinir
 
 ## Phase Details
@@ -118,7 +118,10 @@
   3. Ayarlar > Şablon Yönetimi ekranı şablon listesini, yükleme formunu ve sil/değiştir aksiyonlarını barındırır
   4. Şablon detayı, çıkarılmış değişkenleri bilinen sistem alanlarıyla eşleştirir; her değişkenin "✓ Bilinen" veya "⚠ Bilinmeyen" rozeti vardır
   5. Variable registry (`lib/docx/variable-registry.ts`) tüm desteklenen değişkenleri TypeScript const olarak tanımlar ve Ayarlar > Yardım > "Değişken Listesi" sayfası bu registry'den otomatik üretilen TR açıklamalı cheat-sheet'i gösterir
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 19-01-PLAN.md — Belgeler tab SablondanUret flow + progress modal + BelgeList generated-PDF styling (BUI-01..BUI-05)
+- [ ] 19-02-PLAN.md — VariableCatalogModal + SablonYonetimiSection row click (BUI-06, BUI-07, BUI-09)
+- [ ] 19-03-PLAN.md — Cheat-sheet page + summary card + Ayarlar mount (BUI-08, BUI-09)
 **UI hint**: yes
 
 ### Phase 20: Eski Sistemler Temizliği
@@ -131,7 +134,11 @@
   3. `lib/services/odt-to-pdf.ts`, `lib/pdf/pdf-generator.ts` ve `jspdf` + `adm-zip` + `@xmldom/xmldom` bağımlılıkları kaldırılır; `next build` stale import uyarısı olmadan yeşil geçer
   4. Drizzle migration `dilekce_sablonu` ve `dilekce_odt_sablonu` tablolarını DROP eder; `./uploads/odt-templates/` klasörü silinir
   5. Navigasyon/sidebar menüsünden "Dilekçeler" linki kaldırılmıştır; yerine "Şablon Yönetimi" linki eklenmiştir
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 20-01-PLAN.md — Report PDF migration to pdfmake + Next.js redirects + sidebar nav update
+- [ ] 20-02-PLAN.md — Legacy code deletion (routers, routes, components, services, schema)
+- [ ] 20-03-PLAN.md — Retirement modal + tRPC API for DB/file cleanup
+- [ ] 20-04-PLAN.md — Drizzle migration + npm uninstall + final build validation
 **UI hint**: yes
 
 ## Progress Table
@@ -156,10 +163,10 @@
 | 16. Şablon Şeması ve CRUD | v1.2 | 5/5 | ✅ Complete | 2026-04-21 |
 | 17. PDF Üretim Motoru | v1.2 | 4/4 | ✅ Complete | 2026-04-21 |
 | 18. Arşiv ve Belge Entegrasyonu | v1.2 | 3/3 | ✅ Complete | 2026-04-21 |
-| 19. Belgeler UI ve Şablon Yönetimi Ekranı | v1.2 | 0/0 | 📋 Not started | - |
-| 20. Eski Sistemler Temizliği | v1.2 | 0/0 | 📋 Not started | - |
+| 19. Belgeler UI ve Şablon Yönetimi Ekranı | v1.2 | 3/3 | ✅ Complete | 2026-04-22 |
+| 20. Eski Sistemler Temizliği | v1.2 | 0/4 | 📋 Planned | - |
 
 ---
 
 *Roadmap created: 2026-04-13*
-*Last updated: 2026-04-21 — Phase 18 complete (3/3 plans)*
+*Last updated: 2026-04-22 — Phase 19 complete (3/3 plans), Phase 20 planned (4/4 plans)*
