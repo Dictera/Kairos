@@ -1,10 +1,5 @@
-import { FinansDashboard } from '@/components/finans/finans-dashboard'
+import { FinansPage } from '@/components/finans/finans-page'
 
-export default function FinansPage() {
-  return (
-    <div className="container py-8">
-      <h1 className="text-2xl font-semibold mb-6">Finans Dashboard</h1>
-      <FinansDashboard />
-    </div>
-  )
+export default function Page() {
+  return <FinansPage />
 }
