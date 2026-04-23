@@ -6,10 +6,11 @@ import { useTRPC } from '@/lib/trpc/context'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowDownCircle, ArrowUpCircle, Receipt, MinusCircle } from 'lucide-react'
 import { fmt } from './finans-data'
-import { SirketTur }     from './sirket-tur'
-import { Karlilik }      from './karlilik'
-import { Pipeline }      from './pipeline'
+import { SirketTur }       from './sirket-tur'
+import { Karlilik }        from './karlilik'
+import { Pipeline }        from './pipeline'
 import { FinansDashboard } from './finans-dashboard'
+import { FinansTablolar }  from './finans-tablolar'
 
 type YilFilter = 'all' | string
 
@@ -126,12 +127,14 @@ export function FinansPage() {
           <TabsTrigger value="karlilik">Kârlılık & Verimlilik</TabsTrigger>
           <TabsTrigger value="pipeline">Pipeline & Tahmin</TabsTrigger>
           <TabsTrigger value="aylik">Aylık Özet</TabsTrigger>
+          <TabsTrigger value="tablolar">Tablolar</TabsTrigger>
         </TabsList>
 
         <TabsContent value="sirket"   className="mt-4"><SirketTur /></TabsContent>
         <TabsContent value="karlilik" className="mt-4"><Karlilik /></TabsContent>
         <TabsContent value="pipeline" className="mt-4"><Pipeline /></TabsContent>
         <TabsContent value="aylik"    className="mt-4"><FinansDashboard /></TabsContent>
+        <TabsContent value="tablolar" className="mt-4"><FinansTablolar /></TabsContent>
       </Tabs>
     </div>
   )
