@@ -44,11 +44,12 @@ const TUR_VALUES = ['STK', 'AT', 'AH'] as const
 
 const formSchema = z.object({
   muvekkil_id: z.number({ required_error: 'Müvekkil seçimi zorunludur' }).int(),
-  dosya_no: z.string().min(1, 'Dosya numarası zorunludur').max(50),
+  dosya_no: z.string().min(1).max(50).optional(),
   tur: z.enum(TUR_VALUES, { required_error: 'Dosya türü zorunludur' }),
   sigorta_turu_id: z.number().int().nullable().optional(),
   karsitaraf_sigorta_id: z.number().int().nullable().optional(),
   muvekkil_sigorta_id: z.number().int().nullable().optional(),
+  muvekkil_police_no: z.string().max(100).nullable().optional().or(z.literal('')),
   talep_tutari: z.number().positive('Geçerli bir tutar giriniz').nullable().optional(),
   muvekkil_plaka: z.string().max(10).optional().or(z.literal('')),
   hasar_dosya_no: z.string().max(200).nullable().optional().or(z.literal('')),
@@ -61,11 +62,12 @@ type FormValues = z.infer<typeof formSchema>
 
 const EMPTY_DEFAULTS: FormValues = {
   muvekkil_id: 0,
-  dosya_no: '',
+  dosya_no: undefined,
   tur: 'STK',
   sigorta_turu_id: null,
   karsitaraf_sigorta_id: null,
   muvekkil_sigorta_id: null,
+  muvekkil_police_no: '',
   talep_tutari: null,
   muvekkil_plaka: '',
   hasar_dosya_no: '',
@@ -109,7 +111,7 @@ function DosyaFormInner({
     trpc.dosya.create.mutationOptions({
       onSuccess: (row) => {
         queryClient.invalidateQueries({ queryKey: [['dosya']] })
-        toast.success('Dosya başarıyla oluşturuldu.')
+        toast.success(`Dosya başarıyla oluşturuldu. Dosya No: ${row.dosya_no}`)
         router.push('/dosyalar/' + row.id)
       },
       onError: (err) => {
@@ -156,11 +158,11 @@ function DosyaFormInner({
     if (mode === 'create') {
       createMutation.mutate({
         muvekkil_id: values.muvekkil_id,
-        dosya_no: values.dosya_no,
         tur: values.tur,
         sigorta_turu_id: values.sigorta_turu_id ?? undefined,
         karsitaraf_sigorta_id: values.karsitaraf_sigorta_id ?? undefined,
         muvekkil_sigorta_id: values.muvekkil_sigorta_id ?? undefined,
+        muvekkil_police_no: values.muvekkil_police_no || undefined,
         talep_tutari: values.talep_tutari ?? undefined,
         muvekkil_plaka: values.muvekkil_plaka || undefined,
         hasar_dosya_no: values.hasar_dosya_no || undefined,
@@ -172,11 +174,12 @@ function DosyaFormInner({
       updateMutation.mutate({
         id: dosyaId!,
         muvekkil_id: values.muvekkil_id,
-        dosya_no: values.dosya_no,
+        dosya_no: values.dosya_no ?? '',
         tur: values.tur,
         sigorta_turu_id: values.sigorta_turu_id ?? undefined,
         karsitaraf_sigorta_id: values.karsitaraf_sigorta_id ?? undefined,
         muvekkil_sigorta_id: values.muvekkil_sigorta_id ?? undefined,
+        muvekkil_police_no: values.muvekkil_police_no || undefined,
         talep_tutari: values.talep_tutari ?? undefined,
         muvekkil_plaka: values.muvekkil_plaka || undefined,
         hasar_dosya_no: values.hasar_dosya_no || undefined,
@@ -201,19 +204,21 @@ function DosyaFormInner({
             <Separator />
 
             {/* Dosya No */}
-            <FormField
-              control={form.control}
-              name="dosya_no"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Avukat Dosya No *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="2024/001" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {mode === 'edit' && (
+              <FormField
+                control={form.control}
+                name="dosya_no"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Avukat Dosya No</FormLabel>
+                    <FormControl>
+                      <Input placeholder="2026/1" value={field.value ?? ''} onChange={field.onChange} onBlur={field.onBlur} name={field.name} ref={field.ref} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             {/* Müvekkil */}
             <FormField
@@ -359,6 +364,21 @@ function DosyaFormInner({
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Müvekkil Poliçe No */}
+            <FormField
+              control={form.control}
+              name="muvekkil_police_no"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Müvekkil Poliçe No</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Poliçe numarası" value={field.value ?? ''} onChange={field.onChange} onBlur={field.onBlur} name={field.name} ref={field.ref} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -591,6 +611,7 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
         sigorta_turu_id: dosyaData.sigorta_turu_id ?? null,
         karsitaraf_sigorta_id: dosyaData.karsitaraf_sigorta_id ?? null,
         muvekkil_sigorta_id: dosyaData.muvekkil_sigorta_id ?? null,
+        muvekkil_police_no: dosyaData.muvekkil_police_no ?? '',
         talep_tutari: dosyaData.talep_tutari ?? null,
         muvekkil_plaka: dosyaData.muvekkil_plaka ?? '',
         hasar_dosya_no: dosyaData.hasar_dosya_no ?? '',

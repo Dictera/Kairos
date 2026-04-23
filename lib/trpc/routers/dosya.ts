@@ -17,10 +17,13 @@ export const dosyaSchema = z.object({
   hasar_dosya_no: z.string().max(200).nullable().optional().or(z.literal('')),
   kaza_tarihi: z.string().max(10).nullable().optional().or(z.literal('')),
   muvekkil_sigorta_id: z.number().int().nullable().optional(),
+  muvekkil_police_no: z.string().max(100).nullable().optional().or(z.literal('')),
   kusur_orani_karsi: z.number().int().min(0).max(100).nullable().optional(),
   aciklama: z.string().max(2000).nullable().optional().or(z.literal('')),
   durum: z.enum(['aktif', 'arsiv']).default('aktif').optional(),
 })
+
+export const dosyaCreateSchema = dosyaSchema.omit({ dosya_no: true })
 
 export const tarafSchema = z.object({
   dosya_id: z.number().int(),
@@ -29,6 +32,7 @@ export const tarafSchema = z.object({
   karsitaraf_ad: z.string().max(200).nullable().optional().or(z.literal('')),
   police_no: z.string().max(100).nullable().optional().or(z.literal('')),
   karsitaraf_plaka: z.string().max(10).nullable().optional().or(z.literal('')),
+  karsitaraf_tc_vergi_no: z.string().max(11).nullable().optional().or(z.literal('')),
   surucu_ad: z.string().max(200).nullable().optional().or(z.literal('')),
   surucu_soyad: z.string().max(200).nullable().optional().or(z.literal('')),
   surucu_plaka: z.string().max(10).nullable().optional().or(z.literal('')),
@@ -39,6 +43,25 @@ export const tarafSchema = z.object({
     .or(z.literal('')),
   surucu_police_no: z.string().max(100).nullable().optional().or(z.literal('')),
 })
+
+async function generateDosyaNo(): Promise<string> {
+  const year = new Date().getFullYear()
+  const prefix = `${year}/`
+  const rows = await db
+    .select({ dosya_no: dosya.dosya_no })
+    .from(dosya)
+    .where(sql`${dosya.dosya_no} LIKE ${prefix + '%'}`)
+  let maxSeq = 0
+  for (const row of rows) {
+    const n = parseInt(row.dosya_no.slice(prefix.length), 10)
+    if (!isNaN(n) && n > maxSeq) maxSeq = n
+  }
+  const next = maxSeq + 1
+  if (next > 9999) {
+    throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Yıllık dosya numarası limiti (9999) aşıldı.' })
+  }
+  return `${year}/${next}`
+}
 
 export const dosyaRouter = createTRPCRouter({
   list: protectedProcedure
@@ -148,17 +171,22 @@ export const dosyaRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(dosyaSchema)
+    .input(dosyaCreateSchema)
     .mutation(async ({ input }) => {
-      // Uniqueness check for dosya_no (Claude's discretion — CONTEXT.md)
-      const existing = await db.select({ id: dosya.id }).from(dosya).where(eq(dosya.dosya_no, input.dosya_no))
+      const dosya_no = await generateDosyaNo()
+      const existing = await db.select({ id: dosya.id }).from(dosya).where(eq(dosya.dosya_no, dosya_no))
       if (existing.length > 0) {
-        throw new TRPCError({
-          code: 'CONFLICT',
-          message: 'Bu dosya numarası zaten kullanılıyor.',
-        })
+        // Race condition: retry once with fresh generation
+        const dosya_no2 = await generateDosyaNo()
+        const existing2 = await db.select({ id: dosya.id }).from(dosya).where(eq(dosya.dosya_no, dosya_no2))
+        if (existing2.length > 0) {
+          throw new TRPCError({ code: 'CONFLICT', message: 'Dosya numarası üretilirken çakışma oluştu, lütfen tekrar deneyin.' })
+        }
+        const [row] = await db.insert(dosya).values({ ...input, dosya_no: dosya_no2 }).returning()
+        await logOlay(row.id, 'olusturma', 'Dosya oluşturuldu')
+        return row
       }
-      const [row] = await db.insert(dosya).values(input).returning()
+      const [row] = await db.insert(dosya).values({ ...input, dosya_no }).returning()
       await logOlay(row.id, 'olusturma', 'Dosya oluşturuldu')
       return row
     }),
