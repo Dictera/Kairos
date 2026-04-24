@@ -9,7 +9,7 @@ import { buildJinja2Context } from '@/lib/docx/context-builder'
 import { getMissingVariables } from '@/lib/docx/variable-registry'
 import { getLibreOfficePath } from '@/lib/pipeline/config'
 import { getTurkishErrorMessage } from '@/lib/pipeline/error-codes'
-import { archivePdfAndCreateBelge, generateSlugs } from '@/lib/docx/archive'
+import { archivePdfAndCreateBelge } from '@/lib/docx/archive'
 import { join } from 'path'
 import { tmpdir } from 'os'
 import { randomUUID } from 'crypto'
@@ -48,6 +48,7 @@ export const pdfRouter = createTRPCRouter({
         where: eq(dosya.id, input.dosyaId),
         with: {
           muvekkil: true,
+          sigortaTuru: true,
           taraflar: { with: { sigortaSirketi: true, avukat: true } },
           durusmalar: true,
           sureler: true,
@@ -144,25 +145,8 @@ export const pdfRouter = createTRPCRouter({
       // Clean up rendered DOCX (PDF is handed to Phase 18 for archiving)
       if (fs.existsSync(renderedDocxPath)) fs.unlinkSync(renderedDocxPath)
 
-      const muvekkilAd = rows.muvekkil
-        ? `${rows.muvekkil.ad} ${rows.muvekkil.soyad}`.trim()
-        : null
-      const plaka = rows.muvekkil_plaka || null
       const dosyaNo = rows.dosya_no
-
-      let muvekkilSlug: string
-      let plakaSlug: string | null
-      try {
-        const result = await generateSlugs(muvekkilAd, dosyaNo, plaka)
-        muvekkilSlug = result.muvekkilSlug
-        plakaSlug = result.plakaSlug
-      } catch (e) {
-        if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath)
-        throw e
-      }
-
       const belgeTuru = template.belge_turu ?? 'Diğer'
-      const kategoriSlug = template.kategori.toLowerCase()
 
       try {
         const archivedBelge = await archivePdfAndCreateBelge(
@@ -172,9 +156,14 @@ export const pdfRouter = createTRPCRouter({
           template.id,
           template.ad,
           belgeTuru,
-          muvekkilSlug,
-          plakaSlug,
-          kategoriSlug
+          {
+            tur: rows.tur,
+            sigortaTuruAd: rows.sigortaTuru?.ad ?? null,
+            muvekkilAd: rows.muvekkil
+              ? `${rows.muvekkil.ad} ${rows.muvekkil.soyad}`.trim()
+              : null,
+            muvekkilPlaka: rows.muvekkil_plaka ?? null,
+          }
         )
 
         return { success: true, belge: archivedBelge }

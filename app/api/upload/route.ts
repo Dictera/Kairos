@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/db'
+import { dosya } from '@/lib/schema'
+import { eq } from 'drizzle-orm'
+import { buildBelgelerDir, BELGELER_BASE } from '@/lib/belgeler-storage'
 import fs from 'fs'
 import path from 'path'
 
@@ -10,7 +14,6 @@ const ALLOWED_TYPES = [
   'image/png',
 ]
 const MAX_SIZE = 20 * 1024 * 1024 // 20 MB
-const BASE_PATH = 'E:/sigorta-belgeler'
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData()
@@ -20,7 +23,7 @@ export async function POST(request: NextRequest) {
   const dosyaNo = formData.get('dosyaNo') as string | null
   const kategori = formData.get('kategori') as string | null
 
-  if (!file) {
+  if (!file || !dosyaNo) {
     return NextResponse.json({ error: 'Eksik veri' }, { status: 400 })
   }
 
@@ -28,61 +31,66 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Geçersiz dosya ID' }, { status: 400 })
   }
 
-  // Validate file type
   if (!ALLOWED_TYPES.includes(file.type)) {
     return NextResponse.json({ error: 'İzin verilmeyen dosya türü' }, { status: 400 })
   }
 
-  // Validate file size
   if (file.size > MAX_SIZE) {
     return NextResponse.json({ error: 'Dosya boyutu 20 MB\'ı aşamaz' }, { status: 400 })
   }
 
-  // Create directory if not exists
-  const uploadDir = path.join(BASE_PATH, String(dosyaId))
-  if (!path.resolve(uploadDir).startsWith(path.resolve(BASE_PATH))) {
+  // Look up dosya to build hierarchical directory
+  const dosyaRow = await db.query.dosya.findFirst({
+    where: eq(dosya.id, dosyaId),
+    with: {
+      muvekkil: true,
+      sigortaTuru: true,
+    },
+  })
+
+  if (!dosyaRow) {
+    return NextResponse.json({ error: 'Dosya bulunamadı' }, { status: 404 })
+  }
+
+  const uploadDir = buildBelgelerDir({
+    tur: dosyaRow.tur,
+    sigortaTuruAd: dosyaRow.sigortaTuru?.ad ?? null,
+    muvekkilAd: dosyaRow.muvekkil?.ad ?? null,
+    muvekkilPlaka: dosyaRow.muvekkil_plaka,
+  })
+
+  // Verify resolved dir stays within BELGELER_BASE
+  if (!path.resolve(uploadDir).startsWith(path.resolve(BELGELER_BASE))) {
     return NextResponse.json({ error: 'Geçersiz dizin' }, { status: 400 })
   }
+
   fs.mkdirSync(uploadDir, { recursive: true })
 
-  // Generate unique filename: timestamp + category (if provided) or normalized original
   const timestamp = Date.now()
   const ext = path.extname(file.name)
+
+  let filename: string
+  let dosya_adi: string
+
   if (kategori) {
-    // Category-based naming: kategori + extension (e.g., "İhtarname.pdf")
-    const safeKategori = kategori.replace(/[^a-zA-Z0-9ÇçĞğıİıÖöŞşÜü\s-]/g, '').trim()
-    const filename = `${timestamp}-${safeKategori}${ext}`
-    const filePath = path.join(uploadDir, filename)
-
-    // Write file to E: drive
-    const buffer = Buffer.from(await file.arrayBuffer())
-    fs.writeFileSync(filePath, buffer)
-
-    // Return file metadata for tRPC mutation
-    return NextResponse.json({
-      filename,
-      dosya_yolu: `/api/files/${dosyaId}/${filename}`,
-      dosya_boyutu: file.size,
-      mime_tur: file.type,
-      dosya_adi: `${safeKategori}${ext}`, // category-based name as dosya_adi
-    })
+    const safeKategori = kategori.replace(/[^a-zA-Z0-9ÇçĞğıİÖöŞşÜü\s-]/g, '').trim()
+    filename = `${timestamp}-${safeKategori}${ext}`
+    dosya_adi = `${safeKategori}${ext}`
+  } else {
+    const normalizedName = file.name.toLowerCase().replace(/\s+/g, '-')
+    filename = `${timestamp}-${normalizedName}`
+    dosya_adi = file.name
   }
 
-  // Fallback: timestamp + lowercase normalized original
-  const normalizedName = file.name.toLowerCase().replace(/\s+/g, '-')
-  const filename = `${timestamp}-${normalizedName}`
   const filePath = path.join(uploadDir, filename)
-
-  // Write file to E: drive
   const buffer = Buffer.from(await file.arrayBuffer())
   fs.writeFileSync(filePath, buffer)
 
-  // Return file metadata for tRPC mutation
   return NextResponse.json({
     filename,
     dosya_yolu: `/api/files/${dosyaId}/${filename}`,
     dosya_boyutu: file.size,
     mime_tur: file.type,
-    dosya_adi: file.name, // original name preserved
+    dosya_adi,
   })
 }

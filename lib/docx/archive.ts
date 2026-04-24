@@ -5,8 +5,14 @@ import { db } from '@/lib/db'
 import { belge, olayGunlugu } from '@/lib/schema'
 import { TRPCError } from '@trpc/server'
 import { runSidecarCommand } from '@/lib/services/docx-pipeline'
+import {
+  BELGELER_BASE,
+  buildBelgelerDir,
+  type BelgeDosyaBilgi,
+} from '@/lib/belgeler-storage'
 
-export const ARCHIVE_BASE = path.resolve(process.cwd(), 'uploads', 'sablon-pdf')
+// Re-exported for backward compatibility with tests
+export { BELGELER_BASE as ARCHIVE_BASE }
 
 const RESERVED_WINDOWS_NAMES = /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i
 
@@ -17,46 +23,24 @@ export function isReservedWindowsName(name: string): boolean {
 export function safeUnlinkArchive(filePath: string): void {
   try {
     const resolved = path.resolve(filePath)
-    const baseResolved = path.resolve(ARCHIVE_BASE)
+    const baseResolved = path.resolve(BELGELER_BASE)
     const rel = path.relative(baseResolved, resolved)
     if (rel.startsWith('..') || path.isAbsolute(rel)) {
       return
     }
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
-  } catch (e) {
-    // Failed to delete file from disk
+  } catch {
+    // ignore
   }
 }
 
 export function buildArchivePath(
-  date: Date,
-  kategoriSlug: string,
-  muvekkilSlug: string,
-  plakaSlug: string | null
-): { dir: string; filePath: string; relativePath: string; fileName: string } {
-  const year = String(date.getFullYear())
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const dir = path.join(ARCHIVE_BASE, year, month, kategoriSlug)
+  dosyaBilgi: BelgeDosyaBilgi
+): { dir: string; filePath: string; fileName: string } {
+  const dir = buildBelgelerDir(dosyaBilgi)
 
-  for (const segment of [kategoriSlug, muvekkilSlug, plakaSlug ?? '']) {
-    if (segment.includes('..')) {
-      throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message: 'Geçersiz arşiv yolu: dizin geçişi tespit edildi.',
-      })
-    }
-  }
-
-  let baseName = plakaSlug ? `${muvekkilSlug}-${plakaSlug}` : muvekkilSlug
-  if (isReservedWindowsName(baseName)) {
-    baseName = `${baseName}-belge`
-  }
-
-  const fileName = `${baseName}-${randomUUID().slice(0, 8)}.pdf`
-  const filePath = path.join(dir, fileName)
-
-  const resolved = path.resolve(filePath)
-  const baseResolved = path.resolve(ARCHIVE_BASE)
+  const resolved = path.resolve(dir)
+  const baseResolved = path.resolve(BELGELER_BASE)
   const rel = path.relative(baseResolved, resolved)
   if (rel.startsWith('..') || path.isAbsolute(rel)) {
     throw new TRPCError({
@@ -65,9 +49,10 @@ export function buildArchivePath(
     })
   }
 
-  const relativePath = '/' + path.relative(process.cwd(), filePath).replace(/\\/g, '/')
+  const fileName = `${randomUUID().slice(0, 8)}.pdf`
+  const filePath = path.join(dir, fileName)
 
-  return { dir, filePath, relativePath, fileName }
+  return { dir, filePath, fileName }
 }
 
 export async function generateSlugs(
@@ -128,17 +113,9 @@ export async function archivePdfAndCreateBelge(
   sablonId: number,
   sablonAdi: string,
   belgeTuru: string,
-  muvekkilSlug: string,
-  plakaSlug: string | null,
-  kategoriSlug: string
+  dosyaBilgi: BelgeDosyaBilgi
 ) {
-  const now = new Date()
-  const { dir, filePath, relativePath, fileName } = buildArchivePath(
-    now,
-    kategoriSlug,
-    muvekkilSlug,
-    plakaSlug
-  )
+  const { dir, filePath, fileName } = buildArchivePath(dosyaBilgi)
 
   fs.mkdirSync(dir, { recursive: true })
 
@@ -169,7 +146,7 @@ export async function archivePdfAndCreateBelge(
         dosya_no: dosyaNo,
         kategori: belgeTuru,
         dosya_adi: fileName,
-        dosya_yolu: relativePath,
+        dosya_yolu: `/api/files/${dosyaId}/${fileName}`,
         dosya_boyutu: fileSize,
         mime_tur: 'application/pdf',
         sablon_id: sablonId,

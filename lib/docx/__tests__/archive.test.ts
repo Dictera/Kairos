@@ -8,6 +8,7 @@ import {
   isReservedWindowsName,
   safeUnlinkArchive,
 } from '@/lib/docx/archive'
+import type { SidecarResult } from '@/lib/services/docx-pipeline'
 import { TRPCError } from '@trpc/server'
 
 vi.mock('@/lib/services/docx-pipeline', () => ({
@@ -15,6 +16,14 @@ vi.mock('@/lib/services/docx-pipeline', () => ({
 }))
 
 import { runSidecarCommand } from '@/lib/services/docx-pipeline'
+
+function mockSuccess(slug: string): SidecarResult {
+  return { status: 'success', result: { slug }, exitCode: 0 }
+}
+
+function mockError(message: string): SidecarResult {
+  return { status: 'error', message, exitCode: 1 }
+}
 
 describe('isReservedWindowsName', () => {
   it('returns true for CON', () => {
@@ -64,7 +73,7 @@ describe('safeUnlinkArchive', () => {
   })
 
   it('deletes file inside ARCHIVE_BASE', () => {
-    const target = path.join(ARCHIVE_BASE, '2026', '04', 'stk', 'test.pdf')
+    const target = path.join(ARCHIVE_BASE, 'STK', 'Değer Kaybı', 'test.pdf')
     const existsSpy = vi.spyOn(fs, 'existsSync').mockReturnValue(true)
     const unlinkSpy = vi.spyOn(fs, 'unlinkSync').mockImplementation(() => {})
 
@@ -96,63 +105,63 @@ describe('safeUnlinkArchive', () => {
 })
 
 describe('buildArchivePath', () => {
-  it('returns dir ending in YYYY/AA/kategori-slug with plaka', () => {
-    const date = new Date(2026, 3, 15) // April
-    const result = buildArchivePath(date, 'stk', 'ali-veli', '34-abc-123')
+  it('builds hierarchical dir for STK + sigorta türü + müvekkil with plaka', () => {
+    const result = buildArchivePath({
+      tur: 'STK',
+      sigortaTuruAd: 'Değer Kaybı',
+      muvekkilAd: 'Ali Veli',
+      muvekkilPlaka: '34ABC123',
+    })
 
-    expect(result.dir).toBe(path.join(ARCHIVE_BASE, '2026', '04', 'stk'))
-    expect(result.fileName).toMatch(/^ali-veli-34-abc-123-[a-f0-9]{8}\.pdf$/)
-    expect(result.filePath).toBe(path.join(ARCHIVE_BASE, '2026', '04', 'stk', result.fileName))
-    expect(result.relativePath).toMatch(/\/uploads\/sablon-pdf\/2026\/04\/stk\/ali-veli-34-abc-123-[a-f0-9]{8}\.pdf$/)
+    expect(result.dir).toBe(path.join(ARCHIVE_BASE, 'STK', 'Değer Kaybı', 'Ali Veli - 34ABC123'))
+    expect(result.fileName).toMatch(/^[a-f0-9]{8}\.pdf$/)
+    expect(result.filePath).toBe(path.join(result.dir, result.fileName))
   })
 
-  it('returns filename with only muvekkil slug when plaka is null', () => {
-    const date = new Date(2026, 3, 15)
-    const result = buildArchivePath(date, 'stk', 'mehmet-can', null)
+  it('omits plaka segment when muvekkilPlaka is null', () => {
+    const result = buildArchivePath({
+      tur: 'STK',
+      sigortaTuruAd: 'Hasar',
+      muvekkilAd: 'Mehmet Can',
+      muvekkilPlaka: null,
+    })
 
-    expect(result.fileName).toMatch(/^mehmet-can-[a-f0-9]{8}\.pdf$/)
+    expect(result.dir).toBe(path.join(ARCHIVE_BASE, 'STK', 'Hasar', 'Mehmet Can'))
   })
 
-  it('appends -belge suffix for reserved Windows names', () => {
-    const date = new Date(2026, 3, 15)
-    const result = buildArchivePath(date, 'stk', 'CON', null)
+  it('uses Belirtilmemiş when sigortaTuruAd is null', () => {
+    const result = buildArchivePath({
+      tur: 'AT',
+      sigortaTuruAd: null,
+      muvekkilAd: 'Test Kişi',
+      muvekkilPlaka: null,
+    })
 
-    expect(result.fileName).toMatch(/^CON-belge-[a-f0-9]{8}\.pdf$/)
+    expect(result.dir).toBe(
+      path.join(ARCHIVE_BASE, 'Asliye Ticaret', 'Belirtilmemiş', 'Test Kişi')
+    )
   })
 
-  it('appends -belge suffix for reserved Windows names with plaka', () => {
-    const date = new Date(2026, 3, 15)
-    const result = buildArchivePath(date, 'stk', 'COM1', 'LPT1')
-
-    // Combined base "COM1-LPT1" does not match reserved name regex,
-    // so no suffix is appended (per spec: final base must exact-match)
-    expect(result.fileName).toMatch(/^COM1-LPT1-[a-f0-9]{8}\.pdf$/)
+  it('maps AT to Asliye Ticaret', () => {
+    const result = buildArchivePath({ tur: 'AT', muvekkilAd: 'Test', muvekkilPlaka: null })
+    expect(result.dir).toContain('Asliye Ticaret')
   })
 
-  it('throws TRPCError for path traversal via kategoriSlug', () => {
-    const date = new Date(2026, 3, 15)
-    // ../../../etc from ARCHIVE_BASE/2026/04 goes up past ARCHIVE_BASE
-    expect(() => buildArchivePath(date, '../../../etc', 'muvekkil', null)).toThrow(TRPCError)
+  it('maps AH to Asliye Hukuk', () => {
+    const result = buildArchivePath({ tur: 'AH', muvekkilAd: 'Test', muvekkilPlaka: null })
+    expect(result.dir).toContain('Asliye Hukuk')
   })
 
-  it('throws TRPCError for path traversal via muvekkilSlug', () => {
-    const date = new Date(2026, 3, 15)
-    // ../../../../etc in filename normalizes past ARCHIVE_BASE
-    expect(() => buildArchivePath(date, 'stk', '../../../../etc', null)).toThrow(TRPCError)
-  })
+  it('sanitizes path traversal attempts — result stays within ARCHIVE_BASE', () => {
+    const result = buildArchivePath({
+      tur: 'STK',
+      sigortaTuruAd: '../../../evil',
+      muvekkilAd: '..\\secret',
+      muvekkilPlaka: null,
+    })
 
-  it('throws TRPCError for path traversal via plakaSlug', () => {
-    const date = new Date(2026, 3, 15)
-    expect(() => buildArchivePath(date, 'stk', 'muvekkil', '../../../../etc')).toThrow(TRPCError)
-  })
-
-  it('produces relativePath with forward slashes and leading slash', () => {
-    const date = new Date(2026, 3, 15)
-    const result = buildArchivePath(date, 'stk', 'muvekkil', null)
-
-    expect(result.relativePath).not.toContain('\\')
-    expect(result.relativePath).toMatch(/\/uploads\/sablon-pdf\/2026\/04\/stk\/muvekkil-[a-f0-9]{8}\.pdf$/)
-    expect(result.relativePath.startsWith('/')).toBe(true)
+    expect(result.dir.startsWith(path.resolve(ARCHIVE_BASE))).toBe(true)
+    expect(result.dir).not.toContain('..')
   })
 })
 
@@ -163,8 +172,8 @@ describe('generateSlugs', () => {
 
   it('returns correct slugs when sidecar responds with success', async () => {
     vi.mocked(runSidecarCommand)
-      .mockResolvedValueOnce({ status: 'success', result: { slug: 'ali-veli' } })
-      .mockResolvedValueOnce({ status: 'success', result: { slug: '34-abc-123' } })
+      .mockResolvedValueOnce(mockSuccess('ali-veli'))
+      .mockResolvedValueOnce(mockSuccess('34-abc-123'))
 
     const result = await generateSlugs('Ali Veli', '12345', '34 ABC 123')
 
@@ -181,8 +190,7 @@ describe('generateSlugs', () => {
   })
 
   it('uses dosya-{dosyaNo} fallback when muvekkilAd is null', async () => {
-    vi.mocked(runSidecarCommand)
-      .mockResolvedValueOnce({ status: 'success', result: { slug: 'dosya-12345' } })
+    vi.mocked(runSidecarCommand).mockResolvedValueOnce(mockSuccess('dosya-12345'))
 
     const result = await generateSlugs(null, '12345', null)
 
@@ -195,8 +203,7 @@ describe('generateSlugs', () => {
   })
 
   it('uses dosya-{dosyaNo} fallback when muvekkilAd is empty string', async () => {
-    vi.mocked(runSidecarCommand)
-      .mockResolvedValueOnce({ status: 'success', result: { slug: 'dosya-999' } })
+    vi.mocked(runSidecarCommand).mockResolvedValueOnce(mockSuccess('dosya-999'))
 
     const result = await generateSlugs('', '999', null)
 
@@ -205,8 +212,7 @@ describe('generateSlugs', () => {
   })
 
   it('does not call sidecar for plaka when plaka is null', async () => {
-    vi.mocked(runSidecarCommand)
-      .mockResolvedValueOnce({ status: 'success', result: { slug: 'muvekkil-slug' } })
+    vi.mocked(runSidecarCommand).mockResolvedValueOnce(mockSuccess('muvekkil-slug'))
 
     const result = await generateSlugs('Muvekkil', '123', null)
 
@@ -215,8 +221,7 @@ describe('generateSlugs', () => {
   })
 
   it('does not call sidecar for plaka when plaka is empty string', async () => {
-    vi.mocked(runSidecarCommand)
-      .mockResolvedValueOnce({ status: 'success', result: { slug: 'muvekkil-slug' } })
+    vi.mocked(runSidecarCommand).mockResolvedValueOnce(mockSuccess('muvekkil-slug'))
 
     const result = await generateSlugs('Muvekkil', '123', '')
 
@@ -225,41 +230,29 @@ describe('generateSlugs', () => {
   })
 
   it('throws TRPCError when sidecar returns error for muvekkil', async () => {
-    vi.mocked(runSidecarCommand).mockResolvedValueOnce({
-      status: 'error',
-      message: 'slug failed',
-    })
+    vi.mocked(runSidecarCommand).mockResolvedValueOnce(mockError('slug failed'))
 
     await expect(generateSlugs('Ali', '123', null)).rejects.toThrow(TRPCError)
   })
 
   it('throws TRPCError when sidecar returns error for plaka', async () => {
     vi.mocked(runSidecarCommand)
-      .mockResolvedValueOnce({ status: 'success', result: { slug: 'ali' } })
-      .mockResolvedValueOnce({ status: 'error', message: 'plaka slug failed' })
+      .mockResolvedValueOnce(mockSuccess('ali'))
+      .mockResolvedValueOnce(mockError('plaka slug failed'))
 
     await expect(generateSlugs('Ali', '123', '34 ABC')).rejects.toThrow(TRPCError)
   })
 })
 
 describe('filename format', () => {
-  it('matches {slug}-{uuid8}.pdf without plaka', () => {
-    const date = new Date(2026, 3, 15)
-    const result = buildArchivePath(date, 'stk', 'mehmet-can', null)
-
-    expect(result.fileName).toMatch(/^mehmet-can-[a-f0-9]{8}\.pdf$/)
+  it('generates an 8-char hex UUID filename', () => {
+    const result = buildArchivePath({ tur: 'STK', muvekkilAd: 'Test', muvekkilPlaka: null })
+    expect(result.fileName).toMatch(/^[a-f0-9]{8}\.pdf$/)
   })
 
-  it('matches {slug}-{slug}-{uuid8}.pdf with plaka', () => {
-    const date = new Date(2026, 3, 15)
-    const result = buildArchivePath(date, 'stk', 'mehmet-can', '34-abc')
-
-    expect(result.fileName).toMatch(/^mehmet-can-34-abc-[a-f0-9]{8}\.pdf$/)
-  })
-
-  it('does not contain double dashes', () => {
-    const date = new Date(2026, 3, 15)
-    const result1 = buildArchivePath(date, 'stk', 'mehmet', null)
-    expect(result1.fileName).not.toContain('--')
+  it('each call produces a unique filename', () => {
+    const r1 = buildArchivePath({ tur: 'STK', muvekkilAd: 'Test', muvekkilPlaka: null })
+    const r2 = buildArchivePath({ tur: 'STK', muvekkilAd: 'Test', muvekkilPlaka: null })
+    expect(r1.fileName).not.toBe(r2.fileName)
   })
 })
