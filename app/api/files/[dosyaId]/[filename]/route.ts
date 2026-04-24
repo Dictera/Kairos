@@ -21,32 +21,36 @@ export async function GET(
     return NextResponse.json({ error: 'Geçersiz dosya ID' }, { status: 400 })
   }
 
-  // Look up dosya to compute hierarchical disk path
-  const dosyaRow = await db.query.dosya.findFirst({
-    where: eq(dosya.id, dosyaId),
-    with: {
-      muvekkil: true,
-      sigortaTuru: true,
-    },
-  })
+  // Look up dosya to compute hierarchical disk path; fall back to flat path on any error
+  let filePath = path.join(BELGELER_BASE, dosyaIdStr, filename)
 
-  let filePath: string
-
-  if (dosyaRow) {
-    const dir = buildBelgelerDir({
-      tur: dosyaRow.tur,
-      sigortaTuruAd: dosyaRow.sigortaTuru?.ad ?? null,
-      muvekkilAd: dosyaRow.muvekkil?.ad ?? null,
-      muvekkilPlaka: dosyaRow.muvekkil_plaka,
+  try {
+    const dosyaRow = await db.query.dosya.findFirst({
+      where: eq(dosya.id, dosyaId),
+      with: {
+        muvekkil: true,
+        sigortaTuru: true,
+      },
     })
-    filePath = path.join(dir, filename)
 
-    // Fallback to old flat structure for files uploaded before the hierarchy change
-    if (!fs.existsSync(filePath)) {
-      filePath = path.join(BELGELER_BASE, dosyaIdStr, filename)
+    if (dosyaRow) {
+      const hierarchicalPath = path.join(
+        buildBelgelerDir({
+          tur: dosyaRow.tur,
+          sigortaTuruAd: dosyaRow.sigortaTuru?.ad ?? null,
+          muvekkilAd: dosyaRow.muvekkil
+            ? `${dosyaRow.muvekkil.ad} ${dosyaRow.muvekkil.soyad}`.trim()
+            : null,
+          muvekkilPlaka: dosyaRow.muvekkil_plaka,
+        }),
+        filename
+      )
+      if (fs.existsSync(hierarchicalPath)) {
+        filePath = hierarchicalPath
+      }
     }
-  } else {
-    filePath = path.join(BELGELER_BASE, dosyaIdStr, filename)
+  } catch {
+    // DB lookup failed — serve from flat fallback path
   }
 
   if (!fs.existsSync(filePath)) {

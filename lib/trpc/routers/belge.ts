@@ -88,7 +88,9 @@ export const belgeRouter = createTRPCRouter({
           const dir = buildBelgelerDir({
             tur: dosyaRow.tur,
             sigortaTuruAd: dosyaRow.sigortaTuru?.ad ?? null,
-            muvekkilAd: dosyaRow.muvekkil?.ad ?? null,
+            muvekkilAd: dosyaRow.muvekkil
+              ? `${dosyaRow.muvekkil.ad} ${dosyaRow.muvekkil.soyad}`.trim()
+              : null,
             muvekkilPlaka: dosyaRow.muvekkil_plaka,
           })
           safeDeleteBelge(path.join(dir, filename))

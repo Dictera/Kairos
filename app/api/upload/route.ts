@@ -55,7 +55,9 @@ export async function POST(request: NextRequest) {
   const uploadDir = buildBelgelerDir({
     tur: dosyaRow.tur,
     sigortaTuruAd: dosyaRow.sigortaTuru?.ad ?? null,
-    muvekkilAd: dosyaRow.muvekkil?.ad ?? null,
+    muvekkilAd: dosyaRow.muvekkil
+      ? `${dosyaRow.muvekkil.ad} ${dosyaRow.muvekkil.soyad}`.trim()
+      : null,
     muvekkilPlaka: dosyaRow.muvekkil_plaka,
   })
 
