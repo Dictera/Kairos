@@ -26,7 +26,7 @@ progress:
 Phase: 20 — Eski Sistemler Temizliği
 Plan: 04 (complete)
 Status: Complete
-Last activity: 2026-04-23 - Completed quick task 260423-001: Finans sayfası mock datadan kurtarıldı — tRPC ile sirket/tur/dosyaTur endpointleri
+Last activity: 2026-04-24 - Completed quick task 260424-001: Dosya no otomatik atama — YYYY/N formatı, yılbaşında sıfırla
 
 Progress: [██████████] 100% (6/6 phases)
 
@@ -130,6 +130,7 @@ Items acknowledged and deferred at milestone close on 2026-04-22 (v1.2 Şablon B
 |---|-------------|------|--------|-----------|
 | 260422-001 | Dashboard UI güncelleme — yeni layout, delta kartları, Son Dosyalar tablosu | 2026-04-22 | 3b482d1 | [260422-001-dashboard-ui-guncelleme](./quick/260422-001-dashboard-ui-guncelleme/) |
 | 260423-001 | Finans sayfası mock datadan kurtarıldı — sirket/tur/dosyaTur tRPC endpointleri | 2026-04-23 | 8dec237 | [260423-001-finans-mock-datadan-kurtul](./quick/260423-001-finans-mock-datadan-kurtul/) |
+| 260424-001 | Dosya no otomatik atama — YYYY/N formatı, yılbaşında sıfırla | 2026-04-24 | 0d43135 | [260424-001-dosya-no-otomatik-atama](./quick/260424-001-dosya-no-otomatik-atama/) |
 
 ---
 *State managed by GSD workflow*
