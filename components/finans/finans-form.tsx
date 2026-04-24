@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 
 const ODEME_ASAMASI = ['İhtar', 'Arabulucu', 'Bilirkişi', 'İcra'] as const
+type OdemeAsamasiVal = typeof ODEME_ASAMASI[number]
 
 interface FinansFormProps {
   dosyaId: number
@@ -23,7 +24,7 @@ interface FinansFormProps {
     tutar: number
     tarih: string
     aciklama?: string
-    odeme_asamasi?: string | null
+    odeme_asamasi?: OdemeAsamasiVal | null
   }
   onCancel?: () => void
 }
@@ -33,7 +34,7 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
   const [tutar, setTutar] = useState(initialData?.tutar?.toString() ?? '')
   const [tarih, setTarih] = useState(initialData?.tarih ?? format(new Date(), 'yyyy-MM-dd'))
   const [aciklama, setAciklama] = useState(initialData?.aciklama ?? '')
-  const [odemeAsamasi, setOdemeAsamasi] = useState<string>(initialData?.odeme_asamasi ?? '')
+  const [odemeAsamasi, setOdemeAsamasi] = useState<OdemeAsamasiVal | ''>(initialData?.odeme_asamasi ?? '')
   
   const trpc = useTRPC()
   const queryClient = useQueryClient()
@@ -87,8 +88,7 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
       aciklama: aciklama || '',
     }
 
-    type OdemeAsamasiEnum = 'İhtar' | 'Arabulucu' | 'Bilirkişi' | 'İcra'
-    const odemeAsamasiValue = (odemeAsamasi || undefined) as OdemeAsamasiEnum | undefined
+    const odemeAsamasiValue = odemeAsamasi || undefined
 
     if (editId) {
       updateMutation.mutate({ id: editId, ...data, odeme_asamasi: odemeAsamasiValue ?? null })
@@ -119,7 +119,7 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
       {/* Payment stage (optional) */}
       <div className="space-y-2">
         <Label htmlFor="odeme-asamasi">Ödeme Aşaması (Opsiyonel)</Label>
-        <Select value={odemeAsamasi} onValueChange={(v) => setOdemeAsamasi(v === '__none__' ? '' : v)}>
+        <Select value={odemeAsamasi} onValueChange={(v) => setOdemeAsamasi(v === '__none__' ? '' : v as OdemeAsamasiVal)}>
           <SelectTrigger id="odeme-asamasi" className="w-[200px]">
             <SelectValue placeholder="Seçim yapma" />
           </SelectTrigger>

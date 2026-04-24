@@ -95,7 +95,7 @@ export function FinansEntryList({ dosyaId }: FinansEntryListProps) {
                     tutar: entry.tutar,
                     tarih: entry.tarih,
                     aciklama: entry.aciklama ?? undefined,
-                    odeme_asamasi: (entry as Record<string, unknown>).odeme_asamasi as string | null ?? null,
+                    odeme_asamasi: entry.odeme_asamasi as 'İhtar' | 'Arabulucu' | 'Bilirkişi' | 'İcra' | null,
                   }}
                   onCancel={() => setEditId(null)}
                 />
@@ -111,12 +111,9 @@ export function FinansEntryList({ dosyaId }: FinansEntryListProps) {
                     <p className="text-sm text-muted-foreground flex items-center gap-1 flex-wrap">
                       {format(new Date(entry.tarih), 'dd MMM yyyy', { locale: tr })}
                       {entry.aciklama && ` • ${entry.aciklama}`}
-                      {(() => {
-                        const asama = (entry as Record<string, unknown>).odeme_asamasi
-                        return asama ? (
-                          <Badge variant="outline" className="ml-1 text-xs">{String(asama)}</Badge>
-                        ) : null
-                      })()}
+                      {entry.odeme_asamasi && (
+                        <Badge variant="outline" className="ml-1 text-xs">{entry.odeme_asamasi}</Badge>
+                      )}
                     </p>
                   </div>
                 </div>
