@@ -114,12 +114,8 @@ function DosyaFormInner({
         toast.success(`Dosya başarıyla oluşturuldu. Dosya No: ${row.dosya_no}`)
         router.push('/dosyalar/' + row.id)
       },
-      onError: (err) => {
-        if (err.data?.code === 'CONFLICT') {
-          form.setError('dosya_no', { message: 'Bu dosya numarası zaten kullanılıyor.' })
-        } else {
-          toast.error('Kaydedilemedi. Lütfen tekrar deneyin.')
-        }
+      onError: () => {
+        toast.error('Kaydedilemedi. Lütfen tekrar deneyin.')
       },
     })
   )
@@ -174,7 +170,7 @@ function DosyaFormInner({
       updateMutation.mutate({
         id: dosyaId!,
         muvekkil_id: values.muvekkil_id,
-        dosya_no: values.dosya_no ?? '',
+        dosya_no: values.dosya_no!,
         tur: values.tur,
         sigorta_turu_id: values.sigorta_turu_id ?? undefined,
         karsitaraf_sigorta_id: values.karsitaraf_sigorta_id ?? undefined,
