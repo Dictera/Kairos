@@ -76,7 +76,7 @@ export async function GET(
   return new NextResponse(file, {
     headers: {
       'Content-Type': mimeTypes[ext] || 'application/octet-stream',
-      'Content-Disposition': `inline; filename="${filename}"`,
+      'Content-Disposition': `inline; filename*=UTF-8''${encodeURIComponent(filename)}`,
     },
   })
 }
