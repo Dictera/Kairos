@@ -34,19 +34,23 @@ export async function GET(
     })
 
     if (dosyaRow) {
-      const hierarchicalPath = path.join(
-        buildBelgelerDir({
-          tur: dosyaRow.tur,
-          sigortaTuruAd: dosyaRow.sigortaTuru?.ad ?? null,
-          muvekkilAd: dosyaRow.muvekkil
-            ? `${dosyaRow.muvekkil.ad} ${dosyaRow.muvekkil.soyad}`.trim()
-            : null,
-          muvekkilPlaka: dosyaRow.muvekkil_plaka,
-        }),
-        filename
-      )
-      if (fs.existsSync(hierarchicalPath)) {
-        filePath = hierarchicalPath
+      const base = {
+        tur: dosyaRow.tur,
+        sigortaTuruAd: dosyaRow.sigortaTuru?.ad ?? null,
+        muvekkilPlaka: dosyaRow.muvekkil_plaka,
+      }
+      const adSoyad = dosyaRow.muvekkil
+        ? `${dosyaRow.muvekkil.ad} ${dosyaRow.muvekkil.soyad}`.trim()
+        : null
+      const adOnly = dosyaRow.muvekkil?.ad ?? null
+
+      // Try full name first, then ad-only fallback (handles files uploaded before soyad was added)
+      for (const muvekkilAd of [adSoyad, adOnly]) {
+        const candidate = path.join(buildBelgelerDir({ ...base, muvekkilAd }), filename)
+        if (fs.existsSync(candidate)) {
+          filePath = candidate
+          break
+        }
       }
     }
   } catch {
