@@ -195,6 +195,7 @@ export const dosya = sqliteTable('dosya', {
   hasar_dosya_no: text('hasar_dosya_no'),
   kaza_tarihi: text('kaza_tarihi'),
   muvekkil_sigorta_id: integer('muvekkil_sigorta_id').references(() => sigortaSirketi.id),
+  muvekkil_police_no: text('muvekkil_police_no'),
   kusur_orani_karsi: integer('kusur_orani_karsi'),
   durum: text('durum').notNull().default('aktif'), // 'aktif' | 'arsiv'
   aciklama: text('aciklama'),
@@ -215,6 +216,7 @@ export const taraf = sqliteTable('taraf', {
   karsitaraf_ad: text('karsitaraf_ad'),
   police_no: text('police_no'),
   karsitaraf_plaka: text('karsitaraf_plaka'),     // nullable — D-12
+  karsitaraf_tc_vergi_no: text('karsitaraf_tc_vergi_no'), // nullable — TC/Vergi No for karşı taraf
   surucu_ad: text('surucu_ad'),                    // nullable — surucu (driver) info
   surucu_soyad: text('surucu_soyad'),              // nullable
   surucu_plaka: text('surucu_plaka'),              // nullable
@@ -254,6 +256,7 @@ export const dosyaRelations = relations(dosya, ({ one, many }) => ({
   finans_kalemleri: many(finans_kalemi),
   notlar: many(dosyaNot),
   olaylar: many(olayGunlugu),
+  bildirimler: many(bildirim),
 }))
 
 export const tarafRelations = relations(taraf, ({ one }) => ({
@@ -381,6 +384,9 @@ export const docxSablon = sqliteTable('docx_sablon', {
 export const FINANS_TUR = ['Gelen', 'Giden', 'Masraf'] as const
 export type FinansTur = typeof FINANS_TUR[number]
 
+export const ODEME_ASAMASI = ['İhtar', 'Arabulucu', 'Bilirkişi', 'İcra'] as const
+export type OdemeAsamasi = typeof ODEME_ASAMASI[number]
+
 export const finans_kalemi = sqliteTable('finans_kalemi', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   dosya_id: integer('dosya_id').notNull().references(() => dosya.id, { onDelete: 'cascade' }),
@@ -388,6 +394,7 @@ export const finans_kalemi = sqliteTable('finans_kalemi', {
   tutar: real('tutar').notNull(), // TL amount
   tarih: text('tarih').notNull(), // YYYY-MM-DD
   aciklama: text('aciklama'),
+  odeme_asamasi: text('odeme_asamasi'), // ODEME_ASAMASI enum stored as text, nullable
   created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
 }, (t) => [
   index('idx_finans_dosya').on(t.dosya_id),
@@ -396,4 +403,26 @@ export const finans_kalemi = sqliteTable('finans_kalemi', {
 
 export const finans_kalemiRelations = relations(finans_kalemi, ({ one }) => ({
   dosya: one(dosya, { fields: [finans_kalemi.dosya_id], references: [dosya.id] }),
+}))
+
+// ── BILDIRIM (Notification) table ────────────────────────────────────────────
+
+export const bildirim = sqliteTable('bildirim', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  tip: text('tip').notNull(), // 'durusma' | 'sure'
+  baslik: text('baslik').notNull(),
+  mesaj: text('mesaj').notNull(),
+  dosya_id: integer('dosya_id').references(() => dosya.id, { onDelete: 'cascade' }),
+  dosya_no: text('dosya_no'),
+  tarih: text('tarih').notNull(), // ilgili olayin tarihi (YYYY-MM-DD)
+  created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
+}, (t) => [
+  index('idx_bildirim_dosya').on(t.dosya_id),
+  index('idx_bildirim_tarih').on(t.tarih),
+  index('idx_bildirim_tip_tarih').on(t.tip, t.tarih),
+  uniqueIndex('uniq_bildirim_tip_dosya_tarih').on(t.tip, t.dosya_id, t.tarih),
+])
+
+export const bildirimRelations = relations(bildirim, ({ one }) => ({
+  dosya: one(dosya, { fields: [bildirim.dosya_id], references: [dosya.id] }),
 }))
