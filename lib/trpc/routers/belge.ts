@@ -85,15 +85,20 @@ export const belgeRouter = createTRPCRouter({
         })
 
         if (dosyaRow) {
-          const dir = buildBelgelerDir({
+          const base = {
             tur: dosyaRow.tur,
             sigortaTuruAd: dosyaRow.sigortaTuru?.ad ?? null,
-            muvekkilAd: dosyaRow.muvekkil
-              ? `${dosyaRow.muvekkil.ad} ${dosyaRow.muvekkil.soyad}`.trim()
-              : null,
             muvekkilPlaka: dosyaRow.muvekkil_plaka,
-          })
-          safeDeleteBelge(path.join(dir, filename))
+          }
+          const adSoyad = dosyaRow.muvekkil
+            ? `${dosyaRow.muvekkil.ad} ${dosyaRow.muvekkil.soyad}`.trim()
+            : null
+          const adOnly = dosyaRow.muvekkil?.ad ?? null
+
+          for (const muvekkilAd of [adSoyad, adOnly]) {
+            const candidate = path.join(buildBelgelerDir({ ...base, muvekkilAd }), filename)
+            safeDeleteBelge(candidate)
+          }
         }
       } else if (dosyaYolu) {
         // Legacy path format — attempt delete via archive guard (silently fails if outside base)
