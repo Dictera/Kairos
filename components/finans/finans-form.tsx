@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 
+const ODEME_ASAMASI = ['İhtar', 'Arabulucu', 'Bilirkişi', 'İcra'] as const
+
 interface FinansFormProps {
   dosyaId: number
   onSuccess?: () => void
@@ -21,6 +23,7 @@ interface FinansFormProps {
     tutar: number
     tarih: string
     aciklama?: string
+    odeme_asamasi?: string | null
   }
   onCancel?: () => void
 }
@@ -30,6 +33,7 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
   const [tutar, setTutar] = useState(initialData?.tutar?.toString() ?? '')
   const [tarih, setTarih] = useState(initialData?.tarih ?? format(new Date(), 'yyyy-MM-dd'))
   const [aciklama, setAciklama] = useState(initialData?.aciklama ?? '')
+  const [odemeAsamasi, setOdemeAsamasi] = useState<string>(initialData?.odeme_asamasi ?? '')
   
   const trpc = useTRPC()
   const queryClient = useQueryClient()
@@ -64,6 +68,7 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
     setTutar('')
     setTarih(format(new Date(), 'yyyy-MM-dd'))
     setAciklama('')
+    setOdemeAsamasi('')
   }
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -81,11 +86,14 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
       tarih,
       aciklama: aciklama || '',
     }
-    
+
+    type OdemeAsamasiEnum = 'İhtar' | 'Arabulucu' | 'Bilirkişi' | 'İcra'
+    const odemeAsamasiValue = (odemeAsamasi || undefined) as OdemeAsamasiEnum | undefined
+
     if (editId) {
-      updateMutation.mutate({ id: editId, ...data })
+      updateMutation.mutate({ id: editId, ...data, odeme_asamasi: odemeAsamasiValue ?? null })
     } else {
-      createMutation.mutate(data)
+      createMutation.mutate({ ...data, odeme_asamasi: odemeAsamasiValue })
     }
   }
   
@@ -108,6 +116,22 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
         </Select>
       </div>
       
+      {/* Payment stage (optional) */}
+      <div className="space-y-2">
+        <Label htmlFor="odeme-asamasi">Ödeme Aşaması (Opsiyonel)</Label>
+        <Select value={odemeAsamasi} onValueChange={(v) => setOdemeAsamasi(v === '__none__' ? '' : v)}>
+          <SelectTrigger id="odeme-asamasi" className="w-[200px]">
+            <SelectValue placeholder="Seçim yapma" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__none__">— Seçim yapma —</SelectItem>
+            {ODEME_ASAMASI.map((asama) => (
+              <SelectItem key={asama} value={asama}>{asama}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Amount */}
       <div className="space-y-2">
         <Label htmlFor="tutar">Tutar (TL) *</Label>

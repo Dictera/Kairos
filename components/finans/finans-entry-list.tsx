@@ -6,6 +6,7 @@ import { useTRPC } from '@/lib/trpc/context'
 import { format, parseISO } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { ArrowDownCircle, ArrowUpCircle, Receipt, Pencil, Trash2 } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -94,6 +95,7 @@ export function FinansEntryList({ dosyaId }: FinansEntryListProps) {
                     tutar: entry.tutar,
                     tarih: entry.tarih,
                     aciklama: entry.aciklama ?? undefined,
+                    odeme_asamasi: (entry as Record<string, unknown>).odeme_asamasi as string | null ?? null,
                   }}
                   onCancel={() => setEditId(null)}
                 />
@@ -106,9 +108,15 @@ export function FinansEntryList({ dosyaId }: FinansEntryListProps) {
                     <p className="font-medium">
                       {entry.tur === 'Gelen' ? 'Gelen' : entry.tur === 'Giden' ? 'Giden' : 'Masraf'}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 flex-wrap">
                       {format(new Date(entry.tarih), 'dd MMM yyyy', { locale: tr })}
                       {entry.aciklama && ` • ${entry.aciklama}`}
+                      {(() => {
+                        const asama = (entry as Record<string, unknown>).odeme_asamasi
+                        return asama ? (
+                          <Badge variant="outline" className="ml-1 text-xs">{String(asama)}</Badge>
+                        ) : null
+                      })()}
                     </p>
                   </div>
                 </div>
