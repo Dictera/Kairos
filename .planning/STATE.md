@@ -26,7 +26,7 @@ progress:
 Phase: 20 — Eski Sistemler Temizliği
 Plan: 04 (complete)
 Status: Complete
-Last activity: 2026-04-25 - Completed quick task 260425-001: Finans ödeme aşaması kategorisi (İhtar, Arabulucu, Bilirkişi, İcra)
+Last activity: 2026-04-25 - Completed quick task 260425-002: Karşı taraf sigorta şirketi ve avukat bilgilerinin tamamı görüntüleniyor
 
 Progress: [██████████] 100% (6/6 phases)
 
@@ -132,6 +132,7 @@ Items acknowledged and deferred at milestone close on 2026-04-22 (v1.2 Şablon B
 | 260423-001 | Finans sayfası mock datadan kurtarıldı — sirket/tur/dosyaTur tRPC endpointleri | 2026-04-23 | 8dec237 | [260423-001-finans-mock-datadan-kurtul](./quick/260423-001-finans-mock-datadan-kurtul/) |
 | 260424-001 | Dosya no otomatik atama — YYYY/N formatı, yılbaşında sıfırla | 2026-04-24 | 0d43135 | [260424-001-dosya-no-otomatik-atama](./quick/260424-001-dosya-no-otomatik-atama/) |
 | 260425-001 | Finans ödeme aşaması kategorisi — İhtar, Arabulucu, Bilirkişi, İcra | 2026-04-25 | b980cd8 | [260425-001-finans-odeme-asamasi-ihtar-icra](./quick/260425-001-finans-odeme-asamasi-ihtar-icra/) |
+| 260425-002 | Karşı taraf sigorta şirketi ve avukat bilgilerinin tamamı görüntüleniyor | 2026-04-25 | 220cf8f | [260425-002-karsitaraf-sigorta-avukat-detay](./quick/260425-002-karsitaraf-sigorta-avukat-detay/) |
 
 ---
 *State managed by GSD workflow*
