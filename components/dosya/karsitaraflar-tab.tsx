@@ -34,12 +34,29 @@ type TarafRow = {
   karsitaraf_ad: string | null
   police_no: string | null
   karsitaraf_plaka: string | null
+  karsitaraf_tc_vergi_no: string | null
   surucu_ad: string | null
   surucu_soyad: string | null
   surucu_plaka: string | null
   surucu_telefon: string | null
   surucu_police_no: string | null
-  avukat: { id: number; ad: string; tbb_sicil_no: string } | null
+  sigortaSirketi: {
+    id: number
+    ad: string
+    mersis_no: string | null
+    vergi_no: string
+    bagli_oldugu_vergi_dairesi: string | null
+    ihtar_mail: string | null
+    kep_mail: string | null
+  } | null
+  avukat: {
+    id: number
+    ad: string
+    tbb_sicil_no: string
+    iban: string | null
+    eposta: string | null
+    telefon: string | null
+  } | null
 }
 
 interface KarsitaraflarTabProps {
@@ -59,6 +76,7 @@ const editSchema = z.object({
     .optional()
     .or(z.literal('')),
   surucu_police_no: z.string().max(100).optional().or(z.literal('')),
+  karsitaraf_tc_vergi_no: z.string().max(11).optional().or(z.literal('')),
 })
 
 type EditValues = z.infer<typeof editSchema>
@@ -89,6 +107,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
       surucu_plaka: taraf?.surucu_plaka ?? '',
       surucu_telefon: taraf?.surucu_telefon ?? '',
       surucu_police_no: taraf?.surucu_police_no ?? '',
+      karsitaraf_tc_vergi_no: taraf?.karsitaraf_tc_vergi_no ?? '',
     },
   })
 
@@ -119,6 +138,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
       surucu_plaka: taraf?.surucu_plaka ?? '',
       surucu_telefon: taraf?.surucu_telefon ?? '',
       surucu_police_no: taraf?.surucu_police_no ?? '',
+      karsitaraf_tc_vergi_no: taraf?.karsitaraf_tc_vergi_no ?? '',
     })
     setIsEditing(true)
   }
@@ -128,6 +148,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['dosya', 'getById', { id: dosyaId }] })
         queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        queryClient.invalidateQueries({ queryKey: ['dosya'] })
         toast.success('Kaydedildi.')
         setIsEditing(false)
       },
@@ -147,6 +168,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
       surucu_plaka: values.surucu_plaka || undefined,
       surucu_telefon: values.surucu_telefon || undefined,
       surucu_police_no: values.surucu_police_no || undefined,
+      karsitaraf_tc_vergi_no: values.karsitaraf_tc_vergi_no || undefined,
     })
   }
 
@@ -296,6 +318,17 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="karsitaraf_tc_vergi_no"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>TC / Vergi No</FormLabel>
+                        <FormControl><Input placeholder="TC veya Vergi No" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -333,15 +366,33 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
     <div className="space-y-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base">Karşı Taraf Sigorta Bilgileri</CardTitle>
+          <CardTitle className="text-base">Karşı Sigorta Şirketi</CardTitle>
           <Button variant="outline" size="sm" onClick={handleStartEditing}>
             Düzenle
           </Button>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InfoRow label="Karşı Sigorta Şirketi" value={karsitarafSirketAd} />
-            <InfoRow label="Karşı Taraf Avukatı" value={taraf?.avukat?.ad ?? null} />
+            <InfoRow label="Şirket Adı" value={taraf?.sigortaSirketi?.ad ?? karsitarafSirketAd} />
+            <InfoRow label="Vergi No" value={taraf?.sigortaSirketi?.vergi_no} />
+            <InfoRow label="Mersis No" value={taraf?.sigortaSirketi?.mersis_no} />
+            <InfoRow label="Bağlı Olduğu Vergi Dairesi" value={taraf?.sigortaSirketi?.bagli_oldugu_vergi_dairesi} />
+            <InfoRow label="İhtar Mail" value={taraf?.sigortaSirketi?.ihtar_mail} />
+            <InfoRow label="KEP Mail" value={taraf?.sigortaSirketi?.kep_mail} />
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Karşı Taraf Avukatı</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InfoRow label="Ad" value={taraf?.avukat?.ad ?? null} />
+            <InfoRow label="TBB Sicil No" value={taraf?.avukat?.tbb_sicil_no} />
+            <InfoRow label="Telefon" value={taraf?.avukat?.telefon} />
+            <InfoRow label="E-posta" value={taraf?.avukat?.eposta} />
+            <InfoRow label="IBAN" value={taraf?.avukat?.iban} />
           </div>
         </CardContent>
       </Card>
@@ -357,6 +408,7 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
               <InfoRow label="Plaka" value={taraf?.surucu_plaka} />
               <InfoRow label="Telefon" value={taraf?.surucu_telefon} />
               <InfoRow label="Poliçe No" value={taraf?.surucu_police_no} />
+              <InfoRow label="TC / Vergi No" value={taraf?.karsitaraf_tc_vergi_no} />
             </div>
           </CardContent>
         </Card>
