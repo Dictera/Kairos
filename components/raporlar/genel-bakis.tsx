@@ -4,8 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import dynamic from 'next/dynamic'
 
-const BarChart        = dynamic(() => import('recharts').then(m => m.BarChart),        { ssr: false, loading: () => <Skeleton className="h-[280px] w-full" /> })
-const Bar             = dynamic(() => import('recharts').then(m => m.Bar),             { ssr: false })
+const Bar             = dynamic(() => import('recharts').then(m => m.Bar),             { ssr: false, loading: () => <Skeleton className="h-[280px] w-full" /> })
 const XAxis           = dynamic(() => import('recharts').then(m => m.XAxis),           { ssr: false })
 const YAxis           = dynamic(() => import('recharts').then(m => m.YAxis),           { ssr: false })
 const Tooltip         = dynamic(() => import('recharts').then(m => m.Tooltip),         { ssr: false })
