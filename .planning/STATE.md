@@ -133,6 +133,7 @@ Items acknowledged and deferred at milestone close on 2026-04-22 (v1.2 Şablon B
 | 260424-001 | Dosya no otomatik atama — YYYY/N formatı, yılbaşında sıfırla | 2026-04-24 | 0d43135 | [260424-001-dosya-no-otomatik-atama](./quick/260424-001-dosya-no-otomatik-atama/) |
 | 260425-001 | Finans ödeme aşaması kategorisi — İhtar, Arabulucu, Bilirkişi, İcra | 2026-04-25 | b980cd8 | [260425-001-finans-odeme-asamasi-ihtar-icra](./quick/260425-001-finans-odeme-asamasi-ihtar-icra/) |
 | 260425-002 | Karşı taraf sigorta şirketi ve avukat bilgilerinin tamamı görüntüleniyor | 2026-04-25 | 220cf8f | [260425-002-karsitaraf-sigorta-avukat-detay](./quick/260425-002-karsitaraf-sigorta-avukat-detay/) |
+| 260425-003 | Raporlar sayfası 10 raporla yeniden yazıldı — DB migration + Recharts bileşenleri | 2026-04-25 | b1fdc88 | [260425-003-raporlar-sayfasi-10-rapor-recharts](./quick/260425-003-raporlar-sayfasi-10-rapor-recharts/) |
 
 ---
 *State managed by GSD workflow*
