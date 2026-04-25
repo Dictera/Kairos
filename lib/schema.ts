@@ -200,6 +200,8 @@ export const dosya = sqliteTable('dosya', {
   durum: text('durum').notNull().default('aktif'), // 'aktif' | 'arsiv'
   aciklama: text('aciklama'),
   surec_detay: text('surec_detay'),  // JSON-encoded SurecDetay
+  karar_tutari: real('karar_tutari'),        // Mahkeme/uzlaşma kararı tutarı — nullable
+  sonuc: text('sonuc'),                      // 'kazanıldı' | 'uzlaşma' | 'kaybedildi' | 'devam'
   created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
   updated_at: text('updated_at').notNull().default(sql`(datetime('now'))`),
 }, (t) => [
