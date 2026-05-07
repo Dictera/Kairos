@@ -36,14 +36,15 @@ Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kri
 - ✓ **Eski Sistem Temizliği (TEMIZ-01..08)** — v1.2: Tiptap/ODT routers/routes/services/tables deleted, jspdf/adm-zip/uninstalled, sidebar nav updated
 - ~~**Dilekçe Şablon Sistemi (DILEKCE-01–05)**~~ — v1.0 shipped, **emekliye ayrıldı** v1.2 (yeni .docx + LibreOffice pipeline ile değiştirildi)
 
-## Current Milestone: v1.3 (Planning)
+## Current Milestone: v1.3 GitHub Open Source Yol Haritası
 
-Next milestone will focus on Quick Actions & Template Improvements.
+**Goal:** Projeyi güvenle GitHub'a v0.1 etiketi ile açık kaynak olarak yayınlamak.
 
-### Proposed for v1.3
-
-- **Quick Actions (QUICK-01..05):** Named quick-action buttons on belge tab (e.g., "İhtarname Üret"), dry-run preview, batch multi-template, fuzzy-match typo warnings, generation history
-- **Template Improvements (ADV-01..02):** Deterministic PDF rendering (metadata strip), template versioning/diff/rollback
+**Target features:**
+- Güvenlik & Temizlik — .gitignore tamamlama (`.venv/`, `data/`), hassas veri tarama
+- Dokümantasyon — MIT LICENSE + Türkçe README.md (özellikler, kurulum, Python pipeline, LibreOffice)
+- GitHub Repo — private oluştur → push → public yap → v0.1 release tag → topics/description
+- Kalite (nice-to-have) — GitHub Actions CI, Dependabot, Issue templates
 
 ### Out of Scope
 

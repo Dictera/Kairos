@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Şablon Belgeler
-status: complete
-last_updated: "2026-04-22T14:35:00Z"
-last_activity: 2026-04-22 -- v1.2 Şablon Belgeler milestone archived
+milestone: v1.3
+milestone_name: GitHub Open Source Yol Haritası
+status: defining_requirements
+last_updated: "2026-05-07T00:00:00Z"
+last_activity: 2026-05-07 -- Milestone v1.3 started
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 14
-  completed_plans: 18
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -19,14 +19,14 @@ progress:
 
 **Project:** Sigorta Uyuşmazlık Takip
 **Core value:** Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kritik süreleri tek ekrandan görebilmek.
-**Current focus:** v1.2 Şablon Belgeler — Phase 20 complete, milestone complete
+**Current focus:** v1.3 GitHub Open Source Yol Haritası — defining requirements
 
 ## Current Position
 
-Phase: 20 — Eski Sistemler Temizliği
-Plan: 04 (complete)
-Status: Complete
-Last activity: 2026-04-25 - Completed quick task 260425-002: Karşı taraf sigorta şirketi ve avukat bilgilerinin tamamı görüntüleniyor
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-07 — Milestone v1.3 started
 
 Progress: [██████████] 100% (6/6 phases)
 
