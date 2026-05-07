@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: GitHub Open Source Yol Haritası
-status: defining_requirements
+status: roadmap_ready
 last_updated: "2026-05-07T00:00:00Z"
-last_activity: 2026-05-07 -- Milestone v1.3 started
+last_activity: 2026-05-07 -- Roadmap created for v1.3 (4 phases, 18 requirements)
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -19,22 +19,22 @@ progress:
 
 **Project:** Sigorta Uyuşmazlık Takip
 **Core value:** Her dosyanın STK ve mahkeme süreç aşamalarını, duruşma tarihlerini ve kritik süreleri tek ekrandan görebilmek.
-**Current focus:** v1.3 GitHub Open Source Yol Haritası — defining requirements
+**Current focus:** v1.3 GitHub Open Source Yol Haritası — roadmap ready, Phase 21 next
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Not started (roadmap defined)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-07 — Milestone v1.3 started
+Status: Roadmap ready — awaiting Phase 21 planning
+Last activity: 2026-05-07 — v1.3 roadmap created (4 phases: 21 Güvenlik, 22 Dokümantasyon, 23 GitHub Yayın, 24 Kalite)
 
-Progress: [██████████] 100% (6/6 phases)
+Progress: [__________] 0% (0/4 phases)
 
 ## Session Continuity
 
-Last session: 2026-04-21T22:57:36Z
-Previous milestone: v1.1 shipped 2026-04-17
-Current milestone: v1.2 Şablon Belgeler (phases 15–20 planned)
+Last session: 2026-05-07
+Previous milestone: v1.2 Şablon Belgeler shipped 2026-04-22
+Current milestone: v1.3 GitHub Open Source Yol Haritası (phases 21–24 planned)
 Roadmap file: .planning/ROADMAP.md
 
 ## Performance Metrics
@@ -43,8 +43,9 @@ Roadmap file: .planning/ROADMAP.md
 
 - Total plans completed (v1.0): 31
 - Total plans completed (v1.1): 15
+- Total plans completed (v1.2): 21
 - Average duration: —
-- Total execution time: v1.0 + v1.1 tracked separately
+- Total execution time: v1.0 + v1.1 + v1.2 tracked separately
 
 **By Phase:**
 
@@ -70,6 +71,10 @@ Roadmap file: .planning/ROADMAP.md
 | 18     | 3/3 | - | ~5.8min |
 | 19 | 1/3 | 1 | 3min |
 | 20 | 4/4 | 4 | 3min |
+| 21 | 0/TBD | - | - |
+| 22 | 0/TBD | - | - |
+| 23 | 0/TBD | - | - |
+| 24 | 0/TBD | - | - |
 
 ## Accumulated Context
 
@@ -91,6 +96,7 @@ Roadmap file: .planning/ROADMAP.md
 - **Turkish char pre-transliteration in slugify:** `handle_slug` maps Turkish chars (`İ→I`, `Ş→S`, `Ç→C`, `Ö→O`, `Ü→U`, `Ğ→G` and lowercase variants) via `str.maketrans` before calling `python-slugify` for consistent ASCII output across environments
 - **Optional belge_turu on templates:** `docxSablon.belge_turu` is nullable text with Zod enum validation (`BELGE_KATEGORILER`) crossing the tRPC API boundary; stored as NULL when undefined
 - **Defense-in-depth path traversal guard:** `buildArchivePath` rejects any slug segment containing `..` before path construction, in addition to the post-join `path.resolve` guard, because `path.join` treats `../` inside dash-joined filename segments as literal characters
+- **v1.3 Phase 23 manual steps:** GitHub repo creation, visibility change, release tag, and topics/description are manual browser/CLI actions performed by the user — not automated code tasks
 
 ### Blockers
 
@@ -117,6 +123,7 @@ Items acknowledged and deferred at milestone close on 2026-04-22 (v1.2 Şablon B
 ### Roadmap Evolution
 
 - v1.2 milestone opened: 6 phases (15–20) covering 48 requirements across PIPE / SABLON / PDF / ARSIV / BUI / TEMIZ categories
+- v1.3 milestone opened: 4 phases (21–24) covering 18 requirements across GUVENLIK / DOKUM / GITHUB / KALITE categories
 
 ### Research Flags
 

@@ -88,4 +88,4 @@ Requirements for GitHub Open Source release.
 
 ---
 *Requirements defined: 2026-05-07*
-*Last updated: 2026-05-07 after initial definition*
+*Last updated: 2026-05-07 — traceability confirmed after roadmap creation*
