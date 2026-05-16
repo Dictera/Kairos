@@ -8,7 +8,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { ChevronRight, FileIcon, Download } from 'lucide-react'
+import { ChevronRight, FileIcon, Download, FolderOpen } from 'lucide-react'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
@@ -91,11 +91,18 @@ function BelgeRow({ belge }: { belge: BelgeRow }) {
           </div>
         </div>
       </div>
-      <Button variant="ghost" size="icon" className="flex-shrink-0" asChild>
-        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-          <Download className="h-4 w-4" />
-        </a>
-      </Button>
+      <div className="flex items-center gap-1 flex-shrink-0">
+        <Button variant="ghost" size="icon" asChild>
+          <Link href={`/dosyalar/${belge.dosya_id}`}>
+            <FolderOpen className="h-4 w-4" />
+          </Link>
+        </Button>
+        <Button variant="ghost" size="icon" asChild>
+          <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+            <Download className="h-4 w-4" />
+          </a>
+        </Button>
+      </div>
     </div>
   )
 }
