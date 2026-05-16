@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Lock } from 'lucide-react'
+import { Lock, FolderOpen } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -106,6 +106,14 @@ export function DosyaDetailTabs({ dosyaId }: DosyaDetailTabsProps) {
       {/* Header actions */}
       <div className="flex items-center gap-2">
         <h2 className="text-lg font-semibold flex-1">{data.dosya_no}</h2>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => fetch(`/api/open-folder?dosyaId=${dosyaId}`)}
+          title="Klasörde göster"
+        >
+          <FolderOpen className="h-4 w-4" />
+        </Button>
         <Button variant="secondary" size="sm" asChild>
           <Link href={`/dosyalar/${dosyaId}/duzenle`}>Düzenle</Link>
         </Button>
