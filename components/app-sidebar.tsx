@@ -10,7 +10,7 @@ import {
   Calendar,
   FileText,
   DollarSign,
-  FileEdit,
+  LayoutTemplate,
   BarChart2,
   Settings,
 } from 'lucide-react'
@@ -43,7 +43,7 @@ const navGroups = [
       { label: 'Takvim', href: '/takvim', icon: Calendar },
       { label: 'Belgeler', href: '/belgeler', icon: FileText },
       { label: 'Finans', href: '/finans', icon: DollarSign },
-      { label: 'Şablon Yönetimi', href: '/ayarlar', icon: Settings },
+      { label: 'Şablon Yönetimi', href: '/sablon-yonetimi', icon: LayoutTemplate },
       { label: 'Raporlar', href: '/raporlar', icon: BarChart2 },
     ],
   },
