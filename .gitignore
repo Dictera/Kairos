@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+package-lock.json
 /.pnp
 .pnp.*
 .yarn/*
@@ -42,18 +43,25 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# SQLite database file (contains real data — never commit)
+# SQLite database files (contain real data — never commit)
 data/db.sqlite
 data/db.sqlite-wal
 data/db.sqlite-shm
+data/*.db
 
-# GSD quick tasks (ephemeral, not worth tracking)
-.planning/quick/
+# GSD planning artifacts (debug, phases, research, tmp, milestones)
+.planning/
 
 # Agent-generated artifacts
 .claude/
 .playwright-mcp/
+.agents/
+.opencode/
+.vscode/
+CLAUDE.md
+AGENTS.md
 
-# Python cache
+# Python cache and virtual environment
 scripts/docx-pipeline/__pycache__/
-uploads/sablon-pdf/
+scripts/docx-pipeline/.venv/
+uploads/
