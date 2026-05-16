@@ -1,9 +1,5 @@
-'use client'
-
 import { VARIABLE_REGISTRY, type VariableInfo } from '@/lib/docx/variable-registry'
-import { useState } from 'react'
-import { Copy, ChevronDown, ChevronUp } from 'lucide-react'
-import { toast } from 'sonner'
+import { CopyButton, CopyExampleButton } from './copy-button'
 
 const TAB_ORDER: Array<{ key: string; label: string }> = [
   { key: 'genel', label: 'Genel' },
@@ -40,23 +36,6 @@ function groupByTab(vars: VariableInfo[]): Record<string, VariableInfo[]> {
 
 export function CheatSheetPage() {
   const grouped = groupByTab(VARIABLE_REGISTRY)
-  const [copiedVar, setCopiedVar] = useState<string | null>(null)
-  const [showFilters, setShowFilters] = useState(false)
-
-  function handleCopy(v: string) {
-    const text = `{{ ${v} }}`
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedVar(v)
-      toast.success(`Kopyalandı: ${text}`)
-      setTimeout(() => setCopiedVar(null), 1500)
-    }).catch(() => toast.error('Kopyalanamadı.'))
-  }
-
-  function handleCopyExample(example: string) {
-    navigator.clipboard.writeText(example).then(() => {
-      toast.success(`Kopyalandı: ${example}`)
-    }).catch(() => toast.error('Kopyalanamadı.'))
-  }
 
   return (
     <div className="p-6 space-y-8 max-w-4xl">
@@ -74,29 +53,22 @@ export function CheatSheetPage() {
           <section key={key} className="space-y-3">
             <h2 className="text-base font-semibold">{label}</h2>
             <div className="border rounded-lg divide-y">
-              {vars.map((v) => {
-                const isCopied = copiedVar === v.path
-                return (
-                  <div
-                    key={v.path}
-                    role="button"
-                    tabIndex={0}
-                    className="flex items-center justify-between gap-4 p-3 cursor-pointer hover:bg-muted/50 rounded transition-colors group"
-                    onClick={() => handleCopy(v.path)}
-                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCopy(v.path) } }}
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Copy className={`h-3.5 w-3.5 shrink-0 transition-colors ${isCopied ? 'text-green-600' : 'text-muted-foreground opacity-0 group-hover:opacity-100'}`} />
-                      <code className="text-sm font-mono bg-muted px-1.5 py-0.5 rounded truncate">
-                        {'{{ '}{v.path}{' }}'}
-                      </code>
-                    </div>
-                    <p className="text-sm text-muted-foreground text-right flex-shrink-0 max-w-[50%]">
-                      {v.label}
-                    </p>
+              {vars.map((v) => (
+                <div
+                  key={v.path}
+                  className="flex items-center justify-between gap-4 p-3 hover:bg-muted/50 rounded transition-colors group"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <CopyButton text={v.path} />
+                    <code className="text-sm font-mono bg-muted px-1.5 py-0.5 rounded truncate">
+                      {'{{ '}{v.path}{' }}'}
+                    </code>
                   </div>
-                )
-              })}
+                  <p className="text-sm text-muted-foreground text-right flex-shrink-0 max-w-[50%]">
+                    {v.label}
+                  </p>
+                </div>
+              ))}
             </div>
           </section>
         )
@@ -104,40 +76,26 @@ export function CheatSheetPage() {
 
       <section className="space-y-3">
         <h2 className="text-base font-semibold">Jinja2 Filtreler</h2>
-        <button
-          type="button"
-          className="flex w-full items-center justify-between py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          onClick={() => setShowFilters((s) => !s)}
-        >
-          <span>Filtre Örnekleri</span>
-          {showFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </button>
-        {showFilters && (
-          <div className="border rounded-lg divide-y">
-            {JINJA2_EXAMPLES.map((ex) => {
-              const example = 'example' in ex ? (ex.example ?? '') : `{{ muvekkil.ad | ${ex.name ?? ''} }}`
-              const desc = 'desc' in ex ? ex.desc : ex.description
-              return (
-                <div
-                  key={ex.name ?? ex.filter}
-                  role="button"
-                  tabIndex={0}
-                  className="flex items-start justify-between gap-4 p-3 cursor-pointer hover:bg-muted/50 rounded transition-colors group"
-                  onClick={() => handleCopyExample(example)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCopyExample(example) } }}
-                >
-                  <div className="min-w-0 flex-1">
-                    <code className="text-sm font-mono bg-muted px-1.5 py-0.5 rounded block truncate">
-                      {example}
-                    </code>
-                    <p className="text-xs text-muted-foreground mt-1">{desc}</p>
-                  </div>
-                  <Copy className="h-3.5 w-3.5 shrink-0 mt-1 text-muted-foreground opacity-0 group-hover:opacity-100" />
+        <div className="border rounded-lg divide-y">
+          {JINJA2_EXAMPLES.map((ex) => {
+            const example = 'example' in ex ? (ex.example ?? '') : `{{ muvekkil.ad | ${ex.name ?? ''} }}`
+            const desc = 'desc' in ex ? ex.desc : ex.description
+            return (
+              <div
+                key={ex.name ?? ex.filter}
+                className="flex items-start justify-between gap-4 p-3 hover:bg-muted/50 rounded transition-colors group"
+              >
+                <div className="min-w-0 flex-1">
+                  <code className="text-sm font-mono bg-muted px-1.5 py-0.5 rounded block truncate">
+                    {example}
+                  </code>
+                  <p className="text-xs text-muted-foreground mt-1">{desc}</p>
                 </div>
-              )
-            })}
-          </div>
-        )}
+                <CopyExampleButton example={example} />
+              </div>
+            )
+          })}
+        </div>
       </section>
     </div>
   )

@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AyarlarCrudSection } from './ayarlar-crud-section'
 import { SigortaSirketiSection } from './sigorta-sirketi-section'
 import { PipelineStatus } from '@/components/pipeline/pipeline-status'
+import { CheatSheetSummaryCard } from './cheat-sheet-summary-card'
+import SablonYonetimiSection from './sablon-yonetimi-section'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Check, X, FolderOpen, Pencil, Building2, List, Settings2 } from 'lucide-react'
@@ -118,6 +120,8 @@ export function AyarlarPage() {
 
       {/* ── LİSTELER ── */}
       <TabsContent value="listeler" className="space-y-6">
+        <SablonYonetimiSection />
+        <CheatSheetSummaryCard />
         <AyarlarCrudSection
           title="Sigorta Türleri"
           description="Dosya oluştururken seçilebilecek sigorta türleri."
