@@ -114,7 +114,7 @@ export function CalendarView() {
   const weekDays = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)]">
+    <div className="flex flex-col h-full">
       {/* Header with month navigation */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
