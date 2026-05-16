@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { belge } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
-import { buildBelgelerDir, resolveBelgelerBase } from '@/lib/belgeler-storage'
+import { getTurLabel, sanitizeFsSegment, resolveBelgelerBase } from '@/lib/belgeler-storage'
 import path from 'path'
 import { execFile } from 'child_process'
 
@@ -32,14 +32,20 @@ export async function GET(request: NextRequest) {
 
   const belgelerBase = resolveBelgelerBase()
 
-  const dir = buildBelgelerDir({
-    tur: row.dosya.tur,
-    sigortaTuruAd: row.dosya.sigortaTuru?.ad ?? null,
-    muvekkilAd: row.dosya.muvekkil
+  const turLabel = getTurLabel(row.dosya.tur)
+  const sigortaLabel = row.dosya.sigortaTuru?.ad?.trim()
+    ? sanitizeFsSegment(row.dosya.sigortaTuru.ad)
+    : 'Belirtilmemiş'
+  const muvekkilBase = sanitizeFsSegment(
+    row.dosya.muvekkil
       ? `${row.dosya.muvekkil.ad} ${row.dosya.muvekkil.soyad}`.trim()
-      : null,
-    muvekkilPlaka: row.dosya.muvekkil_plaka,
-  })
+      : 'bilinmiyor'
+  )
+  const muvekkilLabel = row.dosya.muvekkil_plaka?.trim()
+    ? `${muvekkilBase} - ${sanitizeFsSegment(row.dosya.muvekkil_plaka)}`
+    : muvekkilBase
+
+  const dir = path.join(belgelerBase, turLabel, sigortaLabel, muvekkilLabel)
 
   const resolvedDir = path.resolve(dir)
   const resolvedBase = path.resolve(belgelerBase)
