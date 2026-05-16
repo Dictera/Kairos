@@ -101,7 +101,7 @@ describe('sablonRouter.delete: SET NULL FK on belge.sablon_id (SABLON-05, SABLON
     }
   })
 
-  it('deletes belge rows and PDF files when template is deleted', async () => {
+  it('sets belge.sablon_id to NULL when template is deleted (SET NULL FK)', async () => {
     const [tpl] = await db.insert(docxSablon).values({
       ad: 'FK-test',
       kategori: 'Genel',
@@ -126,7 +126,8 @@ describe('sablonRouter.delete: SET NULL FK on belge.sablon_id (SABLON-05, SABLON
     await caller.delete({ id: tpl.id })
 
     const after = await db.select().from(belge).where(eq(belge.id, b.id))
-    expect(after.length).toBe(0)
+    expect(after.length).toBe(1)
+    expect(after[0].sablon_id).toBeNull()
   }, 30_000)
 
   it('throws NOT_FOUND with Turkish message for missing id', async () => {
