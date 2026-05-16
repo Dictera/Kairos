@@ -147,6 +147,7 @@ export const pdfRouter = createTRPCRouter({
 
       const dosyaNo = rows.dosya_no
       const belgeTuru = template.belge_turu ?? 'Diğer'
+      const displayName = template.belge_turu ?? template.ad
 
       try {
         const archivedBelge = await archivePdfAndCreateBelge(
@@ -163,7 +164,8 @@ export const pdfRouter = createTRPCRouter({
               ? `${rows.muvekkil.ad} ${rows.muvekkil.soyad}`.trim()
               : null,
             muvekkilPlaka: rows.muvekkil_plaka ?? null,
-          }
+          },
+          displayName
         )
 
         return { success: true, belge: archivedBelge }

@@ -8,6 +8,7 @@ import { runSidecarCommand } from '@/lib/services/docx-pipeline'
 import {
   BELGELER_BASE,
   buildBelgelerDir,
+  sanitizeFsSegment,
   type BelgeDosyaBilgi,
 } from '@/lib/belgeler-storage'
 
@@ -35,7 +36,8 @@ export function safeUnlinkArchive(filePath: string): void {
 }
 
 export function buildArchivePath(
-  dosyaBilgi: BelgeDosyaBilgi
+  dosyaBilgi: BelgeDosyaBilgi,
+  displayName?: string
 ): { dir: string; filePath: string; fileName: string } {
   const dir = buildBelgelerDir(dosyaBilgi)
 
@@ -49,7 +51,10 @@ export function buildArchivePath(
     })
   }
 
-  const fileName = `${randomUUID().slice(0, 8)}.pdf`
+  const suffix = randomUUID().slice(0, 8)
+  const fileName = displayName
+    ? `${sanitizeFsSegment(displayName).slice(0, 50)}-${suffix}.pdf`
+    : `${suffix}.pdf`
   const filePath = path.join(dir, fileName)
 
   return { dir, filePath, fileName }
@@ -113,9 +118,10 @@ export async function archivePdfAndCreateBelge(
   sablonId: number,
   sablonAdi: string,
   belgeTuru: string,
-  dosyaBilgi: BelgeDosyaBilgi
+  dosyaBilgi: BelgeDosyaBilgi,
+  displayName?: string
 ) {
-  const { dir, filePath, fileName } = buildArchivePath(dosyaBilgi)
+  const { dir, filePath, fileName } = buildArchivePath(dosyaBilgi, displayName)
 
   fs.mkdirSync(dir, { recursive: true })
 

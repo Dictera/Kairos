@@ -245,7 +245,7 @@ describe('generateSlugs', () => {
 })
 
 describe('filename format', () => {
-  it('generates an 8-char hex UUID filename', () => {
+  it('generates an 8-char hex UUID filename when no displayName', () => {
     const result = buildArchivePath({ tur: 'STK', muvekkilAd: 'Test', muvekkilPlaka: null })
     expect(result.fileName).toMatch(/^[a-f0-9]{8}\.pdf$/)
   })
@@ -254,5 +254,22 @@ describe('filename format', () => {
     const r1 = buildArchivePath({ tur: 'STK', muvekkilAd: 'Test', muvekkilPlaka: null })
     const r2 = buildArchivePath({ tur: 'STK', muvekkilAd: 'Test', muvekkilPlaka: null })
     expect(r1.fileName).not.toBe(r2.fileName)
+  })
+
+  it('prefixes filename with sanitized displayName when provided', () => {
+    const result = buildArchivePath({ tur: 'STK', muvekkilAd: 'Test', muvekkilPlaka: null }, 'İhtarname')
+    expect(result.fileName).toMatch(/^İhtarname-[a-f0-9]{8}\.pdf$/)
+  })
+
+  it('uses template ad as prefix when displayName is template name', () => {
+    const result = buildArchivePath({ tur: 'STK', muvekkilAd: 'Test', muvekkilPlaka: null }, 'Değer Kaybı Dilekçesi')
+    expect(result.fileName).toMatch(/^Değer Kaybı Dilekçesi-[a-f0-9]{8}\.pdf$/)
+  })
+
+  it('sanitizes unsafe chars in displayName', () => {
+    const result = buildArchivePath({ tur: 'STK', muvekkilAd: 'Test', muvekkilPlaka: null }, 'my:file/name')
+    expect(result.fileName).not.toContain(':')
+    expect(result.fileName).not.toContain('/')
+    expect(result.fileName).toMatch(/\.pdf$/)
   })
 })

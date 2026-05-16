@@ -361,6 +361,9 @@ export default function SablonYonetimiSection() {
                         ))}
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Belge türü seçilirse üretilen PDF bu türle adlandırılır (örn. İhtarname.pdf). Seçilmezse şablon adı kullanılır.
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
