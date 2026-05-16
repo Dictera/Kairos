@@ -7,8 +7,6 @@ import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AyarlarCrudSection } from './ayarlar-crud-section'
 import { SigortaSirketiSection } from './sigorta-sirketi-section'
-import SablonYonetimiSection from './sablon-yonetimi-section'
-import { CheatSheetSummaryCard } from './cheat-sheet-summary-card'
 import { PipelineStatus } from '@/components/pipeline/pipeline-status'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -198,14 +196,6 @@ export function AyarlarPage() {
           </p>
         </CardContent>
       </Card>
-
-      <Separator />
-
-      <SablonYonetimiSection />
-
-      <Separator />
-
-      <CheatSheetSummaryCard />
 
       <Separator />
 

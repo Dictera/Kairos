@@ -13,7 +13,7 @@ export function CheatSheetSummaryCard() {
           Şablonlarınızda kullanabileceğiniz tüm değişkenlerin listesi ve açıklamaları.
         </p>
         <Button variant="outline" size="sm" asChild>
-          <Link href="/ayarlar/degiskenler">Tüm değişkenleri gör</Link>
+          <Link href="/sablon-yonetimi/degiskenler">Tüm değişkenleri gör</Link>
         </Button>
       </CardContent>
     </Card>
