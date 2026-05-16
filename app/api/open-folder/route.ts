@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { belge } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
-import { buildBelgelerDir, BELGELER_BASE } from '@/lib/belgeler-storage'
+import { buildBelgelerDir, resolveBelgelerBase } from '@/lib/belgeler-storage'
 import path from 'path'
 import { execFile } from 'child_process'
 
@@ -30,10 +30,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Belge bulunamadı' }, { status: 404 })
   }
 
-  const filename = row.dosya_yolu.split('/').pop()
-  if (!filename) {
-    return NextResponse.json({ error: 'Dosya yolu geçersiz' }, { status: 400 })
-  }
+  const belgelerBase = resolveBelgelerBase()
 
   const dir = buildBelgelerDir({
     tur: row.dosya.tur,
@@ -44,15 +41,14 @@ export async function GET(request: NextRequest) {
     muvekkilPlaka: row.dosya.muvekkil_plaka,
   })
 
-  const absolutePath = path.join(dir, filename)
-  const resolvedPath = path.resolve(absolutePath)
-  const resolvedBase = path.resolve(BELGELER_BASE)
+  const resolvedDir = path.resolve(dir)
+  const resolvedBase = path.resolve(belgelerBase)
 
-  if (!resolvedPath.startsWith(resolvedBase + path.sep) && resolvedPath !== resolvedBase) {
+  if (!resolvedDir.startsWith(resolvedBase + path.sep) && resolvedDir !== resolvedBase) {
     return NextResponse.json({ error: 'Geçersiz dizin' }, { status: 403 })
   }
 
-  execFile('explorer.exe', [`/select,${resolvedPath}`])
+  execFile('explorer.exe', [resolvedDir])
 
   return NextResponse.json({ ok: true })
 }
