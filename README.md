@@ -1,12 +1,12 @@
 # kairos
 
-<!-- GSD:generated -->
+<!-- generated-by: gsd-doc-writer -->
 
 Sigorta uyuşmazlık davalarını takip eden, solo avukat için tasarlanmış yerel çalışan web uygulaması. STK Tahkim Komisyonu ve mahkeme süreçlerini, duruşma takvimini, kritik süreleri ve dosyaya ait tüm belge ile finans kayıtlarını tek ekrandan yönetir.
 
 ## Özellikler
 
-- **Dosya Yönetimi** — Dava dosyası oluşturma/düzenleme, 6 sekme (genel bilgiler, taraflar, süreç, süreler, belgeler, finans, notlar, zaman çizelgesi)
+- **Dosya Yönetimi** — Dava dosyası oluşturma/düzenleme, 6 sekme (Genel Bilgiler, Yargılama Süreci, Belgeler, Notlar / Zaman Çizelgesi, Karşı Taraflar, Dosya Finansı)
 - **STK Süreç Takibi** — 9 aşamalı STK izleme (İhtar → Kesinleşme), otomatik tarih hesaplama
 - **Mahkeme Süreç Takibi** — 12 aşamalı mahkeme izleme, birden fazla duruşma kaydı
 - **Otomatik Süre Hesaplama** — STK itiraz (10 gün), istinaf (14 gün), cevap dilekçesi (14 gün); adli tatil uyarıları
@@ -22,7 +22,7 @@ Sigorta uyuşmazlık davalarını takip eden, solo avukat için tasarlanmış ye
 
 | Katman | Teknoloji |
 |--------|-----------|
-| Framework | Next.js 15 (App Router, Turbopack) |
+| Framework | Next.js 16 (App Router, Turbopack) |
 | Veritabanı | SQLite (`better-sqlite3`) + Drizzle ORM |
 | API | tRPC v11 + React Query |
 | Auth | iron-session (HttpOnly cookie, env tabanlı şifre) |
@@ -91,7 +91,7 @@ data/               # db.sqlite (git dışı)
 uploads/            # Yüklenen dosyalar (git dışı)
 drizzle/            # Migration SQL dosyaları
 tests/              # Vitest test dosyaları
-scripts/            # Veritabanı yardımcı scriptleri
+scripts/            # Python sidecar (docx-pipeline, PDF generator)
 ```
 
 ## Belgeler

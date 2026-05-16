@@ -1,6 +1,6 @@
 # Getting Started
 
-<!-- GSD:generated -->
+<!-- generated-by: gsd-doc-writer -->
 
 ## Prerequisites
 
@@ -116,3 +116,11 @@ scripts/docx-pipeline/
 
 **Port 3000 kullanımda**
 → `pnpm run dev -- --port 3001` ile farklı port kullanın.
+
+## Next Steps
+
+- [DEVELOPMENT.md](DEVELOPMENT.md) — Geliştirme ortamı kurulumu, build komutları, kod stili
+- [TESTING.md](TESTING.md) — Test çerçevesi, test çalıştırma, kapsama oranları
+- [CONFIGURATION.md](CONFIGURATION.md) — Tüm ortam değişkenleri ve ayar seçenekleri
+- [ARCHITECTURE.md](ARCHITECTURE.md) — Sistem mimarisi ve veri akışı
+- [API.md](API.md) — API endpoint'leri, istek/yanıt formatları

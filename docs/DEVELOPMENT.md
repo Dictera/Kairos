@@ -1,14 +1,20 @@
+<!-- generated-by: gsd-doc-writer -->
+
 # Development
 
-<!-- GSD:generated -->
-
-## Dev Server
+## Local Setup
 
 ```bash
-pnpm run dev    # Turbopack ile localhost:3000
+git clone <repository-url>
+cd kairos
+pnpm install
+cp .env.example .env         # ardından .env dosyasını düzenleyin
+pnpm run dev                  # Turbopack ile localhost:3000
 ```
 
 Turbopack, Next.js 15 ile varsayılan olarak etkindir. Dosya değişiklikleri anlık yansır. Hot reload sırasında SQLite bağlantısı `globalThis` singleton ile korunur — her reload'da yeni bağlantı açılmaz.
+
+Gerekli ortam değişkenleri `.env.example` dosyasında listelenmiştir. Detaylar için [CONFIGURATION.md](CONFIGURATION.md) sayfasına bakın.
 
 ## Available Scripts
 
@@ -23,6 +29,37 @@ Turbopack, Next.js 15 ile varsayılan olarak etkindir. Dosya değişiklikleri an
 | `pnpm run db:generate` | `lib/schema.ts`'ten SQL migration üret |
 | `pnpm run db:migrate` | Bekleyen migration'ları uygula |
 | `pnpm run db:studio` | Drizzle Studio web arayüzü |
+
+## Code Style
+
+Proje [ESLint](https://eslint.org/) kullanır; yapılandırma `eslint.config.mjs` dosyasındadır (Next.js flat config, `next/core-web-vitals` ve `next/typescript` kuralları). Ayrı bir Prettier veya Biome yapılandırması yoktur — kod formatlaması ESLint tarafından yönetilir.
+
+```bash
+pnpm run lint          # Tüm projeyi kontrol et
+```
+
+CI'da `pnpm run lint` adımı bulunmamaktadır; lint kontrolü şimdilik yalnızca build (`next build`) sırasında Next.js tarafından yapılır. Manuel çalıştırma önerilir.
+
+## Branch Conventions
+
+Varsayılan dal `master`'dır. Belirlenmiş bir dal adlandırma kuralı yoktur. Yeni özellik/düzeltme dalları için yaygın kullanılan desenleri takip edebilirsiniz:
+
+- `feat/kisa-aciklama` — yeni özellikler
+- `fix/kisa-aciklama` — hata düzeltmeleri
+- `chore/kisa-aciklama` — bağımlılık güncellemeleri, yapılandırma değişiklikleri
+
+Commit mesajlarında Dependabot `chore(deps):` prefix'ini kullanır.
+
+## PR Process
+
+1. `master`'dan yeni bir dal oluşturun.
+2. Değişikliklerinizi yapın, testleri çalıştırın (`pnpm test`).
+3. Lint kontrolü yapın (`pnpm run lint`).
+4. Dalı push'layın ve `master`'a yönelik bir pull request açın.
+5. CI (`pnpm run build` + `pnpm test`) başarılı olmalıdır.
+6. PR açıklamasında neyi değiştirdiğinizi ve nedenini belirtin.
+
+CI iş akışı `.github/workflows/ci.yml` dosyasında tanımlıdır. `main` dalına push ve tüm PR'larda tetiklenir.
 
 ## Project Conventions
 
@@ -119,7 +156,7 @@ Node.js tarafında köprü `lib/services/docx-pipeline.ts`'tedir. tRPC router'la
 
 ## Architecture Decisions
 
-Önemli teknik kararların gerekçeleri için [ARCHITECTURE.md](ARCHITECTURE.md) ve `.planning/PROJECT.md` dosyalarına bakın.
+Önemli teknik kararların gerekçeleri için [ARCHITECTURE.md](ARCHITECTURE.md) dosyasına bakın.
 
 Kısa özet:
 - SQLite + Drizzle: offline-first, sıfır sunucu bağımlılığı
