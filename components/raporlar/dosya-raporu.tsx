@@ -1,103 +1,131 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table'
+import { useQuery } from '@tanstack/react-query'
+import { useTRPC } from '@/lib/trpc/context'
+import dynamic from 'next/dynamic'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent } from '@/components/ui/card'
 
-interface DosyaRaporuRow {
-  id: number
-  dosya_no: string
-  tur: string
-  durum: string
-  muvekkil: string
-  karsitaraf_sigorta: string
-  talep_tutari: number
-  karar_tutari: number
-  sonuc: string
-  tahsilat: number
-  gider: number
-  masraf: number
-  net: number
-  created_at: string
-}
+import { C, fmt, fmtKN, type DosyaStatusRow, type DosyaTurRow } from './raporlar-data'
+import { CardHead, ProgressBar, ReportLoading, ReportEmpty } from './raporlar-shared'
 
-const fmt = (v: number) =>
-  new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(v)
+const BarChart            = dynamic(() => import('recharts').then(m => m.BarChart),            { ssr: false, loading: () => <Skeleton className="h-[200px] w-full" /> })
+const Bar                 = dynamic(() => import('recharts').then(m => m.Bar),                 { ssr: false })
+const PieChart            = dynamic(() => import('recharts').then(m => m.PieChart),            { ssr: false, loading: () => <Skeleton className="h-[200px] w-full" /> })
+const Pie                 = dynamic(() => import('recharts').then(m => m.Pie),                 { ssr: false })
+const Cell                = dynamic(() => import('recharts').then(m => m.Cell),                { ssr: false })
+const XAxis               = dynamic(() => import('recharts').then(m => m.XAxis),               { ssr: false })
+const YAxis               = dynamic(() => import('recharts').then(m => m.YAxis),               { ssr: false })
+const CartesianGrid       = dynamic(() => import('recharts').then(m => m.CartesianGrid),       { ssr: false })
+const Tooltip             = dynamic(() => import('recharts').then(m => m.Tooltip),             { ssr: false })
+const Legend              = dynamic(() => import('recharts').then(m => m.Legend),              { ssr: false })
+const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false })
 
-const sonucBadge = (sonuc: string) => {
-  if (sonuc === 'kazanıldı') return 'bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs font-medium'
-  if (sonuc === 'uzlaşma')   return 'bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs font-medium'
-  if (sonuc === 'kaybedildi') return 'bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs font-medium'
-  return 'bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-medium'
-}
+interface DosyaRaporuData { status: DosyaStatusRow[]; tur: DosyaTurRow[] }
 
-const durumBadge = (durum: string) => {
-  if (durum === 'aktif') return 'bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs font-medium'
-  return 'bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-medium'
-}
+export function DosyaRaporu() {
+  const trpc = useTRPC()
+  const { data, isLoading } = useQuery(
+    trpc.raporlar.dosya.queryOptions() as unknown as { queryKey: unknown[]; queryFn: () => Promise<DosyaRaporuData> },
+  )
 
-const sonucLabel = (sonuc: string) => {
-  if (sonuc === 'kazanıldı')  return 'Kazanıldı'
-  if (sonuc === 'uzlaşma')    return 'Uzlaşma'
-  if (sonuc === 'kaybedildi') return 'Kaybedildi'
-  return 'Devam'
-}
+  if (isLoading) return <ReportLoading />
+  if (!data || data.status.length === 0) return <ReportEmpty />
 
-export function DosyaRaporu({ data }: { data: DosyaRaporuRow[] }) {
+  const { status, tur } = data
+  const toplamDosya = status.reduce((a, d) => a + d.adet, 0)
+  const turChart    = tur.map(t => ({ name: t.tur, Gelen: t.gelen, Giden: t.giden, Masraf: t.masraf }))
+  const statusData  = status.map(s => ({ name: s.durum, value: s.adet, fill: s.renk }))
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-sm">Tüm Dosyalar ({data.length} kayıt)</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Dosya No</TableHead>
-                <TableHead>Tür</TableHead>
-                <TableHead>Durum</TableHead>
-                <TableHead>Müvekkil</TableHead>
-                <TableHead>Karşı Sigorta</TableHead>
-                <TableHead className="text-right">Talep</TableHead>
-                <TableHead className="text-right">Karar</TableHead>
-                <TableHead>Sonuç</TableHead>
-                <TableHead className="text-right">Tahsilat</TableHead>
-                <TableHead className="text-right">Net</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell className="font-mono text-sm">{row.dosya_no}</TableCell>
-                  <TableCell>{row.tur}</TableCell>
-                  <TableCell>
-                    <span className={durumBadge(row.durum)}>
-                      {row.durum === 'aktif' ? 'Aktif' : 'Arşiv'}
-                    </span>
-                  </TableCell>
-                  <TableCell>{row.muvekkil}</TableCell>
-                  <TableCell>{row.karsitaraf_sigorta || '-'}</TableCell>
-                  <TableCell className="text-right">{fmt(row.talep_tutari)}</TableCell>
-                  <TableCell className="text-right">
-                    {row.karar_tutari > 0 ? fmt(row.karar_tutari) : '-'}
-                  </TableCell>
-                  <TableCell>
-                    <span className={sonucBadge(row.sonuc)}>{sonucLabel(row.sonuc)}</span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {row.tahsilat > 0 ? fmt(row.tahsilat) : '-'}
-                  </TableCell>
-                  <TableCell className={`text-right font-medium ${row.net >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                    {fmt(row.net)}
-                  </TableCell>
-                </TableRow>
+    <div className="flex flex-col gap-3.5">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        {status.map(d => (
+          <div key={d.durum} className="rounded-b-xl bg-card border px-4 py-3.5 text-center" style={{ borderTopWidth: 3, borderTopColor: d.renk }}>
+            <p className="text-[28px] font-bold tracking-tight tabular-nums" style={{ color: d.renk }}>{d.adet}</p>
+            <p className="text-[11.5px] text-muted-foreground font-medium mt-0.5">{d.durum}</p>
+            <p className="text-[10.5px] text-muted-foreground mt-0.5">{toplamDosya > 0 ? `%${((d.adet / toplamDosya) * 100).toFixed(0)}` : '—'}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-[300px_1fr] gap-3">
+        <Card className="overflow-hidden p-0">
+          <CardHead title="Durum Dağılımı" sub={`Toplam ${toplamDosya} dosya`} />
+          <CardContent className="px-[18px] py-4">
+            <div className="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="55%" outerRadius="80%">
+                    {statusData.map((d, i) => <Cell key={i} fill={d.fill} />)}
+                  </Pie>
+                  <Tooltip />
+                  <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="overflow-hidden p-0">
+          <CardHead title="Tür Bazlı Finansal Kırılım" />
+          <CardContent className="px-[18px] py-4">
+            <div className="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={turChart} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                  <YAxis tickFormatter={fmtKN} tick={{ fontSize: 11 }} width={48} />
+                  <Tooltip formatter={(v: unknown) => typeof v === 'number' ? fmt(v) : String(v)} />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Bar dataKey="Gelen"  fill={C.success} radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="Giden"  fill={C.danger}  radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="Masraf" fill={C.masraf}  radius={[3, 3, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="overflow-hidden p-0">
+        <CardHead title="Tür Detay Tablosu" />
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-muted/50">
+              {['Tür', 'Adet', 'Gelen', 'Net', 'Kâr Marjı'].map(h => (
+                <th key={h} className={`px-3.5 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground ${h === 'Tür' ? 'text-left' : 'text-right'}`}>{h}</th>
               ))}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+            </tr>
+          </thead>
+          <tbody>
+            {tur.map((d, i) => {
+              const net  = d.gelen - d.giden - d.masraf
+              const marj = d.gelen > 0 ? (net / d.gelen) * 100 : 0
+              const col  = marj >= 40 ? C.success : marj >= 25 ? C.warning : C.danger
+              return (
+                <tr key={i} className="border-t">
+                  <td className="px-3.5 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: d.renk }} />
+                      <span className="text-[12.5px] font-medium">{d.label}</span>
+                    </div>
+                  </td>
+                  <td className="px-3.5 py-2.5 text-right text-muted-foreground tabular-nums">{d.adet}</td>
+                  <td className="px-3.5 py-2.5 text-right text-[#22c55e] font-medium tabular-nums">{fmt(d.gelen)}</td>
+                  <td className="px-3.5 py-2.5 text-right text-[#1c768f] font-medium tabular-nums">{fmt(net)}</td>
+                  <td className="px-3.5 py-2.5 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <div className="w-12"><ProgressBar pct={marj} color={col} /></div>
+                      <span className="text-[12px] font-semibold min-w-[36px] tabular-nums" style={{ color: col }}>%{marj.toFixed(0)}</span>
+                    </div>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </Card>
+    </div>
   )
 }
