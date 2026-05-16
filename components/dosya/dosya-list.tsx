@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { Input } from '@/components/ui/input'
 import { DatePickerField } from '@/components/ui/date-picker'
@@ -26,6 +26,15 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { MoreHorizontal, FolderOpen, Pencil, Archive, ArchiveRestore } from 'lucide-react'
+import { toast } from 'sonner'
 import Link from 'next/link'
 
 export function DosyaList() {
@@ -43,6 +52,27 @@ export function DosyaList() {
   const [page, setPage] = useState(isNaN(initialPage) ? 1 : initialPage)
 
   const trpc = useTRPC()
+  const queryClient = useQueryClient()
+
+  const archiveMutation = useMutation(
+    trpc.dosya.archive.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        toast.success('Dosya arşivlendi.')
+      },
+      onError: () => toast.error('Arşivlenemedi.'),
+    })
+  )
+
+  const unarchiveMutation = useMutation(
+    trpc.dosya.unarchive.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        toast.success('Dosya aktifleştirildi.')
+      },
+      onError: () => toast.error('Aktifleştirilemedi.'),
+    })
+  )
 
   // 300ms debounce
   useEffect(() => {
@@ -202,6 +232,7 @@ export function DosyaList() {
               <TableHead>Karşı Sigorta Şirketi</TableHead>
               <TableHead>Poliçe No</TableHead>
               <TableHead>Durum</TableHead>
+              <TableHead className="w-10" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -217,7 +248,7 @@ export function DosyaList() {
               ))
             ) : !data?.rows.length ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-16 text-center">
+                <TableCell colSpan={8} className="py-16 text-center">
                   {hasFilters ? (
                     <p className="text-sm text-muted-foreground">
                       Arama veya filtre kriterlerine uyan dosya bulunamadı.
@@ -246,6 +277,48 @@ export function DosyaList() {
                   <TableCell>{row.karsitaraf_sigorta_ad ?? '—'}</TableCell>
                   <TableCell>{row.police_no ?? '—'}</TableCell>
                   <TableCell>{getDurumBadge(row.durum)}</TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link href={`/dosyalar/${row.id}/duzenle`} className="flex items-center gap-2">
+                            <Pencil className="h-4 w-4" />
+                            Düzenle
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="flex items-center gap-2"
+                          onClick={() => fetch(`/api/open-folder?dosyaId=${row.id}`)}
+                        >
+                          <FolderOpen className="h-4 w-4" />
+                          Klasörde Göster
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        {row.durum === 'aktif' ? (
+                          <DropdownMenuItem
+                            className="flex items-center gap-2"
+                            onClick={() => archiveMutation.mutate({ id: row.id })}
+                          >
+                            <Archive className="h-4 w-4" />
+                            Arşivle
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem
+                            className="flex items-center gap-2"
+                            onClick={() => unarchiveMutation.mutate({ id: row.id })}
+                          >
+                            <ArchiveRestore className="h-4 w-4" />
+                            Aktifleştir
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))
             )}

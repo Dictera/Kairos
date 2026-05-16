@@ -5,7 +5,7 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
-import { FileIcon, Download, Trash2, FileText, Scale, Shield, Briefcase, Users, MoreHorizontal } from 'lucide-react'
+import { FileIcon, Download, Trash2, FileText, Scale, Shield, Briefcase, Users, MoreHorizontal, FolderOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
@@ -123,6 +123,14 @@ export function BelgeList({ dosyaId }: BelgeListProps) {
             </div>
             
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => fetch(`/api/open-folder?belgeId=${belge.id}`)}
+                title="Klasörde göster"
+              >
+                <FolderOpen className="h-4 w-4" />
+              </Button>
               <Button variant="ghost" size="icon" asChild>
                 <a href={fileUrl} target="_blank" rel="noopener noreferrer">
                   <Download className="h-4 w-4" />
