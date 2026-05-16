@@ -1,7 +1,9 @@
 import path from 'path'
 import fs from 'fs'
 
-export const BELGELER_BASE = 'E:/sigorta-belgeler'
+export const BELGELER_BASE = process.env.TEST_BELGELER_BASE
+  ? process.env.TEST_BELGELER_BASE
+  : 'E:/sigorta-belgeler'
 
 const WINDOWS_UNSAFE = /[<>:"/\\|?*\x00-\x1f]/g
 
