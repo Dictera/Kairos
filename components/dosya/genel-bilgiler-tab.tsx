@@ -14,6 +14,7 @@ type DosyaDetail = {
   hasar_dosya_no: string | null
   kaza_tarihi: string | null
   muvekkil_sigorta_id: number | null
+  muvekkil_police_no: string | null
   kusur_orani_karsi: number | null
   aciklama: string | null
   created_at: string
@@ -98,7 +99,7 @@ export function GenelBilgilerTab({ dosya }: GenelBilgilerTabProps) {
           />
           <Row label="Sigorta Türü" value={dosya.sigortaTuru?.ad ?? '—'} />
           <Row label="Karşı Sigorta Şirketi" value={dosya.karsitarafSigorta?.ad ?? '—'} />
-          <Row label="Müvekkil Poliçe No" value={primaryTaraf?.police_no ?? '—'} />
+          <Row label="Müvekkil Poliçe No" value={dosya.muvekkil_police_no ?? '—'} />
           <Row label="Talep Tutarı" value={formatTutar(dosya.talep_tutari)} />
           <Row label="Müvekkil Plaka No" value={dosya.muvekkil_plaka ?? '—'} />
           <Row label="Hasar Dosya No" value={dosya.hasar_dosya_no ?? '—'} />

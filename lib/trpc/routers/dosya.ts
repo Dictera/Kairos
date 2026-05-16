@@ -2,7 +2,7 @@ import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { db } from '@/lib/db'
 import { dosya, taraf, muvekkil, sigortaTuru, sigortaSirketi } from '@/lib/schema'
-import { eq, count, desc, and, sql, inArray, aliasedTable } from 'drizzle-orm'
+import { eq, count, desc, and, sql, aliasedTable } from 'drizzle-orm'
 import { z } from 'zod'
 import { logOlay } from './olay'
 
@@ -112,6 +112,7 @@ export const dosyaRouter = createTRPCRouter({
           kaza_tarihi: dosya.kaza_tarihi,
           kusur_orani_karsi: dosya.kusur_orani_karsi,
           muvekkil_sigorta_ad: muvekkilSirketi.ad,
+          police_no: dosya.muvekkil_police_no,
           created_at: dosya.created_at,
         })
           .from(dosya)
@@ -129,20 +130,9 @@ export const dosyaRouter = createTRPCRouter({
           .where(where),
       ])
 
-      // Fetch police_no from taraf for D-03 column
-      const ids = rows.map(r => r.id)
-      let policeNos: Record<number, string | null> = {}
-      if (ids.length > 0) {
-        const tarafRows = await db
-          .select({ dosya_id: taraf.dosya_id, police_no: taraf.police_no })
-          .from(taraf)
-          .where(inArray(taraf.dosya_id, ids))
-        policeNos = Object.fromEntries(tarafRows.map(t => [t.dosya_id, t.police_no]))
-      }
-
       const total = totalResult[0]?.total ?? 0
       return {
-        rows: rows.map(r => ({ ...r, police_no: policeNos[r.id] ?? null })),
+        rows: rows.map(r => ({ ...r, police_no: r.police_no ?? null })),
         total,
         page,
         pageSize,
