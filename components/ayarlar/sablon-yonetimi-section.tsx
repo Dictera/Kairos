@@ -292,7 +292,7 @@ export default function SablonYonetimiSection() {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onCreateSubmit)}
-              className="space-y-4 py-2"
+              className="space-y-4 py-2 min-w-0"
             >
               <FormField
                 control={form.control}
@@ -380,8 +380,8 @@ export default function SablonYonetimiSection() {
                   />
                 </div>
                 {file && (
-                  <div className="flex items-center justify-between rounded border px-3 py-2 text-sm">
-                    <span className="truncate text-muted-foreground">{file.name}</span>
+                  <div className="flex items-center justify-between rounded border px-3 py-2 text-sm min-w-0">
+                    <span className="truncate text-muted-foreground flex-1 min-w-0">{file.name}</span>
                     <Button
                       type="button"
                       variant="ghost"
@@ -427,8 +427,8 @@ export default function SablonYonetimiSection() {
             <DialogTitle>Şablonu Değiştir</DialogTitle>
           </DialogHeader>
           {overwriteTarget && (
-            <div className="space-y-4 py-2">
-              <p className="text-sm text-muted-foreground">
+            <div className="space-y-4 py-2 min-w-0">
+              <p className="text-sm text-muted-foreground truncate">
                 <strong>{overwriteTarget.ad}</strong> — {overwriteTarget.kategori}
               </p>
               <div className="space-y-2">
@@ -461,8 +461,8 @@ export default function SablonYonetimiSection() {
                   />
                 </div>
               {file && (
-                <div className="flex items-center justify-between rounded border px-3 py-2 text-sm">
-                  <span className="truncate text-muted-foreground">{file.name}</span>
+                <div className="flex items-center justify-between rounded border px-3 py-2 text-sm min-w-0">
+                  <span className="truncate text-muted-foreground flex-1 min-w-0">{file.name}</span>
                   <Button
                     type="button"
                     variant="ghost"
