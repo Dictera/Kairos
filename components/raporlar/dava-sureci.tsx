@@ -10,23 +10,72 @@ import { Clock, AlertOctagon, Layers, CheckCircle2 } from 'lucide-react'
 import { C, fmt, type AsamaRow, type UzunDosyaRow } from './raporlar-data'
 import { KPICard, CardHead, Pill, ReportLoading, ReportEmpty } from './raporlar-shared'
 
-const BarChart            = dynamic(() => import('recharts').then(m => m.BarChart),            { ssr: false, loading: () => <Skeleton className="h-[220px] w-full" /> })
-const Bar                 = dynamic(() => import('recharts').then(m => m.Bar),                 { ssr: false })
-const Cell                = dynamic(() => import('recharts').then(m => m.Cell),                { ssr: false })
-const XAxis               = dynamic(() => import('recharts').then(m => m.XAxis),               { ssr: false })
-const YAxis               = dynamic(() => import('recharts').then(m => m.YAxis),               { ssr: false })
-const CartesianGrid       = dynamic(() => import('recharts').then(m => m.CartesianGrid),       { ssr: false })
-const Tooltip             = dynamic(() => import('recharts').then(m => m.Tooltip),             { ssr: false })
-const Legend              = dynamic(() => import('recharts').then(m => m.Legend),              { ssr: false })
-const ReferenceLine       = dynamic(() => import('recharts').then(m => m.ReferenceLine),       { ssr: false })
-const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false })
-
 interface DavaSureData {
   asamalar:       AsamaRow[]
   uzunDosyalar:   UzunDosyaRow[]
   sirketSureleri: { ad: string; ortGun: number }[]
   kapananYil:     number
 }
+
+type AsamaBarItem  = { name: string; 'Ort. Süre': number; 'Maks. Süre': number; fill: string }
+type SirketBarItem = { name: string; Gun: number; fill: string }
+
+const AsamaBarChart = dynamic<{ data: AsamaBarItem[] }>(
+  async () => {
+    const {
+      BarChart, Bar, Cell, XAxis, YAxis,
+      CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+    } = await import('recharts')
+
+    return function AsamaBarChart({ data }: { data: AsamaBarItem[] }) {
+      return (
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" tick={{ fontSize: 10.5 }} interval={0} angle={-12} textAnchor="end" height={56} />
+            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}g`} width={42} />
+            <Tooltip formatter={(v: unknown) => `${v} gün`} />
+            <Legend wrapperStyle={{ fontSize: 12 }} />
+            <Bar dataKey="Ort. Süre" fill={C.accent} radius={[4, 4, 0, 0]}>
+              {data.map((a, i) => <Cell key={i} fill={a.fill} />)}
+            </Bar>
+            <Bar dataKey="Maks. Süre" fill="#94a3b8" radius={[4, 4, 0, 0]}>
+              {data.map((_, i) => <Cell key={i} fill="#94a3b8" />)}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      )
+    }
+  },
+  { ssr: false, loading: () => <Skeleton className="h-[260px] w-full" /> },
+)
+
+const SirketBarChart = dynamic<{ data: SirketBarItem[] }>(
+  async () => {
+    const {
+      BarChart, Bar, Cell, XAxis, YAxis,
+      CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer,
+    } = await import('recharts')
+
+    return function SirketBarChart({ data }: { data: SirketBarItem[] }) {
+      return (
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" tick={{ fontSize: 10.5 }} interval={0} angle={-15} textAnchor="end" height={60} />
+            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v} gün`} width={56} />
+            <Tooltip formatter={(v: unknown) => `${v} gün`} />
+            <ReferenceLine y={180} stroke={C.accent} strokeDasharray="6 4" />
+            <Bar dataKey="Gun" radius={[5, 5, 0, 0]} name="Ort. Çözüm">
+              {data.map((s, i) => <Cell key={i} fill={s.fill} />)}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      )
+    }
+  },
+  { ssr: false, loading: () => <Skeleton className="h-[260px] w-full" /> },
+)
 
 const ASAMA_COLORS: Record<string, string> = {
   'Başvuru':          C.accent,
@@ -51,8 +100,8 @@ export function DavaSureci() {
   const enUzun    = asamalar.reduce((a, b) => (b.ort > a.ort ? b : a))
   const aktif     = asamalar.reduce((a, s) => a + s.adet, 0)
 
-  const asamaChart  = asamalar.map(a => ({ name: a.asama, 'Ort. Süre': a.ort, 'Maks. Süre': a.max, fill: a.renk }))
-  const sirketChart = sirketSureleri.map(s => ({
+  const asamaChart: AsamaBarItem[]  = asamalar.map(a => ({ name: a.asama, 'Ort. Süre': a.ort, 'Maks. Süre': a.max, fill: a.renk }))
+  const sirketChart: SirketBarItem[] = sirketSureleri.map(s => ({
     name: s.ad, Gun: s.ortGun,
     fill: s.ortGun > 270 ? C.danger : s.ortGun > 200 ? C.warning : C.success,
   }))
@@ -71,21 +120,7 @@ export function DavaSureci() {
           <CardHead title="Aşama Bazlı Süre" sub="Ortalama (koyu) ve maksimum (soluk) gün" />
           <CardContent className="px-[18px] py-4">
             <div className="h-[260px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={asamaChart} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10.5 }} interval={0} angle={-12} textAnchor="end" height={56} />
-                  <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}g`} width={42} />
-                  <Tooltip formatter={(v: unknown) => `${v} gün`} />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="Ort. Süre" radius={[4, 4, 0, 0]}>
-                    {asamaChart.map((a, i) => <Cell key={i} fill={a.fill} />)}
-                  </Bar>
-                  <Bar dataKey="Maks. Süre" radius={[4, 4, 0, 0]}>
-                    {asamaChart.map((a, i) => <Cell key={i} fill={`${a.fill}40`} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <AsamaBarChart data={asamaChart} />
             </div>
           </CardContent>
         </Card>
@@ -94,18 +129,7 @@ export function DavaSureci() {
           <CardHead title="Şirket Bazlı Ort. Çözüm Süresi" sub="Hedef: 180 gün — kırmızı aşıldı" />
           <CardContent className="px-[18px] py-4">
             <div className="h-[260px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={sirketChart} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10.5 }} interval={0} angle={-15} textAnchor="end" height={60} />
-                  <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v} gün`} width={56} />
-                  <Tooltip formatter={(v: unknown) => `${v} gün`} />
-                  <ReferenceLine y={180} stroke={C.accent} strokeDasharray="6 4" />
-                  <Bar dataKey="Gun" radius={[5, 5, 0, 0]} name="Ort. Çözüm">
-                    {sirketChart.map((s, i) => <Cell key={i} fill={s.fill} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <SirketBarChart data={sirketChart} />
             </div>
           </CardContent>
         </Card>
