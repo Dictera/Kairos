@@ -14,6 +14,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -216,8 +217,9 @@ function DosyaFormInner({
                   <FormItem>
                     <FormLabel>Avukat Dosya No</FormLabel>
                     <FormControl>
-                      <Input placeholder="2026/1" value={field.value ?? ''} onChange={field.onChange} onBlur={field.onBlur} name={field.name} ref={field.ref} />
+                      <Input readOnly className="bg-muted cursor-not-allowed" value={field.value ?? ''} name={field.name} ref={field.ref} />
                     </FormControl>
+                    <FormDescription>Otomatik atanır, değiştirilemez.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
