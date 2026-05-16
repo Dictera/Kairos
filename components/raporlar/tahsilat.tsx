@@ -12,13 +12,34 @@ import { CardHead, Pill, ProgressBar, ReportLoading, ReportEmpty } from './rapor
 
 const BarChart            = dynamic(() => import('recharts').then(m => m.BarChart),            { ssr: false, loading: () => <Skeleton className="h-[220px] w-full" /> })
 const Bar                 = dynamic(() => import('recharts').then(m => m.Bar),                 { ssr: false })
-const Cell                = dynamic(() => import('recharts').then(m => m.Cell),                { ssr: false })
 const XAxis               = dynamic(() => import('recharts').then(m => m.XAxis),               { ssr: false })
 const YAxis               = dynamic(() => import('recharts').then(m => m.YAxis),               { ssr: false })
 const CartesianGrid       = dynamic(() => import('recharts').then(m => m.CartesianGrid),       { ssr: false })
 const Tooltip             = dynamic(() => import('recharts').then(m => m.Tooltip),             { ssr: false })
 const Legend              = dynamic(() => import('recharts').then(m => m.Legend),              { ssr: false })
 const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false })
+
+const TierBarChart = dynamic<{ data: { name: string; Tutar: number; fill: string }[] }>(
+  async () => {
+    const { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = await import('recharts')
+    return function TierBarChart({ data }: { data: { name: string; Tutar: number; fill: string }[] }) {
+      return (
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" tick={{ fontSize: 10.5 }} />
+            <YAxis tickFormatter={fmtKN} tick={{ fontSize: 11 }} width={48} />
+            <Tooltip formatter={(v: unknown) => typeof v === 'number' ? fmt(v) : String(v)} />
+            <Bar dataKey="Tutar" radius={[6, 6, 0, 0]}>
+              {data.map((d, i) => <Cell key={i} fill={d.fill} />)}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      )
+    }
+  },
+  { ssr: false, loading: () => <Skeleton className="h-[220px] w-full" /> },
+)
 
 export function Tahsilat() {
   const trpc = useTRPC()
@@ -81,17 +102,7 @@ export function Tahsilat() {
           <CardHead title="3 Kademe Karşılaştırma" sub="Toplam tahsilat hunisi" />
           <CardContent className="px-[18px] py-4">
             <div className="h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={tier3Data} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10.5 }} />
-                  <YAxis tickFormatter={fmtKN} tick={{ fontSize: 11 }} width={48} />
-                  <Tooltip formatter={(v: unknown) => typeof v === 'number' ? fmt(v) : String(v)} />
-                  <Bar dataKey="Tutar" radius={[6, 6, 0, 0]}>
-                    {tier3Data.map((d, i) => <Cell key={i} fill={d.fill} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <TierBarChart data={tier3Data} />
             </div>
           </CardContent>
         </Card>

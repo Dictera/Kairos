@@ -12,13 +12,34 @@ import { KPICard, CardHead, ProgressBar, ReportLoading, ReportEmpty } from './ra
 
 const BarChart            = dynamic(() => import('recharts').then(m => m.BarChart),            { ssr: false, loading: () => <Skeleton className="h-[220px] w-full" /> })
 const Bar                 = dynamic(() => import('recharts').then(m => m.Bar),                 { ssr: false })
-const Cell                = dynamic(() => import('recharts').then(m => m.Cell),                { ssr: false })
 const XAxis               = dynamic(() => import('recharts').then(m => m.XAxis),               { ssr: false })
 const YAxis               = dynamic(() => import('recharts').then(m => m.YAxis),               { ssr: false })
 const CartesianGrid       = dynamic(() => import('recharts').then(m => m.CartesianGrid),       { ssr: false })
 const Tooltip             = dynamic(() => import('recharts').then(m => m.Tooltip),             { ssr: false })
 const Legend              = dynamic(() => import('recharts').then(m => m.Legend),              { ssr: false })
 const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false })
+
+const SureBarChart = dynamic<{ data: { name: string; Sure: number; fill: string }[] }>(
+  async () => {
+    const { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = await import('recharts')
+    return function SureBarChart({ data }: { data: { name: string; Sure: number; fill: string }[] }) {
+      return (
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v} gün`} width={56} />
+            <Tooltip formatter={(v: unknown) => `${v} gün`} />
+            <Bar dataKey="Sure" radius={[6, 6, 0, 0]} barSize={60}>
+              {data.map((d, i) => <Cell key={i} fill={d.fill} />)}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      )
+    }
+  },
+  { ssr: false, loading: () => <Skeleton className="h-[220px] w-full" /> },
+)
 
 export function Arabuluculuk() {
   const trpc = useTRPC()
@@ -79,17 +100,7 @@ export function Arabuluculuk() {
           <CardHead title="Ortalama Çözüm Süresi" sub="Yol bazlı karşılaştırma" />
           <CardContent className="px-[18px] py-4">
             <div className="h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={sureChart} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v} gün`} width={56} />
-                  <Tooltip formatter={(v: unknown) => `${v} gün`} />
-                  <Bar dataKey="Sure" radius={[6, 6, 0, 0]} barSize={60}>
-                    {sureChart.map((d, i) => <Cell key={i} fill={d.fill} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <SureBarChart data={sureChart} />
             </div>
           </CardContent>
         </Card>

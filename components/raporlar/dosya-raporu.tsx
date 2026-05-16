@@ -11,15 +11,32 @@ import { CardHead, ProgressBar, ReportLoading, ReportEmpty } from './raporlar-sh
 
 const BarChart            = dynamic(() => import('recharts').then(m => m.BarChart),            { ssr: false, loading: () => <Skeleton className="h-[200px] w-full" /> })
 const Bar                 = dynamic(() => import('recharts').then(m => m.Bar),                 { ssr: false })
-const PieChart            = dynamic(() => import('recharts').then(m => m.PieChart),            { ssr: false, loading: () => <Skeleton className="h-[200px] w-full" /> })
-const Pie                 = dynamic(() => import('recharts').then(m => m.Pie),                 { ssr: false })
-const Cell                = dynamic(() => import('recharts').then(m => m.Cell),                { ssr: false })
 const XAxis               = dynamic(() => import('recharts').then(m => m.XAxis),               { ssr: false })
 const YAxis               = dynamic(() => import('recharts').then(m => m.YAxis),               { ssr: false })
 const CartesianGrid       = dynamic(() => import('recharts').then(m => m.CartesianGrid),       { ssr: false })
 const Tooltip             = dynamic(() => import('recharts').then(m => m.Tooltip),             { ssr: false })
 const Legend              = dynamic(() => import('recharts').then(m => m.Legend),              { ssr: false })
 const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false })
+
+const StatusPieChart = dynamic<{ data: { name: string; value: number; fill: string }[] }>(
+  async () => {
+    const { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } = await import('recharts')
+    return function StatusPieChart({ data }: { data: { name: string; value: number; fill: string }[] }) {
+      return (
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="55%" outerRadius="80%">
+              {data.map((d, i) => <Cell key={i} fill={d.fill} />)}
+            </Pie>
+            <Tooltip />
+            <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
+          </PieChart>
+        </ResponsiveContainer>
+      )
+    }
+  },
+  { ssr: false, loading: () => <Skeleton className="h-[200px] w-full" /> },
+)
 
 interface DosyaRaporuData { status: DosyaStatusRow[]; tur: DosyaTurRow[] }
 
@@ -54,15 +71,7 @@ export function DosyaRaporu() {
           <CardHead title="Durum Dağılımı" sub={`Toplam ${toplamDosya} dosya`} />
           <CardContent className="px-[18px] py-4">
             <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="55%" outerRadius="80%">
-                    {statusData.map((d, i) => <Cell key={i} fill={d.fill} />)}
-                  </Pie>
-                  <Tooltip />
-                  <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-                </PieChart>
-              </ResponsiveContainer>
+              <StatusPieChart data={statusData} />
             </div>
           </CardContent>
         </Card>

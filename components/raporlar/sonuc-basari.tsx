@@ -14,15 +14,32 @@ import { KPICard, CardHead, ProgressBar, ReportLoading, ReportEmpty } from './ra
 
 const BarChart            = dynamic(() => import('recharts').then(m => m.BarChart),            { ssr: false, loading: () => <Skeleton className="h-[160px] w-full" /> })
 const Bar                 = dynamic(() => import('recharts').then(m => m.Bar),                 { ssr: false })
-const PieChart            = dynamic(() => import('recharts').then(m => m.PieChart),            { ssr: false, loading: () => <Skeleton className="h-[160px] w-full" /> })
-const Pie                 = dynamic(() => import('recharts').then(m => m.Pie),                 { ssr: false })
-const Cell                = dynamic(() => import('recharts').then(m => m.Cell),                { ssr: false })
 const XAxis               = dynamic(() => import('recharts').then(m => m.XAxis),               { ssr: false })
 const YAxis               = dynamic(() => import('recharts').then(m => m.YAxis),               { ssr: false })
 const CartesianGrid       = dynamic(() => import('recharts').then(m => m.CartesianGrid),       { ssr: false })
 const Tooltip             = dynamic(() => import('recharts').then(m => m.Tooltip),             { ssr: false })
 const Legend              = dynamic(() => import('recharts').then(m => m.Legend),              { ssr: false })
 const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false })
+
+const DonutChart = dynamic<{ data: { name: string; value: number; fill: string }[] }>(
+  async () => {
+    const { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } = await import('recharts')
+    return function DonutChart({ data }: { data: { name: string; value: number; fill: string }[] }) {
+      return (
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="50%" outerRadius="75%">
+              {data.map((d, i) => <Cell key={i} fill={d.fill} />)}
+            </Pie>
+            <Tooltip />
+            <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 10 }} />
+          </PieChart>
+        </ResponsiveContainer>
+      )
+    }
+  },
+  { ssr: false, loading: () => <Skeleton className="h-[160px] w-full" /> },
+)
 
 interface SonucBasariData {
   sirket: SonucSirketRow[]
@@ -96,15 +113,7 @@ export function SonucBasari() {
           <CardHead title="Genel Dağılım" />
           <CardContent className="px-3 py-2">
             <div className="h-[160px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={donut} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="50%" outerRadius="75%">
-                    {donut.map((d, i) => <Cell key={i} fill={d.fill} />)}
-                  </Pie>
-                  <Tooltip />
-                  <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 10 }} />
-                </PieChart>
-              </ResponsiveContainer>
+              <DonutChart data={donut} />
             </div>
           </CardContent>
         </Card>
