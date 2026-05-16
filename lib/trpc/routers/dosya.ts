@@ -13,6 +13,7 @@ export const dosyaSchema = z.object({
   sigorta_turu_id: z.number().int().nullable().optional(),
   karsitaraf_sigorta_id: z.number().int().nullable().optional(),
   talep_tutari: z.number().positive().nullable().optional(),
+  karar_tutari: z.number().positive().nullable().optional(),
   muvekkil_plaka: z.string().max(10).nullable().optional().or(z.literal('')),
   hasar_dosya_no: z.string().max(200).nullable().optional().or(z.literal('')),
   kaza_tarihi: z.string().max(10).nullable().optional().or(z.literal('')),
@@ -21,6 +22,7 @@ export const dosyaSchema = z.object({
   kusur_orani_karsi: z.number().int().min(0).max(100).nullable().optional(),
   aciklama: z.string().max(2000).nullable().optional().or(z.literal('')),
   durum: z.enum(['aktif', 'arsiv']).default('aktif').optional(),
+  sonuc: z.enum(['kazanıldı', 'uzlaşma', 'kaybedildi', 'devam']).nullable().optional(),
 })
 
 export const dosyaCreateSchema = dosyaSchema.omit({ dosya_no: true })

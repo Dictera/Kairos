@@ -15,6 +15,8 @@ import { pipelineRouter } from './pipeline'
 import { sablonRouter } from './sablon'
 import { pdfRouter } from './pdf'
 import { retirementRouter } from './retirement'
+import { bildirimRouter } from './bildirim'
+import { searchRouter } from './search'
 
 export const appRouter = createTRPCRouter({
   health: publicProcedure.query(() => ({
@@ -37,6 +39,8 @@ export const appRouter = createTRPCRouter({
   sablon: sablonRouter,
   pdf: pdfRouter,
   retirement: retirementRouter,
+  bildirim: bildirimRouter,
+  search: searchRouter,
 })
 
 export type AppRouter = typeof appRouter
