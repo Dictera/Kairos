@@ -15,7 +15,7 @@ const Tooltip             = dynamic(() => import('recharts').then(m => m.Tooltip
 const Legend              = dynamic(() => import('recharts').then(m => m.Legend),              { ssr: false })
 const PieChart            = dynamic(() => import('recharts').then(m => m.PieChart),            { ssr: false, loading: () => <Skeleton className="h-[220px] w-full" /> })
 const Pie                 = dynamic(() => import('recharts').then(m => m.Pie),                 { ssr: false })
-const Cell                = dynamic(() => import('recharts').then(m => m.Cell),                { ssr: false })
+import { Cell } from 'recharts'
 const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false })
 
 function KPIPill({ value, label, color = 'var(--accent)' }: { value: string | number; label: string; color?: string }) {
@@ -136,7 +136,7 @@ export function SirketTur() {
               <div className="h-[220px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={tur} dataKey="gelen" nameKey="tur" cx="50%" cy="50%" innerRadius="55%" outerRadius="80%">
+                    <Pie data={tur.map(t => ({ ...t, fill: t.renk }))} dataKey="gelen" nameKey="tur" cx="50%" cy="50%" innerRadius="55%" outerRadius="80%">
                       {tur.map((entry, i) => <Cell key={i} fill={entry.renk} />)}
                     </Pie>
                     <Tooltip formatter={(v: unknown) => typeof v === 'number' ? fmt(v) : String(v)} />

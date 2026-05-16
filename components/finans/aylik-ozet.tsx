@@ -58,11 +58,11 @@ export function AylikOzet({ data }: AylikOzetProps) {
           <CardContent className="pt-0">
             <div className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 30 }}>
+                <ComposedChart data={chartData} margin={{ top: 32, right: 16, left: 0, bottom: 55 }}>
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-35} textAnchor="end" />
                   <YAxis tickFormatter={fmtK} width={48} tick={{ fontSize: 11 }} />
                   <Tooltip formatter={ttFmt} />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Legend verticalAlign="top" wrapperStyle={{ fontSize: 12, paddingBottom: 8 }} />
                   <Bar  dataKey="Gelen"  fill={C.gelen}  name="Gelen"  />
                   <Bar  dataKey="Giden"  fill={C.giden}  name="Giden"  />
                   <Bar  dataKey="Masraf" fill={C.masraf} name="Masraf" />
@@ -82,7 +82,7 @@ export function AylikOzet({ data }: AylikOzetProps) {
           <CardContent className="pt-0">
             <div className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 30 }}>
+                <BarChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 55 }}>
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-35} textAnchor="end" />
                   <YAxis tickFormatter={fmtK} width={48} tick={{ fontSize: 11 }} />
                   <Tooltip formatter={ttFmt} />
@@ -104,7 +104,7 @@ export function AylikOzet({ data }: AylikOzetProps) {
         <CardContent className="pt-0">
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={kasaData} margin={{ top: 8, right: 16, left: 0, bottom: 30 }}>
+              <AreaChart data={kasaData} margin={{ top: 8, right: 16, left: 0, bottom: 55 }}>
                 <defs>
                   <linearGradient id="kasaGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%"  stopColor={C.kasa} stopOpacity={0.25} />
@@ -133,11 +133,11 @@ export function AylikOzet({ data }: AylikOzetProps) {
         <CardContent className="pt-0">
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 30 }}>
+              <LineChart data={chartData} margin={{ top: 32, right: 16, left: 0, bottom: 55 }}>
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-35} textAnchor="end" />
                 <YAxis tickFormatter={fmtK} width={48} tick={{ fontSize: 11 }} />
                 <Tooltip formatter={ttFmt} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Legend verticalAlign="top" wrapperStyle={{ fontSize: 12, paddingBottom: 8 }} />
                 <ReferenceLine y={0} stroke="#888" strokeDasharray="4 2" />
                 <Line type="monotone" dataKey="Gelen"  stroke={C.gelen}  name="Gelen"  strokeWidth={2}   dot={{ r: 3 }} />
                 <Line type="monotone" dataKey="Giden"  stroke={C.giden}  name="Giden"  strokeWidth={2}   dot={{ r: 3 }} />

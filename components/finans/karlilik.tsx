@@ -6,7 +6,9 @@ import { useQuery } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { enrichDosyaTur, fmt, fmtK } from './finans-data'
+import { enrichDosyaTur, fmt, fmtK, C } from './finans-data'
+
+const DOSYA_COLORS = ['#1c768f', '#1fa570', '#ca8a04', '#7c3aed', '#c94141', '#0891b2', '#059669']
 
 const BarChart            = dynamic(() => import('recharts').then(m => m.BarChart),            { ssr: false, loading: () => <Skeleton className="h-[240px] w-full" /> })
 const Bar                 = dynamic(() => import('recharts').then(m => m.Bar),                 { ssr: false })
@@ -16,7 +18,8 @@ const XAxis               = dynamic(() => import('recharts').then(m => m.XAxis),
 const YAxis               = dynamic(() => import('recharts').then(m => m.YAxis),               { ssr: false })
 const Tooltip             = dynamic(() => import('recharts').then(m => m.Tooltip),             { ssr: false })
 const Legend              = dynamic(() => import('recharts').then(m => m.Legend),              { ssr: false })
-const Cell                = dynamic(() => import('recharts').then(m => m.Cell),                { ssr: false })
+// Cell is a descriptor-only component (no DOM output) — static import avoids dynamic-load race
+import { Cell } from 'recharts'
 const ReferenceLine       = dynamic(() => import('recharts').then(m => m.ReferenceLine),       { ssr: false })
 const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false })
 
@@ -125,14 +128,14 @@ export function Karlilik() {
           <CardContent className="pt-0">
             <div className="h-[240px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={masrafOranData} margin={{ top: 4, right: 20, left: 0, bottom: 30 }}>
+                <LineChart data={masrafOranData} margin={{ top: 32, right: 20, left: 0, bottom: 55 }}>
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-35} textAnchor="end" />
                   <YAxis tickFormatter={(v) => `%${v}`} domain={[0, 100]} tick={{ fontSize: 11 }} width={40} />
                   <Tooltip formatter={(v: unknown) => `%${v}`} />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Legend verticalAlign="top" wrapperStyle={{ fontSize: 12, paddingBottom: 8 }} />
                   <ReferenceLine y={0} stroke="#888" strokeDasharray="4 2" />
-                  <Line type="monotone" dataKey="Masraf/Gelir"         stroke="#f97316" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="(Giden+Masraf)/Gelir" stroke="#ef4444" strokeWidth={2} strokeDasharray="6 3" dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="Masraf/Gelir"         stroke={C.masraf} strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="(Giden+Masraf)/Gelir" stroke={C.giden}  strokeWidth={2} strokeDasharray="6 3" dot={{ r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -148,15 +151,15 @@ export function Karlilik() {
             <CardContent className="pt-0">
               <div className="h-[240px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={turKarData} margin={{ top: 4, right: 20, left: 0, bottom: 4 }}>
+                  <BarChart data={turKarData} margin={{ top: 32, right: 20, left: 0, bottom: 4 }}>
                     <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                     <YAxis tickFormatter={fmtK} tick={{ fontSize: 11 }} width={50} />
                     <Tooltip formatter={(v: unknown) => typeof v === 'number' ? fmt(v) : String(v)} />
-                    <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar dataKey="Gelen"  fill="#22c55e" radius={[3, 3, 0, 0]} />
-                    <Bar dataKey="Giden"  fill="#ef4444" radius={[3, 3, 0, 0]} />
-                    <Bar dataKey="Masraf" fill="#f97316" radius={[3, 3, 0, 0]} />
-                    <Bar dataKey="Net"    fill="#1c768f" radius={[3, 3, 0, 0]} />
+                    <Legend verticalAlign="top" wrapperStyle={{ fontSize: 12, paddingBottom: 8 }} />
+                    <Bar dataKey="Gelen"  fill={C.gelen}  radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="Giden"  fill={C.giden}  radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="Masraf" fill={C.masraf} radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="Net"    fill={C.net}    radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -180,7 +183,7 @@ export function Karlilik() {
                   <Tooltip formatter={(v: unknown) => typeof v === 'number' ? fmt(v) : String(v)} />
                   <Bar dataKey="Dosya Başına" radius={[0, 3, 3, 0]}>
                     {dosyaBasinaData.map((_, i) => (
-                      <Cell key={i} fill={`oklch(0.527 0.089 ${230 - i * 12} / 0.8)`} />
+                      <Cell key={i} fill={DOSYA_COLORS[i % DOSYA_COLORS.length]} />
                     ))}
                   </Bar>
                 </BarChart>

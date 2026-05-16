@@ -150,8 +150,8 @@ export function Pipeline() {
                   <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={80} />
                   <Tooltip formatter={(v: unknown) => typeof v === 'number' ? fmt(v) : String(v)} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="Tahsilat" stackId="a" fill="#22c55e"                       radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="Bekleyen" stackId="a" fill="oklch(0.527 0.089 230 / 0.35)" radius={[0, 3, 3, 0]} />
+                  <Bar dataKey="Tahsilat" stackId="a" fill="#1fa570"                   radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="Bekleyen" stackId="a" fill="rgba(28,118,143,0.35)"  radius={[0, 3, 3, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -173,7 +173,7 @@ export function Pipeline() {
           <CardContent className="pt-0">
             <div className="h-[260px]">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={kasaMerged} margin={{ top: 4, right: 20, left: 0, bottom: 30 }}>
+                <AreaChart data={kasaMerged} margin={{ top: 32, right: 20, left: 0, bottom: 55 }}>
                   <defs>
                     <linearGradient id="kasaGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%"  stopColor="#1c768f" stopOpacity={0.2} />
@@ -187,7 +187,7 @@ export function Pipeline() {
                   <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-35} textAnchor="end" />
                   <YAxis tickFormatter={fmtK} tick={{ fontSize: 11 }} width={50} />
                   <Tooltip formatter={(v: unknown) => typeof v === 'number' ? fmt(v) : String(v)} />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Legend verticalAlign="top" wrapperStyle={{ fontSize: 12, paddingBottom: 8 }} />
                   <ReferenceLine y={0} stroke="#888" strokeDasharray="4 2" />
                   <Area type="monotone" dataKey="Kasa"   name="Kasa"   stroke="#1c768f" strokeWidth={2.5} fill="url(#kasaGrad)" dot={{ r: 3, fill: '#1c768f', strokeWidth: 0 }} connectNulls={false} />
                   <Area type="monotone" dataKey="Tahmin" name="Tahmin" stroke="#1c768f" strokeWidth={2} strokeDasharray="6 4" fill="url(#projGrad)" dot={{ r: 4, fill: '#1c768f', strokeWidth: 0 }} connectNulls={false} />
