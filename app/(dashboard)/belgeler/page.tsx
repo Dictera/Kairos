@@ -92,10 +92,13 @@ function BelgeRow({ belge }: { belge: BelgeRow }) {
         </div>
       </div>
       <div className="flex items-center gap-1 flex-shrink-0">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href={`/dosyalar/${belge.dosya_id}`}>
-            <FolderOpen className="h-4 w-4" />
-          </Link>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => fetch(`/api/open-folder?belgeId=${belge.id}`)}
+          title="Klasörde göster"
+        >
+          <FolderOpen className="h-4 w-4" />
         </Button>
         <Button variant="ghost" size="icon" asChild>
           <a href={fileUrl} target="_blank" rel="noopener noreferrer">
