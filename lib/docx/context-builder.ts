@@ -80,6 +80,7 @@ export function buildJinja2Context(
           surucu_plaka: dosya.taraflar[0].surucu_plaka,
           surucu_telefon: dosya.taraflar[0].surucu_telefon,
           surucu_police_no: dosya.taraflar[0].surucu_police_no,
+          karsitaraf_tc_vergi_no: dosya.taraflar[0].karsitaraf_tc_vergi_no,
           sigorta_sirketi: dosya.taraflar[0].sigortaSirketi
             ? {
                 ad: dosya.taraflar[0].sigortaSirketi.ad,

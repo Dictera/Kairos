@@ -38,6 +38,7 @@ export const VARIABLE_REGISTRY: VariableInfo[] = [
   { path: 'taraf.surucu_plaka', tab: 'taraflar', label: 'Sürücü plaka' },
   { path: 'taraf.surucu_telefon', tab: 'taraflar', label: 'Sürücü telefonu' },
   { path: 'taraf.surucu_police_no', tab: 'taraflar', label: 'Sürücü poliçe no' },
+  { path: 'taraf.karsitaraf_tc_vergi_no', tab: 'taraflar', label: 'Karşı taraf TC/Vergi No' },
 
   // stk — surec
   { path: 'stk.asama', tab: 'surec', label: 'STK aşaması' },
@@ -146,9 +147,10 @@ export function getMissingVariables(
   const missing: Array<{ var: string; tab: string; label: string }> = []
 
   for (const varPath of templateVars) {
-    const value = getNestedValue(context, varPath)
+    const basePath = varPath.includes('|') ? varPath.split('|')[0].trim() : varPath
+    const value = getNestedValue(context, basePath)
     if (value === undefined || value === null || value === '') {
-      const info = VARIABLE_REGISTRY.find((v) => v.path === varPath)
+      const info = VARIABLE_REGISTRY.find((v) => v.path === basePath)
       missing.push({
         var: varPath,
         tab: info?.tab ?? 'genel',
