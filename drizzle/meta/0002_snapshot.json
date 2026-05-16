@@ -1,0 +1,158 @@
+{
+  "id": "0002_phase14_avukat_schema",
+  "schema": "sigorta-sirketi-ek-alanlar-ve-avukat-yonetimi",
+  "version": "7",
+  "tables": {
+    "sigorta_sirketi": {
+      "name": "sigorta_sirketi",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "ad": {
+          "name": "ad",
+          "type": "text",
+          "notNull": true
+        },
+        "mersis_no": {
+          "name": "mersis_no",
+          "type": "text"
+        },
+        "vergi_no": {
+          "name": "vergi_no",
+          "type": "text",
+          "notNull": true,
+          "default": ""
+        },
+        "bagli_oldugu_vergi_dairesi": {
+          "name": "bagli_oldugu_vergi_dairesi",
+          "type": "text"
+        },
+        "ihtar_mail": {
+          "name": "ihtar_mail",
+          "type": "text"
+        },
+        "kep_mail": {
+          "name": "kep_mail",
+          "type": "text"
+        }
+      }
+    },
+    "avukat": {
+      "name": "avukat",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "ad": {
+          "name": "ad",
+          "type": "text",
+          "notNull": true
+        },
+        "tbb_sicil_no": {
+          "name": "tbb_sicil_no",
+          "type": "text",
+          "notNull": true
+        },
+        "iban": {
+          "name": "iban",
+          "type": "text"
+        },
+        "eposta": {
+          "name": "eposta",
+          "type": "text"
+        },
+        "telefon": {
+          "name": "telefon",
+          "type": "text"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "notNull": true,
+          "default": "datetime('now')"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "notNull": true,
+          "default": "datetime('now')"
+        }
+      }
+    },
+    "avukat_sigorta_sirketi": {
+      "name": "avukat_sigorta_sirketi",
+      "columns": {
+        "avukat_id": {
+          "name": "avukat_id",
+          "type": "integer",
+          "notNull": true,
+          "references": {
+            "table": "avukat",
+            "column": "id",
+            "onDelete": "cascade"
+          }
+        },
+        "sigorta_sirketi_id": {
+          "name": "sigorta_sirketi_id",
+          "type": "integer",
+          "notNull": true,
+          "references": {
+            "table": "sigorta_sirketi",
+            "column": "id",
+            "onDelete": "cascade"
+          }
+        }
+      },
+      "indexes": [
+        { "name": "idx_avukat_sirketi_avukat", "columns": ["avukat_id"] },
+        { "name": "idx_avukat_sirketi_sirketi", "columns": ["sigorta_sirketi_id"] },
+        { "name": "uniq_avukat_sirketi", "columns": ["avukat_id", "sigorta_sirketi_id"], "unique": true }
+      ]
+    },
+    "taraf": {
+      "name": "taraf",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "dosya_id": {
+          "name": "dosya_id",
+          "type": "integer",
+          "notNull": true,
+          "references": { "table": "dosya", "column": "id", "onDelete": "cascade" }
+        },
+        "sigorta_sirketi_id": {
+          "name": "sigorta_sirketi_id",
+          "type": "integer",
+          "references": { "table": "sigorta_sirketi", "column": "id" }
+        },
+        "avukat_id": {
+          "name": "avukat_id",
+          "type": "integer",
+          "references": { "table": "avukat", "column": "id", "onDelete": "set null" }
+        },
+        "karsitaraf_ad": { "name": "karsitaraf_ad", "type": "text" },
+        "police_no": { "name": "police_no", "type": "text" },
+        "karsitaraf_plaka": { "name": "karsitaraf_plaka", "type": "text" },
+        "surucu_ad": { "name": "surucu_ad", "type": "text" },
+        "surucu_soyad": { "name": "surucu_soyad", "type": "text" },
+        "surucu_plaka": { "name": "surucu_plaka", "type": "text" },
+        "surucu_telefon": { "name": "surucu_telefon", "type": "text" },
+        "surucu_police_no": { "name": "surucu_police_no", "type": "text" }
+      }
+    }
+  }
+}

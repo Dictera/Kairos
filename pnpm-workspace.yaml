@@ -1,0 +1,25 @@
+packages:
+  - '.'
+
+# Minimum 7 days after publish before install (supply chain security)
+minimumReleaseAge: 10080
+minimumReleaseAgeStrict: true
+
+strictPeerDependencies: false
+blockExoticSubdeps: true
+strictDepBuilds: true
+
+trustPolicy: no-downgrade
+trustPolicyIgnoreAfter: 43200
+trustPolicyExclude:
+  - 'eslint-import-resolver-typescript@3.10.1'
+
+engineStrict: true
+
+# allowBuilds replaces onlyBuiltDependencies (removed in pnpm v11)
+allowBuilds:
+  better-sqlite3: true
+  esbuild: true
+  msw: true
+  sharp: true
+  unrs-resolver: true
