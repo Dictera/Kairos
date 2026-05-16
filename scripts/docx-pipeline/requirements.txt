@@ -1,4 +1,4 @@
-pydantic>=2.0,<3.0
+pydantic>=2.13.4,<3.0
 docxtpl>=0.18,<1.0
 Jinja2>=3.1,<4.0
 Babel>=2.12,<3.0
