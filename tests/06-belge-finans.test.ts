@@ -121,7 +121,7 @@ describe('Finans input validation (FINANS-04)', () => {
     expect(FINANS_TUR.includes('Gelen')).toBe(true)
     expect(FINANS_TUR.includes('Giden')).toBe(true)
     expect(FINANS_TUR.includes('Masraf')).toBe(true)
-    expect(FINANS_TUR.includes('Other')).toBe(false)
+    expect((FINANS_TUR as readonly string[]).includes('Other')).toBe(false)
   })
 })
 

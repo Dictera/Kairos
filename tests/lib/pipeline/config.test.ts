@@ -77,8 +77,8 @@ describe('lib/pipeline/config', () => {
     Object.defineProperty(process, 'platform', { value: 'win32' })
 
     const { existsSync } = await import('fs')
-    vi.mocked(existsSync).mockImplementation((path: string) => {
-      if (path === 'C:\\Program Files\\LibreOffice\\program\\soffice.exe') return true
+    vi.mocked(existsSync).mockImplementation((path) => {
+      if (String(path) === 'C:\\Program Files\\LibreOffice\\program\\soffice.exe') return true
       return false
     })
 
@@ -113,8 +113,8 @@ describe('lib/pipeline/config', () => {
 
   it('getSidecarPythonPath returns venv path when .venv exists', async () => {
     const { existsSync } = await import('fs')
-    vi.mocked(existsSync).mockImplementation((path: string) => {
-      if (path.includes('.venv')) return true
+    vi.mocked(existsSync).mockImplementation((path) => {
+      if (String(path).includes('.venv')) return true
       return false
     })
 

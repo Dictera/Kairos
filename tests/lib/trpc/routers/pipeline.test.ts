@@ -33,7 +33,7 @@ describe('lib/trpc/routers/pipeline', () => {
 
     const { pipelineRouter } = await import('@/lib/trpc/routers/pipeline')
 
-    const caller = pipelineRouter.createCaller({})
+    const caller = pipelineRouter.createCaller({} as any)
     const result = await caller.healthCheck()
 
     expect(result.python.accessible).toBe(true)
@@ -46,7 +46,7 @@ describe('lib/trpc/routers/pipeline', () => {
 
     const { pipelineRouter } = await import('@/lib/trpc/routers/pipeline')
 
-    const caller = pipelineRouter.createCaller({})
+    const caller = pipelineRouter.createCaller({} as any)
     const result = await caller.status()
 
     expect(result.python.path).toBe('/custom/python')

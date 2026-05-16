@@ -36,7 +36,6 @@ describe('Sidecar: extract-vars (SABLON-03)', () => {
       params: {},
     })
     expect(result.status).toBe('error')
-    // @ts-expect-error narrow
     expect(result.code).toBe(1)
   }, 30_000)
 
