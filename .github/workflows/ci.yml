@@ -33,5 +33,13 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: pip install -r scripts/docx-pipeline/requirements.txt
+
       - name: Test
         run: pnpm test
