@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: GitHub Open Source Yol Haritası
 status: completed
-last_updated: "2026-05-16T16:58:22.368Z"
-last_activity: 2026-05-16 - Completed quick task 260516-tmp: ayarlardan şablon yönetimi ve değişken listesini kaldır
+last_updated: "2026-05-16T19:06:54.482Z"
+last_activity: "2026-05-17 - Completed quick task 260517-pdf: PDF dosya adını şablon türü veya şablon adından türet"
 progress:
   total_phases: 4
   completed_phases: 4
@@ -33,7 +33,7 @@ Progress: [██████████] 100%
 
 ## Session Continuity
 
-Last session: 2026-05-16T16:58:22.358Z
+Last session: 2026-05-16T19:06:54.438Z
 Previous milestone: v1.2 Şablon Belgeler shipped 2026-04-22
 Current milestone: v1.3 GitHub Open Source Yol Haritası (phases 21–24 planned)
 Roadmap file: .planning/ROADMAP.md
@@ -111,6 +111,7 @@ Phase 21 context: .planning/phases/21-g-venlik-temizlik/21-CONTEXT.md
 | 260516-a1 | Belgeler dosyaya git butonu | 2026-05-16 | be31a3e | [260516-a1-belgeler-dosya-git-butonu](./quick/260516-a1-belgeler-dosya-git-butonu/) |
 | 260516-t4t | şablon unselect + değişken kopyalama + jinja2 örnekler | 2026-05-16 | 9eaa074 | [260516-t4t-sablon-yonetimi-unselect-copy-jinja2-orn](./quick/260516-t4t-sablon-yonetimi-unselect-copy-jinja2-orn/) |
 | 260516-tmp | ayarlardan şablon yönetimi ve değişken listesini kaldır | 2026-05-16 | c7343f2 | [260516-tmp-settings-remove-sablon](./quick/260516-tmp-settings-remove-sablon/) |
+| 260517-pdf | PDF dosya adını şablon türü veya şablon adından türet | 2026-05-17 | 441a13e | [260517-pdf-sablon-turu-dosya-adi](./quick/260517-pdf-sablon-turu-dosya-adi/) |
 
 ### Blockers
 

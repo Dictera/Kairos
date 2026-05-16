@@ -9,7 +9,8 @@ import { useTRPC } from '@/lib/trpc/context'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Plus, Pencil, Trash2, ChevronDown } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, CardAction } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardAction } from '@/components/ui/card'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -105,6 +106,7 @@ export function SigortaSirketiSection() {
     })
   )
 
+  const [open, setOpen] = useState(true)
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [sirketiDialogOpen, setSirketiDialogOpen] = useState(false)
   const [editingSirketi, setEditingSirketi] = useState<ListItem | null>(null)
@@ -172,16 +174,24 @@ export function SigortaSirketiSection() {
 
   return (
     <>
+      <Collapsible open={open} onOpenChange={setOpen}>
       <Card>
         <CardHeader>
           <CardTitle className="text-base font-semibold">Sigorta Şirketleri</CardTitle>
+          <CardDescription>Karşı taraf sigorta şirketleri ve bağlı avukatlar.</CardDescription>
           <CardAction>
             <Button size="sm" onClick={openAddDialog}>
               <Plus className="mr-1 h-4 w-4" />
               Sigorta Şirketi Ekle
             </Button>
+            <CollapsibleTrigger asChild>
+              <Button size="icon-sm" variant="ghost" className="h-8 w-8" aria-label="Aç/kapat">
+                <ChevronDown className={cn('h-4 w-4 transition-transform duration-200', open && 'rotate-180')} />
+              </Button>
+            </CollapsibleTrigger>
           </CardAction>
         </CardHeader>
+        <CollapsibleContent>
         <CardContent>
           {isLoading ? (
             <div className="space-y-2">
@@ -350,7 +360,9 @@ export function SigortaSirketiSection() {
             </Table>
           )}
         </CardContent>
+        </CollapsibleContent>
       </Card>
+      </Collapsible>
 
       {/* Sigorta Şirketi Add/Edit Dialog */}
       <Dialog open={sirketiDialogOpen} onOpenChange={setSirketiDialogOpen}>

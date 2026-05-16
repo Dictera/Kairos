@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Pencil, Trash2, Plus } from 'lucide-react'
+import { Pencil, Trash2, Plus, ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardAction } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardAction } from '@/components/ui/card'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -43,6 +45,7 @@ interface AyarlarItem {
 
 interface AyarlarCrudSectionProps {
   title: string
+  description?: string
   items: AyarlarItem[] | undefined
   isLoading: boolean
   onAdd: (values: { ad: string; sehir?: string }) => Promise<void>
@@ -53,6 +56,7 @@ interface AyarlarCrudSectionProps {
 
 export function AyarlarCrudSection({
   title,
+  description,
   items,
   isLoading,
   onAdd,
@@ -60,6 +64,7 @@ export function AyarlarCrudSection({
   onDelete,
   showSehir = false,
 }: AyarlarCrudSectionProps) {
+  const [open, setOpen] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<AyarlarItem | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<AyarlarItem | null>(null)
@@ -132,16 +137,24 @@ export function AyarlarCrudSection({
 
   return (
     <>
+      <Collapsible open={open} onOpenChange={setOpen}>
       <Card>
         <CardHeader>
           <CardTitle className="text-base font-semibold">{title}</CardTitle>
+          {description && <CardDescription>{description}</CardDescription>}
           <CardAction>
             <Button size="sm" onClick={openAdd}>
               <Plus className="mr-1 h-4 w-4" />
               Ekle
             </Button>
+            <CollapsibleTrigger asChild>
+              <Button size="icon-sm" variant="ghost" className="h-8 w-8" aria-label="Aç/kapat">
+                <ChevronDown className={cn('h-4 w-4 transition-transform duration-200', open && 'rotate-180')} />
+              </Button>
+            </CollapsibleTrigger>
           </CardAction>
         </CardHeader>
+        <CollapsibleContent>
         <CardContent>
           {isLoading ? (
             <div className="space-y-2">
@@ -199,7 +212,9 @@ export function AyarlarCrudSection({
             </Table>
           )}
         </CardContent>
+        </CollapsibleContent>
       </Card>
+      </Collapsible>
 
       {/* Add / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) closeDialog() }}>

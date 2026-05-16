@@ -198,5 +198,28 @@ export const ayarlarRouter = createTRPCRouter({
         writeSettings(settings)
         return { success: true, path: normalized }
       }),
+    pickFolder: protectedProcedure.mutation(async () => {
+      const { spawn } = await import('child_process')
+      const script = [
+        'Add-Type -AssemblyName System.Windows.Forms',
+        '$d = New-Object System.Windows.Forms.FolderBrowserDialog',
+        '$d.Description = "Belgeler klasorunu secin"',
+        '$d.ShowNewFolderButton = $true',
+        'if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $d.SelectedPath }',
+      ].join('; ')
+      return new Promise<{ path: string | null }>((resolve) => {
+        const ps = spawn('powershell', ['-NoProfile', '-NonInteractive', '-Command', script], {
+          windowsHide: false,
+        })
+        let output = ''
+        ps.stdout.on('data', (data: Buffer) => { output += data.toString() })
+        ps.on('close', () => {
+          const picked = output.trim()
+          resolve({ path: picked ? picked.replace(/\\/g, '/') : null })
+        })
+        ps.on('error', () => resolve({ path: null }))
+        setTimeout(() => { ps.kill(); resolve({ path: null }) }, 300000)
+      })
+    }),
   }),
 })
