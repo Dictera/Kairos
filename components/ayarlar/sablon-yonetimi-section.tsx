@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTRPC } from '@/lib/trpc/context'
 import { toast } from 'sonner'
-import { Plus, Upload, Trash2 } from 'lucide-react'
+import { Plus, Upload, Trash2, X } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardAction } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -380,9 +380,19 @@ export default function SablonYonetimiSection() {
                   />
                 </div>
                 {file && (
-                  <p className="text-sm text-muted-foreground">
-                    Seçilen: {file.name}
-                  </p>
+                  <div className="flex items-center justify-between rounded border px-3 py-2 text-sm">
+                    <span className="truncate text-muted-foreground">{file.name}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="ml-2 h-5 w-5 shrink-0 text-muted-foreground hover:text-foreground"
+                      onClick={() => setFile(null)}
+                      aria-label="Dosya seçimini kaldır"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 )}
               </div>
 
@@ -451,9 +461,19 @@ export default function SablonYonetimiSection() {
                   />
                 </div>
               {file && (
-                <p className="text-sm text-muted-foreground">
-                  Seçilen: {file.name}
-                </p>
+                <div className="flex items-center justify-between rounded border px-3 py-2 text-sm">
+                  <span className="truncate text-muted-foreground">{file.name}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="ml-2 h-5 w-5 shrink-0 text-muted-foreground hover:text-foreground"
+                    onClick={() => setFile(null)}
+                    aria-label="Dosya seçimini kaldır"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               )}
               <DialogFooter>
                 <Button
