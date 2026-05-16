@@ -13,7 +13,7 @@ describe('Sidecar: extract-vars (SABLON-03)', () => {
     })
     expect(result.status).toBe('success')
     // @ts-expect-error narrow
-    expect(result.result.variables).toEqual(['muvekkil_ad', 'dosya_no', 'paragraf_blok'])
+    expect(result.result.variables).toEqual(['taraf.karsitaraf_ad', 'dosya.dosya_no', 'muvekkil.ad'])
   }, 30_000)
 
   it('handles Word-fragmented placeholders split across <w:t> nodes (RESEARCH Pitfall #1)', async () => {

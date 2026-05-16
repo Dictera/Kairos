@@ -43,14 +43,16 @@ import {
 const TUR_VALUES = ['STK', 'AT', 'AH'] as const
 
 const formSchema = z.object({
-  muvekkil_id: z.number({ required_error: 'Müvekkil seçimi zorunludur' }).int(),
+  muvekkil_id: z.number({ error: 'Müvekkil seçimi zorunludur' }).int(),
   dosya_no: z.string().min(1).max(50).optional(),
-  tur: z.enum(TUR_VALUES, { required_error: 'Dosya türü zorunludur' }),
+  tur: z.enum(TUR_VALUES, { error: 'Dosya türü zorunludur' }),
   sigorta_turu_id: z.number().int().nullable().optional(),
   karsitaraf_sigorta_id: z.number().int().nullable().optional(),
   muvekkil_sigorta_id: z.number().int().nullable().optional(),
   muvekkil_police_no: z.string().max(100).nullable().optional().or(z.literal('')),
   talep_tutari: z.number().positive('Geçerli bir tutar giriniz').nullable().optional(),
+  karar_tutari: z.number().positive('Geçerli bir tutar giriniz').nullable().optional(),
+  sonuc: z.enum(['kazanıldı', 'uzlaşma', 'kaybedildi']).nullable().optional(),
   muvekkil_plaka: z.string().max(10).optional().or(z.literal('')),
   hasar_dosya_no: z.string().max(200).nullable().optional().or(z.literal('')),
   kaza_tarihi: z.string().max(10).nullable().optional().or(z.literal('')),
@@ -69,6 +71,8 @@ const EMPTY_DEFAULTS: FormValues = {
   muvekkil_sigorta_id: null,
   muvekkil_police_no: '',
   talep_tutari: null,
+  karar_tutari: null,
+  sonuc: null,
   muvekkil_plaka: '',
   hasar_dosya_no: '',
   kaza_tarihi: '',
@@ -160,6 +164,8 @@ function DosyaFormInner({
         muvekkil_sigorta_id: values.muvekkil_sigorta_id ?? undefined,
         muvekkil_police_no: values.muvekkil_police_no || undefined,
         talep_tutari: values.talep_tutari ?? undefined,
+        karar_tutari: values.karar_tutari ?? undefined,
+        sonuc: values.sonuc ?? undefined,
         muvekkil_plaka: values.muvekkil_plaka || undefined,
         hasar_dosya_no: values.hasar_dosya_no || undefined,
         kaza_tarihi: values.kaza_tarihi || undefined,
@@ -177,6 +183,8 @@ function DosyaFormInner({
         muvekkil_sigorta_id: values.muvekkil_sigorta_id ?? undefined,
         muvekkil_police_no: values.muvekkil_police_no || undefined,
         talep_tutari: values.talep_tutari ?? undefined,
+        karar_tutari: values.karar_tutari ?? undefined,
+        sonuc: values.sonuc ?? undefined,
         muvekkil_plaka: values.muvekkil_plaka || undefined,
         hasar_dosya_no: values.hasar_dosya_no || undefined,
         kaza_tarihi: values.kaza_tarihi || undefined,
@@ -410,6 +418,64 @@ function DosyaFormInner({
               )}
             />
 
+            {/* Karar Tutarı */}
+            <FormField
+              control={form.control}
+              name="karar_tutari"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Karar Tutarı</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                        ₺
+                      </span>
+                      <Input
+                        className="pl-7"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0,00"
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(e.target.value ? parseFloat(e.target.value) : null)
+                        }
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Sonuç */}
+            <FormField
+              control={form.control}
+              name="sonuc"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sonuç</FormLabel>
+                  <Select
+                    onValueChange={(v) => field.onChange(v === 'none' ? null : v as 'kazanıldı' | 'uzlaşma' | 'kaybedildi')}
+                    value={field.value ?? 'none'}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seçiniz (devam ediyor)" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">Devam Ediyor</SelectItem>
+                      <SelectItem value="kazanıldı">Kazanıldı</SelectItem>
+                      <SelectItem value="uzlaşma">Uzlaşma</SelectItem>
+                      <SelectItem value="kaybedildi">Kaybedildi</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             {/* Hasar Dosya No */}
             <FormField
               control={form.control}
@@ -609,6 +675,8 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
         muvekkil_sigorta_id: dosyaData.muvekkil_sigorta_id ?? null,
         muvekkil_police_no: dosyaData.muvekkil_police_no ?? '',
         talep_tutari: dosyaData.talep_tutari ?? null,
+        karar_tutari: dosyaData.karar_tutari ?? null,
+        sonuc: dosyaData.sonuc as 'kazanıldı' | 'uzlaşma' | 'kaybedildi' ?? null,
         muvekkil_plaka: dosyaData.muvekkil_plaka ?? '',
         hasar_dosya_no: dosyaData.hasar_dosya_no ?? '',
         kaza_tarihi: dosyaData.kaza_tarihi ?? '',

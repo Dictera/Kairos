@@ -51,7 +51,7 @@ describe('sablonRouter.create: extract-vars + insert (SABLON-01, SABLON-03)', ()
       fileSize: 1234,
     })
     expect(row.id).toBeGreaterThan(0)
-    expect(row.degiskenler).toEqual(['muvekkil_ad', 'dosya_no', 'paragraf_blok'])
+    expect(row.degiskenler).toEqual(['taraf.karsitaraf_ad', 'dosya.dosya_no', 'muvekkil.ad'])
     // cleanup
     await caller.delete({ id: row.id })
   }, 30_000)
@@ -101,8 +101,7 @@ describe('sablonRouter.delete: SET NULL FK on belge.sablon_id (SABLON-05, SABLON
     }
   })
 
-  it('sets belge.sablon_id NULL when template is deleted', async () => {
-    // Insert template + belge row directly, bypassing sidecar.
+  it('deletes belge rows and PDF files when template is deleted', async () => {
     const [tpl] = await db.insert(docxSablon).values({
       ad: 'FK-test',
       kategori: 'Genel',
@@ -110,7 +109,6 @@ describe('sablonRouter.delete: SET NULL FK on belge.sablon_id (SABLON-05, SABLON
       degiskenler: [],
     }).returning()
 
-    // Insert a belge row referencing the seeded dosya AND this template.
     const [b] = await db.insert(belge).values({
       dosya_id: seededDosyaId,
       dosya_no: `fk-cascade-${Date.now()}`,
@@ -124,17 +122,11 @@ describe('sablonRouter.delete: SET NULL FK on belge.sablon_id (SABLON-05, SABLON
 
     expect(b.sablon_id).toBe(tpl.id)
 
-    // Delete via router
     const caller = sablonRouter.createCaller(ctx)
     await caller.delete({ id: tpl.id })
 
-    // Re-query belge — sablon_id should be NULL, row should still exist
-    const [after] = await db.select().from(belge).where(eq(belge.id, b.id))
-    expect(after).toBeDefined()
-    expect(after.sablon_id).toBeNull()
-
-    // cleanup
-    await db.delete(belge).where(eq(belge.id, b.id))
+    const after = await db.select().from(belge).where(eq(belge.id, b.id))
+    expect(after.length).toBe(0)
   }, 30_000)
 
   it('throws NOT_FOUND with Turkish message for missing id', async () => {

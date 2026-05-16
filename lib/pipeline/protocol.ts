@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const CommandEnvelopeSchema = z.object({
   command: z.enum(['extract-vars', 'render', 'convert', 'health-check', 'slug']),
-  params: z.record(z.unknown()).default({}),
+  params: z.record(z.string(), z.unknown()).default({}),
 })
 export type CommandEnvelope = z.infer<typeof CommandEnvelopeSchema>
 
@@ -17,7 +17,7 @@ export type CommandResult = z.infer<typeof CommandResultSchema>
 export const RenderParamsSchema = z.object({
   template_path: z.string(),
   output_path: z.string(),
-  context: z.record(z.unknown()),
+  context: z.record(z.string(), z.unknown()),
 })
 export type RenderParams = z.infer<typeof RenderParamsSchema>
 

@@ -31,12 +31,12 @@ describe('Şablon Yönetimi section: copy + structure (SABLON-02, SABLON-04)', (
   })
 })
 
-describe('Ayarlar page mount (SABLON-04)', () => {
-  const page = readFileSync(PAGE_PATH, 'utf-8')
+describe('Şablon Yönetimi page mount (SABLON-04)', () => {
+  const sablonPage = readFileSync('app/(dashboard)/sablon-yonetimi/page.tsx', 'utf-8')
   it('imports SablonYonetimiSection', () => {
-    expect(page).toMatch(/import\s+SablonYonetimiSection\s+from\s+['"]\.\/sablon-yonetimi-section['"]/)
+    expect(sablonPage).toMatch(/import\s+SablonYonetimiSection\s+from\s+['"]@\/components\/ayarlar\/sablon-yonetimi-section['"]/)
   })
   it('renders SablonYonetimiSection in JSX', () => {
-    expect(page).toMatch(/<SablonYonetimiSection\s*\/>/)
+    expect(sablonPage).toMatch(/<SablonYonetimiSection\s*\/>/)
   })
 })
