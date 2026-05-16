@@ -41,5 +41,30 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r scripts/docx-pipeline/requirements.txt
 
+      - name: Generate test fixtures
+        run: python scripts/create-fragmented-fixture.py
+
       - name: Test
         run: pnpm test
+
+  security-scan:
+    runs-on: ubuntu-latest
+    name: Supply Chain Security Scan
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Resolve dependencies (triggers security checks)
+        run: pnpm install
