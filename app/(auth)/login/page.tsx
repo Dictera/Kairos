@@ -45,7 +45,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-4">
       <Card className="w-full max-w-[400px]">
         <CardHeader>
-          <CardTitle>Sigorta Takip</CardTitle>
+          <CardTitle>Kairos</CardTitle>
           <CardDescription>
             Avukat paneline erişmek için şifrenizi girin.
           </CardDescription>
