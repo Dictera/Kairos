@@ -73,16 +73,15 @@ describe('Cheat-sheet route', () => {
   })
 })
 
-describe('AyarlarPage summary card mount', () => {
+describe('AyarlarPage section presence', () => {
   const src = readFileSync(AYARLAR_PATH, 'utf-8')
-  it('imports CheatSheetSummaryCard', () => {
-    expect(src).toMatch(/import\s*\{\s*CheatSheetSummaryCard\s*\}\s*from\s*['"]\.\/cheat-sheet-summary-card['"]/)
+  it('does not contain SablonYonetimiSection (moved to dedicated page)', () => {
+    expect(src).not.toContain('SablonYonetimiSection')
   })
-  it('renders CheatSheetSummaryCard in JSX', () => {
-    expect(src).toMatch(/<CheatSheetSummaryCard\s*\/>/)
+  it('does not contain CheatSheetSummaryCard (moved to dedicated page)', () => {
+    expect(src).not.toContain('CheatSheetSummaryCard')
   })
-  it('does not regress existing sections', () => {
-    expect(src).toContain('SablonYonetimiSection')
+  it('retains core sections', () => {
     expect(src).toContain('SigortaSirketiSection')
     expect(src).toContain('PipelineStatus')
   })
