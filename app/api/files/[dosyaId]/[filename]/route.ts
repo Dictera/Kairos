@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { dosya } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
 import { buildBelgelerDir, BELGELER_BASE } from '@/lib/belgeler-storage'
+import { requireAuth } from '@/lib/auth-guard'
 import fs from 'fs'
 import path from 'path'
 
@@ -10,6 +11,9 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ dosyaId: string; filename: string }> }
 ) {
+  const authError = await requireAuth()
+  if (authError) return authError
+
   const { dosyaId: dosyaIdStr, filename } = await params
 
   if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {

@@ -48,6 +48,7 @@ data/db.sqlite
 data/db.sqlite-wal
 data/db.sqlite-shm
 data/*.db
+data/settings.json
 
 # GSD planning artifacts (debug, phases, research, tmp, milestones)
 .planning/

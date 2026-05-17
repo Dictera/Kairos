@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { belge, dosya } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
 import { getTurLabel, sanitizeFsSegment, resolveBelgelerBase } from '@/lib/belgeler-storage'
+import { requireAuth } from '@/lib/auth-guard'
 import path from 'path'
 import { execFile } from 'child_process'
 
@@ -33,6 +34,13 @@ async function resolveDir(dosyaRow: {
 }
 
 export async function GET(request: NextRequest) {
+  const authError = await requireAuth()
+  if (authError) return authError
+
+  if (process.platform !== 'win32') {
+    return NextResponse.json({ error: 'Bu özellik yalnızca Windows ortamında çalışır.' }, { status: 501 })
+  }
+
   const params = request.nextUrl.searchParams
   const belgeIdRaw = params.get('belgeId')
   const dosyaIdRaw = params.get('dosyaId')

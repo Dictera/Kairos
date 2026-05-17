@@ -87,6 +87,47 @@ const durusmaUpdateSchema = z.object({
   notlar: z.string().max(2000).optional().or(z.literal('')),
 })
 
+const DEFAULT_STK_DATA: StkSurecData = {
+  asama: null,
+  ihtar_tarihi: null,
+  arabuluculuk_son_tutanak_tarihi: null,
+  basvuru_tarihi: null,
+  stk_esas_no: null,
+  stk_karar_no: null,
+  stk_itiraz_esas_no: null,
+  stk_itiraz_karar_no: null,
+  bilirkisi_ucret_talep_tarihi: null,
+  bilirkisi_raporu_tebliğ_tarihi: null,
+  islah_tarihi: null,
+  karar_tarihi: null,
+  kesinlesme_tarihi: null,
+}
+
+const DEFAULT_MAHKEME_DATA: MahkemeSurecData = {
+  asama: null,
+  ilk_derece_esas_no: null,
+  ilk_derece_karar_no: null,
+  ilk_derece_mahkeme_adi: null,
+  istinaf_esas_no: null,
+  istinaf_karar_no: null,
+  istinaf_mahkeme_adi: null,
+  temyiz_esas_no: null,
+  temyiz_karar_no: null,
+  temyiz_mahkeme_adi: null,
+  dava_dilekcesi_tebliğ_tarihi: null,
+  cevap_dilekcesi_tebliğ_tarihi: null,
+  replik_dilekcesi_tebliğ_tarihi: null,
+  duplik_dilekcesi_tebliğ_tarihi: null,
+  bilirkisi_ucret_talep_tarihi: null,
+  bilirkisi_raporu_tebliğ_tarihi: null,
+  karar_tebliğ_tarihi: null,
+  istinaf_dilekcesi_tebliğ_tarihi: null,
+  istinaf_karar_tebliğ_tarihi: null,
+  temyiz_dilekcesi_tebliğ_tarihi: null,
+  temyiz_karar_tebliğ_tarihi: null,
+  kesinlesme_tarihi: null,
+}
+
 // ── Router ───────────────────────────────────────────────────────────────────
 
 export const surecRouter = createTRPCRouter({
@@ -101,7 +142,7 @@ export const surecRouter = createTRPCRouter({
       const surec = parseSurecDetay(row.surec_detay)
       const updated: SurecDetay = {
         ...surec,
-        stk: { ...(surec.stk ?? { asama: null, ihtar_tarihi: null, arabuluculuk_son_tutanak_tarihi: null, basvuru_tarihi: null, stk_esas_no: null, stk_karar_no: null, stk_itiraz_esas_no: null, stk_itiraz_karar_no: null, bilirkisi_ucret_talep_tarihi: null, bilirkisi_raporu_tebliğ_tarihi: null, islah_tarihi: null, karar_tarihi: null, kesinlesme_tarihi: null }), ...input.data } as StkSurecData,
+        stk: { ...DEFAULT_STK_DATA, ...surec.stk, ...input.data } as StkSurecData,
       }
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
@@ -128,7 +169,7 @@ export const surecRouter = createTRPCRouter({
 
       const updated: SurecDetay = {
         ...surec,
-        stk: { ...(surec.stk ?? { asama: null, ihtar_tarihi: null, arabuluculuk_son_tutanak_tarihi: null, basvuru_tarihi: null, stk_esas_no: null, stk_karar_no: null, stk_itiraz_esas_no: null, stk_itiraz_karar_no: null, bilirkisi_ucret_talep_tarihi: null, bilirkisi_raporu_tebliğ_tarihi: null, islah_tarihi: null, karar_tarihi: null, kesinlesme_tarihi: null }), asama: next } as StkSurecData,
+        stk: { ...DEFAULT_STK_DATA, ...surec.stk, asama: next } as StkSurecData,
       }
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
@@ -173,7 +214,7 @@ export const surecRouter = createTRPCRouter({
       const surec = parseSurecDetay(row.surec_detay)
       const updated: SurecDetay = {
         ...surec,
-        mahkeme: { ...(surec.mahkeme ?? { asama: null, ilk_derece_esas_no: null, ilk_derece_karar_no: null, ilk_derece_mahkeme_adi: null, istinaf_esas_no: null, istinaf_karar_no: null, istinaf_mahkeme_adi: null, temyiz_esas_no: null, temyiz_karar_no: null, temyiz_mahkeme_adi: null, dava_dilekcesi_tebliğ_tarihi: null, cevap_dilekcesi_tebliğ_tarihi: null, replik_dilekcesi_tebliğ_tarihi: null, duplik_dilekcesi_tebliğ_tarihi: null, bilirkisi_ucret_talep_tarihi: null, bilirkisi_raporu_tebliğ_tarihi: null, karar_tebliğ_tarihi: null, istinaf_dilekcesi_tebliğ_tarihi: null, istinaf_karar_tebliğ_tarihi: null, temyiz_dilekcesi_tebliğ_tarihi: null, temyiz_karar_tebliğ_tarihi: null, kesinlesme_tarihi: null }), ...input.data } as MahkemeSurecData,
+        mahkeme: { ...DEFAULT_MAHKEME_DATA, ...surec.mahkeme, ...input.data } as MahkemeSurecData,
       }
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
@@ -200,7 +241,7 @@ export const surecRouter = createTRPCRouter({
 
       const updated: SurecDetay = {
         ...surec,
-        mahkeme: { ...(surec.mahkeme ?? { asama: null, ilk_derece_esas_no: null, ilk_derece_karar_no: null, ilk_derece_mahkeme_adi: null, istinaf_esas_no: null, istinaf_karar_no: null, istinaf_mahkeme_adi: null, temyiz_esas_no: null, temyiz_karar_no: null, temyiz_mahkeme_adi: null, dava_dilekcesi_tebliğ_tarihi: null, cevap_dilekcesi_tebliğ_tarihi: null, replik_dilekcesi_tebliğ_tarihi: null, duplik_dilekcesi_tebliğ_tarihi: null, bilirkisi_ucret_talep_tarihi: null, bilirkisi_raporu_tebliğ_tarihi: null, karar_tebliğ_tarihi: null, istinaf_dilekcesi_tebliğ_tarihi: null, istinaf_karar_tebliğ_tarihi: null, temyiz_dilekcesi_tebliğ_tarihi: null, temyiz_karar_tebliğ_tarihi: null, kesinlesme_tarihi: null }), asama: next } as MahkemeSurecData,
+        mahkeme: { ...DEFAULT_MAHKEME_DATA, ...surec.mahkeme, asama: next } as MahkemeSurecData,
       }
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
@@ -247,7 +288,7 @@ export const surecRouter = createTRPCRouter({
 
       const updated: SurecDetay = {
         ...surec,
-        mahkeme: { asama: null, ilk_derece_esas_no: null, ilk_derece_karar_no: null, ilk_derece_mahkeme_adi: null, istinaf_esas_no: null, istinaf_karar_no: null, istinaf_mahkeme_adi: null, temyiz_esas_no: null, temyiz_karar_no: null, temyiz_mahkeme_adi: null, dava_dilekcesi_tebliğ_tarihi: null, cevap_dilekcesi_tebliğ_tarihi: null, replik_dilekcesi_tebliğ_tarihi: null, duplik_dilekcesi_tebliğ_tarihi: null, bilirkisi_ucret_talep_tarihi: null, bilirkisi_raporu_tebliğ_tarihi: null, karar_tebliğ_tarihi: null, istinaf_dilekcesi_tebliğ_tarihi: null, istinaf_karar_tebliğ_tarihi: null, temyiz_dilekcesi_tebliğ_tarihi: null, temyiz_karar_tebliğ_tarihi: null, kesinlesme_tarihi: null },
+        mahkeme: { ...DEFAULT_MAHKEME_DATA },
       }
       await db.update(dosya)
         .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })

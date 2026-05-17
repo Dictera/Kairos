@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { dosya } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
 import { buildBelgelerDir, BELGELER_BASE } from '@/lib/belgeler-storage'
+import { requireAuth } from '@/lib/auth-guard'
 import fs from 'fs'
 import path from 'path'
 
@@ -16,6 +17,9 @@ const ALLOWED_TYPES = [
 const MAX_SIZE = 20 * 1024 * 1024 // 20 MB
 
 export async function POST(request: NextRequest) {
+  const authError = await requireAuth()
+  if (authError) return authError
+
   const formData = await request.formData()
   const file = formData.get('file') as File | null
   const dosyaIdRaw = formData.get('dosyaId') as string | null

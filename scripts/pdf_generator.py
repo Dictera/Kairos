@@ -10,18 +10,29 @@ import os
 from fpdf import FPDF
 
 
+def _find_dejavu_font(name: str) -> str:
+    candidates = []
+    if sys.platform == 'win32':
+        candidates.append(os.path.join(os.environ.get('WINDIR', 'C:\\Windows'), 'Fonts', name))
+    candidates += [
+        f'/usr/share/fonts/truetype/dejavu/{name}',
+        f'/usr/share/fonts/dejavu/{name}',
+        f'/usr/local/share/fonts/{name}',
+        os.path.join(os.path.dirname(__file__), 'fonts', name),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    raise FileNotFoundError(f'DejaVu font bulunamadı: {name}. fonts/ dizinine kopyalayın.')
+
+
 class TurkishPDF(FPDF):
     def __init__(self):
         super().__init__()
-        font_path = 'C:/Windows/Fonts/DejaVuSans.ttf'
-        font_bold_path = 'C:/Windows/Fonts/DejaVuSans-Bold.ttf'
-        font_italic_path = 'C:/Windows/Fonts/DejaVuSans-Oblique.ttf'
-        font_bold_italic_path = 'C:/Windows/Fonts/DejaVuSans-BoldOblique.ttf'
-        
-        self.add_font('DejaVu', '', font_path)
-        self.add_font('DejaVu', 'B', font_bold_path)
-        self.add_font('DejaVu', 'I', font_italic_path)
-        self.add_font('DejaVu', 'BI', font_bold_italic_path)
+        self.add_font('DejaVu', '', _find_dejavu_font('DejaVuSans.ttf'))
+        self.add_font('DejaVu', 'B', _find_dejavu_font('DejaVuSans-Bold.ttf'))
+        self.add_font('DejaVu', 'I', _find_dejavu_font('DejaVuSans-Oblique.ttf'))
+        self.add_font('DejaVu', 'BI', _find_dejavu_font('DejaVuSans-BoldOblique.ttf'))
         self.set_auto_page_break(True, margin=15)
 
 

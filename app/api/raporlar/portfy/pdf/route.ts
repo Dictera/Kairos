@@ -1,5 +1,7 @@
 import { db } from '@/lib/db'
 import { dosya } from '@/lib/schema'
+import { requireAuth } from '@/lib/auth-guard'
+import { NextRequest } from 'next/server'
 
 // pdfmake's @types/pdfmake only covers the browser API (createPdf).
 // The PdfPrinter class lives in js/Printer.js — access it directly.
@@ -29,7 +31,10 @@ async function generatePdfBuffer(docDefinition: DocDefinition): Promise<Buffer> 
   return Buffer.concat(chunks)
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authError = await requireAuth()
+  if (authError) return authError
+
   const allDosya = await db.select().from(dosya)
 
   const aktifCount = allDosya.filter(d => d.durum === 'AKTIF').length

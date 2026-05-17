@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth-guard'
 import fs from 'fs'
 import path from 'path'
 
@@ -10,6 +11,9 @@ const MAX_SIZE = 10 * 1024 * 1024 // 10 MB (CONTEXT discretion)
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'templates') // D-04
 
 export async function POST(request: NextRequest) {
+  const authError = await requireAuth()
+  if (authError) return authError
+
   const formData = await request.formData()
   const file = formData.get('file') as File | null
 
