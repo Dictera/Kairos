@@ -1,7 +1,8 @@
+import os from 'os'
 import path from 'path'
 import fs from 'fs'
 
-const DEFAULT_BELGELER_BASE = 'E:/sigorta-belgeler'
+const DEFAULT_BELGELER_BASE = path.join(os.homedir(), 'sigorta-belgeler')
 const SETTINGS_PATH = path.join(process.cwd(), 'data', 'settings.json')
 
 function readSettingsPath(): string {

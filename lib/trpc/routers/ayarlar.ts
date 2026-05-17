@@ -5,6 +5,7 @@ import { sigortaSirketi, mahkeme, sigortaTuru, avukat, avukatSigortaSirketi, dos
 import { eq, asc, and, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { sigortaSirketiSchema, avukatSchema } from '@/lib/validators/ayarlar'
+import os from 'os'
 import path from 'path'
 import fs from 'fs'
 
@@ -187,7 +188,7 @@ export const ayarlarRouter = createTRPCRouter({
   belgeler: createTRPCRouter({
     getPath: protectedProcedure.query(() => {
       const settings = readSettings()
-      return { path: settings.belgelerPath ?? 'E:/sigorta-belgeler' }
+      return { path: settings.belgelerPath ?? path.join(os.homedir(), 'sigorta-belgeler').replace(/\\/g, '/') }
     }),
     setPath: protectedProcedure
       .input(z.object({ path: z.string().min(1, 'Yol zorunludur') }))
@@ -200,25 +201,50 @@ export const ayarlarRouter = createTRPCRouter({
       }),
     pickFolder: protectedProcedure.mutation(async () => {
       const { spawn } = await import('child_process')
-      const script = [
-        'Add-Type -AssemblyName System.Windows.Forms',
-        '$d = New-Object System.Windows.Forms.FolderBrowserDialog',
-        '$d.Description = "Belgeler klasorunu secin"',
-        '$d.ShowNewFolderButton = $true',
-        'if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $d.SelectedPath }',
-      ].join('; ')
+
       return new Promise<{ path: string | null }>((resolve) => {
-        const ps = spawn('powershell', ['-NoProfile', '-NonInteractive', '-Command', script], {
-          windowsHide: false,
-        })
+        let cmd: string
+        let args: string[]
+
+        if (process.platform === 'win32') {
+          const script = [
+            'Add-Type -AssemblyName System.Windows.Forms',
+            '$d = New-Object System.Windows.Forms.FolderBrowserDialog',
+            '$d.Description = "Belgeler klasorunu secin"',
+            '$d.ShowNewFolderButton = $true',
+            'if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $d.SelectedPath }',
+          ].join('; ')
+          cmd = 'powershell'
+          args = ['-NoProfile', '-NonInteractive', '-Command', script]
+        } else if (process.platform === 'darwin') {
+          cmd = 'osascript'
+          args = ['-e', 'POSIX path of (choose folder with prompt "Belgeler klasorunu secin")']
+        } else {
+          // Linux: try zenity, fall back to kdialog, fall back to null
+          cmd = 'zenity'
+          args = ['--file-selection', '--directory', '--title=Belgeler klasorunu secin']
+        }
+
+        const proc = spawn(cmd, args, { windowsHide: false })
         let output = ''
-        ps.stdout.on('data', (data: Buffer) => { output += data.toString() })
-        ps.on('close', () => {
+        proc.stdout.on('data', (data: Buffer) => { output += data.toString() })
+        proc.on('close', () => {
           const picked = output.trim()
-          resolve({ path: picked ? picked.replace(/\\/g, '/') : null })
+          resolve({ path: picked ? picked.replace(/\\/g, '/').replace(/\n$/, '') : null })
         })
-        ps.on('error', () => resolve({ path: null }))
-        setTimeout(() => { ps.kill(); resolve({ path: null }) }, 300000)
+        proc.on('error', () => {
+          if (process.platform === 'linux') {
+            // zenity not found, try kdialog
+            const kd = spawn('kdialog', ['--getexistingdirectory', os.homedir()])
+            let kdOut = ''
+            kd.stdout.on('data', (d: Buffer) => { kdOut += d.toString() })
+            kd.on('close', () => resolve({ path: kdOut.trim() || null }))
+            kd.on('error', () => resolve({ path: null }))
+          } else {
+            resolve({ path: null })
+          }
+        })
+        setTimeout(() => { proc.kill(); resolve({ path: null }) }, 300000)
       })
     }),
   }),

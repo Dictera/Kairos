@@ -46,7 +46,7 @@ describe('sablonRouter.create: extract-vars + insert (SABLON-01, SABLON-03)', ()
     const row = await caller.create({
       ad: 'Test Şablon',
       kategori: 'STK',
-      filePath,
+      filename: path.basename(filePath),
       fileName: 'test.docx',
       fileSize: 1234,
     })
@@ -62,7 +62,7 @@ describe('sablonRouter.create: extract-vars + insert (SABLON-01, SABLON-03)', ()
       caller.create({
         ad: 'Bogus',
         kategori: 'STK',
-        filePath: '/nonexistent/path.docx',
+        filename: 'nonexistent-path.docx',
         fileName: 'x.docx',
         fileSize: 1,
       }),

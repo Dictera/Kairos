@@ -1,6 +1,11 @@
-import { describe, it, expect, afterAll } from 'vitest'
+import { describe, it, expect, afterAll, vi } from 'vitest'
 import { readFileSync, rmSync, existsSync, readdirSync } from 'fs'
 import path from 'path'
+
+vi.mock('@/lib/auth-guard', () => ({
+  requireAuth: vi.fn().mockResolvedValue(null),
+}))
+
 import { POST } from '@/app/api/templates/upload/route'
 
 const ROUTE_PATH = 'app/api/templates/upload/route.ts'
@@ -69,9 +74,9 @@ describe('Upload route behavior: SABLON-01 validation', () => {
     const res = await POST(makeRequest(fd) as any)
     expect(res.status).toBe(200)
     const body = await res.json()
-    expect(body.filePath).toContain(path.join('uploads', 'templates'))
+    expect(body.filename).toBeDefined()
     expect(body.fileName).toBe('test-upload-tiny.docx')
-    expect(existsSync(body.filePath)).toBe(true)
+    expect(existsSync(path.join(UPLOAD_DIR, body.filename))).toBe(true)
   })
 
   it('rejects file larger than 10 MB', async () => {
