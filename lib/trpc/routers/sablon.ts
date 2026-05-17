@@ -33,13 +33,17 @@ export const sablonRouter = createTRPCRouter({
   create: protectedProcedure
     .input(sablonCreateSchema)
     .mutation(async ({ input }) => {
+      const filePath = path.join(TEMPLATES_BASE_PATH, path.basename(input.filename))
+      if (!path.resolve(filePath).startsWith(TEMPLATES_BASE_PATH + path.sep)) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Geçersiz şablon dosya yolu.' })
+      }
       const result = await runSidecarCommand({
         command: 'extract-vars',
-        params: { file_path: input.filePath },
+        params: { file_path: filePath },
       })
 
       if (result.status === 'error') {
-        safeUnlink(input.filePath)
+        safeUnlink(filePath)
         throw new TRPCError({
           code: 'BAD_REQUEST',
           message: result.message ?? 'Değişkenler çıkarılamadı.',
@@ -51,7 +55,7 @@ export const sablonRouter = createTRPCRouter({
       const [row] = await db.insert(docxSablon).values({
         ad: input.ad,
         kategori: input.kategori,
-        dosya_yolu: input.filePath,
+        dosya_yolu: filePath,
         degiskenler: variables,
         belge_turu: input.belge_turu ?? null,
       }).returning()
@@ -84,13 +88,18 @@ export const sablonRouter = createTRPCRouter({
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Şablon bulunamadı.' })
       }
 
+      const newFilePath = path.join(TEMPLATES_BASE_PATH, path.basename(input.filename))
+      if (!path.resolve(newFilePath).startsWith(TEMPLATES_BASE_PATH + path.sep)) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Geçersiz şablon dosya yolu.' })
+      }
+
       const result = await runSidecarCommand({
         command: 'extract-vars',
-        params: { file_path: input.filePath },
+        params: { file_path: newFilePath },
       })
 
       if (result.status === 'error') {
-        safeUnlink(input.filePath)
+        safeUnlink(newFilePath)
         throw new TRPCError({
           code: 'BAD_REQUEST',
           message: result.message ?? 'Değişkenler çıkarılamadı.',
@@ -105,7 +114,7 @@ export const sablonRouter = createTRPCRouter({
 
       const [updated] = await db.update(docxSablon)
         .set({
-          dosya_yolu: input.filePath,
+          dosya_yolu: newFilePath,
           degiskenler: variables,
           belge_turu: input.belge_turu ?? null,
           updated_at: sql`(datetime('now'))`,

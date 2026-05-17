@@ -6,7 +6,7 @@ export const sablonKategoriSchema = z.enum(SABLON_KATEGORILER)
 export const sablonCreateSchema = z.object({
   ad: z.string().min(1, 'Ad zorunludur').max(200),
   kategori: sablonKategoriSchema,
-  filePath: z.string().min(1),
+  filename: z.string().min(1),
   fileName: z.string().min(1),
   fileSize: z.number().int().optional(),
   belge_turu: z.enum(BELGE_KATEGORILER).optional(),
@@ -14,7 +14,7 @@ export const sablonCreateSchema = z.object({
 
 export const sablonUpdateSchema = z.object({
   id: z.number().int(),
-  filePath: z.string().min(1),
+  filename: z.string().min(1),
   fileName: z.string().min(1),
   belge_turu: z.enum(BELGE_KATEGORILER).optional(),
 })

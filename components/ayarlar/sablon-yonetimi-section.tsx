@@ -121,7 +121,7 @@ export default function SablonYonetimiSection() {
     form.reset({ ad: '', kategori: 'STK', belge_turu: undefined })
   }
 
-  async function uploadFileAndGetPath(f: File): Promise<{ filePath: string; fileName: string; fileSize: number }> {
+  async function uploadFileAndGetPath(f: File): Promise<{ filename: string; fileName: string; fileSize: number }> {
     const fd = new FormData()
     fd.append('file', f)
     const res = await fetch('/api/templates/upload', { method: 'POST', body: fd })
@@ -136,8 +136,8 @@ export default function SablonYonetimiSection() {
     if (!file) return
     setUploading(true)
     try {
-      const { filePath, fileName, fileSize } = await uploadFileAndGetPath(file)
-      await createSablon.mutateAsync({ ad: values.ad, kategori: values.kategori, belge_turu: values.belge_turu, filePath, fileName, fileSize })
+      const { filename, fileName, fileSize } = await uploadFileAndGetPath(file)
+      await createSablon.mutateAsync({ ad: values.ad, kategori: values.kategori, belge_turu: values.belge_turu, filename, fileName, fileSize })
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Yükleme başarısız. Lütfen tekrar deneyin.'
       toast.error(msg)
@@ -150,8 +150,8 @@ export default function SablonYonetimiSection() {
     if (!overwriteTarget || !file) return
     setUploading(true)
     try {
-      const { filePath, fileName } = await uploadFileAndGetPath(file)
-      await updateSablon.mutateAsync({ id: overwriteTarget.id, belge_turu: overwriteBelgeTuru, filePath, fileName })
+      const { filename, fileName } = await uploadFileAndGetPath(file)
+      await updateSablon.mutateAsync({ id: overwriteTarget.id, belge_turu: overwriteBelgeTuru, filename, fileName })
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Yükleme başarısız. Lütfen tekrar deneyin.'
       toast.error(msg)
