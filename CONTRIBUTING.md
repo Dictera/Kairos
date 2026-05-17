@@ -14,7 +14,7 @@ Katkıya başlamadan önce geliştirme ortamınızı kurun. / Set up your develo
 Kısa özet / Quick summary:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Dictera/Kairos.git
 cd kairos
 pnpm install
 cp .env.example .env         # ardından .env dosyasını düzenleyin
@@ -33,12 +33,12 @@ CI iş akışı `.github/workflows/ci.yml` dosyasında tanımlıdır.
 
 ## PR Süreci / Pull Request Guidelines
 
-1. `master` dalından yeni bir dal oluşturun.
+1. `main` dalından yeni bir dal oluşturun.
 2. Değişikliklerinizi yapın.
 3. Testleri çalıştırın: `pnpm test`
 4. Lint kontrolü yapın: `pnpm run lint`
 5. Değişikliklerinizi commit edin ve dalı push'layın.
-6. `master` dalına yönelik bir pull request açın.
+6. `main` dalına yönelik bir pull request açın.
 7. PR açıklamasında **neyi değiştirdiğinizi** ve **neden** değiştirdiğinizi açıklayın.
 8. CI (`pnpm run build` + `pnpm test`) başarılı olmalıdır. Başarısız CI kontrolleri olan PR'lar merge edilemez.
 
@@ -62,7 +62,7 @@ Net ve açıklayıcı commit mesajları yazın. Mümkünse [Conventional Commits
 
 ### Hata Bildirme / Reporting a Bug
 
-Hata bildirmek için [Bug Report](https://github.com/<repository>/issues/new?template=bug_report.md) şablonunu kullanın. / Use the Bug Report template.
+Hata bildirmek için [Bug Report](https://github.com/Dictera/Kairos/issues/new?template=bug_report.md) şablonunu kullanın. / Use the Bug Report template.
 
 Lütfen şu bilgileri ekleyin:
 - Hatanın kısa açıklaması / Brief description of the bug
@@ -72,7 +72,7 @@ Lütfen şu bilgileri ekleyin:
 
 ### Özellik İsteği / Requesting a Feature
 
-Yeni bir özellik önermek için [Feature Request](https://github.com/<repository>/issues/new?template=feature_request.md) şablonunu kullanın. / Use the Feature Request template.
+Yeni bir özellik önermek için [Feature Request](https://github.com/Dictera/Kairos/issues/new?template=feature_request.md) şablonunu kullanın. / Use the Feature Request template.
 
 Lütfen şu bilgileri ekleyin:
 - Özelliğin açıklaması / Feature description
