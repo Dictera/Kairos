@@ -2,7 +2,7 @@
 
 <!-- generated-by: gsd-doc-writer -->
 
-Sigorta uyuşmazlık davalarını takip eden, avukatlar için tasarlanmış yerel çalışan web uygulaması. STK Tahkim Komisyonu ve mahkeme süreçlerini, duruşma takvimini, kritik süreleri ve dosyaya ait tüm belge ile finans kayıtlarını tek ekrandan yönetir.
+Sigorta uyuşmazlık davalarını takip eden, avukatlar için tasarlanmış yerel çalışan web uygulaması. Sigorta Tahkim Komisyonu ve mahkeme süreçlerini, duruşma takvimini, kritik süreleri ve dosyaya ait tüm belge ile finans kayıtlarını tek ekrandan yönetir.
 
 ## Özellikler
 
