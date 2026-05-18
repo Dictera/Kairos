@@ -57,12 +57,14 @@ export async function sendPendingTelegramNotifications(): Promise<void> {
 
   for (const row of pending) {
     try {
-      await sendTelegramMessage(formatMessage(row))
-      // D-14: mark as sent immediately after successful send
-      await db
-        .update(bildirim)
-        .set({ telegram_sent_at: nowDateTimeStr() })
-        .where(eq(bildirim.id, row.id))
+      const sent = await sendTelegramMessage(formatMessage(row))
+      // D-14: mark as sent only when send actually succeeded
+      if (sent) {
+        await db
+          .update(bildirim)
+          .set({ telegram_sent_at: nowDateTimeStr() })
+          .where(eq(bildirim.id, row.id))
+      }
     } catch (err) {
       // D-16, D-17: per-row failure does not abort the loop
       console.error('[telegram] failed to send/update bildirim id:', row.id, String(err))

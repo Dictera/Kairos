@@ -11,13 +11,13 @@
  * - Network failure (fetch rejects): console.error, no throw
  */
 
-export async function sendTelegramMessage(text: string): Promise<void> {
+export async function sendTelegramMessage(text: string): Promise<boolean> {
   const token = process.env.TELEGRAM_BOT_TOKEN
   const chatId = process.env.TELEGRAM_CHAT_ID
 
   // D-11: silently skip if not configured — app continues working without Telegram
   if (!token || !chatId) {
-    return
+    return false
   }
 
   // SECURITY: URL contains the token — construct it but NEVER log it
@@ -38,9 +38,12 @@ export async function sendTelegramMessage(text: string): Promise<void> {
       // D-16: log error but do not throw — log only status + body, NOT the URL
       const body = await res.text()
       console.error('[telegram] sendMessage failed:', res.status, body)
+      return false
     }
+    return true
   } catch (err) {
     // D-16: network errors (DNS failure, timeout, etc.) are also silent
     console.error('[telegram] sendMessage network error:', String(err))
+    return false
   }
 }

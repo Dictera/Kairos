@@ -30,16 +30,16 @@ describe('TEL-02: sendTelegramMessage skips silently when env vars missing', () 
     delete process.env.TELEGRAM_CHAT_ID
   })
 
-  it('returns void (no throw) when TELEGRAM_BOT_TOKEN is missing', async () => {
+  it('returns false (no throw) when TELEGRAM_BOT_TOKEN is missing', async () => {
     const { sendTelegramMessage } = await import('@/lib/telegram/send')
-    await expect(sendTelegramMessage('test')).resolves.toBeUndefined()
+    await expect(sendTelegramMessage('test')).resolves.toBe(false)
   })
 
-  it('returns void (no throw) when TELEGRAM_CHAT_ID is missing', async () => {
+  it('returns false (no throw) when TELEGRAM_CHAT_ID is missing', async () => {
     process.env.TELEGRAM_BOT_TOKEN = 'fake-token'
     delete process.env.TELEGRAM_CHAT_ID
     const { sendTelegramMessage } = await import('@/lib/telegram/send')
-    await expect(sendTelegramMessage('test')).resolves.toBeUndefined()
+    await expect(sendTelegramMessage('test')).resolves.toBe(false)
   })
 })
 
@@ -63,7 +63,7 @@ describe('TEL-03: sendTelegramMessage does not throw on API error', () => {
       text: () => Promise.resolve('{"ok":false,"description":"Unauthorized"}'),
     }))
     const { sendTelegramMessage } = await import('@/lib/telegram/send')
-    await expect(sendTelegramMessage('test')).resolves.toBeUndefined()
+    await expect(sendTelegramMessage('test')).resolves.toBe(false)
   })
 
   it('does not throw when fetch rejects (network error)', async () => {
@@ -72,7 +72,7 @@ describe('TEL-03: sendTelegramMessage does not throw on API error', () => {
     // If it throws, this test will catch it as a failure
     const { sendTelegramMessage } = await import('@/lib/telegram/send')
     // Note: D-16 says "sessiz hata, console.error ile log" — no throw
-    await expect(sendTelegramMessage('test')).resolves.toBeUndefined()
+    await expect(sendTelegramMessage('test')).resolves.toBe(false)
   })
 })
 
