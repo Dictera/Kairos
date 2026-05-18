@@ -418,6 +418,7 @@ export const bildirim = sqliteTable('bildirim', {
   dosya_no: text('dosya_no'),
   tarih: text('tarih').notNull(), // ilgili olayin tarihi (YYYY-MM-DD)
   created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
+  telegram_sent_at: text('telegram_sent_at'),  // nullable — deduplication timestamp (D-12)
 }, (t) => [
   index('idx_bildirim_dosya').on(t.dosya_id),
   index('idx_bildirim_tarih').on(t.tarih),

@@ -10,16 +10,16 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 describe('TEL-01: bildirim schema has telegram_sent_at', () => {
   it('bildirim table definition includes telegram_sent_at column', async () => {
     const { bildirim } = await import('@/lib/schema')
-    expect(Object.keys(bildirim)).toBeDefined()
-    // Column must exist in the schema object
-    const columns = (bildirim as unknown as { _: { columns: Record<string, unknown> } })._.columns
+    // In drizzle-orm 0.45.x, columns are direct properties on the table object
+    const columns = bildirim as unknown as Record<string, unknown>
     expect(columns).toHaveProperty('telegram_sent_at')
   })
 
   it('telegram_sent_at is nullable (no notNull constraint)', async () => {
     const { bildirim } = await import('@/lib/schema')
-    const columns = (bildirim as unknown as { _: { columns: Record<string, { notNull: boolean }> } })._.columns
-    expect(columns['telegram_sent_at'].notNull).toBe(false)
+    // In drizzle-orm 0.45.x, column objects are direct properties with .notNull boolean
+    const col = (bildirim as unknown as Record<string, { notNull: boolean }>)['telegram_sent_at']
+    expect(col.notNull).toBe(false)
   })
 })
 
