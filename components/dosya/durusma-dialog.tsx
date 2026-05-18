@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { TimeField } from '@/components/ui/time-field'
 import { Textarea } from '@/components/ui/textarea'
 import {
   Form,
@@ -187,7 +188,11 @@ export function DurusmaDialog({
                 <FormItem>
                   <FormLabel>Saat</FormLabel>
                   <FormControl>
-                    <Input placeholder="09:30" {...field} />
+                    <TimeField
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
