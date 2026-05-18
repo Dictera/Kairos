@@ -5,20 +5,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { X, Send } from 'lucide-react'
+import { X, Send, Clock } from 'lucide-react'
 import { toast } from 'sonner'
-
-// HH:MM validation regex — mirrors Zod schema on server (D-03 security)
-const TIME_REGEX = /^\d{2}:\d{2}$/
+import { ClockPicker } from '@/components/clock-picker'
 
 export function TelegramBildirimSection() {
   const trpc = useTRPC()
   const qc = useQueryClient()
 
-  const [newTime, setNewTime] = useState('')
-  const [inputError, setInputError] = useState<string | null>(null)
+  const [clockOpen, setClockOpen] = useState(false)
 
   // ── Load configured cron times ─────────────────────────────────────────
   const scheduleOpts = trpc.telegram.getSchedule.queryOptions()
@@ -56,23 +52,14 @@ export function TelegramBildirimSection() {
     })
   )
 
-  // ── Add time handler ───────────────────────────────────────────────────
-  function handleAdd() {
-    setInputError(null)
-
-    if (!TIME_REGEX.test(newTime)) {
-      setInputError('SS:DD formatında girin (örn. 09:00)')
-      return
-    }
-
-    if (times.includes(newTime)) {
+  // ── Add time via clock picker ──────────────────────────────────────────
+  function handleTimeConfirm(time: string) {
+    if (times.includes(time)) {
       toast.error('Bu saat zaten ekli.')
       return
     }
-
-    const newTimes = [...times, newTime].sort()
+    const newTimes = [...times, time].sort()
     updateSchedule.mutate({ times: newTimes })
-    setNewTime('')
   }
 
   // ── Remove time handler ────────────────────────────────────────────────
@@ -149,43 +136,24 @@ export function TelegramBildirimSection() {
           </div>
         </div>
 
-        {/* Add time input + Saat Ekle button */}
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <Input
-              value={newTime}
-              onChange={(e) => {
-                setNewTime(e.target.value)
-                setInputError(null)
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleAdd()
-                if (e.key === 'Escape') {
-                  setNewTime('')
-                  setInputError(null)
-                }
-              }}
-              placeholder="09:00"
-              className="w-24 font-mono text-sm tabular-nums"
-              maxLength={5}
-              aria-label="Yeni bildirim saati (SS:DD)"
-              aria-invalid={inputError !== null ? 'true' : 'false'}
-              aria-describedby={inputError ? 'time-input-error' : undefined}
-            />
-            <Button
-              size="sm"
-              variant="default"
-              onClick={handleAdd}
-              disabled={updateSchedule.isPending}
-            >
-              {updateSchedule.isPending ? 'Saat ekleniyor…' : 'Saat Ekle'}
-            </Button>
-          </div>
-          {inputError && (
-            <p id="time-input-error" className="text-xs text-destructive">
-              {inputError}
-            </p>
-          )}
+        {/* Add time — clock picker trigger */}
+        <div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-2"
+            onClick={() => setClockOpen(true)}
+            disabled={updateSchedule.isPending}
+            type="button"
+          >
+            <Clock className="h-3.5 w-3.5" />
+            Saat Ekle
+          </Button>
+          <ClockPicker
+            open={clockOpen}
+            onOpenChange={setClockOpen}
+            onConfirm={handleTimeConfirm}
+          />
         </div>
 
         {/* Bağlantı Testi button — D-20 (Claude's discretion: include) */}
