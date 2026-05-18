@@ -30,14 +30,21 @@ function readSettings(): Record<string, unknown> {
 }
 
 function writeSettings(data: Record<string, unknown>): void {
-  fs.mkdirSync(path.dirname(SETTINGS_PATH), { recursive: true })
-  fs.writeFileSync(SETTINGS_PATH, JSON.stringify(data, null, 2), 'utf-8')
+  const dir = path.dirname(SETTINGS_PATH)
+  fs.mkdirSync(dir, { recursive: true })
+  const tmp = SETTINGS_PATH + '.tmp'
+  fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf-8')
+  fs.renameSync(tmp, SETTINGS_PATH)
 }
 
 // ── Zod schema for HH:MM time validation (D-03, security: cron injection prevention) ──
 const timeSchema = z
   .string()
   .regex(/^\d{2}:\d{2}$/, 'HH:MM formatı gerekli (örn. 09:00)')
+  .refine((t) => {
+    const [h, m] = t.split(':').map(Number)
+    return h >= 0 && h <= 23 && m >= 0 && m <= 59
+  }, 'Geçersiz saat (saat 00-23, dakika 00-59 arasında olmalı)')
 
 export const telegramRouter = createTRPCRouter({
   /**
