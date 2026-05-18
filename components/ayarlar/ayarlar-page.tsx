@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AyarlarCrudSection } from './ayarlar-crud-section'
 import { SigortaSirketiSection } from './sigorta-sirketi-section'
 import { PipelineStatus } from '@/components/pipeline/pipeline-status'
+import { TelegramBildirimSection } from '@/components/telegram-bildirim-section'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Check, X, FolderOpen, Pencil, Building2, List, Settings2 } from 'lucide-react'
@@ -131,6 +132,8 @@ export function AyarlarPage() {
 
       {/* ── SİSTEM ── */}
       <TabsContent value="sistem" className="space-y-6">
+        <TelegramBildirimSection />
+
         {/* Belgeler Yolu */}
         <Card>
           <CardHeader>
