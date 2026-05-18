@@ -28,10 +28,17 @@ function nowDateTimeStr(): string {
   return format(new Date(), 'yyyy-MM-dd HH:mm:ss')
 }
 
+const TR_MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık']
+const TR_DAYS = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi']
+
+function formatTurkishDate(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00')
+  return `${d.getDate()} ${TR_MONTHS[d.getMonth()]} ${d.getFullYear()}, ${TR_DAYS[d.getDay()]}`
+}
+
 function formatMessage(row: typeof bildirim.$inferSelect): string {
-  const tipLabel = row.tip === 'durusma' ? 'Duruşma' : 'Süre'
   const dosyaInfo = row.dosya_no ? ` — Dosya: ${row.dosya_no}` : ''
-  return `<b>${tipLabel} Hatırlatması</b>${dosyaInfo}\n${row.baslik}\n${row.mesaj}\n<i>Tarih: ${row.tarih}</i>`
+  return `<b>${row.baslik}</b>${dosyaInfo}\n${row.mesaj}\n<i>${formatTurkishDate(row.tarih)}</i>`
 }
 
 export async function sendPendingTelegramNotifications(): Promise<void> {

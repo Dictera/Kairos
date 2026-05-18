@@ -1,6 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { db } from '@/lib/db'
-import { bildirim, dosya, durusma, sure, muvekkil } from '@/lib/schema'
+import { bildirim, dosya, durusma, sure } from '@/lib/schema'
 import { eq, and, gte, lte, sql } from 'drizzle-orm'
 import { format, subDays, addDays } from 'date-fns'
 import { z } from 'zod'
@@ -27,18 +27,16 @@ export const bildirimRouter = createTRPCRouter({
       mahkeme_kurum: durusma.mahkeme_kurum,
       dosya_id: durusma.dosya_id,
       dosya_no: dosya.dosya_no,
-      muvekkil_ad: sql<string>`${muvekkil.ad} || ' ' || ${muvekkil.soyad}`,
     })
       .from(durusma)
       .innerJoin(dosya, eq(durusma.dosya_id, dosya.id))
-      .innerJoin(muvekkil, eq(dosya.muvekkil_id, muvekkil.id))
       .where(and(gte(durusma.tarih, yesterday), lte(durusma.tarih, tomorrow)))
       .orderBy(durusma.tarih, durusma.saat)
 
     for (const h of hearingRows) {
       const label = h.tarih === today ? 'Bugün' : h.tarih === yesterday ? 'Dün' : 'Yarın'
       const title = `${label} Duruşma`
-      const message = `${h.muvekkil_ad} — ${h.mahkeme_kurum ?? 'Mahkeme'}${h.saat ? ` (${h.saat})` : ''}`
+      const message = `${h.mahkeme_kurum ?? 'Mahkeme'}${h.saat ? ` (${h.saat})` : ''}`
       await db.insert(bildirim).values({
         tip: 'durusma',
         baslik: title,
@@ -57,18 +55,16 @@ export const bildirimRouter = createTRPCRouter({
       tur: sure.tur,
       dosya_id: sure.dosya_id,
       dosya_no: dosya.dosya_no,
-      muvekkil_ad: sql<string>`${muvekkil.ad} || ' ' || ${muvekkil.soyad}`,
     })
       .from(sure)
       .innerJoin(dosya, eq(sure.dosya_id, dosya.id))
-      .innerJoin(muvekkil, eq(dosya.muvekkil_id, muvekkil.id))
       .where(and(gte(sure.son_tarih, yesterday), lte(sure.son_tarih, tomorrow)))
       .orderBy(sure.son_tarih)
 
     for (const s of deadlineRows) {
       const label = s.son_tarih === today ? 'Bugün' : s.son_tarih === yesterday ? 'Dün' : 'Yarın'
       const title = `${label} Süre Sonu`
-      const message = `${s.muvekkil_ad} — ${s.ad}`
+      const message = s.ad
       await db.insert(bildirim).values({
         tip: 'sure',
         baslik: title,
