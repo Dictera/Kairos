@@ -4,12 +4,9 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { toast } from 'sonner'
-import { format, parseISO } from 'date-fns'
-import { tr } from 'date-fns/locale/tr'
-import { CalendarIcon } from 'lucide-react'
 import { DatePickerField } from '@/components/ui/date-picker'
 import {
   Dialog,
@@ -19,7 +16,6 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { TimeField } from '@/components/ui/time-field'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -30,8 +26,13 @@ import {
   FormControl,
   FormMessage,
 } from '@/components/ui/form'
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
-import { Calendar } from '@/components/ui/calendar'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const durusmaFormSchema = z.object({
   tarih: z.string().min(1, 'Tarih seçilmelidir.'),
@@ -64,6 +65,8 @@ export function DurusmaDialog({
   onOpenChange,
 }: DurusmaDialogProps) {
   const trpc = useTRPC()
+
+  const { data: mahkemeList = [] } = useQuery(trpc.ayarlar.mahkeme.list.queryOptions())
 
   const form = useForm<DurusmaFormValues>({
     resolver: zodResolver(durusmaFormSchema),
@@ -206,9 +209,20 @@ export function DurusmaDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Mahkeme/Kurum</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Mahkeme veya kurum adı" {...field} />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Mahkeme veya kurum seçin" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {mahkemeList.map((m) => (
+                        <SelectItem key={m.id} value={m.ad}>
+                          {m.ad}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -221,9 +235,18 @@ export function DurusmaDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Duruşma Türü</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Esas / ara karar / bilirkişi" {...field} />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Duruşma türü seçin" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="on_inceleme">Ön İnceleme</SelectItem>
+                      <SelectItem value="esas">Esas</SelectItem>
+                      <SelectItem value="karar">Karar</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
