@@ -101,7 +101,7 @@ export const telegramRouter = createTRPCRouter({
 
     try {
       await sendTelegramMessage(
-        '<b>Sigorta Takip</b>\nTelegram bağlantısı başarıyla test edildi.'
+        '<b>Kairos</b>\nTelegram bağlantısı başarıyla test edildi.'
       )
       return { ok: true as const }
     } catch (err) {
