@@ -13,7 +13,7 @@
       "idx": 1,
       "version": "6",
       "when": 1776194781546,
-      "tag": "0001_curious_jasper_sitwell",
+      "tag": "0001_add_phase13_columns",
       "breakpoints": true
     },
     {
@@ -75,8 +75,36 @@
     {
       "idx": 10,
       "version": "6",
+      "when": 1777233600000,
+      "tag": "0010_add_muvekkil_police_no",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
       "when": 1745539200000,
       "tag": "0011_add_finans_odeme_asamasi",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1777320000000,
+      "tag": "0012_add_karar_tutari_sonuc",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1777406400000,
+      "tag": "0013_add_arsiv_tarihi",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1777492800000,
+      "tag": "0014_add_telegram_sent_at",
       "breakpoints": true
     }
   ]
