@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, getDay } from "date-fns"
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, getDay, addDays } from "date-fns"
 import { tr } from "date-fns/locale/tr"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useTRPC } from "@/lib/trpc/context"
 import { useQuery } from "@tanstack/react-query"
 import Link from "next/link"
+import { getDaysUntil, isInAdliTatil } from "@/lib/deadline-service"
 
 export type CalendarEvent = {
   id: number
@@ -24,6 +25,8 @@ export type CalendarEvent = {
   tarih: string
   saat: string | null
 }
+
+type ActiveFilter = "all" | "süre" | "duruşma"
 
 const months = [
   { value: "0", label: "Ocak" },
@@ -42,11 +45,32 @@ const months = [
 
 const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i)
 
+/**
+ * Returns a Tailwind background class for a süre dot based on urgency.
+ * Only applies to "süre" type events; duruşma events use blue always.
+ */
+function getSureDotClass(daysUntil: number): string {
+  if (daysUntil < 0) return "bg-red-800"   // overdue
+  if (daysUntil <= 3) return "bg-red-500"   // 0–3 days
+  if (daysUntil <= 7) return "bg-orange-500" // 4–7 days
+  if (daysUntil <= 30) return "bg-amber-400" // 8–30 days
+  return "bg-green-500"                       // 31+ days
+}
+
+/**
+ * Returns the dot class for any event (süre uses urgency tiers, duruşma uses blue).
+ */
+function getEventDotClass(event: CalendarEvent): string {
+  if (event.type === "duruşma") return "bg-blue-500"
+  return getSureDotClass(getDaysUntil(event.tarih))
+}
+
 export function CalendarView() {
   const trpc = useTRPC()
   const [currentMonth, setCurrentMonth] = React.useState(new Date())
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null)
   const [popoverOpen, setPopoverOpen] = React.useState(false)
+  const [activeFilter, setActiveFilter] = React.useState<ActiveFilter>("all")
 
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
@@ -65,16 +89,38 @@ export function CalendarView() {
     placeholderData: (previousData) => previousData,
   })
 
+  // Filter events by active chip (only for grid display)
+  const filteredEvents = React.useMemo(() => {
+    if (!data?.events) return []
+    if (activeFilter === "all") return data.events
+    return data.events.filter((e) => e.type === activeFilter)
+  }, [data, activeFilter])
+
   const eventsMap = React.useMemo(() => {
     const map = new Map<string, CalendarEvent[]>()
-    if (!data?.events) return map
-
-    for (const event of data.events) {
+    for (const event of filteredEvents) {
       const existing = map.get(event.tarih) || []
       existing.push(event)
       map.set(event.tarih, existing)
     }
     return map
+  }, [filteredEvents])
+
+  // Upcoming 7-day panel — always reads raw data regardless of active filter
+  const upcomingEvents = React.useMemo(() => {
+    if (!data?.events) return []
+    const today = new Date()
+    const todayStr = format(today, "yyyy-MM-dd")
+    const endStr = format(addDays(today, 7), "yyyy-MM-dd")
+    return data.events
+      .filter((e) => e.tarih >= todayStr && e.tarih <= endStr)
+      .sort((a, b) => {
+        if (a.tarih !== b.tarih) return a.tarih.localeCompare(b.tarih)
+        // sort by time within same day
+        const aTime = a.saat ?? "00:00"
+        const bTime = b.saat ?? "00:00"
+        return aTime.localeCompare(bTime)
+      })
   }, [data])
 
   const handlePrevMonth = () => {
@@ -114,9 +160,9 @@ export function CalendarView() {
   const weekDays = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full gap-4">
       {/* Header with month navigation */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" onClick={handlePrevMonth}>
             <ChevronLeftIcon className="size-4" />
@@ -164,6 +210,20 @@ export function CalendarView() {
             Bugün
           </Button>
 
+          {/* Filter chips */}
+          <div className="flex items-center gap-1">
+            {(["all", "süre", "duruşma"] as const).map((filter) => (
+              <Button
+                key={filter}
+                variant={activeFilter === filter ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActiveFilter(filter)}
+              >
+                {filter === "all" ? "Tümü" : filter === "süre" ? "Süreler" : "Duruşmalar"}
+              </Button>
+            ))}
+          </div>
+
           {/* Legend */}
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
@@ -202,6 +262,14 @@ export function CalendarView() {
           const dayEvents = eventsMap.get(dateStr) || []
           const hasEvents = dayEvents.length > 0
           const isSelected = selectedDate && isSameDay(day, selectedDate)
+          const adliTatil = isInAdliTatil(dateStr)
+
+          // Inline name preview for single-event days
+          const singleEventLabel = dayEvents.length === 1
+            ? (dayEvents[0].type === "duruşma" && dayEvents[0].saat
+                ? `${dayEvents[0].saat} ${dayEvents[0].ad}`
+                : dayEvents[0].ad)
+            : null
 
           return (
             <Popover key={dateStr} open={!!(isSelected && popoverOpen)} onOpenChange={setPopoverOpen}>
@@ -212,17 +280,25 @@ export function CalendarView() {
                     "relative flex flex-col items-center justify-start p-2 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors text-left h-full",
                     !isSameMonth(day, currentMonth) && "text-muted-foreground",
                     isToday(day) && "border-primary border-2",
-                    isSelected && "bg-muted ring-2 ring-primary ring-offset-2"
+                    isSelected && "bg-muted ring-2 ring-primary ring-offset-2",
+                    adliTatil && "bg-yellow-50/40"
                   )}
                 >
-                  <span
-                    className={cn(
-                      "text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full",
-                      isToday(day) && "bg-primary text-primary-foreground"
+                  <div className="flex items-center justify-between w-full">
+                    <span
+                      className={cn(
+                        "text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full",
+                        isToday(day) && "bg-primary text-primary-foreground"
+                      )}
+                    >
+                      {format(day, "d")}
+                    </span>
+                    {adliTatil && (
+                      <span className="text-[9px] font-semibold text-amber-700 leading-none px-0.5">
+                        AT
+                      </span>
                     )}
-                  >
-                    {format(day, "d")}
-                  </span>
+                  </div>
 
                   {hasEvents && (
                     <div className="flex flex-wrap gap-1 mt-1 justify-center">
@@ -231,7 +307,7 @@ export function CalendarView() {
                           key={`${event.type}-${event.id}-${idx}`}
                           className={cn(
                             "w-2 h-2 rounded-full",
-                            event.type === "süre" ? "bg-red-500" : "bg-blue-500"
+                            getEventDotClass(event)
                           )}
                         />
                       ))}
@@ -246,7 +322,7 @@ export function CalendarView() {
                   {dayEvents.length > 0 && (
                     <div className="mt-auto pt-1 w-full">
                       <span className="text-[10px] text-muted-foreground truncate block">
-                        {dayEvents.length} etkinlik
+                        {singleEventLabel ?? `${dayEvents.length} etkinlik`}
                       </span>
                     </div>
                   )}
@@ -273,7 +349,7 @@ export function CalendarView() {
                         <span
                           className={cn(
                             "w-2 h-2 rounded-full shrink-0",
-                            event.type === "süre" ? "bg-red-500" : "bg-blue-500"
+                            getEventDotClass(event)
                           )}
                         />
                         <div className="flex-1 min-w-0">
@@ -297,6 +373,39 @@ export function CalendarView() {
             </Popover>
           )
         })}
+      </div>
+
+      {/* Upcoming 7-day panel */}
+      <div className="border-t border-border pt-4">
+        <h3 className="text-sm font-semibold mb-2">Yaklaşan 7 Gün</h3>
+        {upcomingEvents.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Önümüzdeki 7 günde etkinlik yok</p>
+        ) : (
+          <div className="space-y-1">
+            {upcomingEvents.map((event) => (
+              <Link
+                key={`upcoming-${event.type}-${event.id}`}
+                href={`/dosyalar/${event.dosya_id}`}
+                className="flex items-center gap-3 p-2 rounded-md hover:bg-muted transition-colors text-sm"
+              >
+                <span className="text-xs text-muted-foreground w-20 shrink-0">
+                  {format(new Date(event.tarih + "T12:00:00"), "dd MMM", { locale: tr })}
+                  {event.saat ? ` ${event.saat}` : ""}
+                </span>
+                <span
+                  className={cn("w-2 h-2 rounded-full shrink-0", getEventDotClass(event))}
+                />
+                <span className="flex-1 truncate">{event.ad}</span>
+                <Badge
+                  variant={event.type === "süre" ? "destructive" : "secondary"}
+                  className="shrink-0 text-xs"
+                >
+                  {event.type === "süre" ? "Süre" : "Duruşma"}
+                </Badge>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
