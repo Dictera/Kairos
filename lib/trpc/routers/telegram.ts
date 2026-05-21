@@ -5,37 +5,19 @@
  * - getSchedule: read current cron times from settings.json
  * - updateSchedule: validate times, write to settings.json, hot-reload cron tasks (D-04)
  * - testConnection: send a test message to verify BOT_TOKEN + CHAT_ID work
+ * - getToggles: read notification category toggle states from settings.json
+ * - updateToggles: validate 3 boolean toggles via Zod and persist to settings.json
  *
  * Security:
  * - All procedures: protectedProcedure (session required)
  * - updateSchedule input: Zod regex /^\d{2}:\d{2}$/ — prevents cron expression injection
+ * - updateToggles input: Zod z.boolean() on all 3 fields — rejects non-boolean values
  * - testConnection: returns structured result, never throws to client
  */
 import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { z } from 'zod'
-import fs from 'fs'
-import path from 'path'
 import { sendTelegramMessage } from '@/lib/telegram/send'
-
-// ── Settings helpers — copied from ayarlar.ts (not exported there, project pattern) ──
-const SETTINGS_PATH = path.join(process.cwd(), 'data', 'settings.json')
-
-function readSettings(): Record<string, unknown> {
-  try {
-    const raw = fs.readFileSync(SETTINGS_PATH, 'utf-8')
-    return JSON.parse(raw) as Record<string, unknown>
-  } catch {
-    return {}
-  }
-}
-
-function writeSettings(data: Record<string, unknown>): void {
-  const dir = path.dirname(SETTINGS_PATH)
-  fs.mkdirSync(dir, { recursive: true })
-  const tmp = SETTINGS_PATH + '.tmp'
-  fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf-8')
-  fs.renameSync(tmp, SETTINGS_PATH)
-}
+import { readSettings, writeSettings } from '@/lib/telegram/settings-helper'
 
 // ── Zod schema for HH:MM time validation (D-03, security: cron injection prevention) ──
 const timeSchema = z
@@ -45,6 +27,13 @@ const timeSchema = z
     const [h, m] = t.split(':').map(Number)
     return h >= 0 && h <= 23 && m >= 0 && m <= 59
   }, 'Geçersiz saat (saat 00-23, dakika 00-59 arasında olmalı)')
+
+// ── Zod schema for notification category toggles (T-26-02-01: boolean validation) ──
+const togglesSchema = z.object({
+  telegram_gunluk_durusma_aktif: z.boolean(),
+  telegram_gunluk_sure_aktif: z.boolean(),
+  telegram_haftalik_ozet_aktif: z.boolean(),
+})
 
 export const telegramRouter = createTRPCRouter({
   /**
@@ -110,5 +99,33 @@ export const telegramRouter = createTRPCRouter({
         error: `Telegram API hatası: ${String(err)}`,
       }
     }
+  }),
+
+  /**
+   * getToggles — read notification category toggle states from settings.json
+   * Returns true defaults for all 3 keys when not yet configured (T-26-02-02: protectedProcedure)
+   */
+  getToggles: protectedProcedure.query(() => {
+    const settings = readSettings()
+    return {
+      telegram_gunluk_durusma_aktif:
+        (settings.telegram_gunluk_durusma_aktif as boolean | undefined) ?? true,
+      telegram_gunluk_sure_aktif:
+        (settings.telegram_gunluk_sure_aktif as boolean | undefined) ?? true,
+      telegram_haftalik_ozet_aktif:
+        (settings.telegram_haftalik_ozet_aktif as boolean | undefined) ?? true,
+    }
+  }),
+
+  /**
+   * updateToggles — validate 3 boolean toggles via Zod, merge into settings.json
+   * T-26-02-01: Zod z.boolean() rejects non-boolean values before writeSettings
+   * T-26-02-03: Object.assign preserves unrelated settings.json keys (belgelerPath, saatler, etc.)
+   */
+  updateToggles: protectedProcedure.input(togglesSchema).mutation(({ input }) => {
+    const settings = readSettings()
+    Object.assign(settings, input)
+    writeSettings(settings)
+    return { ok: true }
   }),
 })
