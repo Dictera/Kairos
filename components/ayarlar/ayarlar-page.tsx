@@ -13,6 +13,8 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Check, X, FolderOpen, Pencil, Building2, List, Settings2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 
 export function AyarlarPage() {
   const trpc = useTRPC()
@@ -53,6 +55,15 @@ export function AyarlarPage() {
   const delSigortaTuru = useMutation(
     trpc.ayarlar.sigortaTuru.delete.mutationOptions({
       onSuccess: () => qc.invalidateQueries({ queryKey: sigortaTuruOpts.queryKey }),
+    })
+  )
+
+  // Takvim Export Goster
+  const exportGosterOpts = trpc.ayarlar.takvim.getExportGoster.queryOptions()
+  const { data: exportData } = useQuery(exportGosterOpts)
+  const setExportGoster = useMutation(
+    trpc.ayarlar.takvim.setExportGoster.mutationOptions({
+      onSuccess: () => qc.invalidateQueries({ queryKey: exportGosterOpts.queryKey }),
     })
   )
 
@@ -190,6 +201,31 @@ export function AyarlarPage() {
                 </Button>
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Takvim Export */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold">Takvim</CardTitle>
+            <CardDescription>
+              Takvim sayfasındaki export ve abonelik butonları
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="font-medium">Export Butonlarını Göster</Label>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Takvim sayfasında &quot;Takvimi İndir&quot; ve &quot;Abone Ol&quot; butonlarını göster/gizle
+                </p>
+              </div>
+              <Switch
+                checked={exportData?.goster ?? true}
+                onCheckedChange={(v) => setExportGoster.mutate({ value: v })}
+                disabled={setExportGoster.isPending}
+              />
+            </div>
           </CardContent>
         </Card>
 
