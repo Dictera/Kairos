@@ -77,9 +77,9 @@
   **Wave 0**
   - [x] 26-00-PLAN.md — Test scaffold (BLD-01..BLD-08 stubs)
   **Wave 1** *(blocked on Wave 0 completion)*
-  - [ ] 26-01-PLAN.md — settings-helper.ts + notify.ts grouped messages + weekly.ts formalize
+  - [x] 26-01-PLAN.md — settings-helper.ts + notify.ts grouped messages + weekly.ts formalize
   **Wave 2** *(blocked on Wave 1 completion)*
-  - [ ] 26-02-PLAN.md — telegram.ts router getToggles + updateToggles procedures
+  - [x] 26-02-PLAN.md — telegram.ts router getToggles + updateToggles procedures
   **Wave 3** *(blocked on Wave 2 completion)*
   - [ ] 26-03-PLAN.md — TelegramBildirimSection 3 Switch toggles + human verify
   **Cross-cutting constraints:**
@@ -183,7 +183,7 @@
 | 23. GitHub Repo Yayını | v1.3 | 0/2 | Not started | - |
 | 24. Kalite & CI | v1.3 | 2/2 | Complete   | 2026-05-16 |
 | 25. Telegram Bildirim Servisi | v1.3 | 0/5 | Not started | - |
-| 26. Bildirim Sisteminin İyileştirilmesi | v1.3 | 1/4 | In Progress|  |
+| 26. Bildirim Sisteminin İyileştirilmesi | v1.3 | 3/4 | In Progress|  |
 
 ---
 
