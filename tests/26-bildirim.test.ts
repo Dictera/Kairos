@@ -6,6 +6,15 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
+// Top-level module mocks — must be at top level so execution order matches hoisting
+vi.mock('@/lib/telegram/send', () => ({
+  sendTelegramMessage: vi.fn().mockResolvedValue(true),
+}))
+vi.mock('@/lib/telegram/settings-helper', () => ({
+  readSettings: vi.fn().mockReturnValue({}),
+  writeSettings: vi.fn(),
+}))
+
 // Row type used in BLD-02, BLD-03, BLD-05 test data
 type Row = { id: number; tip: string; tarih: string; dosya_no: string | null; mesaj: string | null }
 
@@ -126,24 +135,17 @@ describe('BLD-06: weekly.ts durusma rows included in output', () => {
 
 // ── BLD-07: weekly.ts toggle=false → returns early ──────────────────────────
 describe('BLD-07: weekly.ts toggle=false → returns early, no message sent', () => {
-  beforeEach(() => {
-    vi.mock('@/lib/telegram/send', () => ({
-      sendTelegramMessage: vi.fn().mockResolvedValue(true),
-    }))
+  beforeEach(async () => {
+    const { readSettings } = await import('@/lib/telegram/settings-helper')
+    vi.mocked(readSettings).mockReturnValue({ telegram_haftalik_ozet_aktif: false })
   })
 
   afterEach(() => {
-    vi.restoreAllMocks()
+    vi.clearAllMocks()
     vi.resetModules()
   })
 
   it('sendTelegramMessage is NOT called when telegram_haftalik_ozet_aktif=false', async () => {
-    // Mock settings-helper to return toggle=false
-    vi.mock('@/lib/telegram/settings-helper', () => ({
-      readSettings: vi.fn().mockReturnValue({ telegram_haftalik_ozet_aktif: false }),
-      writeSettings: vi.fn(),
-    }))
-
     const sendModule = await import('@/lib/telegram/send')
     const mockSend = vi.mocked(sendModule.sendTelegramMessage)
 

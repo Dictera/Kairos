@@ -72,7 +72,7 @@
   - [ ] 25-02-PLAN.md — lib/telegram/notify.ts + lib/telegram/cron.ts + instrumentation.ts
   - [ ] 25-03-PLAN.md — lib/trpc/routers/telegram.ts + _app.ts registration
   - [ ] 25-04-PLAN.md — components/telegram-bildirim-section.tsx + ayarlar-page.tsx mount + .env.example
-- [ ] **Phase 26: Bildirim Sisteminin İyileştirilmesi** — Mevcut bildirim sisteminin kapsamlı iyileştirilmesi
+- [x] **Phase 26: Bildirim Sisteminin İyileştirilmesi** — Mevcut bildirim sisteminin kapsamlı iyileştirilmesi (completed 2026-05-21)
   **Plans**: 4 plans
   **Wave 0**
   - [x] 26-00-PLAN.md — Test scaffold (BLD-01..BLD-08 stubs)
@@ -81,7 +81,7 @@
   **Wave 2** *(blocked on Wave 1 completion)*
   - [x] 26-02-PLAN.md — telegram.ts router getToggles + updateToggles procedures
   **Wave 3** *(blocked on Wave 2 completion)*
-  - [ ] 26-03-PLAN.md — TelegramBildirimSection 3 Switch toggles + human verify
+  - [x] 26-03-PLAN.md — TelegramBildirimSection 3 Switch toggles + human verify
   **Cross-cutting constraints:**
   - `?? true` defaults required for all 3 toggle keys (never `|| true`)
   - `telegram_sent_at` NOT updated for rows skipped due to disabled toggle
@@ -183,7 +183,7 @@
 | 23. GitHub Repo Yayını | v1.3 | 0/2 | Not started | - |
 | 24. Kalite & CI | v1.3 | 2/2 | Complete   | 2026-05-16 |
 | 25. Telegram Bildirim Servisi | v1.3 | 0/5 | Not started | - |
-| 26. Bildirim Sisteminin İyileştirilmesi | v1.3 | 3/4 | In Progress|  |
+| 26. Bildirim Sisteminin İyileştirilmesi | v1.3 | 4/4 | Complete   | 2026-05-21 |
 
 ---
 
