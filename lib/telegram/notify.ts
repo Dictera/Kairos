@@ -32,10 +32,11 @@ function nowDateTimeStr(): string {
 }
 
 // ── Row type for buildGroupedMessage ──────────────────────────────────────────
-type BildirimRow = Pick<typeof bildirim.$inferSelect, 'id' | 'dosya_no' | 'mesaj' | 'tarih'>
+// mesaj is notNull in schema but tests pass nullable rows — allow null for safety
+type BildirimRow = { id: number; dosya_no: string | null; mesaj: string | null; tarih: string }
 
 // ── Row formatter (em dash —, not hyphen) ────────────────────────────────────
-function formatDailyRow(row: Pick<typeof bildirim.$inferSelect, 'dosya_no' | 'mesaj'>): string {
+function formatDailyRow(row: { dosya_no: string | null; mesaj: string | null }): string {
   const parts: string[] = []
   if (row.dosya_no) parts.push(row.dosya_no)
   if (row.mesaj) parts.push(row.mesaj)
