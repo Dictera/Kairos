@@ -7,11 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AyarlarCrudSection } from './ayarlar-crud-section'
 import { SigortaSirketiSection } from './sigorta-sirketi-section'
+import { ChangelogSection } from './changelog-section'
 import { PipelineStatus } from '@/components/pipeline/pipeline-status'
 import { TelegramBildirimSection } from '@/components/telegram-bildirim-section'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Check, X, FolderOpen, Pencil, Building2, List, Settings2 } from 'lucide-react'
+import { Check, X, FolderOpen, Pencil, Building2, List, Settings2, ScrollText } from 'lucide-react'
 import { toast } from 'sonner'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -67,6 +68,10 @@ export function AyarlarPage() {
     })
   )
 
+  // Changelog
+  const changelogOpts = trpc.ayarlar.getChangelog.queryOptions()
+  const { data: changelogData } = useQuery(changelogOpts)
+
   // Belgeler Yolu
   const belgelerOpts = trpc.ayarlar.belgeler.getPath.queryOptions()
   const { data: belgelerData } = useQuery(belgelerOpts)
@@ -98,7 +103,7 @@ export function AyarlarPage() {
 
   return (
     <Tabs defaultValue="kurumlar" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-3 max-w-md">
+      <TabsList className="grid w-full grid-cols-4 max-w-2xl">
         <TabsTrigger value="kurumlar" className="gap-1.5">
           <Building2 className="h-3.5 w-3.5" />
           Kurumlar
@@ -110,6 +115,10 @@ export function AyarlarPage() {
         <TabsTrigger value="sistem" className="gap-1.5">
           <Settings2 className="h-3.5 w-3.5" />
           Sistem
+        </TabsTrigger>
+        <TabsTrigger value="changelog" className="gap-1.5">
+          <ScrollText className="h-3.5 w-3.5" />
+          Changelog
         </TabsTrigger>
       </TabsList>
 
@@ -255,6 +264,11 @@ export function AyarlarPage() {
 
         {/* Pipeline */}
         <PipelineStatus />
+      </TabsContent>
+
+      {/* ── CHANGELOG ── */}
+      <TabsContent value="changelog">
+        <ChangelogSection content={changelogData?.content ?? ''} />
       </TabsContent>
     </Tabs>
   )
