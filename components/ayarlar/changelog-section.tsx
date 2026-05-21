@@ -7,6 +7,16 @@ interface ChangelogSectionProps {
   content: string
 }
 
+function renderInline(text: string): React.ReactNode[] {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>
+    }
+    return part
+  })
+}
+
 export function ChangelogSection({ content }: ChangelogSectionProps) {
   const lines = content.split('\n')
 
@@ -17,7 +27,7 @@ export function ChangelogSection({ content }: ChangelogSectionProps) {
           key={i}
           className="font-semibold text-base border-b pb-1 mb-2 mt-4 first:mt-0"
         >
-          {line.replace(/^## /, '')}
+          {renderInline(line.replace(/^## /, ''))}
         </h2>
       )
     }
@@ -27,14 +37,14 @@ export function ChangelogSection({ content }: ChangelogSectionProps) {
           key={i}
           className="font-medium text-sm text-muted-foreground mt-3 mb-1"
         >
-          {line.replace(/^### /, '')}
+          {renderInline(line.replace(/^### /, ''))}
         </h3>
       )
     }
     if (line.startsWith('- ') || line.startsWith('* ')) {
       return (
         <ul key={i} className="list-disc list-inside">
-          <li className="text-sm">{line.replace(/^[-*] /, '')}</li>
+          <li className="text-sm">{renderInline(line.replace(/^[-*] /, ''))}</li>
         </ul>
       )
     }
@@ -43,7 +53,7 @@ export function ChangelogSection({ content }: ChangelogSectionProps) {
     }
     return (
       <p key={i} className="text-sm">
-        {line}
+        {renderInline(line)}
       </p>
     )
   })
