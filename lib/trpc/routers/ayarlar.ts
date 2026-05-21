@@ -201,6 +201,15 @@ export const ayarlarRouter = createTRPCRouter({
       }),
   }),
 
+  getChangelog: protectedProcedure.query(() => {
+    const changelogPath = path.join(process.cwd(), 'CHANGELOG.md')
+    try {
+      return { content: fs.readFileSync(changelogPath, 'utf-8') }
+    } catch {
+      return { content: '' }
+    }
+  }),
+
   belgeler: createTRPCRouter({
     getPath: protectedProcedure.query(() => {
       const settings = readSettings()
