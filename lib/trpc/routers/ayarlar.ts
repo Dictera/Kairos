@@ -185,6 +185,22 @@ export const ayarlarRouter = createTRPCRouter({
       }),
   }),
 
+  takvim: createTRPCRouter({
+    getExportGoster: protectedProcedure.query(() => {
+      const settings = readSettings()
+      const goster: boolean = settings.takvimExportGoster !== undefined ? Boolean(settings.takvimExportGoster) : true
+      return { goster }
+    }),
+    setExportGoster: protectedProcedure
+      .input(z.object({ value: z.boolean() }))
+      .mutation(({ input }) => {
+        const settings = readSettings()
+        settings.takvimExportGoster = input.value
+        writeSettings(settings)
+        return { success: true }
+      }),
+  }),
+
   belgeler: createTRPCRouter({
     getPath: protectedProcedure.query(() => {
       const settings = readSettings()
