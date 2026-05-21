@@ -160,248 +160,251 @@ export function CalendarView() {
   const weekDays = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
 
   return (
-    <div className="flex flex-col h-full gap-4">
-      {/* Header with month navigation */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={handlePrevMonth}>
-            <ChevronLeftIcon className="size-4" />
-          </Button>
+    <div className="flex h-full gap-4 min-h-0">
+      {/* Left: Main calendar */}
+      <div className="flex flex-col flex-1 min-w-0 gap-2">
+        {/* Header with month navigation */}
+        <div className="flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-1.5">
+            <Button variant="outline" size="icon" className="size-8" onClick={handlePrevMonth}>
+              <ChevronLeftIcon className="size-3.5" />
+            </Button>
+
+            <div className="flex items-center gap-1.5">
+              <Select value={String(currentMonth.getMonth())} onValueChange={handleMonthChange}>
+                <SelectTrigger className="w-[100px] h-8 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {months.map((m) => (
+                    <SelectItem key={m.value} value={m.value}>
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={String(currentMonth.getFullYear())} onValueChange={handleYearChange}>
+                <SelectTrigger className="w-[90px] h-8 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((y) => (
+                    <SelectItem key={y} value={String(y)}>
+                      {y}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button variant="outline" size="icon" className="size-8" onClick={handleNextMonth}>
+              <ChevronRightIcon className="size-3.5" />
+            </Button>
+          </div>
 
           <div className="flex items-center gap-2">
-            <Select value={String(currentMonth.getMonth())} onValueChange={handleMonthChange}>
-              <SelectTrigger className="w-[110px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {months.map((m) => (
-                  <SelectItem key={m.value} value={m.value}>
-                    {m.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={() => setCurrentMonth(new Date())}
+            >
+              Bugün
+            </Button>
 
-            <Select value={String(currentMonth.getFullYear())} onValueChange={handleYearChange}>
-              <SelectTrigger className="w-[100px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map((y) => (
-                  <SelectItem key={y} value={String(y)}>
-                    {y}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button variant="outline" size="icon" onClick={handleNextMonth}>
-            <ChevronRightIcon className="size-4" />
-          </Button>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentMonth(new Date())}
-          >
-            Bugün
-          </Button>
-
-          {/* Filter chips */}
-          <div className="flex items-center gap-1">
-            {(["all", "süre", "duruşma"] as const).map((filter) => (
-              <Button
-                key={filter}
-                variant={activeFilter === filter ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveFilter(filter)}
-              >
-                {filter === "all" ? "Tümü" : filter === "süre" ? "Süreler" : "Duruşmalar"}
-              </Button>
-            ))}
-          </div>
-
-          {/* Legend */}
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-red-500" />
-              Süre
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-blue-500" />
-              Duruşma
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Weekday headers */}
-      <div className="grid grid-cols-7 gap-1 mb-1">
-        {weekDays.map((day) => (
-          <div
-            key={day}
-            className="text-center text-sm font-medium text-muted-foreground py-2"
-          >
-            {day}
-          </div>
-        ))}
-      </div>
-
-      {/* Calendar grid */}
-      <div className="flex-1 grid grid-cols-7 gap-1 auto-rows-fr">
-        {/* Leading empty cells to align day 1 with the correct weekday */}
-        {Array.from({ length: startOffset }).map((_, i) => (
-          <div key={`offset-${i}`} />
-        ))}
-
-        {daysInMonth.map((day) => {
-          const dateStr = format(day, "yyyy-MM-dd")
-          const dayEvents = eventsMap.get(dateStr) || []
-          const hasEvents = dayEvents.length > 0
-          const isSelected = selectedDate && isSameDay(day, selectedDate)
-          const adliTatil = isInAdliTatil(dateStr)
-
-          // Inline name preview for single-event days
-          const singleEventLabel = dayEvents.length === 1
-            ? (dayEvents[0].type === "duruşma" && dayEvents[0].saat
-                ? `${dayEvents[0].saat} ${dayEvents[0].ad}`
-                : dayEvents[0].ad)
-            : null
-
-          return (
-            <Popover key={dateStr} open={!!(isSelected && popoverOpen)} onOpenChange={setPopoverOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  onClick={() => handleDayClick(day)}
-                  className={cn(
-                    "relative flex flex-col items-center justify-start p-2 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors text-left h-full",
-                    !isSameMonth(day, currentMonth) && "text-muted-foreground",
-                    isToday(day) && "border-primary border-2",
-                    isSelected && "bg-muted ring-2 ring-primary ring-offset-2",
-                    adliTatil && "bg-yellow-50/40"
-                  )}
+            {/* Filter chips */}
+            <div className="flex items-center gap-1">
+              {(["all", "süre", "duruşma"] as const).map((filter) => (
+                <Button
+                  key={filter}
+                  variant={activeFilter === filter ? "default" : "outline"}
+                  size="sm"
+                  className="h-7 text-xs px-2"
+                  onClick={() => setActiveFilter(filter)}
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <span
-                      className={cn(
-                        "text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full",
-                        isToday(day) && "bg-primary text-primary-foreground"
-                      )}
-                    >
-                      {format(day, "d")}
-                    </span>
-                    {adliTatil && (
-                      <span className="text-[9px] font-semibold text-amber-700 leading-none px-0.5">
-                        AT
-                      </span>
-                    )}
-                  </div>
+                  {filter === "all" ? "Tümü" : filter === "süre" ? "Süreler" : "Duruşmalar"}
+                </Button>
+              ))}
+            </div>
 
-                  {hasEvents && (
-                    <div className="flex flex-wrap gap-1 mt-1 justify-center">
-                      {dayEvents.slice(0, 3).map((event, idx) => (
-                        <span
-                          key={`${event.type}-${event.id}-${idx}`}
-                          className={cn(
-                            "w-2 h-2 rounded-full",
-                            getEventDotClass(event)
-                          )}
-                        />
-                      ))}
-                      {dayEvents.length > 3 && (
-                        <span className="text-[10px] text-muted-foreground">
-                          +{dayEvents.length - 3}
+            {/* Legend */}
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-red-500" />
+                Süre
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-blue-500" />
+                Duruşma
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Weekday headers */}
+        <div className="grid grid-cols-7 gap-1 shrink-0">
+          {weekDays.map((day) => (
+            <div
+              key={day}
+              className="text-center text-xs font-medium text-muted-foreground py-1"
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+
+        {/* Calendar grid */}
+        <div className="flex-1 grid grid-cols-7 gap-1 auto-rows-fr min-h-0">
+          {/* Leading empty cells to align day 1 with the correct weekday */}
+          {Array.from({ length: startOffset }).map((_, i) => (
+            <div key={`offset-${i}`} />
+          ))}
+
+          {daysInMonth.map((day) => {
+            const dateStr = format(day, "yyyy-MM-dd")
+            const dayEvents = eventsMap.get(dateStr) || []
+            const hasEvents = dayEvents.length > 0
+            const isSelected = selectedDate && isSameDay(day, selectedDate)
+            const adliTatil = isInAdliTatil(dateStr)
+
+            const singleEventLabel = dayEvents.length === 1
+              ? (dayEvents[0].type === "duruşma" && dayEvents[0].saat
+                  ? `${dayEvents[0].saat} ${dayEvents[0].ad}`
+                  : dayEvents[0].ad)
+              : null
+
+            return (
+              <Popover key={dateStr} open={!!(isSelected && popoverOpen)} onOpenChange={setPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    onClick={() => handleDayClick(day)}
+                    className={cn(
+                      "relative flex flex-col items-center justify-start p-1.5 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors text-left h-full",
+                      !isSameMonth(day, currentMonth) && "text-muted-foreground",
+                      isToday(day) && "border-primary border-2",
+                      isSelected && "bg-muted ring-2 ring-primary ring-offset-1",
+                      adliTatil && "bg-yellow-50/40"
+                    )}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span
+                        className={cn(
+                          "text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full",
+                          isToday(day) && "bg-primary text-primary-foreground"
+                        )}
+                      >
+                        {format(day, "d")}
+                      </span>
+                      {adliTatil && (
+                        <span className="text-[8px] font-semibold text-amber-700 leading-none">
+                          AT
                         </span>
                       )}
                     </div>
-                  )}
 
-                  {dayEvents.length > 0 && (
-                    <div className="mt-auto pt-1 w-full">
-                      <span className="text-[10px] text-muted-foreground truncate block">
-                        {singleEventLabel ?? `${dayEvents.length} etkinlik`}
-                      </span>
+                    {hasEvents && (
+                      <div className="flex flex-wrap gap-0.5 mt-0.5 justify-center">
+                        {dayEvents.slice(0, 3).map((event, idx) => (
+                          <span
+                            key={`${event.type}-${event.id}-${idx}`}
+                            className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              getEventDotClass(event)
+                            )}
+                          />
+                        ))}
+                        {dayEvents.length > 3 && (
+                          <span className="text-[9px] text-muted-foreground">
+                            +{dayEvents.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {dayEvents.length > 0 && (
+                      <div className="mt-auto pt-0.5 w-full">
+                        <span className="text-[9px] text-muted-foreground truncate block leading-tight">
+                          {singleEventLabel ?? `${dayEvents.length} etkinlik`}
+                        </span>
+                      </div>
+                    )}
+                  </button>
+                </PopoverTrigger>
+
+                {hasEvents && (
+                  <PopoverContent className="w-80 p-0" align="start">
+                    <div className="p-3 border-b border-border">
+                      <p className="font-semibold">{format(day, "dd MMMM yyyy", { locale: tr })}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {dayEvents.length} etkinlik
+                      </p>
                     </div>
-                  )}
-                </button>
-              </PopoverTrigger>
 
-              {hasEvents && (
-                <PopoverContent className="w-80 p-0" align="start">
-                  <div className="p-3 border-b border-border">
-                    <p className="font-semibold">{format(day, "dd MMMM yyyy", { locale: tr })}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {dayEvents.length} etkinlik
-                    </p>
-                  </div>
-
-                  <div className="max-h-64 overflow-y-auto p-2 space-y-1">
-                    {dayEvents.map((event) => (
-                      <Link
-                        key={`${event.type}-${event.id}`}
-                        href={`/dosyalar/${event.dosya_id}`}
-                        onClick={() => setPopoverOpen(false)}
-                        className="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
-                      >
-                        <span
-                          className={cn(
-                            "w-2 h-2 rounded-full shrink-0",
-                            getEventDotClass(event)
-                          )}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{event.ad}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {event.muvekkil_ad} — #{event.dosya_no}
-                            {event.type === "duruşma" && event.saat && ` • ${event.saat}`}
-                          </p>
-                        </div>
-                        <Badge
-                          variant={event.type === "süre" ? "destructive" : "secondary"}
-                          className="shrink-0 text-xs"
+                    <div className="max-h-64 overflow-y-auto p-2 space-y-1">
+                      {dayEvents.map((event) => (
+                        <Link
+                          key={`${event.type}-${event.id}`}
+                          href={`/dosyalar/${event.dosya_id}`}
+                          onClick={() => setPopoverOpen(false)}
+                          className="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
                         >
-                          {event.type === "süre" ? "Süre" : "Duruşma"}
-                        </Badge>
-                      </Link>
-                    ))}
-                  </div>
-                </PopoverContent>
-              )}
-            </Popover>
-          )
-        })}
+                          <span
+                            className={cn(
+                              "w-2 h-2 rounded-full shrink-0",
+                              getEventDotClass(event)
+                            )}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{event.ad}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {event.muvekkil_ad} — #{event.dosya_no}
+                              {event.type === "duruşma" && event.saat && ` • ${event.saat}`}
+                            </p>
+                          </div>
+                          <Badge
+                            variant={event.type === "süre" ? "destructive" : "secondary"}
+                            className="shrink-0 text-xs"
+                          >
+                            {event.type === "süre" ? "Süre" : "Duruşma"}
+                          </Badge>
+                        </Link>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                )}
+              </Popover>
+            )
+          })}
+        </div>
       </div>
 
-      {/* Upcoming 7-day panel */}
-      <div className="border-t border-border pt-4">
-        <h3 className="text-sm font-semibold mb-2">Yaklaşan 7 Gün</h3>
+      {/* Right: Upcoming 7-day panel */}
+      <div className="w-52 shrink-0 flex flex-col min-h-0 border-l border-border pl-4">
+        <h3 className="text-sm font-semibold mb-2 shrink-0">Yaklaşan 7 Gün</h3>
         {upcomingEvents.length === 0 ? (
           <p className="text-sm text-muted-foreground">Önümüzdeki 7 günde etkinlik yok</p>
         ) : (
-          <div className="space-y-1">
+          <div className="flex-1 overflow-y-auto space-y-1 min-h-0">
             {upcomingEvents.map((event) => (
               <Link
                 key={`upcoming-${event.type}-${event.id}`}
                 href={`/dosyalar/${event.dosya_id}`}
-                className="flex items-center gap-3 p-2 rounded-md hover:bg-muted transition-colors text-sm"
+                className="flex flex-col gap-0.5 p-2 rounded-md hover:bg-muted transition-colors"
               >
-                <span className="text-xs text-muted-foreground w-20 shrink-0">
-                  {format(new Date(event.tarih + "T12:00:00"), "dd MMM", { locale: tr })}
-                  {event.saat ? ` ${event.saat}` : ""}
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className={cn("w-1.5 h-1.5 rounded-full shrink-0", getEventDotClass(event))}
+                  />
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    {format(new Date(event.tarih + "T12:00:00"), "dd MMM", { locale: tr })}
+                    {event.saat ? ` ${event.saat}` : ""}
+                  </span>
+                </div>
+                <span className="text-xs font-medium truncate pl-3">{event.ad}</span>
+                <span className="text-[10px] text-muted-foreground truncate pl-3">
+                  {event.muvekkil_ad}
                 </span>
-                <span
-                  className={cn("w-2 h-2 rounded-full shrink-0", getEventDotClass(event))}
-                />
-                <span className="flex-1 truncate">{event.ad}</span>
-                <Badge
-                  variant={event.type === "süre" ? "destructive" : "secondary"}
-                  className="shrink-0 text-xs"
-                >
-                  {event.type === "süre" ? "Süre" : "Duruşma"}
-                </Badge>
               </Link>
             ))}
           </div>
