@@ -8,21 +8,9 @@
  * Hot-reload: hotReloadCronJobs() exported for use by tRPC telegram.updateSchedule.
  */
 import cron, { type ScheduledTask } from 'node-cron'
-import path from 'path'
-import fs from 'fs'
 import { sendPendingTelegramNotifications } from './notify'
-
-// ── Settings helpers (copy from ayarlar.ts — not exported there, project pattern) ──
-const SETTINGS_PATH = path.join(process.cwd(), 'data', 'settings.json')
-
-function readSettings(): Record<string, unknown> {
-  try {
-    const raw = fs.readFileSync(SETTINGS_PATH, 'utf-8')
-    return JSON.parse(raw) as Record<string, unknown>
-  } catch {
-    return {}
-  }
-}
+import { sendWeeklySureSummary } from './weekly'
+import { readSettings } from './settings-helper'
 
 // ── globalThis type declarations for singleton guard ──────────────────────────
 declare global {
@@ -49,10 +37,17 @@ export function scheduleFromSettings(times?: string[]): void {
   const tasks = configuredTimes
     .filter((t) => cron.validate(timeToCron(t)))  // TEL-07: reject invalid HH:MM
     .map((t) =>
-      cron.schedule(timeToCron(t), () => void sendPendingTelegramNotifications(), {
-        timezone: 'Europe/Istanbul',  // A1: Turkey timezone (see RESEARCH.md Assumptions)
-        noOverlap: true,              // Skip run if previous is still in progress
-      })
+      cron.schedule(
+        timeToCron(t),
+        async () => {
+          await sendPendingTelegramNotifications()
+          await sendWeeklySureSummary()
+        },
+        {
+          timezone: 'Europe/Istanbul',  // A1: Turkey timezone (see RESEARCH.md Assumptions)
+          noOverlap: true,              // Skip run if previous is still in progress
+        }
+      )
     )
 
   globalThis.__telegramCronTasks = tasks
@@ -62,6 +57,7 @@ export function scheduleFromSettings(times?: string[]): void {
 export async function runStartupSync(): Promise<void> {
   try {
     await sendPendingTelegramNotifications()
+    await sendWeeklySureSummary()
   } catch (err) {
     // D-16: startup sync failure must not crash the server
     console.error('[telegram] startup sync failed:', String(err))
