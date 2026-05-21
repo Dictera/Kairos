@@ -16,7 +16,7 @@ pnpm run test:watch     # İzleme modu — dosya değişikliğinde yeniden çal�
 
 ```
 tests/
-  setup.ts                         — Vitest global setup (minimal, boş hook'lar)
+  setup.ts                         — In-memory SQLite DB kurulumu, migration uygulaması, lower_tr UDF kaydı, @/lib/db mock'u
   fixtures/
     test-template.docx             — Şablon testleri için fixture
   *.test.ts                        — Entegrasyon ve router testleri (faz numarası önekli)
@@ -52,7 +52,7 @@ Test dosyaları faz numarasıyla öneklidir (ör. `16-sablon-router.test.ts`) �
 
 ### Router Integration Tests (tests/)
 
-tRPC router'ları `createCaller` metodu ile doğrudan çağrılır; HTTP katmanı bypass edilir. Veritabanı erişimi gerçek `db.sqlite` üzerinden gerçekleşir — mock kullanılmaz.
+tRPC router'ları `createCaller` metodu ile doğrudan çağrılır; HTTP katmanı bypass edilir. `tests/setup.ts` içinde `vi.mock('@/lib/db', ...)` ile `@/lib/db` in-memory SQLite ile değiştirilir — gerçek `db.sqlite` dosyasına dokunulmaz.
 
 Test bazlı DB izolasyonu için her test kendi fixture verilerini oluşturur ve `afterAll` / `afterEach` hook'larında temizler.
 

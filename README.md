@@ -17,6 +17,7 @@ Sigorta uyuşmazlık davalarını takip eden, avukatlar için tasarlanmış yere
 - **Dashboard & Takvim** — İstatistik kartları, aciliyet rozetleri, günün duruşmaları, aylık takvim görünümü
 - **Müvekkil Yönetimi** — Tam CRUD, Türkçe arama, bağlı dosya sayısı
 - **Ayarlar** — Sigorta şirketi, mahkeme, sigorta türü, avukat CRUD yönetimi
+- **Telegram Bildirimleri** — Opsiyonel bot entegrasyonu; günlük duruşma uyarıları, 7 gün içindeki süre bildirimleri ve haftalık özet
 
 ## Teknoloji Yığını
 
@@ -87,6 +88,9 @@ lib/
   db.ts             # SQLite bağlantısı (globalThis singleton, WAL modu)
   trpc/routers/     # tRPC router'ları (dosya, müvekkil, finans, belge, şablon…)
   docx/             # Şablon değişken kayıt defteri ve context builder
+  pipeline/         # Python sidecar IPC protokolü ve sağlık kontrolü
+  services/         # Docx pipeline köprüsü, değişken ikamesi
+  telegram/         # Telegram bot bildirimleri (cron, haftalık özet)
 data/               # db.sqlite (git dışı)
 uploads/            # Yüklenen dosyalar (git dışı)
 drizzle/            # Migration SQL dosyaları

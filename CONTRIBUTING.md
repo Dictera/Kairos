@@ -17,7 +17,7 @@ Kısa özet / Quick summary:
 git clone https://github.com/Dictera/Kairos.git
 cd kairos
 pnpm install
-cp .env.example .env         # ardından .env dosyasını düzenleyin
+cp .env.example .env.local   # ardından .env.local dosyasını düzenleyin
 pnpm run dev                  # localhost:3000
 ```
 

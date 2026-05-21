@@ -8,7 +8,7 @@
 git clone <repository-url>
 cd kairos
 pnpm install
-cp .env.example .env         # ardından .env dosyasını düzenleyin
+cp .env.example .env.local   # ardından .env.local dosyasını düzenleyin
 pnpm run dev                  # Turbopack ile localhost:3000
 ```
 
@@ -42,7 +42,7 @@ CI'da `pnpm run lint` adımı bulunmamaktadır; lint kontrolü şimdilik yalnız
 
 ## Branch Conventions
 
-Varsayılan dal `master`'dır. Belirlenmiş bir dal adlandırma kuralı yoktur. Yeni özellik/düzeltme dalları için yaygın kullanılan desenleri takip edebilirsiniz:
+Varsayılan dal `main`'dir. Belirlenmiş bir dal adlandırma kuralı yoktur. Yeni özellik/düzeltme dalları için yaygın kullanılan desenleri takip edebilirsiniz:
 
 - `feat/kisa-aciklama` — yeni özellikler
 - `fix/kisa-aciklama` — hata düzeltmeleri
@@ -52,7 +52,7 @@ Commit mesajlarında Dependabot `chore(deps):` prefix'ini kullanır.
 
 ## PR Process
 
-1. `master`'dan yeni bir dal oluşturun.
+1. `main`'den yeni bir dal oluşturun.
 2. Değişikliklerinizi yapın, testleri çalıştırın (`pnpm test`).
 3. Lint kontrolü yapın (`pnpm run lint`).
 4. Dalı push'layın ve `master`'a yönelik bir pull request açın.

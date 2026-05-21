@@ -245,9 +245,7 @@ Eksik değişken kontrolü: Şablondaki tüm `{{ degisken }}` alanları doldurul
 
 ---
 
-### `search` — ⚠ Henüz kayıtlı değil
-
-> **Not:** `searchRouter` `lib/trpc/routers/search.ts` içinde tanımlıdır ancak `lib/trpc/routers/_app.ts` içinde **import edilmemiş ve kaydedilmemiştir**. Şu anda çalışma anında erişilemez.
+### `search`
 
 | Procedure | Tip | Input | Açıklama |
 |-----------|-----|-------|----------|
@@ -257,9 +255,7 @@ Arama alanları: dosya_no, müvekkil ad/soyad, hasar dosya no, plaka, TC/Vergi n
 
 ---
 
-### `bildirim` — ⚠ Henüz kayıtlı değil
-
-> **Not:** `bildirimRouter` `lib/trpc/routers/bildirim.ts` içinde tanımlıdır ancak `lib/trpc/routers/_app.ts` içinde **import edilmemiş ve kaydedilmemiştir**. Şu anda çalışma anında erişilemez.
+### `bildirim`
 
 | Procedure | Tip | Input | Açıklama |
 |-----------|-----|-------|----------|
