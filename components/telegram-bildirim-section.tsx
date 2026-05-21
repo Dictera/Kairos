@@ -6,6 +6,8 @@ import { useTRPC } from '@/lib/trpc/context'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
+import { Separator } from '@/components/ui/separator'
 import { X, Send, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 import { ClockPicker } from '@/components/clock-picker'
@@ -21,6 +23,10 @@ export function TelegramBildirimSection() {
   const { data: scheduleData, isLoading } = useQuery(scheduleOpts)
   const times: string[] = scheduleData?.times ?? []
 
+  // ── Load notification category toggles ────────────────────────────────
+  const togglesOpts = trpc.telegram.getToggles.queryOptions()
+  const { data: toggles } = useQuery(togglesOpts)
+
   // ── Update schedule mutation ───────────────────────────────────────────
   const updateSchedule = useMutation(
     trpc.telegram.updateSchedule.mutationOptions({
@@ -29,6 +35,18 @@ export function TelegramBildirimSection() {
         toast.success('Bildirim saatleri güncellendi.')
       },
       onError: () => toast.error('Güncelleme başarısız.'),
+    })
+  )
+
+  // ── Update toggles mutation ────────────────────────────────────────────
+  const updateToggles = useMutation(
+    trpc.telegram.updateToggles.mutationOptions({
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: togglesOpts.queryKey })
+        qc.invalidateQueries({ queryKey: scheduleOpts.queryKey })
+        toast.success('Bildirim ayarları güncellendi.')
+      },
+      onError: () => toast.error('Güncelleme başarısız. Lütfen tekrar deneyin.'),
     })
   )
 
@@ -78,6 +96,8 @@ export function TelegramBildirimSection() {
         <CardContent className="space-y-2">
           <div className="h-4 w-48 animate-pulse rounded bg-muted" />
           <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+          <div className="h-4 w-40 animate-pulse rounded bg-muted" />
+          <div className="h-4 w-36 animate-pulse rounded bg-muted" />
         </CardContent>
       </Card>
     )
@@ -104,9 +124,76 @@ export function TelegramBildirimSection() {
           dosyasındaki talimatları izleyin.
         </div>
 
+        {/* Bildirim Kategorileri toggle group */}
+        <div className="space-y-1">
+          <p className="text-sm font-semibold">Bildirim Kategorileri</p>
+
+          {/* Günlük Duruşmalar */}
+          <div className="flex items-center justify-between py-1">
+            <div>
+              <p className="text-sm font-normal">Günlük Duruşmalar</p>
+              <p className="text-xs text-muted-foreground">Yaklaşan duruşmalar tek mesajda gönderilir.</p>
+            </div>
+            <Switch
+              checked={(toggles?.telegram_gunluk_durusma_aktif) ?? true}
+              onCheckedChange={(v) =>
+                updateToggles.mutate({
+                  telegram_gunluk_durusma_aktif: v,
+                  telegram_gunluk_sure_aktif: toggles?.telegram_gunluk_sure_aktif ?? true,
+                  telegram_haftalik_ozet_aktif: toggles?.telegram_haftalik_ozet_aktif ?? true,
+                })
+              }
+              disabled={updateToggles.isPending}
+              aria-label="Günlük Duruşmalar"
+            />
+          </div>
+
+          {/* Günlük Süreler */}
+          <div className="flex items-center justify-between py-1">
+            <div>
+              <p className="text-sm font-normal">Günlük Süreler</p>
+              <p className="text-xs text-muted-foreground">Yaklaşan hak düşürücü süreler tek mesajda gönderilir.</p>
+            </div>
+            <Switch
+              checked={(toggles?.telegram_gunluk_sure_aktif) ?? true}
+              onCheckedChange={(v) =>
+                updateToggles.mutate({
+                  telegram_gunluk_durusma_aktif: toggles?.telegram_gunluk_durusma_aktif ?? true,
+                  telegram_gunluk_sure_aktif: v,
+                  telegram_haftalik_ozet_aktif: toggles?.telegram_haftalik_ozet_aktif ?? true,
+                })
+              }
+              disabled={updateToggles.isPending}
+              aria-label="Günlük Süreler"
+            />
+          </div>
+
+          {/* Haftalık Özet */}
+          <div className="flex items-center justify-between py-1">
+            <div>
+              <p className="text-sm font-normal">Haftalık Özet</p>
+              <p className="text-xs text-muted-foreground">Her Pazartesi bu haftaki duruşma ve süreler özetlenir.</p>
+            </div>
+            <Switch
+              checked={(toggles?.telegram_haftalik_ozet_aktif) ?? true}
+              onCheckedChange={(v) =>
+                updateToggles.mutate({
+                  telegram_gunluk_durusma_aktif: toggles?.telegram_gunluk_durusma_aktif ?? true,
+                  telegram_gunluk_sure_aktif: toggles?.telegram_gunluk_sure_aktif ?? true,
+                  telegram_haftalik_ozet_aktif: v,
+                })
+              }
+              disabled={updateToggles.isPending}
+              aria-label="Haftalık Özet"
+            />
+          </div>
+        </div>
+
+        <Separator />
+
         {/* Cron times label + chip list */}
         <div className="space-y-2">
-          <p className="text-sm font-medium">Bildirim Saatleri</p>
+          <p className="text-sm font-semibold">Bildirim Saatleri</p>
           <div className="flex flex-wrap gap-2">
             {times.length === 0 ? (
               <p className="text-sm text-muted-foreground">Henüz bildirim saati eklenmedi.</p>
