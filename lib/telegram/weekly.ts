@@ -18,6 +18,10 @@ import { readSettings, writeSettings } from './settings-helper'
 
 const TR_MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık']
 
+function escHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
 function formatShortDate(dateStr: string): string {
   const d = new Date(dateStr + 'T00:00:00')
   return `${d.getDate()} ${TR_MONTHS[d.getMonth()]}`
@@ -97,8 +101,8 @@ export async function sendWeeklySureSummary(): Promise<void> {
     `(${formatShortDate(monday)} – ${formatShortDate(sunday)})\n\n` +
     merged
       .map((r) => {
-        const dosyaPart = r.dosya_no ? ` — Dosya: ${r.dosya_no}` : ''
-        return `• <b>${formatShortDate(r.tarih)}</b>${dosyaPart}\n  ${r.label}`
+        const dosyaPart = r.dosya_no ? ` — Dosya: ${escHtml(r.dosya_no)}` : ''
+        return `• <b>${formatShortDate(r.tarih)}</b>${dosyaPart}\n  ${escHtml(r.label)}`
       })
       .join('\n\n')
 

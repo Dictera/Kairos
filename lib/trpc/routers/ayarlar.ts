@@ -218,7 +218,12 @@ export const ayarlarRouter = createTRPCRouter({
     setPath: protectedProcedure
       .input(z.object({ path: z.string().min(1, 'Yol zorunludur') }))
       .mutation(({ input }) => {
-        const normalized = input.path.replace(/\\/g, '/').replace(/\/+$/, '')
+        const resolved = path.resolve(input.path)
+        const dataDir = path.resolve(process.cwd(), 'data')
+        if (resolved === dataDir || resolved.startsWith(dataDir + path.sep)) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Geçersiz yol.' })
+        }
+        const normalized = resolved.replace(/\\/g, '/')
         const settings = readSettings()
         settings.belgelerPath = normalized
         writeSettings(settings)

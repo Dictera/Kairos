@@ -35,11 +35,15 @@ function nowDateTimeStr(): string {
 // mesaj is notNull in schema but tests pass nullable rows — allow null for safety
 type BildirimRow = { id: number; dosya_no: string | null; mesaj: string | null; tarih: string }
 
+function escHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
 // ── Row formatter (em dash —, not hyphen) ────────────────────────────────────
 function formatDailyRow(row: { dosya_no: string | null; mesaj: string | null }): string {
   const parts: string[] = []
-  if (row.dosya_no) parts.push(row.dosya_no)
-  if (row.mesaj) parts.push(row.mesaj)
+  if (row.dosya_no) parts.push(escHtml(row.dosya_no))
+  if (row.mesaj) parts.push(escHtml(row.mesaj))
   return `- ${parts.join(' — ')}`
 }
 
