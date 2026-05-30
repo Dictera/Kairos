@@ -8,7 +8,6 @@ import { dashboardRouter } from './dashboard'
 import { calendarRouter } from './calendar'
 import { belgeRouter } from './belge'
 import { finansRouter } from './finans'
-import { raporRouter } from './rapor'
 import { raporlarRouter } from './raporlar'
 import { notlarRouter } from './notlar'
 import { olayRouter } from './olay'
@@ -34,7 +33,6 @@ export const appRouter = createTRPCRouter({
   calendar: calendarRouter,
   belge: belgeRouter,
   finans: finansRouter,
-  rapor: raporRouter,
   raporlar: raporlarRouter,
   notlar: notlarRouter,
   olay: olayRouter,

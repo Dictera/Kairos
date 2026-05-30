@@ -62,7 +62,7 @@ export async function getHealthStatus(): Promise<HealthStatus> {
   return healthPending
 }
 
-export async function runHealthChecks(): Promise<HealthStatus> {
+async function runHealthChecks(): Promise<HealthStatus> {
   const pythonPath = await getSidecarPythonPath()
   const libreofficePath = await getLibreOfficePath()
 

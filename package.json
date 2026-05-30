@@ -16,7 +16,6 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@base-ui/react": "^1.4.1",
     "@hookform/resolvers": "^5.2.2",
     "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4.3.0",
@@ -25,7 +24,6 @@
     "@trpc/client": "^11.17.0",
     "@trpc/server": "^11.17.0",
     "@trpc/tanstack-react-query": "^11.17.0",
-    "autoprefixer": "^10.5.0",
     "better-sqlite3": "^12.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

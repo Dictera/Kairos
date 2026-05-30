@@ -5,7 +5,7 @@ import { muvekkil, dosya } from '@/lib/schema'
 import { eq, count, desc, sql, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 
-export const muvekkilSchema = z.object({
+const muvekkilSchema = z.object({
   ad: z.string().min(1, 'Ad zorunludur').max(100),
   soyad: z.string().min(1, 'Soyad zorunludur').max(100),
   telefon: z

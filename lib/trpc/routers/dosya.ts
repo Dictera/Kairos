@@ -25,7 +25,7 @@ export const dosyaSchema = z.object({
   sonuc: z.enum(['kazanıldı', 'uzlaşma', 'kaybedildi', 'devam']).nullable().optional(),
 })
 
-export const dosyaCreateSchema = dosyaSchema.omit({ dosya_no: true })
+const dosyaCreateSchema = dosyaSchema.omit({ dosya_no: true })
 
 export const tarafSchema = z.object({
   dosya_id: z.number().int(),

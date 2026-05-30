@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { BELGE_KATEGORILER, SABLON_KATEGORILER } from '@/lib/schema'
 
-export const sablonKategoriSchema = z.enum(SABLON_KATEGORILER)
+const sablonKategoriSchema = z.enum(SABLON_KATEGORILER)
 
 export const sablonCreateSchema = z.object({
   ad: z.string().min(1, 'Ad zorunludur').max(200),

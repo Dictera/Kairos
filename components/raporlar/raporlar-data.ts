@@ -2,12 +2,12 @@
 
 // ── Locale ───────────────────────────────────────────────────────────────────
 
-export const MONTHS_TR = [
+const MONTHS_TR = [
   'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
   'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
 ]
 
-export const MONTHS_FULL = [
+const MONTHS_FULL = [
   'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
   'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
 ]
@@ -186,9 +186,6 @@ export const fmtKN = (v: number): string => {
   if (a >= 1_000)     return `${(v / 1_000).toFixed(1)}k`
   return String(v)
 }
-
-export const oranColor = (pct: number): string =>
-  pct >= 80 ? C.success : pct >= 65 ? C.warning : C.danger
 
 export const riskColor: Record<ZamanasimıRisk, string> = {
   Acil:    C.danger,
