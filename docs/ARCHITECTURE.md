@@ -16,7 +16,7 @@ Tarayıcı
   │           ├── dosyalar/       — Dava dosyaları
   │           ├── muvekkiller/    — Müvekkiller
   │           ├── finans/         — Finans takibi
-  │           ├── raporlar/       — Raporlar (PDF/Excel)
+  │           ├── raporlar/       — Raporlar (PDF)
   │           ├── belgeler/       — Belge yönetimi
   │           ├── takvim/         — Duruşma takvimi
   │           ├── sablon-yonetimi/— Şablon yönetimi
@@ -28,7 +28,7 @@ Tarayıcı
   ├── REST Handlers (app/api/)
   │     ├── upload/               — Belge ve şablon yükleme
   │     ├── files/                — Statik dosya servisi
-  │     ├── raporlar/             — PDF/Excel rapor üretim
+  │     ├── raporlar/             — PDF rapor üretim
   │     └── templates/            — Şablon dosya servisi
   │
   └── SQLite (better-sqlite3 + Drizzle ORM)
@@ -67,7 +67,7 @@ Tipik bir sayfa isteğinin sistemdeki akışı:
 - **tRPC v11** — Tüm iş mantığı 17 router girişi üzerinden akar (16 alt router + `health` prosedürü); end-to-end TypeScript tip güvenliği sağlar.
 - **superjson** — `Date`, `bigint` gibi tipleri JSON'a encode/decode eder.
 - **React Query v5** — İstemci tarafı önbellekleme ve sunucu durum yönetimi.
-- **REST handlers** — Dosya yükleme (`/api/upload`), statik dosya servisi (`/api/files`), PDF/Excel üretim (`/api/raporlar`) ve şablon servisi (`/api/templates`) tRPC dışı kaldı çünkü binary payload aktarımı gerektirirler.
+- **REST handlers** — Dosya yükleme (`/api/upload`), statik dosya servisi (`/api/files`), PDF üretim (`/api/raporlar`) ve şablon servisi (`/api/templates`) tRPC dışı kaldı çünkü binary payload aktarımı gerektirirler.
 
 ### 3. Business Logic (lib/)
 

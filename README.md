@@ -13,7 +13,7 @@ Sigorta uyuşmazlık davalarını takip eden, avukatlar için tasarlanmış yere
 - **Belge Yönetimi** — 20 MB'a kadar yükleme/indirme, kategori etiketleri, silme
 - **Şablon & PDF Üretimi** — `.docx` şablon yükleme, Jinja2 değişken doldurma, LibreOffice headless PDF dönüşümü
 - **Finans Takibi** — Gelen/Giden/Masraf girişleri, net bakiye, finans dashboard
-- **Raporlar** — Portföy ve finansal raporlar, PDF ve Excel dışa aktarım
+- **Raporlar** — Portföy ve finansal raporlar, PDF dışa aktarım
 - **Dashboard & Takvim** — İstatistik kartları, aciliyet rozetleri, günün duruşmaları, aylık takvim görünümü
 - **Müvekkil Yönetimi** — Tam CRUD, Türkçe arama, bağlı dosya sayısı
 - **Ayarlar** — Sigorta şirketi, mahkeme, sigorta türü, avukat CRUD yönetimi

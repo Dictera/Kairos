@@ -20,6 +20,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Webcal butonu tek buton yerine "Uygulama Aç" + "Linki Kopyala" olarak ikiye bölündü
 - Telegram bildirim mesajları gruplandırıldı; müvekkil adı kaldırıldı
 
+### Removed
+
+- Excel rapor dışa aktarım — finans ve dosya listesi `.xlsx` endpoint'leri kaldırıldı (UI'dan erişilmiyordu); `exceljs` bağımlılığı çıkarıldı. Raporlar PDF olarak indirilmeye devam ediyor.
+
 ## [0.1.0] - 2026-05-17
 
 İlk genel sürüm. Avukatlar için sigorta uyuşmazlık takip sistemi.

@@ -377,14 +377,6 @@ Portföy raporunu PDF olarak indir (`Content-Disposition: attachment`).
 
 Finansal raporu PDF olarak indir.
 
-### `GET /api/raporlar/finans/excel`
-
-Finansal raporu Excel olarak indir.
-
-### `GET /api/raporlar/dosya-listesi/excel`
-
-Dosya listesini Excel olarak indir. Query parametreleri: `?tur=STK|Mahkeme&durum=AKTIF|PASIF` (opsiyonel filtre).
-
 ---
 
 ## Rate Limits
