@@ -7,13 +7,35 @@
 | Gereksinim | Minimum Sürüm | Notlar |
 |-----------|--------------|--------|
 | Node.js | 18+ | `node --version` ile kontrol edin |
-| pnpm | 9+ | `npm install -g pnpm` ile kurun |
+| pnpm | 11.5.0 | `corepack enable` ile etkinleştirin (proje bu sürüme sabitlenmiştir) |
 | Python | 3.8+ | PDF şablon özelliği için (opsiyonel) |
 | LibreOffice | Herhangi bir güncel sürüm | PDF şablon özelliği için (opsiyonel) — [libreoffice.org](https://www.libreoffice.org) adresinden indirin |
 
 PDF şablon özelliği (`.docx` → PDF) kullanmayacaksanız Python ve LibreOffice gerekmez.
 
 ## Installation
+
+### Otomatik Kurulum (Windows — önerilen)
+
+Son kullanıcılar için tek tıkla kurulum. Aşağıdaki manuel adımların tamamını sizin yerinize yapar.
+
+1. Depo klasöründeki **`setup.bat`** dosyasına çift tıklayın.
+2. İstendiğinde uygulamaya giriş şifresini (`APP_PASSWORD`) belirleyin.
+3. Betik şunları otomatik yürütür:
+   - Node.js 18+ kontrolü — kurulu değilse `winget` ile kurar (winget yoksa nodejs.org bağlantısını gösterip durur).
+   - `corepack` ile pnpm@11.5.0 etkinleştirme.
+   - `pnpm install --frozen-lockfile`.
+   - `.env.local` oluşturma — kriptografik olarak güvenli, 48 karakterlik rastgele bir `SESSION_PASSWORD` üretir; `APP_PASSWORD` değerini sizden alır. **Mevcut bir `.env.local` dosyasının üzerine asla yazılmaz.**
+   - `pnpm build` ve `pnpm db:migrate`.
+   - Python kuruluysa `.docx → PDF` pipeline'ını kurar (kurulu değilse atlar — uygulama yine de çalışır).
+   - Masaüstü ve Başlat menüsünde **Kairos** kısayolu oluşturur.
+4. Kurulum bitince masaüstündeki **Kairos** kısayoluna (veya **`start-kairos.bat`**) çift tıklayın; tarayıcı [http://localhost:3000](http://localhost:3000) adresini açar.
+
+> **Güvenlik notu:** `setup.bat`, yerel `installer\install.ps1` betiğini `-ExecutionPolicy Bypass` ile çalıştırır (imzasız yerel betikler için gereklidir). Betik internetten kod indirip çalıştırmaz; yalnızca resmi `winget` paketinden Node.js kurar. Sırlar ekrana yazılmaz veya okunmaz.
+
+Kurulum sırasında "Node.js kuruldu, pencereyi kapatıp `setup.bat`'i tekrar çalıştırın" uyarısı görürseniz bu normaldir — yeni `PATH`'in tanınması içindir.
+
+### Manuel Kurulum
 
 ### 1. Bağımlılıkları kurun
 

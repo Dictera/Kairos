@@ -1,33 +1,37 @@
-#requires -Version 5.1
+﻿#requires -Version 5.1
 <#
-  Kairos - Sigorta Uyusmazlik Takip
-  Son kullanici kurulum betigi.
+  Kairos - Sigorta Uyuşmazlık Takip
+  Son kullanıcı kurulum betiği.
 
-  Yaptiklari:
-    1. Node.js 18+ kontrolu (yoksa winget ile kurar)
-    2. pnpm etkinlestirme (corepack)
-    3. Bagimliliklarin yuklenmesi (pnpm install)
-    4. .env.local olusturma (rastgele SESSION_PASSWORD + APP_PASSWORD sorar)
+  Yaptıkları:
+    1. Node.js 18+ kontrolü (yoksa winget ile kurar)
+    2. pnpm etkinleştirme (corepack)
+    3. Bağımlılıkların yüklenmesi (pnpm install)
+    4. .env.local oluşturma (rastgele SESSION_PASSWORD + APP_PASSWORD sorar)
     5. Uygulama derlemesi (pnpm build)
-    6. Veritabani semasi (pnpm db:migrate)
+    6. Veritabanı şeması (pnpm db:migrate)
     7. Opsiyonel Python pipeline kurulumu (.docx -> PDF)
-    8. Masaustu + Baslat menusu kisayolu
+    8. Masaüstü + Başlat menüsü kısayolu
 
-  Guvenlik:
-    - SESSION_PASSWORD kriptografik RNG ile uretilir.
-    - Mevcut .env.local ASLA uzerine yazilmaz.
-    - Hicbir sir ekrana yazilmaz / okunmaz.
+  Güvenlik:
+    - SESSION_PASSWORD kriptografik RNG ile üretilir.
+    - Mevcut .env.local ASLA üzerine yazılmaz.
+    - Hiçbir sır ekrana yazılmaz / okunmaz.
 #>
 
+Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# --- Repo koku: bu betik installer\ icinde, kok bir ust dizin ---
+# Türkçe karakterlerin konsolda doğru görünmesi için UTF-8 çıktı
+try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
+
+# --- Repo kökü: bu betik installer\ içinde, kök bir üst dizin ---
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot  = Split-Path -Parent $ScriptDir
 Set-Location $RepoRoot
 
 # ------------------------------------------------------------------
-# Yardimci fonksiyonlar
+# Yardımcı fonksiyonlar
 # ------------------------------------------------------------------
 function Write-Step { param([string]$Msg) Write-Host "`n==> $Msg" -ForegroundColor Cyan }
 function Write-Ok   { param([string]$Msg) Write-Host "    [OK] $Msg" -ForegroundColor Green }
@@ -44,7 +48,7 @@ function Test-Command {
   $null -ne (Get-Command $Name -ErrorAction SilentlyContinue)
 }
 
-# pnpm'i guvenilir cagirmak icin: once dogrudan, olmazsa corepack uzerinden
+# pnpm'i güvenilir çağırmak için: önce doğrudan, olmazsa corepack üzerinden
 function Invoke-Pnpm {
   param([Parameter(ValueFromRemainingArguments = $true)][string[]]$PnpmArgs)
   if (Test-Command 'pnpm') {
@@ -52,12 +56,12 @@ function Invoke-Pnpm {
   } else {
     & corepack pnpm @PnpmArgs
   }
-  if ($LASTEXITCODE -ne 0) { Fail "pnpm $($PnpmArgs -join ' ') komutu basarisiz oldu (kod $LASTEXITCODE)." }
+  if ($LASTEXITCODE -ne 0) { Fail "pnpm $($PnpmArgs -join ' ') komutu başarısız oldu (kod $LASTEXITCODE)." }
 }
 
 Write-Host ""
 Write-Host "===========================================================" -ForegroundColor White
-Write-Host "  Kairos - Sigorta Uyusmazlik Takip - Kurulum" -ForegroundColor White
+Write-Host "  Kairos - Sigorta Uyuşmazlık Takip - Kurulum" -ForegroundColor White
 Write-Host "===========================================================" -ForegroundColor White
 
 # ------------------------------------------------------------------
@@ -72,28 +76,28 @@ if (Test-Command 'node') {
     Write-Ok "Node.js $nodeVersion bulundu"
     $nodeOk = $true
   } else {
-    Write-Warn "Node.js $nodeVersion cok eski (18+ gerekli)."
+    Write-Warn "Node.js $nodeVersion çok eski (18+ gerekli)."
   }
 }
 
 if (-not $nodeOk) {
   if (Test-Command 'winget') {
-    Write-Note "Node.js LTS winget ile kuruluyor..."
-    & winget install --id OpenJS.NodeJS.LTS -e --accept-source-agreements --accept-package-agreements
+    Write-Note "Node.js LTS, winget ile kuruluyor..."
+    & winget install --id OpenJS.NodeJS.LTS -e --source winget --accept-source-agreements --accept-package-agreements
     if ($LASTEXITCODE -ne 0) {
-      Fail "Node.js otomatik kurulamadi. Lutfen https://nodejs.org adresinden LTS surumunu kurup setup.bat dosyasini tekrar calistirin."
+      Fail "Node.js otomatik kurulamadı. Lütfen https://nodejs.org adresinden LTS sürümünü kurup setup.bat dosyasını tekrar çalıştırın."
     }
-    Write-Warn "Node.js kuruldu. PATH'in guncellenmesi icin bu pencereyi KAPATIP setup.bat dosyasini TEKRAR calistirin."
+    Write-Warn "Node.js kuruldu. PATH'in güncellenmesi için bu pencereyi KAPATIP setup.bat dosyasını TEKRAR çalıştırın."
     exit 0
   } else {
-    Fail "Node.js bulunamadi ve winget yok. Lutfen https://nodejs.org adresinden Node.js 18+ LTS kurup setup.bat dosyasini tekrar calistirin."
+    Fail "Node.js bulunamadı ve winget yok. Lütfen https://nodejs.org adresinden Node.js 18+ LTS kurup setup.bat dosyasını tekrar çalıştırın."
   }
 }
 
 # ------------------------------------------------------------------
 # 2. pnpm (corepack)
 # ------------------------------------------------------------------
-Write-Step "pnpm hazirlaniyor"
+Write-Step "pnpm hazırlanıyor"
 if (Test-Command 'corepack') {
   & corepack enable 2>$null | Out-Null
   & corepack prepare pnpm@11.5.0 --activate 2>$null | Out-Null
@@ -101,41 +105,48 @@ if (Test-Command 'corepack') {
 if (-not (Test-Command 'pnpm') -and -not (Test-Command 'corepack')) {
   Write-Note "corepack yok, pnpm npm ile kuruluyor..."
   & npm install -g pnpm
-  if ($LASTEXITCODE -ne 0) { Fail "pnpm kurulamadi." }
+  if ($LASTEXITCODE -ne 0) { Fail "pnpm kurulamadı." }
 }
-Write-Ok "pnpm hazir"
+Write-Ok "pnpm hazır"
 
 # ------------------------------------------------------------------
-# 3. Bagimliliklar
+# 3. Bağımlılıklar
 # ------------------------------------------------------------------
-Write-Step "Bagimliliklar yukleniyor (pnpm install) - birkac dakika surebilir"
+Write-Step "Bağımlılıklar yükleniyor (pnpm install) - birkaç dakika sürebilir"
 Invoke-Pnpm install --frozen-lockfile
-Write-Ok "Bagimliliklar yuklendi"
+Write-Ok "Bağımlılıklar yüklendi"
 
 # ------------------------------------------------------------------
 # 4. .env.local
 # ------------------------------------------------------------------
-Write-Step "Ortam ayarlari (.env.local)"
+Write-Step "Ortam ayarları (.env.local)"
 $envPath = Join-Path $RepoRoot '.env.local'
 if (Test-Path $envPath) {
-  Write-Ok ".env.local zaten var - dokunulmadi"
+  Write-Ok ".env.local zaten var - dokunulmadı"
 } else {
-  # Kriptografik olarak guvenli rastgele SESSION_PASSWORD (48 karakter)
-  $bytes = New-Object 'System.Byte[]' 36
-  [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
-  $sessionPassword = [Convert]::ToBase64String($bytes) -replace '[+/=]', 'A'
-  $sessionPassword = $sessionPassword.Substring(0, 48)
+  # Kriptografik olarak güvenli rastgele SESSION_PASSWORD (48 karakter, alfanümerik)
+  $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+  try {
+    $buf = New-Object 'System.Byte[]' 48
+    $rng.GetBytes($buf)
+    $sb = New-Object System.Text.StringBuilder 48
+    foreach ($b in $buf) { [void]$sb.Append($alphabet[[int]$b % $alphabet.Length]) }
+    $sessionPassword = $sb.ToString()
+  } finally {
+    $rng.Dispose()
+  }
 
-  # APP_PASSWORD kullanicidan al (giris sifresi)
+  # APP_PASSWORD kullanıcıdan alınır (giriş şifresi)
   Write-Host ""
-  Write-Host "    Uygulamaya giris icin bir sifre belirleyin." -ForegroundColor White
+  Write-Host "    Uygulamaya giriş için bir şifre belirleyin." -ForegroundColor White
   $appPassword = ''
   while ([string]::IsNullOrWhiteSpace($appPassword)) {
-    $secure = Read-Host "    Giris sifresi (APP_PASSWORD)" -AsSecureString
+    $secure = Read-Host "    Giriş şifresi (APP_PASSWORD)" -AsSecureString
     $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
     try { $appPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr) }
     finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr) }
-    if ([string]::IsNullOrWhiteSpace($appPassword)) { Write-Warn "Sifre bos olamaz." }
+    if ([string]::IsNullOrWhiteSpace($appPassword)) { Write-Warn "Şifre boş olamaz." }
   }
 
   $envContent = @"
@@ -143,55 +154,55 @@ SESSION_PASSWORD=$sessionPassword
 SESSION_COOKIE_NAME=sigorta-session
 APP_PASSWORD=$appPassword
 
-# Pipeline yapilandirmasi (bos birakilirsa otomatik algilanir)
+# Pipeline yapılandırması (boş bırakılırsa otomatik algılanır)
 PYTHON_PATH=
 LIBREOFFICE_PATH=
 
-# Telegram bildirimleri (opsiyonel - bos ise bildirimler atlanir)
+# Telegram bildirimleri (opsiyonel - boş ise bildirimler atlanır)
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_CHAT_ID=
 "@
   # UTF-8 (BOM'suz) yaz
   [System.IO.File]::WriteAllText($envPath, $envContent, (New-Object System.Text.UTF8Encoding($false)))
-  Write-Ok ".env.local olusturuldu (SESSION_PASSWORD otomatik uretildi)"
+  Write-Ok ".env.local oluşturuldu (SESSION_PASSWORD otomatik üretildi)"
 }
 
 # ------------------------------------------------------------------
 # 5. Derleme
 # ------------------------------------------------------------------
-Write-Step "Uygulama derleniyor (pnpm build) - birkac dakika surebilir"
+Write-Step "Uygulama derleniyor (pnpm build) - birkaç dakika sürebilir"
 Invoke-Pnpm build
-Write-Ok "Derleme tamamlandi"
+Write-Ok "Derleme tamamlandı"
 
 # ------------------------------------------------------------------
-# 6. Veritabani
+# 6. Veritabanı
 # ------------------------------------------------------------------
-Write-Step "Veritabani hazirlaniyor (db:migrate)"
+Write-Step "Veritabanı hazırlanıyor (db:migrate)"
 Invoke-Pnpm db:migrate
-Write-Ok "Veritabani hazir (data\db.sqlite)"
+Write-Ok "Veritabanı hazır (data\db.sqlite)"
 
 # ------------------------------------------------------------------
 # 7. Opsiyonel Python pipeline (.docx -> PDF)
 # ------------------------------------------------------------------
-Write-Step "Belge sablonu (PDF) pipeline'i - opsiyonel"
+Write-Step "Belge şablonu (PDF) pipeline'ı - opsiyonel"
 $venvScript = Join-Path $RepoRoot 'scripts\docx-pipeline\setup-venv.ps1'
 if ((Test-Command 'python') -and (Test-Path $venvScript)) {
   try {
     & powershell -NoProfile -ExecutionPolicy Bypass -File $venvScript
     if ($LASTEXITCODE -eq 0) { Write-Ok "Python pipeline kuruldu" }
-    else { Write-Warn "Python pipeline kurulamadi - sablon PDF ozelligi devre disi (uygulama yine calisir)." }
+    else { Write-Warn "Python pipeline kurulamadı - şablon PDF özelliği devre dışı (uygulama yine de çalışır)." }
   } catch {
-    Write-Warn "Python pipeline kurulumu atlandi - sablon PDF ozelligi devre disi (uygulama yine calisir)."
+    Write-Warn "Python pipeline kurulumu atlandı - şablon PDF özelliği devre dışı (uygulama yine de çalışır)."
   }
 } else {
-  Write-Note "Python bulunamadi - sablon PDF ozelligi atlandi (uygulama yine calisir)."
-  Write-Note "Bu ozellik icin Python 3.8+ ve LibreOffice kurup setup.bat'i tekrar calistirabilirsiniz."
+  Write-Note "Python bulunamadı - şablon PDF özelliği atlandı (uygulama yine de çalışır)."
+  Write-Note "Bu özellik için Python 3.8+ ve LibreOffice kurup setup.bat'i tekrar çalıştırabilirsiniz."
 }
 
 # ------------------------------------------------------------------
-# 8. Kisayollar
+# 8. Kısayollar
 # ------------------------------------------------------------------
-Write-Step "Kisayollar olusturuluyor"
+Write-Step "Kısayollar oluşturuluyor"
 $launcher = Join-Path $RepoRoot 'start-kairos.bat'
 if (Test-Path $launcher) {
   $WshShell = New-Object -ComObject WScript.Shell
@@ -203,16 +214,16 @@ if (Test-Path $launcher) {
       $sc = $WshShell.CreateShortcut($lnkPath)
       $sc.TargetPath       = $launcher
       $sc.WorkingDirectory = $RepoRoot
-      $sc.Description       = 'Kairos - Sigorta Uyusmazlik Takip'
+      $sc.Description       = 'Kairos - Sigorta Uyuşmazlık Takip'
       $sc.IconLocation      = "$env:SystemRoot\System32\shell32.dll,13"
       $sc.Save()
     } catch {
-      Write-Warn "Kisayol olusturulamadi: $dir"
+      Write-Warn "Kısayol oluşturulamadı: $dir"
     }
   }
-  Write-Ok "Masaustu ve Baslat menusu kisayollari olusturuldu"
+  Write-Ok "Masaüstü ve Başlat menüsü kısayolları oluşturuldu"
 } else {
-  Write-Warn "start-kairos.bat bulunamadi - kisayol atlandi."
+  Write-Warn "start-kairos.bat bulunamadı - kısayol atlandı."
 }
 
 # ------------------------------------------------------------------
@@ -220,10 +231,10 @@ if (Test-Path $launcher) {
 # ------------------------------------------------------------------
 Write-Host ""
 Write-Host "===========================================================" -ForegroundColor Green
-Write-Host "  Kurulum tamamlandi!" -ForegroundColor Green
+Write-Host "  Kurulum tamamlandı!" -ForegroundColor Green
 Write-Host "===========================================================" -ForegroundColor Green
-Write-Host "  Uygulamayi baslatmak icin masaustundeki 'Kairos'" -ForegroundColor White
-Write-Host "  kisayoluna cift tiklayin (veya start-kairos.bat)." -ForegroundColor White
-Write-Host "  Tarayicida http://localhost:3000 acilacaktir." -ForegroundColor White
+Write-Host "  Uygulamayı başlatmak için masaüstündeki 'Kairos'" -ForegroundColor White
+Write-Host "  kısayoluna çift tıklayın (veya start-kairos.bat)." -ForegroundColor White
+Write-Host "  Tarayıcıda http://localhost:3000 açılacaktır." -ForegroundColor White
 Write-Host ""
 exit 0

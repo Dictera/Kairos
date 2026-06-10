@@ -34,6 +34,19 @@ Sigorta uyuşmazlık davalarını takip eden, avukatlar için tasarlanmış yere
 
 ## Hızlı Başlangıç
 
+### Tek Tıkla Kurulum (Windows — son kullanıcı)
+
+Teknik bilgi gerektirmeyen otomatik kurulum:
+
+1. **`setup.bat`** dosyasına çift tıklayın.
+2. Açılan pencerede uygulamaya giriş için bir şifre belirleyin (`APP_PASSWORD`).
+3. Kurulumun bitmesini bekleyin. Betik şu adımları sizin için yapar: Node.js 18+ kontrolü (yoksa winget ile kurar), pnpm hazırlama, bağımlılık yükleme, `.env.local` oluşturma (rastgele `SESSION_PASSWORD` üretir), derleme, veritabanı şeması ve masaüstü kısayolu.
+4. Kurulum bitince masaüstündeki **Kairos** kısayoluyla (veya **`start-kairos.bat`**) uygulamayı başlatın. Tarayıcı otomatik olarak [http://localhost:3000](http://localhost:3000) adresini açar.
+
+> Ayrıntılar ve sorun giderme için [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) belgesine bakın.
+
+### Manuel Kurulum (geliştirici)
+
 1. **Node.js 18+** kur — [nodejs.org](https://nodejs.org)
 2. **pnpm** kur — `npm install -g pnpm`
 3. **Python 3.8+** kur — [python.org](https://www.python.org) (PDF şablon özelliği için)
