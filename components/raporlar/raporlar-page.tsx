@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { ChevronRight, type LucideIcon } from 'lucide-react'
 
-import { Pill, REPORT_ICONS, type ReportIconKey } from './raporlar-shared'
-import { REPORTS } from './rapor-detay'
+import { Pill } from './raporlar-shared'
+import { REPORTS, REPORT_ICONS, type ReportIconKey } from './reports-config'
 
 // ── Report card ─────────────────────────────────────────────────────────────
 

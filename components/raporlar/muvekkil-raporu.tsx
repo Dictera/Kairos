@@ -71,10 +71,10 @@ export function MuvekkilRaporu() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((m, i) => {
+            {rows.map((m) => {
               const col = m.oran >= 85 ? C.success : m.oran >= 70 ? C.warning : C.danger
               return (
-                <tr key={i} className="border-t">
+                <tr key={m.ad} className="border-t">
                   <td className="px-3.5 py-2.5 font-semibold text-[13px]">{m.ad}</td>
                   <td className="px-3.5 py-2.5"><Pill label={m.durum} color={m.durum === 'Aktif' ? C.success : C.warning} /></td>
                   <td className="px-3.5 py-2.5 text-muted-foreground tabular-nums">{m.dosya}</td>

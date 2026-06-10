@@ -11,10 +11,14 @@ export function DatePickerField({
   value,
   onChange,
   placeholder,
+  id,
+  'aria-label': ariaLabel,
 }: {
   value: string | null | undefined
   onChange: (value: string | undefined) => void
   placeholder?: string
+  id?: string
+  'aria-label'?: string
 }) {
   const date = value ? parseISO(value) : undefined
 
@@ -22,6 +26,8 @@ export function DatePickerField({
     <Popover>
       <PopoverTrigger asChild>
         <Button
+          id={id}
+          aria-label={ariaLabel}
           variant="outline"
           className="w-full justify-start text-left font-normal"
         >

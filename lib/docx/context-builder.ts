@@ -43,7 +43,13 @@ export function buildJinja2Context(
 ): Record<string, unknown> {
   const surecDetay = parseSurecDetay(dosya.surec_detay)
 
+  const now = new Date()
+  const bugun = `${String(now.getDate()).padStart(2, '0')}/${String(
+    now.getMonth() + 1
+  ).padStart(2, '0')}/${now.getFullYear()}`
+
   const rawContext = {
+    bugun,
     muvekkil: dosya.muvekkil
       ? {
           ad: dosya.muvekkil.ad,

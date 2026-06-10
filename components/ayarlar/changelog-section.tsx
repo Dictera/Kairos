@@ -7,11 +7,14 @@ interface ChangelogSectionProps {
   content: string
 }
 
-function renderInline(text: string): React.ReactNode[] {
+function Inline({ text }: { text: string }): React.ReactNode {
   const parts = text.split(/(\*\*[^*]+\*\*)/g)
-  return parts.map((part, i) => {
+  const seen = new Map<string, number>()
+  return parts.map((part) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i}>{part.slice(2, -2)}</strong>
+      const n = seen.get(part) ?? 0
+      seen.set(part, n + 1)
+      return <strong key={`${part}#${n}`}>{part.slice(2, -2)}</strong>
     }
     return part
   })
@@ -20,40 +23,48 @@ function renderInline(text: string): React.ReactNode[] {
 export function ChangelogSection({ content }: ChangelogSectionProps) {
   const lines = content.split('\n')
 
-  const rendered = lines.map((line, i) => {
+  const seen = new Map<string, number>()
+  const keyFor = (line: string) => {
+    const n = seen.get(line) ?? 0
+    seen.set(line, n + 1)
+    return `${line}#${n}`
+  }
+
+  const rendered = lines.map((line) => {
+    const key = keyFor(line)
     if (line.startsWith('## ')) {
       return (
         <h2
-          key={i}
+          key={key}
           className="font-semibold text-base border-b pb-1 mb-2 mt-4 first:mt-0"
         >
-          {renderInline(line.replace(/^## /, ''))}
+          <Inline text={line.replace(/^## /, '')} />
         </h2>
       )
     }
     if (line.startsWith('### ')) {
       return (
         <h3
-          key={i}
+          key={key}
           className="font-medium text-sm text-muted-foreground mt-3 mb-1"
         >
-          {renderInline(line.replace(/^### /, ''))}
+          <Inline text={line.replace(/^### /, '')} />
         </h3>
       )
     }
     if (line.startsWith('- ') || line.startsWith('* ')) {
       return (
-        <ul key={i} className="list-disc list-inside">
-          <li className="text-sm">{renderInline(line.replace(/^[-*] /, ''))}</li>
+        <ul key={key} className="list-disc list-inside">
+          <li className="text-sm"><Inline text={line.replace(/^[-*] /, '')} /></li>
         </ul>
       )
     }
     if (line.trim() === '') {
-      return <div key={i} className="h-1" />
+      return <div key={key} className="h-1" />
     }
     return (
-      <p key={i} className="text-sm">
-        {renderInline(line)}
+      <p key={key} className="text-sm">
+        <Inline text={line} />
       </p>
     )
   })

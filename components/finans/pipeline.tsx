@@ -53,8 +53,8 @@ export function Pipeline() {
 
   const isLoading = sirketLoading || dashLoading
 
-  const sirket  = sirketData ?? []
-  const monthly = dashData?.monthly ?? []
+  const sirket  = useMemo(() => sirketData ?? [], [sirketData])
+  const monthly = useMemo(() => dashData?.monthly ?? [], [dashData])
 
   const pipeline = useMemo(() =>
     sirket.map(s => ({ ...s, bekleyen: Math.max(0, s.talep - s.tahsilat) })),
@@ -214,11 +214,11 @@ export function Pipeline() {
                 </tr>
               </thead>
               <tbody>
-                {[...pipeline].sort((a, b) => b.bekleyen - a.bekleyen).map((s, i) => {
+                {pipeline.toSorted((a, b) => b.bekleyen - a.bekleyen).map((s) => {
                   const pct = s.talep > 0 ? (s.tahsilat / s.talep) * 100 : 0
                   const col = tahsilatColor(pct)
                   return (
-                    <tr key={i} className="border-t hover:bg-muted/40 transition-colors">
+                    <tr key={s.ad} className="border-t hover:bg-muted/40 transition-colors">
                       <td className="px-5 py-2.5 font-medium">{s.ad}</td>
                       <td className="px-5 py-2.5 text-right tabular-nums">{fmt(s.talep)}</td>
                       <td className="px-5 py-2.5 text-right tabular-nums font-medium" style={{ color: '#22c55e' }}>{fmt(s.tahsilat)}</td>

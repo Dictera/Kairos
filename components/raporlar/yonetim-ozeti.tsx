@@ -158,9 +158,9 @@ export function YonetimOzeti() {
           <div className="flex flex-col gap-2">
             {alerts.length === 0 ? (
               <p className="text-[13px] text-muted-foreground">Aktif uyarı bulunmuyor.</p>
-            ) : alerts.map((a, i) => (
+            ) : alerts.map((a) => (
               <div
-                key={i}
+                key={a.msg}
                 className="flex items-center gap-3 rounded-lg px-3.5 py-2.5"
                 style={{ background: `${a.color}0d`, border: `1px solid ${a.color}30` }}
               >
@@ -185,12 +185,12 @@ export function YonetimOzeti() {
               </tr>
             </thead>
             <tbody>
-              {sonucTur.map((t, i) => {
+              {sonucTur.map((t) => {
                 const tot  = t.kazan + t.uzlasma + t.kaybet
                 const oran = tot > 0 ? ((t.kazan + t.uzlasma) / tot) * 100 : 0
                 const col  = oran >= 80 ? C.success : oran >= 65 ? C.warning : C.danger
                 return (
-                  <tr key={i} className="border-t">
+                  <tr key={t.tur} className="border-t">
                     <td className="px-3.5 py-2.5">
                       <div className="flex items-center gap-1.5">
                         <div className="w-1.5 h-1.5 rounded-sm" style={{ background: t.renk }} />
@@ -218,8 +218,8 @@ export function YonetimOzeti() {
               </tr>
             </thead>
             <tbody>
-              {sirketler.map((s, i) => (
-                <tr key={i} className="border-t">
+              {sirketler.map((s) => (
+                <tr key={s.ad} className="border-t">
                   <td className="px-3.5 py-2.5 font-medium text-[12.5px]">{s.ad}</td>
                   <td className="px-3.5 py-2.5 text-right text-muted-foreground text-[12px] tabular-nums">{fmtK(s.talep)}</td>
                   <td className="px-3.5 py-2.5 text-right text-[#22c55e] text-[12px] font-medium tabular-nums">{fmtK(s.karar)}</td>

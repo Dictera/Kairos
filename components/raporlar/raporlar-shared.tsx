@@ -2,10 +2,7 @@
 
 import { ReactNode } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Star, BarChart3, Filter, Trophy, Handshake, AlertTriangle,
-  Folder, Users, Scale, Shield, type LucideIcon,
-} from 'lucide-react'
+import { type LucideIcon } from 'lucide-react'
 
 // ── KPI card ──────────────────────────────────────────────────────────────────
 
@@ -144,20 +141,3 @@ export function ReportEmpty({ message = 'Bu rapor için henüz veri bulunmuyor.'
     </div>
   )
 }
-
-// ── Icon registry ─────────────────────────────────────────────────────────────
-
-export const REPORT_ICONS = {
-  star:       Star,
-  chart:      BarChart3,
-  funnel:     Filter,
-  trophy:     Trophy,
-  handshake:  Handshake,
-  alert:      AlertTriangle,
-  folder:     Folder,
-  users:      Users,
-  scale:      Scale,
-  shield:     Shield,
-} as const
-
-export type ReportIconKey = keyof typeof REPORT_ICONS

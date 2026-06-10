@@ -26,7 +26,7 @@ const StatusPieChart = dynamic<{ data: { name: string; value: number; fill: stri
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="55%" outerRadius="80%">
-              {data.map((d, i) => <Cell key={i} fill={d.fill} />)}
+              {data.map((d) => <Cell key={d.name} fill={d.fill} />)}
             </Pie>
             <Tooltip />
             <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
@@ -108,12 +108,12 @@ export function DosyaRaporu() {
             </tr>
           </thead>
           <tbody>
-            {tur.map((d, i) => {
+            {tur.map((d) => {
               const net  = d.gelen - d.giden - d.masraf
               const marj = d.gelen > 0 ? (net / d.gelen) * 100 : 0
               const col  = marj >= 40 ? C.success : marj >= 25 ? C.warning : C.danger
               return (
-                <tr key={i} className="border-t">
+                <tr key={d.label} className="border-t">
                   <td className="px-3.5 py-2.5">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: d.renk }} />

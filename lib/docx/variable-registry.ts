@@ -5,6 +5,9 @@ export interface VariableInfo {
 }
 
 export const VARIABLE_REGISTRY: VariableInfo[] = [
+  // sistem — genel
+  { path: 'bugun', tab: 'genel', label: 'Bugünün tarihi / düzenlenme tarihi (gg/aa/yyyy)' },
+
   // muvekkil — genel
   { path: 'muvekkil.ad', tab: 'genel', label: 'Müvekkil adı' },
   { path: 'muvekkil.soyad', tab: 'genel', label: 'Müvekkil soyadı' },
@@ -145,12 +148,13 @@ export function getMissingVariables(
   context: Record<string, unknown>
 ): Array<{ var: string; tab: string; label: string }> {
   const missing: Array<{ var: string; tab: string; label: string }> = []
+  const registryByPath = new Map(VARIABLE_REGISTRY.map((v) => [v.path, v]))
 
   for (const varPath of templateVars) {
     const basePath = varPath.includes('|') ? varPath.split('|')[0].trim() : varPath
     const value = getNestedValue(context, basePath)
     if (value === undefined || value === null || value === '') {
-      const info = VARIABLE_REGISTRY.find((v) => v.path === basePath)
+      const info = registryByPath.get(basePath)
       missing.push({
         var: varPath,
         tab: info?.tab ?? 'genel',

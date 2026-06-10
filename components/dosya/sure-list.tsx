@@ -63,6 +63,14 @@ function daysLabel(days: number): string {
   return `${days} gün`
 }
 
+function formatDate(dateStr: string) {
+  try {
+    return format(parseISO(dateStr), 'dd.MM.yyyy', { locale: tr })
+  } catch {
+    return dateStr
+  }
+}
+
 export function SureList({ dosyaId }: { dosyaId: number }) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
@@ -162,14 +170,6 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
   const handleDelete = () => {
     if (!deletingSure) return
     deleteMutation.mutate({ id: deletingSure.id })
-  }
-
-  const formatDate = (dateStr: string) => {
-    try {
-      return format(parseISO(dateStr), 'dd.MM.yyyy', { locale: tr })
-    } catch {
-      return dateStr
-    }
   }
 
   if (isLoading) {

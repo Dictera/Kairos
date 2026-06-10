@@ -63,8 +63,10 @@ export async function getHealthStatus(): Promise<HealthStatus> {
 }
 
 async function runHealthChecks(): Promise<HealthStatus> {
-  const pythonPath = await getSidecarPythonPath()
-  const libreofficePath = await getLibreOfficePath()
+  const [pythonPath, libreofficePath] = await Promise.all([
+    getSidecarPythonPath(),
+    getLibreOfficePath(),
+  ])
 
   let pythonAccessible = false
   let pythonVersion: string | null = null

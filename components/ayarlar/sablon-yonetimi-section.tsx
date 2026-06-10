@@ -59,6 +59,17 @@ const sablonFormSchema = z.object({
 })
 type SablonFormValues = z.infer<typeof sablonFormSchema>
 
+async function uploadFileAndGetPath(f: File): Promise<{ filename: string; fileName: string; fileSize: number }> {
+  const fd = new FormData()
+  fd.append('file', f)
+  const res = await fetch('/api/templates/upload', { method: 'POST', body: fd })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body?.error ?? 'Yükleme başarısız. Lütfen tekrar deneyin.')
+  }
+  return res.json()
+}
+
 export default function SablonYonetimiSection() {
   const trpc = useTRPC()
   const qc = useQueryClient()
@@ -119,17 +130,6 @@ export default function SablonYonetimiSection() {
     setUploadOpen(false)
     setFile(null)
     form.reset({ ad: '', kategori: 'STK', belge_turu: undefined })
-  }
-
-  async function uploadFileAndGetPath(f: File): Promise<{ filename: string; fileName: string; fileSize: number }> {
-    const fd = new FormData()
-    fd.append('file', f)
-    const res = await fetch('/api/templates/upload', { method: 'POST', body: fd })
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}))
-      throw new Error(body?.error ?? 'Yükleme başarısız. Lütfen tekrar deneyin.')
-    }
-    return res.json()
   }
 
   async function onCreateSubmit(values: SablonFormValues) {
@@ -378,6 +378,7 @@ export default function SablonYonetimiSection() {
                   <input
                     type="file"
                     accept=".docx"
+                    aria-label=".docx dosyası yükle"
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                     onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
                   />
@@ -435,12 +436,12 @@ export default function SablonYonetimiSection() {
                 <strong>{overwriteTarget.ad}</strong> — {overwriteTarget.kategori}
               </p>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Belge Türü</label>
+                <label htmlFor="overwrite-belge-turu" className="text-sm font-medium">Belge Türü</label>
                 <Select
                   value={overwriteBelgeTuru}
                   onValueChange={(v) => setOverwriteBelgeTuru(v as (typeof BELGE_KATEGORILER)[number] | undefined)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="overwrite-belge-turu" aria-label="Belge Türü">
                     <SelectValue placeholder="Belge türü seçin (isteğe bağlı)" />
                   </SelectTrigger>
                   <SelectContent>
@@ -459,6 +460,7 @@ export default function SablonYonetimiSection() {
                   <input
                     type="file"
                     accept=".docx"
+                    aria-label=".docx dosyası yükle"
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                     onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
                   />

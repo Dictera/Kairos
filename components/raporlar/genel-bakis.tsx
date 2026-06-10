@@ -131,7 +131,7 @@ export function GenelBakis({ yil }: GenelBakisProps) {
             </thead>
             <tbody>
               {data_.map((d, i) => (
-                <tr key={i} className={`border-t ${i % 2 === 0 ? '' : 'bg-muted/20'}`}>
+                <tr key={d.labelFull} className={`border-t ${i % 2 === 0 ? '' : 'bg-muted/20'}`}>
                   <td className="px-3.5 py-2 font-medium">{d.labelFull}</td>
                   <td className="px-3.5 py-2 text-right text-[#22c55e] font-medium tabular-nums">{fmt(d.gelen)}</td>
                   <td className="px-3.5 py-2 text-right text-[#ef4444] tabular-nums">{fmt(d.giden)}</td>

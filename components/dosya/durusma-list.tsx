@@ -33,6 +33,20 @@ type DurusmaListProps = {
   dosyaId: number
 }
 
+function formatTarih(tarih: string) {
+  try {
+    return format(parseISO(tarih), 'dd.MM.yyyy')
+  } catch {
+    return tarih
+  }
+}
+
+function truncate(text: string | null | undefined, maxLen: number) {
+  if (!text) return null
+  if (text.length <= maxLen) return text
+  return text.slice(0, maxLen) + '...'
+}
+
 export function DurusmaList({ dosyaId }: DurusmaListProps) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
@@ -79,20 +93,6 @@ export function DurusmaList({ dosyaId }: DurusmaListProps) {
 
   const handleDelete = (id: number) => {
     deleteMutation.mutate({ id })
-  }
-
-  const formatTarih = (tarih: string) => {
-    try {
-      return format(parseISO(tarih), 'dd.MM.yyyy')
-    } catch {
-      return tarih
-    }
-  }
-
-  const truncate = (text: string | null | undefined, maxLen: number) => {
-    if (!text) return null
-    if (text.length <= maxLen) return text
-    return text.slice(0, maxLen) + '...'
   }
 
   if (durusmaList.length === 0) {

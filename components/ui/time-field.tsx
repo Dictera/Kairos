@@ -8,6 +8,8 @@ interface TimeFieldProps {
   onBlur?: () => void
 }
 
+const fmt = (n: number | null) => n !== null ? String(n).padStart(2, '0') : '--'
+
 export function TimeField({ value, onChange, onBlur }: TimeFieldProps) {
   const [editing, setEditing] = useState<'hour' | 'minute' | null>(null)
   const [draft, setDraft] = useState('')
@@ -38,15 +40,14 @@ export function TimeField({ value, onChange, onBlur }: TimeFieldProps) {
     if (e.key === 'Escape') { setEditing(null); setDraft('') }
   }
 
-  const fmt = (n: number | null) => n !== null ? String(n).padStart(2, '0') : '--'
-
   const segClass = 'w-7 text-center tabular-nums bg-transparent outline-none'
 
   return (
     <div className="flex items-center border border-input rounded-md px-3 py-2 h-9 text-sm bg-background w-fit">
       {editing === 'hour' ? (
         <input
-          autoFocus
+          ref={(el) => el?.focus()}
+          aria-label="Saat"
           type="text"
           inputMode="numeric"
           maxLength={2}
@@ -70,7 +71,8 @@ export function TimeField({ value, onChange, onBlur }: TimeFieldProps) {
       <span className="text-muted-foreground mx-0.5 select-none">:</span>
       {editing === 'minute' ? (
         <input
-          autoFocus
+          ref={(el) => el?.focus()}
+          aria-label="Dakika"
           type="text"
           inputMode="numeric"
           maxLength={2}

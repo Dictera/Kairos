@@ -210,15 +210,16 @@ export default function BelgelerPage() {
     }
 
     return TUR_ORDER
-      .filter(tur => turMap.has(tur))
-      .map(tur => ({
-        tur,
-        turLabel: TUR_LABELS[tur] ?? tur,
-        sigortaTurleri: Array.from(turMap.get(tur)!.entries()).map(([ad, dosyaMap]) => ({
-          ad,
-          dosyalar: Array.from(dosyaMap.values()),
-        })),
-      }))
+      .flatMap(tur => turMap.has(tur)
+        ? [{
+            tur,
+            turLabel: TUR_LABELS[tur] ?? tur,
+            sigortaTurleri: Array.from(turMap.get(tur)!.entries()).map(([ad, dosyaMap]) => ({
+              ad,
+              dosyalar: Array.from(dosyaMap.values()),
+            })),
+          }]
+        : [])
   }, [rows])
 
   if (isLoading) {

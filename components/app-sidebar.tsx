@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useSyncExternalStore } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -71,13 +71,17 @@ function SidebarCollapseSync() {
   return null
 }
 
+// false on server + first client render, true after hydration —
+// avoids hydration mismatch on active-link styling without a mount effect
+const emptySubscribe = () => () => {}
+
 export function AppSidebar() {
   const pathname = usePathname()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  )
 
   const isActive = (href: string) => mounted && pathname === href
 

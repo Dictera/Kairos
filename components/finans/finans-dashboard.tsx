@@ -29,6 +29,9 @@ const MONTHS_SHORT = [
 ]
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ttFmt = (v: any) => typeof v === 'number' ? fmt(v) : String(v)
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const NetBarShape = (props: any) => {
   const { x, y, width, height, value } = props
   if (!width || !height) return null
@@ -38,6 +41,7 @@ const NetBarShape = (props: any) => {
       rx={3} ry={3} />
   )
 }
+const netBarShape = <NetBarShape />
 
 export function FinansDashboard() {
   const trpc = useTRPC()
@@ -78,9 +82,6 @@ export function FinansDashboard() {
     running += e.Net
     return { name: e.name, Kasa: running }
   })
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ttFmt = (v: any) => typeof v === 'number' ? fmt(v) : String(v)
 
   return (
     <div className="space-y-5">
@@ -141,7 +142,7 @@ export function FinansDashboard() {
                   <YAxis tickFormatter={fmtK} width={48} tick={{ fontSize:11 }} />
                   <Tooltip formatter={ttFmt} />
                   <ReferenceLine y={0} stroke="#888" strokeDasharray="4 2" />
-                  <Bar dataKey="Net" name="Net Bakiye" shape={<NetBarShape />} />
+                  <Bar dataKey="Net" name="Net Bakiye" shape={netBarShape} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

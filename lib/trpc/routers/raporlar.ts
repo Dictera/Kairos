@@ -80,7 +80,8 @@ export const raporlarRouter = createTRPCRouter({
       sirketAgg[sid].karar += d.karar_tutari ?? 0
       sirketAgg[sid].dosya++
     })
-    tumFinans.filter(f => f.tur === 'Gelen').forEach(f => {
+    tumFinans.forEach(f => {
+      if (f.tur !== 'Gelen') return
       const d = tumDosyalar.find(x => x.id === f.dosya_id)
       if (!d?.karsitaraf_sigorta_id) return
       sirketAgg[d.karsitaraf_sigorta_id].tahsilat += f.tutar ?? 0
@@ -110,24 +111,24 @@ export const raporlarRouter = createTRPCRouter({
     // zamanasimı
     const bugun = new Date()
     const zamanasimıRows = tumDosyalar
-      .filter(d => d.kaza_tarihi)
-      .map(d => {
+      .flatMap(d => {
+        if (!d.kaza_tarihi) return []
         const turuAd = d.sigorta_turu_id ? sigortaTuruMap[d.sigorta_turu_id] : undefined
         const yil = zaYil(d.tur, turuAd)
-        const son = new Date(d.kaza_tarihi!)
+        const son = new Date(d.kaza_tarihi)
         son.setFullYear(son.getFullYear() + yil)
         const kalan = Math.ceil((son.getTime() - bugun.getTime()) / 86_400_000)
         const risk  = zaRisk(kalan)
-        return {
+        return [{
           no: d.dosya_no,
           muvekkil: muvekkilMap[d.muvekkil_id] ?? '',
           sirket: d.karsitaraf_sigorta_id ? (sirketMap[d.karsitaraf_sigorta_id] ?? '') : '',
           tur: turuAd ?? TUR_LABEL[d.tur] ?? d.tur,
-          basTarih: d.kaza_tarihi!,
+          basTarih: d.kaza_tarihi,
           zamanasimıYil: yil,
           kalanGun: kalan,
           risk,
-        }
+        }]
       })
       .sort((a, b) => a.kalanGun - b.kalanGun)
 
@@ -185,7 +186,8 @@ export const raporlarRouter = createTRPCRouter({
       sirketAgg[sid].karar += d.karar_tutari ?? 0
       sirketAgg[sid].dosya++
     })
-    tumFinans.filter(f => f.tur === 'Gelen').forEach(f => {
+    tumFinans.forEach(f => {
+      if (f.tur !== 'Gelen') return
       const d = tumDosyalar.find(x => x.id === f.dosya_id)
       if (!d?.karsitaraf_sigorta_id) return
       sirketAgg[d.karsitaraf_sigorta_id].tahsilat += f.tutar ?? 0
@@ -315,23 +317,23 @@ export const raporlarRouter = createTRPCRouter({
     const bugun = new Date()
 
     const dosyalar = tumDosyalar
-      .filter(d => d.kaza_tarihi && d.durum === 'aktif')
-      .map(d => {
+      .flatMap(d => {
+        if (!d.kaza_tarihi || d.durum !== 'aktif') return []
         const turuAd = d.sigorta_turu_id ? sigortaTuruMap[d.sigorta_turu_id] : undefined
         const yil  = zaYil(d.tur, turuAd)
-        const son  = new Date(d.kaza_tarihi!)
+        const son  = new Date(d.kaza_tarihi)
         son.setFullYear(son.getFullYear() + yil)
         const kalan = Math.ceil((son.getTime() - bugun.getTime()) / 86_400_000)
-        return {
+        return [{
           no: d.dosya_no,
           muvekkil: muvekkilMap[d.muvekkil_id] ?? '',
           sirket: d.karsitaraf_sigorta_id ? (sirketMap[d.karsitaraf_sigorta_id] ?? '') : '',
           tur: turuAd ?? TUR_LABEL[d.tur] ?? d.tur,
-          basTarih: d.kaza_tarihi!,
+          basTarih: d.kaza_tarihi,
           zamanasimıYil: yil,
           kalanGun: kalan,
           risk: zaRisk(kalan),
-        }
+        }]
       })
       .sort((a, b) => a.kalanGun - b.kalanGun)
 
@@ -398,30 +400,31 @@ export const raporlarRouter = createTRPCRouter({
     const MONTHS_TR_IDX = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara']
 
     const rows = tumMuvekkil
-      .map(m => {
+      .flatMap(m => {
         const mDosyalar = tumDosyalar.filter(d => d.muvekkil_id === m.id)
-        if (!mDosyalar.length) return null
+        if (!mDosyalar.length) return []
         const mFinans   = tumFinans.filter(f => mDosyalar.some(d => d.id === f.dosya_id))
         const tahsilat  = mFinans.filter(f => f.tur === 'Gelen').reduce((s, f) => s + (f.tutar ?? 0), 0)
         const topTalep  = mDosyalar.reduce((s, d) => s + (d.talep_tutari ?? 0), 0)
         const oran      = topTalep > 0 ? Math.round((tahsilat / topTalep) * 100) : 0
         const aktif     = mDosyalar.some(d => d.durum === 'aktif')
-        const lastFinans = mFinans.sort((a, b) => b.tarih.localeCompare(a.tarih))[0]
+        const lastFinans = mFinans.length
+          ? mFinans.reduce((a, b) => (b.tarih > a.tarih ? b : a))
+          : undefined
         let son = ''
         if (lastFinans) {
           const [y, mo] = lastFinans.tarih.substring(0, 7).split('-').map(Number)
           son = `${MONTHS_TR_IDX[mo - 1]} ${y}`
         }
-        return {
+        return [{
           ad: `${m.ad} ${m.soyad}`,
           dosya: mDosyalar.length,
           tahsilat,
           oran,
           durum: aktif ? ('Aktif' as const) : ('Pasif' as const),
           son,
-        }
+        }]
       })
-      .filter(Boolean) as Array<{ ad: string; dosya: number; tahsilat: number; oran: number; durum: 'Aktif' | 'Pasif'; son: string }>
 
     rows.sort((a, b) => b.tahsilat - a.tahsilat)
     return { rows }
@@ -483,18 +486,18 @@ export const raporlarRouter = createTRPCRouter({
       if (!asamaAgg[d.asama]) asamaAgg[d.asama] = []
       asamaAgg[d.asama].push(d.gun)
     })
-    const asamalar = STAGES.map(a => {
+    const asamalar = STAGES.flatMap(a => {
       const gunler = asamaAgg[a] ?? []
-      if (!gunler.length) return null
-      return {
+      if (!gunler.length) return []
+      return [{
         asama: a,
         ort: Math.round(gunler.reduce((s, g) => s + g, 0) / gunler.length),
         min: Math.min(...gunler),
         max: Math.max(...gunler),
         adet: gunler.length,
         renk: STAGE_RENK[a] ?? '#94a3b8',
-      }
-    }).filter(Boolean) as Array<{ asama: string; ort: number; min: number; max: number; adet: number; renk: string }>
+      }]
+    })
 
     // uzunDosyalar
     const uzunDosyalar = dosyaInfo
@@ -543,7 +546,8 @@ export const raporlarRouter = createTRPCRouter({
       sirketAgg[sid].karar += d.karar_tutari ?? 0
       sirketAgg[sid].dosya++
     })
-    tumFinans.filter(f => f.tur === 'Gelen').forEach(f => {
+    tumFinans.forEach(f => {
+      if (f.tur !== 'Gelen') return
       const d = tumDosyalar.find(x => x.id === f.dosya_id)
       if (!d?.karsitaraf_sigorta_id) return
       sirketAgg[d.karsitaraf_sigorta_id].tahsilat += f.tutar ?? 0
@@ -567,7 +571,8 @@ export const raporlarRouter = createTRPCRouter({
 
     // monthly tahsilat per company
     const trendAgg: Record<string, Record<string, number>> = {}
-    tumFinans.filter(f => f.tur === 'Gelen').forEach(f => {
+    tumFinans.forEach(f => {
+      if (f.tur !== 'Gelen') return
       const d = tumDosyalar.find(x => x.id === f.dosya_id)
       if (!d?.karsitaraf_sigorta_id) return
       if (!top4Ids.includes(d.karsitaraf_sigorta_id)) return

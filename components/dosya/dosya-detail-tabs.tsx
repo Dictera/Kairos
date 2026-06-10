@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { useRouter } from 'next/navigation'
@@ -44,7 +44,14 @@ interface DosyaDetailTabsProps {
 }
 
 export function DosyaDetailTabs({ dosyaId }: DosyaDetailTabsProps) {
-  const [activeTab, setActiveTab] = useState('genel-bilgiler')
+  // Read the URL hash once at mount via lazy init (no extra render).
+  // Guarded for SSR — the loading skeleton renders first, so there is no
+  // hydration mismatch by the time the tabs appear.
+  const [activeTab, setActiveTab] = useState(() =>
+    typeof window === 'undefined'
+      ? 'genel-bilgiler'
+      : window.location.hash.slice(1) || 'genel-bilgiler'
+  )
   const [archiveOpen, setArchiveOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
@@ -53,11 +60,6 @@ export function DosyaDetailTabs({ dosyaId }: DosyaDetailTabsProps) {
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery(trpc.dosya.getById.queryOptions({ id: dosyaId }))
-
-  useEffect(() => {
-    const hash = window.location.hash.slice(1)
-    if (hash) setActiveTab(hash)
-  }, [])
 
   const handleTabChange = (value: string) => {
     setActiveTab(value)

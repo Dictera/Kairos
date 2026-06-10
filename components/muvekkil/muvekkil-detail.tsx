@@ -47,9 +47,11 @@ function formatDate(dateStr: string | null | undefined) {
   }
 }
 
+const TRY_FORMAT = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' })
+
 function formatTutar(tutar: number | null | undefined) {
   if (tutar == null) return '—'
-  return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(tutar)
+  return TRY_FORMAT.format(tutar)
 }
 
 type DosyaTur = 'STK' | 'AT' | 'AH' | string

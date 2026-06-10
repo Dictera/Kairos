@@ -25,9 +25,15 @@ const JINJA2_EXAMPLES = [
   { filter: 'join', example: '{{ liste | join(", ") }}', desc: 'Listeyi birleştir' },
 ]
 
+function handleCopyExample(example: string) {
+  navigator.clipboard.writeText(example).then(() => {
+    toast.success(`Kopyalandı: ${example}`)
+  }).catch(() => toast.error('Kopyalanamadı.'))
+}
+
 export function VariableCatalogModal({ sablon, onOpenChange }: VariableCatalogModalProps) {
   const variables = sablon?.degiskenler ?? []
-  const sorted = [...variables].sort((a, b) => a.localeCompare(b, 'tr'))
+  const sorted = variables.toSorted((a, b) => a.localeCompare(b, 'tr'))
   const [showFilters, setShowFilters] = useState(false)
   const [copiedVar, setCopiedVar] = useState<string | null>(null)
 
@@ -37,12 +43,6 @@ export function VariableCatalogModal({ sablon, onOpenChange }: VariableCatalogMo
       setCopiedVar(v)
       toast.success(`Kopyalandı: ${text}`)
       setTimeout(() => setCopiedVar(null), 1500)
-    }).catch(() => toast.error('Kopyalanamadı.'))
-  }
-
-  function handleCopyExample(example: string) {
-    navigator.clipboard.writeText(example).then(() => {
-      toast.success(`Kopyalandı: ${example}`)
     }).catch(() => toast.error('Kopyalanamadı.'))
   }
 
@@ -63,14 +63,12 @@ export function VariableCatalogModal({ sablon, onOpenChange }: VariableCatalogMo
             const known = VARIABLE_REGISTRY.find((r) => r.path === basePath)
             const isCopied = copiedVar === v
             return (
-              <div
+              <button
                 key={v}
-                role="button"
-                tabIndex={0}
+                type="button"
                 aria-label={`${v} değişkenini kopyala`}
-                className="flex items-center justify-between py-1 px-2 rounded hover:bg-muted/50 cursor-pointer group"
+                className="flex w-full items-center justify-between py-1 px-2 rounded hover:bg-muted/50 cursor-pointer group text-left"
                 onClick={() => handleCopy(v)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCopy(v) } }}
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <Copy className={`h-3.5 w-3.5 shrink-0 transition-colors ${isCopied ? 'text-green-600' : 'text-muted-foreground opacity-0 group-hover:opacity-100'}`} />
@@ -88,7 +86,7 @@ export function VariableCatalogModal({ sablon, onOpenChange }: VariableCatalogMo
                     ⚠ Bilinmeyen
                   </Badge>
                 )}
-              </div>
+              </button>
             )
           })}
         </div>
@@ -106,21 +104,19 @@ export function VariableCatalogModal({ sablon, onOpenChange }: VariableCatalogMo
           {showFilters && (
             <div className="mt-1 space-y-1 max-h-52 overflow-y-auto">
               {JINJA2_EXAMPLES.map((ex) => (
-                <div
+                <button
                   key={ex.filter}
-                  role="button"
-                  tabIndex={0}
+                  type="button"
                   aria-label={`${ex.example} örneğini kopyala`}
-                  className="flex items-start justify-between rounded px-2 py-1.5 hover:bg-muted/50 cursor-pointer group"
+                  className="flex w-full items-start justify-between rounded px-2 py-1.5 hover:bg-muted/50 cursor-pointer group text-left"
                   onClick={() => handleCopyExample(ex.example)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCopyExample(ex.example) } }}
                 >
                   <div className="min-w-0">
                     <code className="text-xs font-mono text-foreground">{ex.example}</code>
                     <p className="text-xs text-muted-foreground mt-0.5">{ex.desc}</p>
                   </div>
                   <Copy className="h-3.5 w-3.5 shrink-0 mt-0.5 ml-2 text-muted-foreground opacity-0 group-hover:opacity-100" />
-                </div>
+                </button>
               ))}
             </div>
           )}

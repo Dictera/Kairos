@@ -31,7 +31,7 @@ const SureBarChart = dynamic<{ data: { name: string; Sure: number; fill: string 
             <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v} gün`} width={56} />
             <Tooltip formatter={(v: unknown) => `${v} gün`} />
             <Bar dataKey="Sure" radius={[6, 6, 0, 0]} barSize={60}>
-              {data.map((d, i) => <Cell key={i} fill={d.fill} />)}
+              {data.map((d) => <Cell key={d.name} fill={d.fill} />)}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
@@ -114,8 +114,8 @@ export function Arabuluculuk() {
               {[
                 { label: 'Arabuluculuk', coz: totAraCoz, top: totAra, oran: araBasari, color: C.accent, avantaj: 'Hızlı sonuç · düşük maliyet · gizlilik' },
                 { label: 'Dava', coz: totDavaCoz, top: totDava, oran: davaBasari, color: C.danger, avantaj: 'Kesin hüküm · icra kabiliyeti · emsal' },
-              ].map((r, i) => (
-                <div key={i} className="rounded-lg bg-muted/50 px-4 py-3.5">
+              ].map((r) => (
+                <div key={r.label} className="rounded-lg bg-muted/50 px-4 py-3.5">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-bold text-[14px]" style={{ color: r.color }}>{r.label}</span>
                     <span className="text-[22px] font-extrabold tabular-nums" style={{ color: r.color }}>%{r.oran}</span>
@@ -141,8 +141,8 @@ export function Arabuluculuk() {
               </tr>
             </thead>
             <tbody>
-              {aylik.map((r, i) => (
-                <tr key={i} className="border-t">
+              {aylik.map((r) => (
+                <tr key={r.ay} className="border-t">
                   <td className="px-3 py-1.5 font-medium text-[12.5px]">{r.ay}</td>
                   <td className="px-3 py-1.5 text-right text-muted-foreground text-[12px] tabular-nums">{r.ara}</td>
                   <td className="px-3 py-1.5 text-right font-semibold text-[#1c768f] text-[12px] tabular-nums">{r.araCoz}</td>

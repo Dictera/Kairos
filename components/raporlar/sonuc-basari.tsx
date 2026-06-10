@@ -29,7 +29,7 @@ const DonutChart = dynamic<{ data: { name: string; value: number; fill: string }
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="50%" outerRadius="75%">
-              {data.map((d, i) => <Cell key={i} fill={d.fill} />)}
+              {data.map((d) => <Cell key={d.name} fill={d.fill} />)}
             </Pie>
             <Tooltip />
             <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 10 }} />
@@ -150,12 +150,12 @@ export function SonucBasari() {
             </tr>
           </thead>
           <tbody>
-            {tur.map((t, i) => {
+            {tur.map((t) => {
               const tot  = t.kazan + t.uzlasma + t.kaybet
               const oran = tot > 0 ? ((t.kazan + t.uzlasma) / tot) * 100 : 0
               const col  = oran >= 80 ? C.success : oran >= 65 ? C.warning : C.danger
               return (
-                <tr key={i} className="border-t">
+                <tr key={t.tur} className="border-t">
                   <td className="px-3.5 py-2">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: t.renk }} />

@@ -33,6 +33,16 @@ interface NotListProps {
   dosyaId: number
 }
 
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('tr-TR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 export function NotList({ dosyaId }: NotListProps) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
@@ -69,16 +79,6 @@ export function NotList({ dosyaId }: NotListProps) {
       },
     })
   )
-
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('tr-TR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
 
   if (isLoading) {
     return (

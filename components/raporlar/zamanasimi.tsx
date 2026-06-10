@@ -19,6 +19,8 @@ const riskIcon: Record<ZamanasimıRisk, LucideIcon> = {
   Güvenli: CheckCircle2,
 }
 
+const RISKS: ZamanasimıRisk[] = ['Acil', 'Kritik', 'Dikkat', 'Güvenli']
+
 const ZAMANASIMI_INFO = [
   { tur: 'Ferdi Kaza / Konut / Sağlık / Hayat',    sure: '2 yıl',  kanun: 'TTK' },
   { tur: 'Trafik & İş Kazası — Yaralanma',         sure: '10 yıl', kanun: 'TK'  },
@@ -32,23 +34,21 @@ export function Zamanasimi() {
     trpc.raporlar.zamanasimi.queryOptions() as unknown as { queryKey: unknown[]; queryFn: () => Promise<{ dosyalar: ZamanasimıRow[] }> },
   )
 
-  const dosyalar = data?.dosyalar ?? []
+  const dosyalar = useMemo(() => data?.dosyalar ?? [], [data])
   const grouped = useMemo(() => {
     const g: Record<ZamanasimıRisk, ZamanasimıRow[]> = { Acil: [], Kritik: [], Dikkat: [], Güvenli: [] }
     for (const d of dosyalar) g[d.risk]?.push(d)
     return g
   }, [dosyalar])
-  const sorted = useMemo(() => [...dosyalar].sort((a, b) => a.kalanGun - b.kalanGun), [dosyalar])
+  const sorted = useMemo(() => dosyalar.toSorted((a, b) => a.kalanGun - b.kalanGun), [dosyalar])
 
   if (isLoading) return <ReportLoading />
   if (dosyalar.length === 0) return <ReportEmpty />
 
-  const risks: ZamanasimıRisk[] = ['Acil', 'Kritik', 'Dikkat', 'Güvenli']
-
   return (
     <div className="flex flex-col gap-3.5">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {risks.map((r) => {
+        {RISKS.map((r) => {
           const Icon = riskIcon[r]
           return (
             <div key={r} className="rounded-b-xl bg-card border px-4 py-3.5 text-center" style={{ borderTopWidth: 3, borderTopColor: riskColor[r] }}>
@@ -72,8 +72,8 @@ export function Zamanasimi() {
             </tr>
           </thead>
           <tbody>
-            {ZAMANASIMI_INFO.map((z, i) => (
-              <tr key={i} className="border-t">
+            {ZAMANASIMI_INFO.map((z) => (
+              <tr key={z.tur} className="border-t">
                 <td className="px-[18px] py-2.5 text-[13px] font-medium">{z.tur}</td>
                 <td className="px-[18px] py-2.5"><Pill label={z.sure} color={z.sure === '2 yıl' ? C.warning : z.sure === '10 yıl' ? C.accent : C.success} /></td>
                 <td className="px-[18px] py-2.5 text-muted-foreground text-[12px]">{z.kanun}</td>
@@ -95,11 +95,11 @@ export function Zamanasimi() {
               </tr>
             </thead>
             <tbody>
-              {sorted.map((d, i) => {
+              {sorted.map((d) => {
                 const col = riskColor[d.risk]
                 const bg = d.risk === 'Acil' ? 'bg-[#ef444408]' : d.risk === 'Kritik' ? 'bg-[#f9731608]' : ''
                 return (
-                  <tr key={i} className={`border-t ${bg}`}>
+                  <tr key={d.no} className={`border-t ${bg}`}>
                     <td className="px-3.5 py-2.5 font-mono text-[12px] text-muted-foreground">{d.no}</td>
                     <td className="px-3.5 py-2.5 font-semibold text-[13px]">{d.muvekkil}</td>
                     <td className="px-3.5 py-2.5 text-[12.5px] text-muted-foreground">{d.sirket}</td>

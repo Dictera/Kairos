@@ -46,18 +46,23 @@ function highlight(text: string | null, query: string) {
   )
 }
 
+function getIcon(tip: string) {
+  if (tip === 'durusma') return <Calendar className="size-4 text-primary shrink-0" />
+  return <Clock className="size-4 text-orange-500 shrink-0" />
+}
+
 function NotificationDropdown() {
   const router = useRouter()
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const [open, setOpen] = React.useState(false)
 
-  const unreadQuery = useQuery({
+  const { data: unreadData } = useQuery({
     ...trpc.bildirim.unreadCount.queryOptions(),
     refetchInterval: open ? false : 30000,
   })
 
-  const listQuery = useQuery({
+  const { data: listData, isLoading: listLoading } = useQuery({
     ...trpc.bildirim.list.queryOptions(),
     enabled: open,
   })
@@ -93,8 +98,8 @@ function NotificationDropdown() {
     }
   }
 
-  const notifications = listQuery.data ?? []
-  const unreadCount = unreadQuery.data ?? 0
+  const notifications = listData ?? []
+  const unreadCount = unreadData ?? 0
 
   const handleNotificationClick = (dosyaId: number | null) => {
     if (dosyaId) {
@@ -113,11 +118,6 @@ function NotificationDropdown() {
   }
 
   const today = new Date().toISOString().slice(0, 10)
-
-  const getIcon = (tip: string) => {
-    if (tip === 'durusma') return <Calendar className="size-4 text-primary shrink-0" />
-    return <Clock className="size-4 text-orange-500 shrink-0" />
-  }
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
@@ -150,10 +150,10 @@ function NotificationDropdown() {
           )}
         </div>
         <ScrollArea className="max-h-72">
-          {listQuery.isLoading && syncMutation.isPending && (
+          {listLoading && syncMutation.isPending && (
             <div className="px-3 py-4 text-center text-xs text-muted-foreground">Yükleniyor...</div>
           )}
-          {notifications.length === 0 && !listQuery.isLoading && (
+          {notifications.length === 0 && !listLoading && (
             <div className="px-3 py-6 text-center text-sm text-muted-foreground">
               Bildirim yok
             </div>
@@ -162,21 +162,26 @@ function NotificationDropdown() {
             {notifications.map((n) => (
               <div
                 key={n.id}
-                onClick={() => handleNotificationClick(n.dosya_id)}
-                className="group relative flex cursor-pointer items-start gap-3 border-b border-border/40 px-3 py-2.5 transition-colors hover:bg-muted/50 last:border-b-0"
+                className="group relative border-b border-border/40 last:border-b-0"
               >
-                <div className="mt-0.5">{getIcon(n.tip)}</div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs font-medium">{n.baslik}</div>
-                  <div className="text-xs text-muted-foreground">{n.mesaj}</div>
-                  <div className="mt-0.5 text-[10px] text-muted-foreground/70">
-                    {n.tarih === today ? 'Bugün' : n.tarih}
+                <button
+                  type="button"
+                  onClick={() => handleNotificationClick(n.dosya_id)}
+                  className="flex w-full cursor-pointer items-start gap-3 px-3 py-2.5 text-left transition-colors hover:bg-muted/50"
+                >
+                  <div className="mt-0.5">{getIcon(n.tip)}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-medium">{n.baslik}</div>
+                    <div className="text-xs text-muted-foreground">{n.mesaj}</div>
+                    <div className="mt-0.5 text-[10px] text-muted-foreground/70">
+                      {n.tarih === today ? 'Bugün' : n.tarih}
+                    </div>
                   </div>
-                </div>
+                </button>
                 <button
                   type="button"
                   onClick={(e) => handleDismiss(e, n.id)}
-                  className="mt-0.5 shrink-0 rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+                  className="absolute right-3 top-2.5 rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
                   aria-label="Bildirimi kaldır"
                 >
                   <X className="size-3" />
@@ -197,7 +202,7 @@ export function DashboardHeader() {
   const debouncedQuery = useDebounce(query, 200)
 
   const trpc = useTRPC()
-  const searchQuery = useQuery({
+  const { data: searchData, isLoading: searchLoading } = useQuery({
     ...trpc.search.global.queryOptions({ query: debouncedQuery, limit: 5 }),
     enabled: debouncedQuery.length >= 1,
   })
@@ -224,8 +229,8 @@ export function DashboardHeader() {
     router.push(`/muvekkiller/${id}`)
   }
 
-  const dosyalar = searchQuery.data?.dosyalar ?? []
-  const muvekkiller = searchQuery.data?.muvekkiller ?? []
+  const dosyalar = searchData?.dosyalar ?? []
+  const muvekkiller = searchData?.muvekkiller ?? []
   const hasResults = dosyalar.length > 0 || muvekkiller.length > 0
 
   return (
@@ -279,11 +284,11 @@ export function DashboardHeader() {
               </div>
             )}
 
-            {query.length > 0 && !searchQuery.isLoading && !hasResults && (
+            {query.length > 0 && !searchLoading && !hasResults && (
               <CommandEmpty>Sonuç bulunamadı</CommandEmpty>
             )}
 
-            {query.length > 0 && searchQuery.isLoading && (
+            {query.length > 0 && searchLoading && (
               <div className="py-6 text-center text-sm text-muted-foreground">Aranıyor...</div>
             )}
 

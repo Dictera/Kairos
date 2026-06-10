@@ -20,6 +20,9 @@ interface DavaSureData {
 type AsamaBarItem  = { name: string; 'Ort. Süre': number; 'Maks. Süre': number; fill: string }
 type SirketBarItem = { name: string; Gun: number; fill: string }
 
+// Computed once at module load (stable across SSR/hydration) — avoids new Date() in render
+const PREV_YEAR = new Date().getFullYear() - 1
+
 const AsamaBarChart = dynamic<{ data: AsamaBarItem[] }>(
   async () => {
     const {
@@ -37,10 +40,10 @@ const AsamaBarChart = dynamic<{ data: AsamaBarItem[] }>(
             <Tooltip formatter={(v: unknown) => `${v} gün`} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             <Bar dataKey="Ort. Süre" fill={C.accent} radius={[4, 4, 0, 0]}>
-              {data.map((a, i) => <Cell key={i} fill={a.fill} />)}
+              {data.map((a) => <Cell key={a.name} fill={a.fill} />)}
             </Bar>
             <Bar dataKey="Maks. Süre" fill="#94a3b8" radius={[4, 4, 0, 0]}>
-              {data.map((_, i) => <Cell key={i} fill="#94a3b8" />)}
+              {data.map((d) => <Cell key={d.name} fill="#94a3b8" />)}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
@@ -67,7 +70,7 @@ const SirketBarChart = dynamic<{ data: SirketBarItem[] }>(
             <Tooltip formatter={(v: unknown) => `${v} gün`} />
             <ReferenceLine y={180} stroke={C.accent} strokeDasharray="6 4" />
             <Bar dataKey="Gun" radius={[5, 5, 0, 0]} name="Ort. Çözüm">
-              {data.map((s, i) => <Cell key={i} fill={s.fill} />)}
+              {data.map((s) => <Cell key={s.name} fill={s.fill} />)}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
@@ -112,7 +115,7 @@ export function DavaSureci() {
         <KPICard label="Ort. Toplam Süre" value={`${ortToplam} gün`} color={C.accent}  Icon={Clock}        sub="Açılıştan kapanışa" />
         <KPICard label="En Uzun Aşama"    value={enUzun.asama}        color={C.danger}  Icon={AlertOctagon} sub={`Ort. ${enUzun.ort} gün`} />
         <KPICard label="Aktif Dosya"      value={aktif}               color={C.success} Icon={Layers} />
-        <KPICard label={`${new Date().getFullYear() - 1} Kapanan`} value={kapananYil} color={C.masraf} Icon={CheckCircle2} sub="Yıl boyunca kapanan" />
+        <KPICard label={`${PREV_YEAR} Kapanan`} value={kapananYil} color={C.masraf} Icon={CheckCircle2} sub="Yıl boyunca kapanan" />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
@@ -147,10 +150,10 @@ export function DavaSureci() {
               </tr>
             </thead>
             <tbody>
-              {uzunDosyalar.map((d, i) => {
+              {uzunDosyalar.map((d) => {
                 const col = d.gun > 300 ? C.danger : d.gun > 200 ? C.warning : C.amber
                 return (
-                  <tr key={i} className={`border-t ${d.gun > 300 ? 'bg-[#ef444406]' : ''}`}>
+                  <tr key={d.no} className={`border-t ${d.gun > 300 ? 'bg-[#ef444406]' : ''}`}>
                     <td className="px-3.5 py-2.5 font-mono text-[12px] text-muted-foreground">{d.no}</td>
                     <td className="px-3.5 py-2.5 font-semibold text-[13px]">{d.muvekkil}</td>
                     <td className="px-3.5 py-2.5 text-[12.5px] text-muted-foreground">{d.sirket}</td>

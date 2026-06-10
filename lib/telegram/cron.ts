@@ -34,21 +34,22 @@ export function scheduleFromSettings(times?: string[]): void {
     times ??
     ((settings.telegram_bildirim_saatleri as string[] | undefined) ?? ['09:00', '15:00'])
 
-  const tasks = configuredTimes
-    .filter((t) => cron.validate(timeToCron(t)))  // TEL-07: reject invalid HH:MM
-    .map((t) =>
-      cron.schedule(
-        timeToCron(t),
-        async () => {
-          await sendPendingTelegramNotifications()
-          await sendWeeklySureSummary()
-        },
-        {
-          timezone: 'Europe/Istanbul',  // A1: Turkey timezone (see RESEARCH.md Assumptions)
-          noOverlap: true,              // Skip run if previous is still in progress
-        }
-      )
-    )
+  const tasks = configuredTimes.flatMap((t) =>
+    // TEL-07: reject invalid HH:MM
+    cron.validate(timeToCron(t))
+      ? [cron.schedule(
+          timeToCron(t),
+          async () => {
+            await sendPendingTelegramNotifications()
+            await sendWeeklySureSummary()
+          },
+          {
+            timezone: 'Europe/Istanbul',  // A1: Turkey timezone (see RESEARCH.md Assumptions)
+            noOverlap: true,              // Skip run if previous is still in progress
+          }
+        )]
+      : []
+  )
 
   globalThis.__telegramCronTasks = tasks
 }

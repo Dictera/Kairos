@@ -69,7 +69,7 @@ export function FinansEntryList({ dosyaId }: FinansEntryListProps) {
     )
   }
   
-  const sortedEntries = [...entries].sort((a, b) => {
+  const sortedEntries = entries.toSorted((a, b) => {
     return parseISO(b.tarih).getTime() - parseISO(a.tarih).getTime()
   })
   

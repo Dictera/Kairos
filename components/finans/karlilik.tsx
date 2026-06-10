@@ -62,7 +62,7 @@ export function Karlilik() {
 
   const dosyaTurNet = useMemo(() => enrichDosyaTur(dosyaTurData ?? []), [dosyaTurData])
 
-  const monthly = dashData?.monthly ?? []
+  const monthly = useMemo(() => dashData?.monthly ?? [], [dashData])
 
   const totals = useMemo(() => monthly.reduce(
     (a, m) => ({
@@ -89,13 +89,14 @@ export function Karlilik() {
 
   const sirket = sirketData ?? []
   const dosyaBasinaData = sirket
-    .filter(s => s.dosya > 0)
-    .map(s => ({ name: s.ad, 'Dosya Başına': Math.round(s.tahsilat / s.dosya) }))
+    .flatMap(s => s.dosya > 0
+      ? [{ name: s.ad, 'Dosya Başına': Math.round(s.tahsilat / s.dosya) }]
+      : [])
 
   const masrafOrt = totals.gelen > 0 ? (totals.masraf / totals.gelen * 100).toFixed(1) : '0'
   const netMarj   = totals.gelen > 0 ? (totals.net    / totals.gelen * 100).toFixed(1) : '0'
   const aylikOrt  = monthly.length > 0 ? Math.round(totals.net / monthly.length) : 0
-  const enKarliTur = [...dosyaTurNet].sort((a, b) => b.oran - a.oran)[0]?.tur ?? '—'
+  const enKarliTur = dosyaTurNet.toSorted((a, b) => b.oran - a.oran)[0]?.tur ?? '—'
 
   if (isLoading) {
     return (
@@ -182,8 +183,8 @@ export function Karlilik() {
                   <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={80} />
                   <Tooltip formatter={(v: unknown) => typeof v === 'number' ? fmt(v) : String(v)} />
                   <Bar dataKey="Dosya Başına" radius={[0, 3, 3, 0]}>
-                    {dosyaBasinaData.map((_, i) => (
-                      <Cell key={i} fill={DOSYA_COLORS[i % DOSYA_COLORS.length]} />
+                    {dosyaBasinaData.map((d, i) => (
+                      <Cell key={d.name} fill={DOSYA_COLORS[i % DOSYA_COLORS.length]} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -206,8 +207,8 @@ export function Karlilik() {
                 </tr>
               </thead>
               <tbody>
-                {dosyaTurNet.map((d, i) => (
-                  <tr key={i} className="border-t hover:bg-muted/40 transition-colors">
+                {dosyaTurNet.map((d) => (
+                  <tr key={d.tur} className="border-t hover:bg-muted/40 transition-colors">
                     <td className="px-5 py-3 font-semibold text-base">{d.tur}</td>
                     <td className="px-5 py-3 text-right tabular-nums font-medium" style={{ color: '#22c55e' }}>{fmt(d.gelen)}</td>
                     <td className="px-5 py-3 text-right tabular-nums"            style={{ color: '#ef4444' }}>{fmt(d.giden)}</td>

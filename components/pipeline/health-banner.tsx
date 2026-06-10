@@ -36,12 +36,13 @@ export function HealthBanner() {
         <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <div className="flex flex-col gap-0.5">
-            {messages.map((msg, i) => (
-              <p key={i} className="text-sm font-medium">{msg}</p>
+            {messages.map((msg) => (
+              <p key={msg} className="text-sm font-medium">{msg}</p>
             ))}
           </div>
         </div>
         <button
+          type="button"
           onClick={() => setDismissed(true)}
           className="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
           aria-label="Uyarıyı kapat"

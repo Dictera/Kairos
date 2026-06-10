@@ -116,7 +116,7 @@ export function SirketTur() {
                   <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={80} />
                   <Tooltip formatter={(v: unknown) => `%${v}`} />
                   <Bar dataKey="Oran" radius={[0, 3, 3, 0]}>
-                    {oranData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
+                    {oranData.map((entry) => <Cell key={entry.name} fill={entry.fill} />)}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -137,7 +137,7 @@ export function SirketTur() {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={tur.map(t => ({ ...t, fill: t.renk }))} dataKey="gelen" nameKey="tur" cx="50%" cy="50%" innerRadius="55%" outerRadius="80%">
-                      {tur.map((entry, i) => <Cell key={i} fill={entry.renk} />)}
+                      {tur.map((entry) => <Cell key={entry.tur} fill={entry.renk} />)}
                     </Pie>
                     <Tooltip formatter={(v: unknown) => typeof v === 'number' ? fmt(v) : String(v)} />
                     <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
@@ -160,11 +160,11 @@ export function SirketTur() {
                 </tr>
               </thead>
               <tbody>
-                {sirket.map((s, i) => {
+                {sirket.map((s) => {
                   const pct = s.talep > 0 ? (s.tahsilat / s.talep) * 100 : 0
                   const col = tahsilatColor(pct)
                   return (
-                    <tr key={i} className="border-t hover:bg-muted/40 transition-colors">
+                    <tr key={s.ad} className="border-t hover:bg-muted/40 transition-colors">
                       <td className="px-4 py-2.5 font-medium">{s.ad}</td>
                       <td className="px-4 py-2.5 text-right text-muted-foreground">{s.dosya}</td>
                       <td className="px-4 py-2.5 text-right tabular-nums">{fmt(s.talep)}</td>

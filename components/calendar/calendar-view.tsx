@@ -43,6 +43,8 @@ const months = [
   { value: "11", label: "Aralık" },
 ]
 
+const weekDays = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
+
 const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i)
 
 /**
@@ -156,8 +158,6 @@ export function CalendarView() {
   const selectedDateEvents = selectedDate
     ? eventsMap.get(format(selectedDate, "yyyy-MM-dd")) || []
     : []
-
-  const weekDays = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
 
   return (
     <div className="flex h-full gap-4 min-h-0">
@@ -278,6 +278,7 @@ export function CalendarView() {
               <Popover key={dateStr} open={!!(isSelected && popoverOpen)} onOpenChange={setPopoverOpen}>
                 <PopoverTrigger asChild>
                   <button
+                    type="button"
                     onClick={() => handleDayClick(day)}
                     className={cn(
                       "relative flex flex-col items-center justify-start p-1.5 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors text-left h-full",

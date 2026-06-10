@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
 import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import { Dialog, DialogContent, DialogClose, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { ChevronUp, ChevronDown } from 'lucide-react'
@@ -16,15 +16,50 @@ function wrap(val: number, max: number) {
   return ((val % max) + max) % max
 }
 
+const ORANGE = 'oklch(0.746 0.174 57)'
+const NAVY   = 'oklch(0.219 0.044 240)'
+const MUTED  = 'oklch(0.219 0.044 240 / 0.35)'
+const CARD   = 'oklch(0.969 0.008 20)'
+const BORDER = 'oklch(0.88 0.008 20)'
+
+const inputStyle: CSSProperties = {
+  background: 'transparent',
+  border: 'none',
+  borderBottom: `2px solid ${ORANGE}`,
+  outline: 'none',
+  color: ORANGE,
+  fontSize: 64,
+  fontWeight: 100,
+  lineHeight: 1,
+  letterSpacing: '-0.04em',
+  width: 96,
+  textAlign: 'center',
+  caretColor: ORANGE,
+}
+
+const bigDigitStyle: CSSProperties = {
+  color: ORANGE,
+  fontSize: 64,
+  fontWeight: 100,
+  letterSpacing: '-0.04em',
+  background: 'none',
+  border: 'none',
+  cursor: 'text',
+  padding: 0,
+}
+
 export function ClockPicker({ open, onOpenChange, onConfirm }: ClockPickerProps) {
   const [hour, setHour] = useState(8)
   const [minute, setMinute] = useState(0)
   const [editing, setEditing] = useState<'hour' | 'minute' | null>(null)
   const [draft, setDraft] = useState('')
 
-  useEffect(() => {
-    if (!open) { setHour(8); setMinute(0); setEditing(null); setDraft('') }
-  }, [open])
+  // Reset on every close path (Esc, overlay, close button, confirm) — Radix
+  // routes all of them through onOpenChange, so resetting here covers them all.
+  function handleOpenChange(next: boolean) {
+    if (!next) { setHour(8); setMinute(0); setEditing(null); setDraft('') }
+    onOpenChange(next)
+  }
 
   function startEdit(field: 'hour' | 'minute') {
     setEditing(field)
@@ -49,32 +84,11 @@ export function ClockPicker({ open, onOpenChange, onConfirm }: ClockPickerProps)
   function handleConfirm() {
     if (editing) commitEdit()
     onConfirm(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`)
-    onOpenChange(false)
-  }
-
-  const ORANGE = 'oklch(0.746 0.174 57)'
-  const NAVY   = 'oklch(0.219 0.044 240)'
-  const MUTED  = 'oklch(0.219 0.044 240 / 0.35)'
-  const CARD   = 'oklch(0.969 0.008 20)'
-  const BORDER = 'oklch(0.88 0.008 20)'
-
-  const inputStyle: React.CSSProperties = {
-    background: 'transparent',
-    border: 'none',
-    borderBottom: `2px solid ${ORANGE}`,
-    outline: 'none',
-    color: ORANGE,
-    fontSize: 64,
-    fontWeight: 100,
-    lineHeight: 1,
-    letterSpacing: '-0.04em',
-    width: 96,
-    textAlign: 'center',
-    caretColor: ORANGE,
+    handleOpenChange(false)
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         className="max-w-xs p-0 overflow-hidden gap-0 rounded-2xl"
         showCloseButton={false}
@@ -89,7 +103,8 @@ export function ClockPicker({ open, onOpenChange, onConfirm }: ClockPickerProps)
           <div className="flex items-end gap-1.5">
             {editing === 'hour' ? (
               <input
-                autoFocus
+                ref={el => el?.focus()}
+                aria-label="Saat"
                 type="text"
                 inputMode="numeric"
                 maxLength={2}
@@ -107,7 +122,7 @@ export function ClockPicker({ open, onOpenChange, onConfirm }: ClockPickerProps)
             ) : (
               <button type="button" onClick={() => startEdit('hour')}
                 className="tabular-nums leading-none transition-opacity hover:opacity-70"
-                style={{ color: ORANGE, fontSize: 64, fontWeight: 100, letterSpacing: '-0.04em', background: 'none', border: 'none', cursor: 'text', padding: 0 }}>
+                style={bigDigitStyle}>
                 {String(hour).padStart(2, '0')}
               </button>
             )}
@@ -117,7 +132,8 @@ export function ClockPicker({ open, onOpenChange, onConfirm }: ClockPickerProps)
             </span>
             {editing === 'minute' ? (
               <input
-                autoFocus
+                ref={el => el?.focus()}
+                aria-label="Dakika"
                 type="text"
                 inputMode="numeric"
                 maxLength={2}
@@ -135,7 +151,7 @@ export function ClockPicker({ open, onOpenChange, onConfirm }: ClockPickerProps)
             ) : (
               <button type="button" onClick={() => startEdit('minute')}
                 className="tabular-nums leading-none transition-opacity hover:opacity-70"
-                style={{ color: ORANGE, fontSize: 64, fontWeight: 100, letterSpacing: '-0.04em', background: 'none', border: 'none', cursor: 'text', padding: 0 }}>
+                style={bigDigitStyle}>
                 {String(minute).padStart(2, '0')}
               </button>
             )}
@@ -209,10 +225,13 @@ interface DrumColumnProps {
   border: string
 }
 
+function fmt(n: number) {
+  return String(n).padStart(2, '0')
+}
+
 function DrumColumn({ value, max, label, onChange, orange, navy, muted, border }: DrumColumnProps) {
   const prev = wrap(value - 1, max)
   const next = wrap(value + 1, max)
-  const fmt  = (n: number) => String(n).padStart(2, '0')
 
   return (
     <div className="flex-1 flex flex-col items-center gap-1">

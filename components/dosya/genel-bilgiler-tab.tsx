@@ -48,20 +48,21 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   )
 }
 
+function formatTutar(amount: number | null) {
+  if (amount == null) return '—'
+  return '₺' + amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })
+}
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('tr-TR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
+
 export function GenelBilgilerTab({ dosya }: GenelBilgilerTabProps) {
   const primaryTaraf = dosya.taraflar[0]
-
-  const formatTutar = (amount: number | null) => {
-    if (amount == null) return '—'
-    return '₺' + amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })
-  }
-
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString('tr-TR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
 
   return (
     <Card>

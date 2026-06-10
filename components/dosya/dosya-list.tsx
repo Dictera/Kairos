@@ -37,6 +37,43 @@ import { MoreHorizontal, FolderOpen, Pencil, Archive, ArchiveRestore } from 'luc
 import { toast } from 'sonner'
 import Link from 'next/link'
 
+function getTurLabel(t: string) {
+  if (t === 'STK') return 'STK'
+  if (t === 'AT') return 'Asliye Ticaret'
+  if (t === 'AH') return 'Asliye Hukuk'
+  return t
+}
+
+function getTurBadge(t: string) {
+  if (t === 'STK') {
+    return (
+      <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+        {getTurLabel(t)}
+      </Badge>
+    )
+  }
+  return (
+    <Badge className="bg-muted text-muted-foreground hover:bg-muted">
+      {getTurLabel(t)}
+    </Badge>
+  )
+}
+
+function getDurumBadge(d: string) {
+  if (d === 'aktif') {
+    return (
+      <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+        Aktif
+      </Badge>
+    )
+  }
+  return (
+    <Badge className="bg-muted text-muted-foreground hover:bg-muted">
+      Arşivlenmiş
+    </Badge>
+  )
+}
+
 export function DosyaList() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -118,43 +155,6 @@ export function DosyaList() {
     setPage(1)
   }
 
-  function getTurLabel(t: string) {
-    if (t === 'STK') return 'STK'
-    if (t === 'AT') return 'Asliye Ticaret'
-    if (t === 'AH') return 'Asliye Hukuk'
-    return t
-  }
-
-  function getTurBadge(t: string) {
-    if (t === 'STK') {
-      return (
-        <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-          {getTurLabel(t)}
-        </Badge>
-      )
-    }
-    return (
-      <Badge className="bg-muted text-muted-foreground hover:bg-muted">
-        {getTurLabel(t)}
-      </Badge>
-    )
-  }
-
-  function getDurumBadge(d: string) {
-    if (d === 'aktif') {
-      return (
-        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-          Aktif
-        </Badge>
-      )
-    }
-    return (
-      <Badge className="bg-muted text-muted-foreground hover:bg-muted">
-        Arşivlenmiş
-      </Badge>
-    )
-  }
-
   return (
     <div className="space-y-4">
       {/* Toolbar Row 1: Search + New button */}
@@ -173,9 +173,9 @@ export function DosyaList() {
       {/* Toolbar Row 2: Filters */}
       <div className="flex flex-wrap items-end gap-3">
         <div className="space-y-1">
-          <label className="text-sm font-semibold text-muted-foreground">Tür</label>
+          <label htmlFor="filter-tur" className="text-sm font-semibold text-muted-foreground">Tür</label>
           <Select value={tur || 'all'} onValueChange={handleTurChange}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger id="filter-tur" aria-label="Tür" className="w-[160px]">
               <SelectValue placeholder="Tümü" />
             </SelectTrigger>
             <SelectContent>
@@ -188,9 +188,9 @@ export function DosyaList() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-sm font-semibold text-muted-foreground">Durum</label>
+          <label htmlFor="filter-durum" className="text-sm font-semibold text-muted-foreground">Durum</label>
           <Select value={durum || 'all'} onValueChange={handleDurumChange}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger id="filter-durum" aria-label="Durum" className="w-[160px]">
               <SelectValue placeholder="Tümü" />
             </SelectTrigger>
             <SelectContent>
@@ -202,8 +202,10 @@ export function DosyaList() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-sm font-semibold text-muted-foreground">Başlangıç</label>
+          <label htmlFor="filter-baslangic" className="text-sm font-semibold text-muted-foreground">Başlangıç</label>
           <DatePickerField
+            id="filter-baslangic"
+            aria-label="Başlangıç"
             value={tarihBaslangic}
             onChange={(val) => { setTarihBaslangic(val || ''); setPage(1) }}
             placeholder="Başlangıç tarihi"
@@ -211,8 +213,10 @@ export function DosyaList() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-sm font-semibold text-muted-foreground">Bitiş</label>
+          <label htmlFor="filter-bitis" className="text-sm font-semibold text-muted-foreground">Bitiş</label>
           <DatePickerField
+            id="filter-bitis"
+            aria-label="Bitiş"
             value={tarihBitis}
             onChange={(val) => { setTarihBitis(val || ''); setPage(1) }}
             placeholder="Bitiş tarihi"
@@ -335,7 +339,7 @@ export function DosyaList() {
                 href="#"
                 onClick={(e) => {
                   e.preventDefault()
-                  if (page > 1) setPage(page - 1)
+                  if (page > 1) setPage((p) => p - 1)
                 }}
                 aria-disabled={page <= 1}
                 className={page <= 1 ? 'pointer-events-none opacity-50' : ''}
@@ -365,7 +369,7 @@ export function DosyaList() {
                 href="#"
                 onClick={(e) => {
                   e.preventDefault()
-                  if (page < data.totalPages) setPage(page + 1)
+                  if (page < data.totalPages) setPage((p) => p + 1)
                 }}
                 aria-disabled={page >= data.totalPages}
                 className={page >= data.totalPages ? 'pointer-events-none opacity-50' : ''}

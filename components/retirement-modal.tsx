@@ -19,7 +19,9 @@ const RETIREMENT_FLAG_KEY = 'retirement_v1_2_done'
 
 export function RetirementModal() {
   const [showModal, setShowModal] = useState(false)
-  const [checked, setChecked] = useState(false)
+  const [checked, setChecked] = useState(
+    () => typeof window !== 'undefined' && localStorage.getItem(RETIREMENT_FLAG_KEY) === '1'
+  )
   const trpc = useTRPC()
 
   const { data: checkLegacy } = useQuery(
@@ -42,15 +44,6 @@ export function RetirementModal() {
       },
     })
   )
-
-  useEffect(() => {
-    if (checked) return
-    const flag = localStorage.getItem(RETIREMENT_FLAG_KEY)
-    if (flag === '1') {
-      setChecked(true)
-      return
-    }
-  }, [checked])
 
   useEffect(() => {
     if (checkLegacy && !checked) {

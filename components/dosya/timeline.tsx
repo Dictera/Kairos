@@ -19,22 +19,22 @@ interface TimelineProps {
   dosyaId: number
 }
 
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('tr-TR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 export function Timeline({ dosyaId }: TimelineProps) {
   const trpc = useTRPC()
 
   const { data: events, isLoading } = useQuery(
     trpc.olay.list.queryOptions({ dosya_id: dosyaId })
   )
-
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('tr-TR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
 
   if (isLoading) {
     return (

@@ -31,7 +31,7 @@ const TierBarChart = dynamic<{ data: { name: string; Tutar: number; fill: string
             <YAxis tickFormatter={fmtKN} tick={{ fontSize: 11 }} width={48} />
             <Tooltip formatter={(v: unknown) => typeof v === 'number' ? fmt(v) : String(v)} />
             <Bar dataKey="Tutar" radius={[6, 6, 0, 0]}>
-              {data.map((d, i) => <Cell key={i} fill={d.fill} />)}
+              {data.map((d) => <Cell key={d.name} fill={d.fill} />)}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
@@ -81,7 +81,7 @@ export function Tahsilat() {
       <div className="grid grid-cols-1 md:grid-cols-3 rounded-xl border overflow-hidden bg-card">
         {tiers.map((c, i) => (
           <div
-            key={i}
+            key={c.label}
             className={`px-5 py-[18px] border-t-[3px] ${i < tiers.length - 1 ? 'md:border-r' : ''}`}
             style={{ borderTopColor: c.color }}
           >
@@ -151,7 +151,7 @@ export function Tahsilat() {
                 const kCol     = kOran >= 80 ? C.success : kOran >= 65 ? C.warning : C.danger
                 const tCol     = tOran >= 90 ? C.success : tOran >= 80 ? C.warning : C.danger
                 return (
-                  <tr key={i} className="border-t">
+                  <tr key={s.ad} className="border-t">
                     <td className="px-3 py-2.5 font-semibold text-[13px]">{s.ad}</td>
                     <td className="px-3 py-2.5"><Pill label={s.tur} color={C.accent} /></td>
                     <td className="px-3 py-2.5 text-right text-muted-foreground tabular-nums">{s.dosya}</td>

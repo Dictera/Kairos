@@ -10,6 +10,8 @@ import { Shield, Scale, CheckCircle2, PieChart as PieIcon } from 'lucide-react'
 import { C, fmt, fmtK, type SirketRow } from './raporlar-data'
 import { KPICard, CardHead, ProgressBar, ReportLoading, ReportEmpty } from './raporlar-shared'
 
+const LINE_COLORS = [C.accent, C.success, C.masraf, C.purple]
+
 const LineChart           = dynamic(() => import('recharts').then(m => m.LineChart),           { ssr: false, loading: () => <Skeleton className="h-[220px] w-full" /> })
 const Line                = dynamic(() => import('recharts').then(m => m.Line),                { ssr: false })
 const XAxis               = dynamic(() => import('recharts').then(m => m.XAxis),               { ssr: false })
@@ -37,7 +39,7 @@ export function SirketAnalizi() {
   const { sirketler, oranTrend } = data
   const trendSeries = data.trendSeries ?? sirketler.slice(0, 4).map(s => s.ad)
 
-  const sorted = [...sirketler].sort((a, b) => {
+  const sorted = sirketler.toSorted((a, b) => {
     const ra = a.karar > 0 ? a.tahsilat / a.karar : 0
     const rb = b.karar > 0 ? b.tahsilat / b.karar : 0
     return rb - ra
@@ -45,8 +47,6 @@ export function SirketAnalizi() {
 
   const totTalep    = sirketler.reduce((a, s) => a + s.talep,    0)
   const totTahsilat = sirketler.reduce((a, s) => a + s.tahsilat, 0)
-
-  const LINE_COLORS = [C.accent, C.success, C.masraf, C.purple]
 
   return (
     <div className="flex flex-col gap-3.5">
@@ -100,7 +100,7 @@ export function SirketAnalizi() {
                 const kararCol  = kararOran >= 90 ? C.success : kararOran >= 80 ? C.warning : C.danger
                 const rank      = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`
                 return (
-                  <tr key={i} className="border-t">
+                  <tr key={s.ad} className="border-t">
                     <td className="px-3 py-2.5 text-muted-foreground text-[12px] w-9">{rank}</td>
                     <td className="px-3 py-2.5 font-semibold text-[13px]">{s.ad}</td>
                     <td className="px-3 py-2.5 text-muted-foreground tabular-nums">{s.dosya}</td>

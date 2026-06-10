@@ -166,6 +166,7 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
         <input
           type="file"
           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+          aria-label="Dosya yükle"
           className={`
             absolute inset-0 w-full h-full opacity-0 cursor-pointer
             ${file ? 'pointer-events-none' : ''}

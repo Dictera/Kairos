@@ -70,6 +70,7 @@ function YilChips({ value, onChange, years }: { value: YilFilter; onChange: (v: 
   return (
     <div className="flex gap-1.5 flex-wrap">
       <button
+        type="button"
         onClick={() => onChange('all')}
         className={[
           'rounded-md border px-3.5 py-1.5 text-[12.5px] font-medium transition-colors',
@@ -83,6 +84,7 @@ function YilChips({ value, onChange, years }: { value: YilFilter; onChange: (v: 
       {years.map(y => (
         <button
           key={y}
+          type="button"
           onClick={() => onChange(String(y))}
           className={[
             'rounded-md border px-3.5 py-1.5 text-[12.5px] font-medium transition-colors',
