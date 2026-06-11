@@ -6,8 +6,9 @@
   Yaptıkları:
     1. Node.js 18+ kontrolü (yoksa winget ile kurar)
     2. pnpm etkinleştirme (corepack)
-    3. Bağımlılıkların yüklenmesi (pnpm install)
-    4. .env.local oluşturma (rastgele SESSION_PASSWORD + APP_PASSWORD sorar)
+    3. Kurulum seçenekleri + .env.local oluşturma
+       (rastgele SESSION_PASSWORD, APP_PASSWORD, opsiyonel Telegram)
+    4. Bağımlılıkların yüklenmesi (pnpm install)
     5. Uygulama derlemesi (pnpm build)
     6. Veritabanı şeması (pnpm db:migrate)
     7. Opsiyonel Python pipeline kurulumu (.docx -> PDF)
@@ -16,7 +17,7 @@
   Güvenlik:
     - SESSION_PASSWORD kriptografik RNG ile üretilir.
     - Mevcut .env.local ASLA üzerine yazılmaz.
-    - Hiçbir sır ekrana yazılmaz / okunmaz.
+    - APP_PASSWORD ekrana yazılmaz / okunmaz.
 #>
 
 Set-StrictMode -Version Latest
@@ -46,6 +47,19 @@ function Fail {
 function Test-Command {
   param([string]$Name)
   $null -ne (Get-Command $Name -ErrorAction SilentlyContinue)
+}
+
+# Türkçe Evet/Hayır sorusu. Boş cevap varsayılanı döndürür.
+function Read-YesNo {
+  param([string]$Question, [bool]$Default = $false)
+  $hint = if ($Default) { '[E/h]' } else { '[e/H]' }
+  while ($true) {
+    $ans = (Read-Host "    $Question $hint").Trim().ToLower()
+    if ([string]::IsNullOrEmpty($ans)) { return $Default }
+    if ($ans -in @('e', 'evet', 'y', 'yes')) { return $true }
+    if ($ans -in @('h', 'hayir', 'hayır', 'n', 'no')) { return $false }
+    Write-Warn "Lütfen E (evet) veya H (hayır) girin."
+  }
 }
 
 # pnpm'i güvenilir çağırmak için: önce doğrudan, olmazsa corepack üzerinden
@@ -110,34 +124,40 @@ if (-not (Test-Command 'pnpm') -and -not (Test-Command 'corepack')) {
 Write-Ok "pnpm hazır"
 
 # ------------------------------------------------------------------
-# 3. Bağımlılıklar
+# 3. Kurulum seçenekleri + .env.local
+#    (Tüm sorular burada sorulur; uzun adımlar sonra gözetimsiz çalışır.)
 # ------------------------------------------------------------------
-Write-Step "Bağımlılıklar yükleniyor (pnpm install) - birkaç dakika sürebilir"
-Invoke-Pnpm install --frozen-lockfile
-Write-Ok "Bağımlılıklar yüklendi"
+Write-Step "Kurulum seçenekleri"
 
-# ------------------------------------------------------------------
-# 4. .env.local
-# ------------------------------------------------------------------
-Write-Step "Ortam ayarları (.env.local)"
-$envPath = Join-Path $RepoRoot '.env.local'
-if (Test-Path $envPath) {
+# --- Opsiyon: belge şablonundan PDF (Python pipeline) ---
+Write-Host ""
+Write-Host "    Belge şablonu (.docx) -> PDF üretimi opsiyonel bir özelliktir." -ForegroundColor White
+Write-Host "    Python 3.8+ ve LibreOffice gerektirir." -ForegroundColor DarkGray
+$wantPdf = Read-YesNo "Şablondan PDF üretimi kurulsun mu?" $false
+
+# --- .env.local + opsiyonel Telegram ---
+$envPath   = Join-Path $RepoRoot '.env.local'
+$envExists = Test-Path $envPath
+
+if ($envExists) {
   Write-Ok ".env.local zaten var - dokunulmadı"
+  Write-Note "Telegram bildirimlerini eklemek için .env.local içindeki TELEGRAM_* alanlarını düzenleyin."
 } else {
   # Kriptografik olarak güvenli rastgele SESSION_PASSWORD (48 karakter, alfanümerik)
   $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
   $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
   try {
-    $buf = New-Object 'System.Byte[]' 48
+    $bufLen = 48
+    $buf = New-Object 'System.Byte[]' $bufLen
     $rng.GetBytes($buf)
-    $sb = New-Object System.Text.StringBuilder 48
+    $sb = New-Object System.Text.StringBuilder $bufLen
     foreach ($b in $buf) { [void]$sb.Append($alphabet[[int]$b % $alphabet.Length]) }
     $sessionPassword = $sb.ToString()
   } finally {
     $rng.Dispose()
   }
 
-  # APP_PASSWORD kullanıcıdan alınır (giriş şifresi)
+  # APP_PASSWORD kullanıcıdan alınır (giriş şifresi) - ekrana yazılmaz
   Write-Host ""
   Write-Host "    Uygulamaya giriş için bir şifre belirleyin." -ForegroundColor White
   $appPassword = ''
@@ -147,6 +167,27 @@ if (Test-Path $envPath) {
     try { $appPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr) }
     finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr) }
     if ([string]::IsNullOrWhiteSpace($appPassword)) { Write-Warn "Şifre boş olamaz." }
+  }
+
+  # Opsiyon: Telegram bildirimleri
+  $telegramToken  = ''
+  $telegramChatId = ''
+  Write-Host ""
+  Write-Host "    Telegram bildirimleri (günlük duruşma/süre uyarıları) opsiyoneldir." -ForegroundColor White
+  if (Read-YesNo "Telegram bildirimleri kurulsun mu?" $false) {
+    Write-Note "Bot token: Telegram'da @BotFather -> /newbot ile alınır."
+    Write-Note "Chat ID: Telegram'da @userinfobot'a mesaj atınca görünür."
+    while ([string]::IsNullOrWhiteSpace($telegramToken)) {
+      $telegramToken = (Read-Host "    TELEGRAM_BOT_TOKEN").Trim()
+      if ([string]::IsNullOrWhiteSpace($telegramToken)) { Write-Warn "Token boş olamaz (vazgeçmek için Ctrl+C)." }
+    }
+    while ([string]::IsNullOrWhiteSpace($telegramChatId)) {
+      $telegramChatId = (Read-Host "    TELEGRAM_CHAT_ID").Trim()
+      if ([string]::IsNullOrWhiteSpace($telegramChatId)) { Write-Warn "Chat ID boş olamaz (vazgeçmek için Ctrl+C)." }
+    }
+    Write-Ok "Telegram bilgileri kaydedilecek"
+  } else {
+    Write-Note "Telegram atlandı - bildirimler devre dışı (sonradan .env.local'dan eklenebilir)."
   }
 
   $envContent = @"
@@ -159,13 +200,20 @@ PYTHON_PATH=
 LIBREOFFICE_PATH=
 
 # Telegram bildirimleri (opsiyonel - boş ise bildirimler atlanır)
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_CHAT_ID=
+TELEGRAM_BOT_TOKEN=$telegramToken
+TELEGRAM_CHAT_ID=$telegramChatId
 "@
   # UTF-8 (BOM'suz) yaz
   [System.IO.File]::WriteAllText($envPath, $envContent, (New-Object System.Text.UTF8Encoding($false)))
   Write-Ok ".env.local oluşturuldu (SESSION_PASSWORD otomatik üretildi)"
 }
+
+# ------------------------------------------------------------------
+# 4. Bağımlılıklar
+# ------------------------------------------------------------------
+Write-Step "Bağımlılıklar yükleniyor (pnpm install) - birkaç dakika sürebilir"
+Invoke-Pnpm install --frozen-lockfile
+Write-Ok "Bağımlılıklar yüklendi"
 
 # ------------------------------------------------------------------
 # 5. Derleme
@@ -184,19 +232,26 @@ Write-Ok "Veritabanı hazır (data\db.sqlite)"
 # ------------------------------------------------------------------
 # 7. Opsiyonel Python pipeline (.docx -> PDF)
 # ------------------------------------------------------------------
-Write-Step "Belge şablonu (PDF) pipeline'ı - opsiyonel"
-$venvScript = Join-Path $RepoRoot 'scripts\docx-pipeline\setup-venv.ps1'
-if ((Test-Command 'python') -and (Test-Path $venvScript)) {
-  try {
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $venvScript
-    if ($LASTEXITCODE -eq 0) { Write-Ok "Python pipeline kuruldu" }
-    else { Write-Warn "Python pipeline kurulamadı - şablon PDF özelliği devre dışı (uygulama yine de çalışır)." }
-  } catch {
-    Write-Warn "Python pipeline kurulumu atlandı - şablon PDF özelliği devre dışı (uygulama yine de çalışır)."
+Write-Step "Belge şablonu (PDF) pipeline'ı"
+if ($wantPdf) {
+  $venvScript = Join-Path $RepoRoot 'scripts\docx-pipeline\setup-venv.ps1'
+  if ((Test-Command 'python') -and (Test-Path $venvScript)) {
+    try {
+      & powershell -NoProfile -ExecutionPolicy Bypass -File $venvScript
+      if ($LASTEXITCODE -eq 0) { Write-Ok "Python pipeline kuruldu" }
+      else { Write-Warn "Python pipeline kurulamadı - şablon PDF özelliği devre dışı (uygulama yine de çalışır)." }
+    } catch {
+      Write-Warn "Python pipeline kurulumu atlandı - şablon PDF özelliği devre dışı (uygulama yine de çalışır)."
+    }
+    if (-not (Test-Command 'soffice')) {
+      Write-Note "LibreOffice (soffice) PATH'te bulunamadı - PDF dönüşümü için kurulu olmalı: https://www.libreoffice.org"
+    }
+  } else {
+    Write-Warn "Python bulunamadı - şablon PDF özelliği kurulamadı."
+    Write-Note "Python 3.8+ ve LibreOffice kurup setup.bat'i tekrar çalıştırın."
   }
 } else {
-  Write-Note "Python bulunamadı - şablon PDF özelliği atlandı (uygulama yine de çalışır)."
-  Write-Note "Bu özellik için Python 3.8+ ve LibreOffice kurup setup.bat'i tekrar çalıştırabilirsiniz."
+  Write-Note "Şablondan PDF üretimi atlandı (seçilmedi)."
 }
 
 # ------------------------------------------------------------------

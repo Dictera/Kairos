@@ -20,14 +20,16 @@ PDF şablon özelliği (`.docx` → PDF) kullanmayacaksanız Python ve LibreOffi
 Son kullanıcılar için tek tıkla kurulum. Aşağıdaki manuel adımların tamamını sizin yerinize yapar.
 
 1. Depo klasöründeki **`setup.bat`** dosyasına çift tıklayın.
-2. İstendiğinde uygulamaya giriş şifresini (`APP_PASSWORD`) belirleyin.
+2. İstendiğinde uygulamaya giriş şifresini (`APP_PASSWORD`) belirleyin ve opsiyonel özellikleri seçin:
+   - **Şablondan PDF üretimi** — `.docx → PDF` için Python pipeline'ı kurulsun mu? (Python 3.8+ ve LibreOffice gerektirir.)
+   - **Telegram bildirimleri** — kurulacaksa betik sizden `TELEGRAM_BOT_TOKEN` (@BotFather) ve `TELEGRAM_CHAT_ID` (@userinfobot) değerlerini ister; seçmezseniz alanlar boş bırakılır ve bildirimler atlanır.
 3. Betik şunları otomatik yürütür:
    - Node.js 18+ kontrolü — kurulu değilse `winget` ile kurar (winget yoksa nodejs.org bağlantısını gösterip durur).
    - `corepack` ile pnpm@11.5.0 etkinleştirme.
    - `pnpm install --frozen-lockfile`.
    - `.env.local` oluşturma — kriptografik olarak güvenli, 48 karakterlik rastgele bir `SESSION_PASSWORD` üretir; `APP_PASSWORD` değerini sizden alır. **Mevcut bir `.env.local` dosyasının üzerine asla yazılmaz.**
    - `pnpm build` ve `pnpm db:migrate`.
-   - Python kuruluysa `.docx → PDF` pipeline'ını kurar (kurulu değilse atlar — uygulama yine de çalışır).
+   - Şablon-PDF özelliğini seçtiyseniz `.docx → PDF` pipeline'ını kurar (Python yoksa uyarır; uygulama yine de çalışır).
    - Masaüstü ve Başlat menüsünde **Kairos** kısayolu oluşturur.
 4. Kurulum bitince masaüstündeki **Kairos** kısayoluna (veya **`start-kairos.bat`**) çift tıklayın; tarayıcı [http://localhost:3000](http://localhost:3000) adresini açar.
 
