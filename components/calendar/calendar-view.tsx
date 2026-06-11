@@ -155,10 +155,6 @@ export function CalendarView() {
     setPopoverOpen(true)
   }
 
-  const selectedDateEvents = selectedDate
-    ? eventsMap.get(format(selectedDate, "yyyy-MM-dd")) || []
-    : []
-
   return (
     <div className="flex h-full gap-4 min-h-0">
       {/* Left: Main calendar */}

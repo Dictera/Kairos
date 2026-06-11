@@ -10,7 +10,7 @@ const FIXTURE = path.resolve(process.cwd(), 'tests/fixtures/test-template.docx')
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'templates')
 
 // Mock auth context — SessionData only requires isLoggedIn
-const ctx = { session: { isLoggedIn: true } } as any
+const ctx = { session: { isLoggedIn: true } } as Parameters<typeof sablonRouter.createCaller>[0]
 
 function copyFixtureForTest(suffix: string): string {
   if (!existsSync(UPLOAD_DIR)) mkdirSync(UPLOAD_DIR, { recursive: true })
@@ -78,7 +78,7 @@ describe('sablonRouter.delete: SET NULL FK on belge.sablon_id (SABLON-05, SABLON
     // Reuse any existing muvekkil if present; otherwise insert a minimal one.
     const existingMuv = await db.query.muvekkil?.findFirst?.()
     if (existingMuv) {
-      seededMuvekkilId = (existingMuv as any).id
+      seededMuvekkilId = existingMuv.id
     } else {
       const [m] = await db.insert(muvekkil).values({
         ad: 'fk-test-muvekkil',

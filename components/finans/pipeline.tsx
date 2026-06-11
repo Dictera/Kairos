@@ -67,18 +67,18 @@ export function Pipeline() {
     : 0
 
   // Cumulative kasa from monthly data
-  const kasaData = useMemo(() => {
-    let running = 0
-    return monthly.map(m => {
+  const kasaData = useMemo(() =>
+    monthly.reduce<{ name: string; Kasa: number; Tahmin: number | undefined }[]>((acc, m) => {
       const [year, month] = m.ay.split('-')
-      running += m.gelen - m.giden - m.masraf
-      return {
+      const prev = acc.length > 0 ? acc[acc.length - 1].Kasa : 0
+      acc.push({
         name: `${MONTHS_FULL_SHORT[parseInt(month) - 1]} ${year}`,
-        Kasa: running,
-        Tahmin: undefined as number | undefined,
-      }
-    })
-  }, [monthly])
+        Kasa: prev + m.gelen - m.giden - m.masraf,
+        Tahmin: undefined,
+      })
+      return acc
+    }, [])
+  , [monthly])
 
   const lastKasa = kasaData[kasaData.length - 1]?.Kasa ?? 0
   const lastAy   = monthly[monthly.length - 1]?.ay ?? ''

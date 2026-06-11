@@ -11,7 +11,7 @@
  */
 import { db } from '@/lib/db'
 import { sure, dosya, durusma } from '@/lib/schema'
-import { eq, gte, lte, and, sql } from 'drizzle-orm'
+import { eq, gte, lte, and } from 'drizzle-orm'
 import { format, startOfWeek, endOfWeek } from 'date-fns'
 import { sendTelegramMessage } from './send'
 import { readSettings, writeSettings } from './settings-helper'

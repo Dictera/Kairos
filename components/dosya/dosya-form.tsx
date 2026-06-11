@@ -197,6 +197,8 @@ function DosyaFormInner({
 
   const isPending = createMutation.isPending || updateMutation.isPending
 
+  // react-hook-form's watch() is not memoizable by the React Compiler; safe here.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const kusur_orani_karsi = form.watch('kusur_orani_karsi')
 
   return (

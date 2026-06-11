@@ -144,7 +144,7 @@ export function Tahsilat() {
               </tr>
             </thead>
             <tbody>
-              {sirketler.map((s, i) => {
+              {sirketler.map((s) => {
                 const kOran    = s.talep > 0 ? (s.karar / s.talep) * 100 : 0
                 const tOran    = s.karar > 0 ? (s.tahsilat / s.karar) * 100 : 0
                 const topKayip = s.talep - s.tahsilat

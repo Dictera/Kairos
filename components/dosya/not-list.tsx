@@ -112,7 +112,6 @@ export function NotList({ dosyaId }: NotListProps) {
         <div className="space-y-3">
           {notes.map((note) => {
             const isEditing = editingId === note.id
-            const isDeleting = deleteId === note.id
 
             return (
               <Card key={note.id}>

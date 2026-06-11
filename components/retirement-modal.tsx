@@ -18,15 +18,14 @@ import {
 const RETIREMENT_FLAG_KEY = 'retirement_v1_2_done'
 
 export function RetirementModal() {
-  const [showModal, setShowModal] = useState(false)
-  const [checked, setChecked] = useState(
-    () => typeof window !== 'undefined' && localStorage.getItem(RETIREMENT_FLAG_KEY) === '1'
-  )
+  const [dismissed, setDismissed] = useState(false)
+  const alreadyDone =
+    typeof window !== 'undefined' && localStorage.getItem(RETIREMENT_FLAG_KEY) === '1'
   const trpc = useTRPC()
 
   const { data: checkLegacy } = useQuery(
     trpc.retirement.checkLegacyTables.queryOptions(undefined, {
-      enabled: !checked && typeof window !== 'undefined',
+      enabled: !alreadyDone && typeof window !== 'undefined',
     })
   )
 
@@ -45,23 +44,21 @@ export function RetirementModal() {
     })
   )
 
+  // No legacy tables → nothing to clean; persist the flag so we stop checking.
   useEffect(() => {
-    if (checkLegacy && !checked) {
-      setChecked(true)
-      if (checkLegacy.hasLegacyTables) {
-        setShowModal(true)
-      } else {
-        localStorage.setItem(RETIREMENT_FLAG_KEY, '1')
-      }
+    if (checkLegacy && !checkLegacy.hasLegacyTables) {
+      localStorage.setItem(RETIREMENT_FLAG_KEY, '1')
     }
-  }, [checkLegacy, checked])
+  }, [checkLegacy])
+
+  const showModal = !alreadyDone && !dismissed && !!checkLegacy?.hasLegacyTables
 
   const handleRetire = () => {
     executeRetirement.mutate()
   }
 
   return (
-    <AlertDialog open={showModal} onOpenChange={setShowModal}>
+    <AlertDialog open={showModal} onOpenChange={(open) => { if (!open) setDismissed(true) }}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Eski Sistemleri Temizle</AlertDialogTitle>
@@ -70,7 +67,7 @@ export function RetirementModal() {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setShowModal(false)}>Vazgeç</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => setDismissed(true)}>Vazgeç</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleRetire}
             disabled={executeRetirement.isPending}

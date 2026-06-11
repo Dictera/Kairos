@@ -366,7 +366,7 @@ export const raporlarRouter = createTRPCRouter({
     const TUR_COLORS = ['#1c768f','#22c55e','#f97316','#746cac','#ef4444','#f59e0b']
     const turAgg: Record<string, { label: string; gelen: number; giden: number; masraf: number; adet: number; renk: string }> = {}
 
-    tumDosyalar.forEach((d, i) => {
+    tumDosyalar.forEach((d) => {
       const turKey   = d.sigorta_turu_id ? String(d.sigorta_turu_id) : d.tur
       const turLabel = d.sigorta_turu_id ? sigortaTuruMap[d.sigorta_turu_id] : (TUR_LABEL[d.tur] ?? d.tur)
       if (!turAgg[turKey]) {

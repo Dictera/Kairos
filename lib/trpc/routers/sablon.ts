@@ -20,7 +20,7 @@ function safeUnlink(filePath: string) {
       return
     }
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
-  } catch (e) {
+  } catch {
     // Swallow errors per pattern
   }
 }

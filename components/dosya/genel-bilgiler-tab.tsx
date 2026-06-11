@@ -62,8 +62,6 @@ function formatDate(iso: string) {
 }
 
 export function GenelBilgilerTab({ dosya }: GenelBilgilerTabProps) {
-  const primaryTaraf = dosya.taraflar[0]
-
   return (
     <Card>
       <CardHeader>

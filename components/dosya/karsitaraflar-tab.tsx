@@ -111,6 +111,8 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
     },
   })
 
+  // react-hook-form's watch() is not memoizable by the React Compiler; safe here.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedSirketId = form.watch('sigorta_sirketi_id')
   const { data: avukatList } = useQuery(
     trpc.ayarlar.avukat.bySirket.queryOptions(

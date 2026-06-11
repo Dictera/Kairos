@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest'
 import { sure, sureRelations, SURE_TUR, type SureTur } from '@/lib/schema'
-import { sql } from 'drizzle-orm'
 
 describe('sure table schema (Task 1)', () => {
   it('sure table is defined with correct columns', () => {

@@ -1,11 +1,10 @@
 import { db } from '@/lib/db'
 import { finans_kalemi } from '@/lib/schema'
 import { requireAuth } from '@/lib/auth-guard'
-import { NextRequest } from 'next/server'
 
 // pdfmake's @types/pdfmake only covers the browser API (createPdf).
 // The PdfPrinter class lives in js/Printer.js — access it directly.
-const PdfPrinterClass = require('pdfmake/js/Printer').default
+import PdfPrinterClass from 'pdfmake/js/Printer'
 
 const fonts = {
   Roboto: {
@@ -18,7 +17,7 @@ const fonts = {
 const printer = new PdfPrinterClass(fonts)
 
 interface DocDefinition {
-  content: any[]
+  content: Record<string, unknown>[]
   defaultStyle?: { font?: string; fontSize?: number }
 }
 
@@ -31,7 +30,7 @@ async function generatePdfBuffer(docDefinition: DocDefinition): Promise<Buffer> 
   return Buffer.concat(chunks)
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const authError = await requireAuth()
   if (authError) return authError
 

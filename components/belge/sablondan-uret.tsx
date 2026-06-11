@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useTRPC } from '@/lib/trpc/context'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
@@ -38,9 +38,6 @@ export function SablondanUret({ dosyaId }: SablondanUretProps) {
   const [progressOpen, setProgressOpen] = useState(false)
   const [step, setStep] = useState<'idle' | 'render' | 'convert' | 'archive'>('idle')
 
-  const tick1Ref = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const tick2Ref = useRef<ReturnType<typeof setTimeout> | null>(null)
-
   const { data: templates = [], isLoading } = useQuery(trpc.sablon.list.queryOptions())
 
   const generateMutation = useMutation(
@@ -61,8 +58,6 @@ export function SablondanUret({ dosyaId }: SablondanUretProps) {
     if (!selected) return
     setProgressOpen(true)
     setStep('render')
-    tick1Ref.current = setTimeout(() => setStep('convert'), 1200)
-    tick2Ref.current = setTimeout(() => setStep('archive'), 2400)
     generateMutation.mutate({ dosyaId, sablonId: selected.id })
   }
 
@@ -70,14 +65,19 @@ export function SablondanUret({ dosyaId }: SablondanUretProps) {
     setProgressOpen(false)
     setStep('idle')
     setSelected(null)
-    if (tick1Ref.current) clearTimeout(tick1Ref.current)
-    if (tick2Ref.current) clearTimeout(tick2Ref.current)
   }
 
-  useEffect(() => () => {
-    if (tick1Ref.current) clearTimeout(tick1Ref.current)
-    if (tick2Ref.current) clearTimeout(tick2Ref.current)
-  }, [])
+  // Advance the staged progress labels while the modal is open; timers are
+  // local to the effect and cleared on close/unmount.
+  useEffect(() => {
+    if (!progressOpen) return
+    const tick1 = setTimeout(() => setStep('convert'), 1200)
+    const tick2 = setTimeout(() => setStep('archive'), 2400)
+    return () => {
+      clearTimeout(tick1)
+      clearTimeout(tick2)
+    }
+  }, [progressOpen])
 
   const filtered = templates.filter(t => filter === 'all' || t.kategori === filter)
 

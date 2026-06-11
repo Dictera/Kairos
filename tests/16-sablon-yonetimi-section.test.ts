@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 
 const SECTION_PATH = 'components/ayarlar/sablon-yonetimi-section.tsx'
-const PAGE_PATH = 'components/ayarlar/ayarlar-page.tsx'
 
 describe('Şablon Yönetimi section: copy + structure (SABLON-02, SABLON-04)', () => {
   const src = readFileSync(SECTION_PATH, 'utf-8')

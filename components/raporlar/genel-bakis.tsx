@@ -4,7 +4,6 @@ import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import dynamic from 'next/dynamic'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
 import { ArrowDown, DollarSign, TrendingUp, Briefcase } from 'lucide-react'
 
@@ -14,7 +13,6 @@ import {
 } from './raporlar-data'
 import { KPICard, CardHead, ReportLoading, ReportEmpty } from './raporlar-shared'
 
-const LineChart           = dynamic(() => import('recharts').then(m => m.LineChart),           { ssr: false, loading: () => <Skeleton className="h-[230px] w-full" /> })
 const Line                = dynamic(() => import('recharts').then(m => m.Line),                { ssr: false })
 const AreaChart           = dynamic(() => import('recharts').then(m => m.AreaChart),           { ssr: false })
 const Area                = dynamic(() => import('recharts').then(m => m.Area),                { ssr: false })

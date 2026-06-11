@@ -14,9 +14,7 @@ import { readSettings } from './settings-helper'
 
 // ── globalThis type declarations for singleton guard ──────────────────────────
 declare global {
-  // eslint-disable-next-line no-var
   var __telegramCronInitialized: boolean | undefined
-  // eslint-disable-next-line no-var
   var __telegramCronTasks: ScheduledTask[] | undefined
 }
 

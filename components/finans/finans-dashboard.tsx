@@ -77,11 +77,11 @@ export function FinansDashboard() {
     }
   })
 
-  let running = 0
-  const kasaData = chartData.map(e => {
-    running += e.Net
-    return { name: e.name, Kasa: running }
-  })
+  const kasaData = chartData.reduce<{ name: string; Kasa: number }[]>((acc, e) => {
+    const prev = acc.length > 0 ? acc[acc.length - 1].Kasa : 0
+    acc.push({ name: e.name, Kasa: prev + e.Net })
+    return acc
+  }, [])
 
   return (
     <div className="space-y-5">

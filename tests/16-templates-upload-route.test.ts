@@ -51,14 +51,14 @@ describe('Upload route source: SABLON-01 constants', () => {
 describe('Upload route behavior: SABLON-01 validation', () => {
   it('returns 400 when no file', async () => {
     const fd = new FormData()
-    const res = await POST(makeRequest(fd) as any)
+    const res = await POST(makeRequest(fd) as unknown as Parameters<typeof POST>[0])
     expect(res.status).toBe(400)
   })
 
   it('rejects .pdf with Turkish error', async () => {
     const fd = new FormData()
     fd.append('file', new File([new Uint8Array([0x25, 0x50, 0x44, 0x46])], 'test-upload-doc.pdf', { type: 'application/pdf' }))
-    const res = await POST(makeRequest(fd) as any)
+    const res = await POST(makeRequest(fd) as unknown as Parameters<typeof POST>[0])
     expect(res.status).toBe(400)
     const body = await res.json()
     expect(body.error).toMatch(/\.docx/)
@@ -71,7 +71,7 @@ describe('Upload route behavior: SABLON-01 validation', () => {
     fd.append('file', new File([docxBytes], 'test-upload-tiny.docx', {
       type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     }))
-    const res = await POST(makeRequest(fd) as any)
+    const res = await POST(makeRequest(fd) as unknown as Parameters<typeof POST>[0])
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.filename).toBeDefined()
@@ -85,7 +85,7 @@ describe('Upload route behavior: SABLON-01 validation', () => {
     fd.append('file', new File([big], 'test-upload-big.docx', {
       type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     }))
-    const res = await POST(makeRequest(fd) as any)
+    const res = await POST(makeRequest(fd) as unknown as Parameters<typeof POST>[0])
     expect(res.status).toBe(400)
     const body = await res.json()
     expect(body.error).toMatch(/10 MB/)
