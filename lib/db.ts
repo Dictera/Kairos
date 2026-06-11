@@ -52,27 +52,38 @@ function createDb() {
 // (first run after this feature ships, or after a manual rebuild). Cheap no-op
 // afterwards — just two COUNT checks. All ongoing sync happens in tRPC mutations.
 function backfillFts(sqlite: Database.Database) {
-  const dosyaNeeds = sqlite.prepare(
-    `SELECT (SELECT count(*) FROM dosya_fts) = 0 AND (SELECT count(*) FROM dosya) > 0 AS n`
-  ).get() as { n: number }
-  if (dosyaNeeds.n) {
-    const rows = sqlite.prepare(
-      `SELECT d.id, d.dosya_no, d.hasar_dosya_no, d.muvekkil_plaka, m.ad, m.soyad
-         FROM dosya d LEFT JOIN muvekkil m ON m.id = d.muvekkil_id`
-    ).all() as Array<{ id: number; dosya_no: string | null; hasar_dosya_no: string | null; muvekkil_plaka: string | null; ad: string | null; soyad: string | null }>
-    const ins = sqlite.prepare(`INSERT INTO dosya_fts(rowid, txt) VALUES (?, ?)`)
-    sqlite.transaction(() => { for (const r of rows) ins.run(r.id, dosyaFtsText(r)) })()
+  // The base tables may not exist yet — e.g. during `next build` page-data
+  // collection on CI, where the module is imported against a fresh db.sqlite
+  // before migrations run. Backfill is a best-effort optimization, so skip a
+  // table until it is present rather than throwing "no such table".
+  const hasTable = (name: string) =>
+    sqlite.prepare(`SELECT 1 FROM sqlite_master WHERE type='table' AND name=?`).get(name) !== undefined
+
+  if (hasTable('dosya')) {
+    const dosyaNeeds = sqlite.prepare(
+      `SELECT (SELECT count(*) FROM dosya_fts) = 0 AND (SELECT count(*) FROM dosya) > 0 AS n`
+    ).get() as { n: number }
+    if (dosyaNeeds.n) {
+      const rows = sqlite.prepare(
+        `SELECT d.id, d.dosya_no, d.hasar_dosya_no, d.muvekkil_plaka, m.ad, m.soyad
+           FROM dosya d LEFT JOIN muvekkil m ON m.id = d.muvekkil_id`
+      ).all() as Array<{ id: number; dosya_no: string | null; hasar_dosya_no: string | null; muvekkil_plaka: string | null; ad: string | null; soyad: string | null }>
+      const ins = sqlite.prepare(`INSERT INTO dosya_fts(rowid, txt) VALUES (?, ?)`)
+      sqlite.transaction(() => { for (const r of rows) ins.run(r.id, dosyaFtsText(r)) })()
+    }
   }
 
-  const muvekkilNeeds = sqlite.prepare(
-    `SELECT (SELECT count(*) FROM muvekkil_fts) = 0 AND (SELECT count(*) FROM muvekkil) > 0 AS n`
-  ).get() as { n: number }
-  if (muvekkilNeeds.n) {
-    const rows = sqlite.prepare(
-      `SELECT id, ad, soyad, tc_vergi_no, telefon FROM muvekkil`
-    ).all() as Array<{ id: number; ad: string | null; soyad: string | null; tc_vergi_no: string | null; telefon: string | null }>
-    const ins = sqlite.prepare(`INSERT INTO muvekkil_fts(rowid, txt) VALUES (?, ?)`)
-    sqlite.transaction(() => { for (const r of rows) ins.run(r.id, muvekkilFtsText(r)) })()
+  if (hasTable('muvekkil')) {
+    const muvekkilNeeds = sqlite.prepare(
+      `SELECT (SELECT count(*) FROM muvekkil_fts) = 0 AND (SELECT count(*) FROM muvekkil) > 0 AS n`
+    ).get() as { n: number }
+    if (muvekkilNeeds.n) {
+      const rows = sqlite.prepare(
+        `SELECT id, ad, soyad, tc_vergi_no, telefon FROM muvekkil`
+      ).all() as Array<{ id: number; ad: string | null; soyad: string | null; tc_vergi_no: string | null; telefon: string | null }>
+      const ins = sqlite.prepare(`INSERT INTO muvekkil_fts(rowid, txt) VALUES (?, ?)`)
+      sqlite.transaction(() => { for (const r of rows) ins.run(r.id, muvekkilFtsText(r)) })()
+    }
   }
 }
 
