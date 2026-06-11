@@ -80,9 +80,10 @@ export const raporlarRouter = createTRPCRouter({
       sirketAgg[sid].karar += d.karar_tutari ?? 0
       sirketAgg[sid].dosya++
     })
+    const dosyaById = new Map(tumDosyalar.map(d => [d.id, d]))
     tumFinans.forEach(f => {
       if (f.tur !== 'Gelen') return
-      const d = tumDosyalar.find(x => x.id === f.dosya_id)
+      const d = dosyaById.get(f.dosya_id)
       if (!d?.karsitaraf_sigorta_id) return
       sirketAgg[d.karsitaraf_sigorta_id].tahsilat += f.tutar ?? 0
     })
@@ -186,9 +187,10 @@ export const raporlarRouter = createTRPCRouter({
       sirketAgg[sid].karar += d.karar_tutari ?? 0
       sirketAgg[sid].dosya++
     })
+    const dosyaById = new Map(tumDosyalar.map(d => [d.id, d]))
     tumFinans.forEach(f => {
       if (f.tur !== 'Gelen') return
-      const d = tumDosyalar.find(x => x.id === f.dosya_id)
+      const d = dosyaById.get(f.dosya_id)
       if (!d?.karsitaraf_sigorta_id) return
       sirketAgg[d.karsitaraf_sigorta_id].tahsilat += f.tutar ?? 0
     })
@@ -372,8 +374,9 @@ export const raporlarRouter = createTRPCRouter({
       }
       turAgg[turKey].adet++
     })
+    const dosyaById = new Map(tumDosyalar.map(d => [d.id, d]))
     tumFinans.forEach(f => {
-      const d = tumDosyalar.find(x => x.id === f.dosya_id)
+      const d = dosyaById.get(f.dosya_id)
       if (!d) return
       const turKey = d.sigorta_turu_id ? String(d.sigorta_turu_id) : d.tur
       if (!turAgg[turKey]) return
@@ -399,11 +402,23 @@ export const raporlarRouter = createTRPCRouter({
 
     const MONTHS_TR_IDX = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara']
 
+    // Index once: O(d + f) instead of O(müvekkil × dosya × finans) nested scans.
+    const dosyalarByMuvekkil = new Map<number, typeof tumDosyalar>()
+    for (const d of tumDosyalar) {
+      const arr = dosyalarByMuvekkil.get(d.muvekkil_id)
+      if (arr) arr.push(d); else dosyalarByMuvekkil.set(d.muvekkil_id, [d])
+    }
+    const finansByDosya = new Map<number, typeof tumFinans>()
+    for (const f of tumFinans) {
+      const arr = finansByDosya.get(f.dosya_id)
+      if (arr) arr.push(f); else finansByDosya.set(f.dosya_id, [f])
+    }
+
     const rows = tumMuvekkil
       .flatMap(m => {
-        const mDosyalar = tumDosyalar.filter(d => d.muvekkil_id === m.id)
+        const mDosyalar = dosyalarByMuvekkil.get(m.id) ?? []
         if (!mDosyalar.length) return []
-        const mFinans   = tumFinans.filter(f => mDosyalar.some(d => d.id === f.dosya_id))
+        const mFinans   = mDosyalar.flatMap(d => finansByDosya.get(d.id) ?? [])
         const tahsilat  = mFinans.filter(f => f.tur === 'Gelen').reduce((s, f) => s + (f.tutar ?? 0), 0)
         const topTalep  = mDosyalar.reduce((s, d) => s + (d.talep_tutari ?? 0), 0)
         const oran      = topTalep > 0 ? Math.round((tahsilat / topTalep) * 100) : 0
@@ -536,19 +551,21 @@ export const raporlarRouter = createTRPCRouter({
       db.select().from(sigortaSirketi),
     ])
 
+    const sirketMap = Object.fromEntries(tumSirket.map(s => [s.id, s.ad]))
     const sirketAgg: Record<number, { ad: string; talep: number; karar: number; tahsilat: number; dosya: number; tur: string }> = {}
     tumDosyalar.forEach(d => {
       if (!d.karsitaraf_sigorta_id) return
       const sid = d.karsitaraf_sigorta_id
-      const ad  = tumSirket.find(s => s.id === sid)?.ad ?? ''
+      const ad  = sirketMap[sid] ?? ''
       if (!sirketAgg[sid]) sirketAgg[sid] = { ad, talep: 0, karar: 0, tahsilat: 0, dosya: 0, tur: d.tur }
       sirketAgg[sid].talep += d.talep_tutari ?? 0
       sirketAgg[sid].karar += d.karar_tutari ?? 0
       sirketAgg[sid].dosya++
     })
+    const dosyaById = new Map(tumDosyalar.map(d => [d.id, d]))
     tumFinans.forEach(f => {
       if (f.tur !== 'Gelen') return
-      const d = tumDosyalar.find(x => x.id === f.dosya_id)
+      const d = dosyaById.get(f.dosya_id)
       if (!d?.karsitaraf_sigorta_id) return
       sirketAgg[d.karsitaraf_sigorta_id].tahsilat += f.tutar ?? 0
     })
@@ -573,7 +590,7 @@ export const raporlarRouter = createTRPCRouter({
     const trendAgg: Record<string, Record<string, number>> = {}
     tumFinans.forEach(f => {
       if (f.tur !== 'Gelen') return
-      const d = tumDosyalar.find(x => x.id === f.dosya_id)
+      const d = dosyaById.get(f.dosya_id)
       if (!d?.karsitaraf_sigorta_id) return
       if (!top4Ids.includes(d.karsitaraf_sigorta_id)) return
       const ay  = f.tarih.substring(0, 7)

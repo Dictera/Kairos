@@ -2,7 +2,7 @@ import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { db } from '@/lib/db'
 import { belge, dosya, muvekkil, sigortaTuru, BELGE_KATEGORILER } from '@/lib/schema'
-import { logOlay } from './olay'
+import { logOlayTx } from './olay'
 import { eq, desc } from 'drizzle-orm'
 import { z } from 'zod'
 import path from 'path'
@@ -57,24 +57,26 @@ export const belgeRouter = createTRPCRouter({
       mime_tur: z.string(),
     }))
     .mutation(async ({ input }) => {
-      const [row] = await db.insert(belge).values(input).returning()
-      await logOlay(input.dosya_id, 'belge_eklendi', `Belge eklendi: ${input.dosya_adi}`)
-      return row
+      return db.transaction((tx) => {
+        const row = tx.insert(belge).values(input).returning().get()
+        logOlayTx(tx, input.dosya_id, 'belge_eklendi', `Belge eklendi: ${input.dosya_adi}`)
+        return row
+      })
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.number().int() }))
     .mutation(async ({ input }) => {
-      const existing = await db.select().from(belge).where(eq(belge.id, input.id))
-      if (!existing[0]) {
+      const existing = await db.select().from(belge).where(eq(belge.id, input.id)).then(r => r[0])
+      if (!existing) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Belge bulunamadı.' })
       }
 
-      await db.delete(belge).where(eq(belge.id, input.id))
-
-      const dosyaYolu = existing[0].dosya_yolu
+      const dosyaYolu = existing.dosya_yolu
       const apiMatch = dosyaYolu?.match(/^\/api\/files\/(\d+)\/(.+)$/)
 
+      // Resolve filesystem target(s) BEFORE the transaction (this read is async).
+      const fsTargets: string[] = []
       if (apiMatch) {
         const fileDosyaId = parseInt(apiMatch[1], 10)
         const filename = apiMatch[2]
@@ -96,17 +98,27 @@ export const belgeRouter = createTRPCRouter({
           const adOnly = dosyaRow.muvekkil?.ad ?? null
 
           for (const muvekkilAd of [adSoyad, adOnly]) {
-            const candidate = path.join(buildBelgelerDir({ ...base, muvekkilAd }), filename)
-            safeDeleteBelge(candidate)
+            fsTargets.push(path.join(buildBelgelerDir({ ...base, muvekkilAd }), filename))
           }
         }
+      }
+
+      // DB delete + activity log commit atomically.
+      db.transaction((tx) => {
+        tx.delete(belge).where(eq(belge.id, input.id)).run()
+        logOlayTx(tx, existing.dosya_id, 'belge_silindi', `Belge silindi: ${existing.dosya_adi}`)
+      })
+
+      // Filesystem cleanup AFTER commit — never orphan the DB row if a file
+      // delete fails, and never delete files for a rolled-back transaction.
+      if (apiMatch) {
+        for (const candidate of fsTargets) safeDeleteBelge(candidate)
       } else if (dosyaYolu) {
         // Legacy path format — attempt delete via archive guard (silently fails if outside base)
         const cleanPath = dosyaYolu.startsWith('/') ? dosyaYolu.slice(1) : dosyaYolu
         safeUnlinkArchive(path.join(process.cwd(), cleanPath))
       }
 
-      await logOlay(existing[0].dosya_id, 'belge_silindi', `Belge silindi: ${existing[0].dosya_adi}`)
       return { success: true }
     }),
 })

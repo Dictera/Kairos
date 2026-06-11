@@ -9,7 +9,7 @@ import {
 } from '@/lib/schema'
 import { eq, asc, sql } from 'drizzle-orm'
 import { z } from 'zod'
-import { logOlay } from './olay'
+import { logOlayTx } from './olay'
 
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -135,165 +135,186 @@ export const surecRouter = createTRPCRouter({
   updateStkData: protectedProcedure
     .input(z.object({ dosya_id: z.number().int(), data: stkDataSchema }))
     .mutation(async ({ input }) => {
-      const row = await db.select({ surec_detay: dosya.surec_detay })
-        .from(dosya).where(eq(dosya.id, input.dosya_id)).then(r => r[0])
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
+      return db.transaction((tx) => {
+        const row = tx.select({ surec_detay: dosya.surec_detay })
+          .from(dosya).where(eq(dosya.id, input.dosya_id)).get()
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
 
-      const surec = parseSurecDetay(row.surec_detay)
-      const updated: SurecDetay = {
-        ...surec,
-        stk: { ...DEFAULT_STK_DATA, ...surec.stk, ...input.data } as StkSurecData,
-      }
-      await db.update(dosya)
-        .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
-        .where(eq(dosya.id, input.dosya_id))
+        const surec = parseSurecDetay(row.surec_detay)
+        const updated: SurecDetay = {
+          ...surec,
+          stk: { ...DEFAULT_STK_DATA, ...surec.stk, ...input.data } as StkSurecData,
+        }
+        tx.update(dosya)
+          .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
+          .where(eq(dosya.id, input.dosya_id))
+          .run()
 
-      // TODO: Re-enable deadline calculations with new field names
-      // Deadline auto-calc disabled — new STK structure has different date fields
+        // TODO: Re-enable deadline calculations with new field names
+        // Deadline auto-calc disabled — new STK structure has different date fields
 
-      return { success: true }
+        return { success: true }
+      })
     }),
 
   // D-03, D-04: Advance STK stage sequentially, no back-step
   stkIleriAl: protectedProcedure
     .input(z.object({ dosya_id: z.number().int() }))
     .mutation(async ({ input }) => {
-      const row = await db.select({ surec_detay: dosya.surec_detay })
-        .from(dosya).where(eq(dosya.id, input.dosya_id)).then(r => r[0])
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
+      return db.transaction((tx) => {
+        const row = tx.select({ surec_detay: dosya.surec_detay })
+          .from(dosya).where(eq(dosya.id, input.dosya_id)).get()
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
 
-      const surec = parseSurecDetay(row.surec_detay)
-      const currentAsama = surec.stk?.asama ?? null
-      const next = nextAsama(STK_ASAMALAR, currentAsama)
-      if (!next) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Son aşamaya ulaşıldı.' })
+        const surec = parseSurecDetay(row.surec_detay)
+        const currentAsama = surec.stk?.asama ?? null
+        const next = nextAsama(STK_ASAMALAR, currentAsama)
+        if (!next) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Son aşamaya ulaşıldı.' })
 
-      const updated: SurecDetay = {
-        ...surec,
-        stk: { ...DEFAULT_STK_DATA, ...surec.stk, asama: next } as StkSurecData,
-      }
-      await db.update(dosya)
-        .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
-        .where(eq(dosya.id, input.dosya_id))
-      await logOlay(input.dosya_id, 'surec_asama', `STK aşaması ilerletildi: ${STK_ASAMA_LABELS[next]}`)
-      return { asama: next }
+        const updated: SurecDetay = {
+          ...surec,
+          stk: { ...DEFAULT_STK_DATA, ...surec.stk, asama: next } as StkSurecData,
+        }
+        tx.update(dosya)
+          .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
+          .where(eq(dosya.id, input.dosya_id))
+          .run()
+        logOlayTx(tx, input.dosya_id, 'surec_asama', `STK aşaması ilerletildi: ${STK_ASAMA_LABELS[next]}`)
+        return { asama: next }
+      })
     }),
 
   // D-03: Step back STK stage
   stkGeriAl: protectedProcedure
     .input(z.object({ dosya_id: z.number().int() }))
     .mutation(async ({ input }) => {
-      const row = await db.select({ surec_detay: dosya.surec_detay })
-        .from(dosya).where(eq(dosya.id, input.dosya_id)).then(r => r[0])
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
+      return db.transaction((tx) => {
+        const row = tx.select({ surec_detay: dosya.surec_detay })
+          .from(dosya).where(eq(dosya.id, input.dosya_id)).get()
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
 
-      const surec = parseSurecDetay(row.surec_detay)
-      const currentAsama = surec.stk?.asama ?? null
-      if (!currentAsama) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Geri alınacak aşama yok.' })
-      const prev = prevAsama(STK_ASAMALAR, currentAsama)
-      if (!prev) throw new TRPCError({ code: 'BAD_REQUEST', message: 'İlk aşamaya geri dönülemez.' })
+        const surec = parseSurecDetay(row.surec_detay)
+        const currentAsama = surec.stk?.asama ?? null
+        if (!currentAsama) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Geri alınacak aşama yok.' })
+        const prev = prevAsama(STK_ASAMALAR, currentAsama)
+        if (!prev) throw new TRPCError({ code: 'BAD_REQUEST', message: 'İlk aşamaya geri dönülemez.' })
 
-      const updated: SurecDetay = {
-        ...surec,
-        stk: { ...surec.stk, asama: prev } as StkSurecData,
-      }
-      await db.update(dosya)
-        .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
-        .where(eq(dosya.id, input.dosya_id))
-      await logOlay(input.dosya_id, 'surec_asama', `STK aşaması geri alındı: ${STK_ASAMA_LABELS[prev]}`)
-      return { asama: prev }
+        const updated: SurecDetay = {
+          ...surec,
+          stk: { ...surec.stk, asama: prev } as StkSurecData,
+        }
+        tx.update(dosya)
+          .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
+          .where(eq(dosya.id, input.dosya_id))
+          .run()
+        logOlayTx(tx, input.dosya_id, 'surec_asama', `STK aşaması geri alındı: ${STK_ASAMA_LABELS[prev]}`)
+        return { asama: prev }
+      })
     }),
 
   // D-06: Update Mahkeme data fields independently of stage
   updateMahkemeData: protectedProcedure
     .input(z.object({ dosya_id: z.number().int(), data: mahkemeDataSchema }))
     .mutation(async ({ input }) => {
-      const row = await db.select({ surec_detay: dosya.surec_detay })
-        .from(dosya).where(eq(dosya.id, input.dosya_id)).then(r => r[0])
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
+      return db.transaction((tx) => {
+        const row = tx.select({ surec_detay: dosya.surec_detay })
+          .from(dosya).where(eq(dosya.id, input.dosya_id)).get()
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
 
-      const surec = parseSurecDetay(row.surec_detay)
-      const updated: SurecDetay = {
-        ...surec,
-        mahkeme: { ...DEFAULT_MAHKEME_DATA, ...surec.mahkeme, ...input.data } as MahkemeSurecData,
-      }
-      await db.update(dosya)
-        .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
-        .where(eq(dosya.id, input.dosya_id))
+        const surec = parseSurecDetay(row.surec_detay)
+        const updated: SurecDetay = {
+          ...surec,
+          mahkeme: { ...DEFAULT_MAHKEME_DATA, ...surec.mahkeme, ...input.data } as MahkemeSurecData,
+        }
+        tx.update(dosya)
+          .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
+          .where(eq(dosya.id, input.dosya_id))
+          .run()
 
-      // TODO: Re-enable deadline calculations with new field names
-      // Deadline auto-calc disabled — new Mahkeme structure has different date fields
+        // TODO: Re-enable deadline calculations with new field names
+        // Deadline auto-calc disabled — new Mahkeme structure has different date fields
 
-      return { success: true }
+        return { success: true }
+      })
     }),
 
   // Advance Mahkeme stage sequentially
   mahkemeIleriAl: protectedProcedure
     .input(z.object({ dosya_id: z.number().int() }))
     .mutation(async ({ input }) => {
-      const row = await db.select({ surec_detay: dosya.surec_detay })
-        .from(dosya).where(eq(dosya.id, input.dosya_id)).then(r => r[0])
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
+      return db.transaction((tx) => {
+        const row = tx.select({ surec_detay: dosya.surec_detay })
+          .from(dosya).where(eq(dosya.id, input.dosya_id)).get()
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
 
-      const surec = parseSurecDetay(row.surec_detay)
-      const currentAsama = surec.mahkeme?.asama ?? null
-      const next = nextAsama(MAHKEME_ASAMALAR, currentAsama)
-      if (!next) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Son aşamaya ulaşıldı.' })
+        const surec = parseSurecDetay(row.surec_detay)
+        const currentAsama = surec.mahkeme?.asama ?? null
+        const next = nextAsama(MAHKEME_ASAMALAR, currentAsama)
+        if (!next) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Son aşamaya ulaşıldı.' })
 
-      const updated: SurecDetay = {
-        ...surec,
-        mahkeme: { ...DEFAULT_MAHKEME_DATA, ...surec.mahkeme, asama: next } as MahkemeSurecData,
-      }
-      await db.update(dosya)
-        .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
-        .where(eq(dosya.id, input.dosya_id))
-      await logOlay(input.dosya_id, 'surec_asama', `Mahkeme aşaması ilerletildi: ${MAHKEME_ASAMA_LABELS[next]}`)
-      return { asama: next }
+        const updated: SurecDetay = {
+          ...surec,
+          mahkeme: { ...DEFAULT_MAHKEME_DATA, ...surec.mahkeme, asama: next } as MahkemeSurecData,
+        }
+        tx.update(dosya)
+          .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
+          .where(eq(dosya.id, input.dosya_id))
+          .run()
+        logOlayTx(tx, input.dosya_id, 'surec_asama', `Mahkeme aşaması ilerletildi: ${MAHKEME_ASAMA_LABELS[next]}`)
+        return { asama: next }
+      })
     }),
 
   // Step back Mahkeme stage
   mahkemeGeriAl: protectedProcedure
     .input(z.object({ dosya_id: z.number().int() }))
     .mutation(async ({ input }) => {
-      const row = await db.select({ surec_detay: dosya.surec_detay })
-        .from(dosya).where(eq(dosya.id, input.dosya_id)).then(r => r[0])
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
+      return db.transaction((tx) => {
+        const row = tx.select({ surec_detay: dosya.surec_detay })
+          .from(dosya).where(eq(dosya.id, input.dosya_id)).get()
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
 
-      const surec = parseSurecDetay(row.surec_detay)
-      const currentAsama = surec.mahkeme?.asama ?? null
-      if (!currentAsama) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Geri alınacak aşama yok.' })
-      const prev = prevAsama(MAHKEME_ASAMALAR, currentAsama)
-      if (!prev) throw new TRPCError({ code: 'BAD_REQUEST', message: 'İlk aşamaya geri dönülemez.' })
+        const surec = parseSurecDetay(row.surec_detay)
+        const currentAsama = surec.mahkeme?.asama ?? null
+        if (!currentAsama) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Geri alınacak aşama yok.' })
+        const prev = prevAsama(MAHKEME_ASAMALAR, currentAsama)
+        if (!prev) throw new TRPCError({ code: 'BAD_REQUEST', message: 'İlk aşamaya geri dönülemez.' })
 
-      const updated: SurecDetay = {
-        ...surec,
-        mahkeme: { ...surec.mahkeme, asama: prev } as MahkemeSurecData,
-      }
-      await db.update(dosya)
-        .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
-        .where(eq(dosya.id, input.dosya_id))
-      await logOlay(input.dosya_id, 'surec_asama', `Mahkeme aşaması geri alındı: ${MAHKEME_ASAMA_LABELS[prev]}`)
-      return { asama: prev }
+        const updated: SurecDetay = {
+          ...surec,
+          mahkeme: { ...surec.mahkeme, asama: prev } as MahkemeSurecData,
+        }
+        tx.update(dosya)
+          .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
+          .where(eq(dosya.id, input.dosya_id))
+          .run()
+        logOlayTx(tx, input.dosya_id, 'surec_asama', `Mahkeme aşaması geri alındı: ${MAHKEME_ASAMA_LABELS[prev]}`)
+        return { asama: prev }
+      })
     }),
 
   // D-01: Initialize mahkeme section for STK files
   initMahkemeSurec: protectedProcedure
     .input(z.object({ dosya_id: z.number().int() }))
     .mutation(async ({ input }) => {
-      const row = await db.select({ surec_detay: dosya.surec_detay })
-        .from(dosya).where(eq(dosya.id, input.dosya_id)).then(r => r[0])
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
+      return db.transaction((tx) => {
+        const row = tx.select({ surec_detay: dosya.surec_detay })
+          .from(dosya).where(eq(dosya.id, input.dosya_id)).get()
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
 
-      const surec = parseSurecDetay(row.surec_detay)
-      if (surec.mahkeme) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Mahkeme süreci zaten başlatılmış.' })
+        const surec = parseSurecDetay(row.surec_detay)
+        if (surec.mahkeme) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Mahkeme süreci zaten başlatılmış.' })
 
-      const updated: SurecDetay = {
-        ...surec,
-        mahkeme: { ...DEFAULT_MAHKEME_DATA },
-      }
-      await db.update(dosya)
-        .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
-        .where(eq(dosya.id, input.dosya_id))
-      return { success: true }
+        const updated: SurecDetay = {
+          ...surec,
+          mahkeme: { ...DEFAULT_MAHKEME_DATA },
+        }
+        tx.update(dosya)
+          .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
+          .where(eq(dosya.id, input.dosya_id))
+          .run()
+        return { success: true }
+      })
     }),
 
   // SUREC-05: Durusma CRUD

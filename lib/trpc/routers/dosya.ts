@@ -4,7 +4,10 @@ import { db } from '@/lib/db'
 import { dosya, taraf, muvekkil, sigortaTuru, sigortaSirketi } from '@/lib/schema'
 import { eq, count, desc, and, sql, aliasedTable } from 'drizzle-orm'
 import { z } from 'zod'
-import { logOlay } from './olay'
+import { logOlayTx } from './olay'
+import type { Transaction } from '@/lib/db'
+import { upsertDosyaFts, deleteDosyaFts } from '@/lib/search-index'
+import { ftsMatchQuery } from '@/lib/turkish'
 
 export const dosyaSchema = z.object({
   muvekkil_id: z.number().int(),
@@ -46,19 +49,20 @@ export const tarafSchema = z.object({
   surucu_police_no: z.string().max(100).nullable().optional().or(z.literal('')),
 })
 
-async function generateDosyaNo(): Promise<string> {
+// Sync — must run inside the create transaction so MAX(seq)+1 is computed and
+// the row inserted atomically (SQLite serializes write transactions, so no race).
+function generateDosyaNo(tx: Transaction): string {
   const year = new Date().getFullYear()
   const prefix = `${year}/`
-  const rows = await db
-    .select({ dosya_no: dosya.dosya_no })
+  // substr is 1-based; skip the "YYYY/" prefix and read the numeric sequence.
+  const row = tx
+    .select({
+      maxSeq: sql<number>`COALESCE(MAX(CAST(substr(${dosya.dosya_no}, ${prefix.length + 1}) AS INTEGER)), 0)`,
+    })
     .from(dosya)
     .where(sql`${dosya.dosya_no} LIKE ${prefix + '%'}`)
-  let maxSeq = 0
-  for (const row of rows) {
-    const n = parseInt(row.dosya_no.slice(prefix.length), 10)
-    if (!isNaN(n) && n > maxSeq) maxSeq = n
-  }
-  const next = maxSeq + 1
+    .get()
+  const next = (row?.maxSeq ?? 0) + 1
   if (next > 9999) {
     throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Yıllık dosya numarası limiti (9999) aşıldı.' })
   }
@@ -83,8 +87,11 @@ export const dosyaRouter = createTRPCRouter({
       const conditions = []
 
       if (search) {
+        const match = ftsMatchQuery(search)
         conditions.push(
-          sql`lower_tr(${dosya.dosya_no}) LIKE lower_tr(${'%' + search + '%'}) OR lower_tr(${muvekkil.ad} || ' ' || ${muvekkil.soyad}) LIKE lower_tr(${'%' + search + '%'})`
+          match
+            ? sql`${dosya.id} IN (SELECT rowid FROM dosya_fts WHERE dosya_fts MATCH ${match})`
+            : sql`lower_tr(${dosya.dosya_no}) LIKE lower_tr(${'%' + search + '%'}) OR lower_tr(${muvekkil.ad} || ' ' || ${muvekkil.soyad}) LIKE lower_tr(${'%' + search + '%'})`
         )
       }
       if (tur) conditions.push(eq(dosya.tur, tur))
@@ -165,79 +172,91 @@ export const dosyaRouter = createTRPCRouter({
   create: protectedProcedure
     .input(dosyaCreateSchema)
     .mutation(async ({ input }) => {
-      const dosya_no = await generateDosyaNo()
-      const existing = await db.select({ id: dosya.id }).from(dosya).where(eq(dosya.dosya_no, dosya_no))
-      if (existing.length > 0) {
-        // Race condition: retry once with fresh generation
-        const dosya_no2 = await generateDosyaNo()
-        const existing2 = await db.select({ id: dosya.id }).from(dosya).where(eq(dosya.dosya_no, dosya_no2))
-        if (existing2.length > 0) {
-          throw new TRPCError({ code: 'CONFLICT', message: 'Dosya numarası üretilirken çakışma oluştu, lütfen tekrar deneyin.' })
-        }
-        const [row] = await db.insert(dosya).values({ ...input, dosya_no: dosya_no2 }).returning()
-        await logOlay(row.id, 'olusturma', 'Dosya oluşturuldu')
+      // No-retry needed: number generation + insert + log run in one write
+      // transaction, which SQLite serializes — concurrent creates can't collide.
+      return db.transaction((tx) => {
+        const dosya_no = generateDosyaNo(tx)
+        const row = tx.insert(dosya).values({ ...input, dosya_no }).returning().get()
+        const mv = tx.select({ ad: muvekkil.ad, soyad: muvekkil.soyad })
+          .from(muvekkil).where(eq(muvekkil.id, row.muvekkil_id)).get()
+        upsertDosyaFts(tx, row.id, { ...row, ad: mv?.ad, soyad: mv?.soyad })
+        logOlayTx(tx, row.id, 'olusturma', 'Dosya oluşturuldu')
         return row
-      }
-      const [row] = await db.insert(dosya).values({ ...input, dosya_no }).returning()
-      await logOlay(row.id, 'olusturma', 'Dosya oluşturuldu')
-      return row
+      })
     }),
 
   update: protectedProcedure
     .input(dosyaSchema.extend({ id: z.number().int() }))
     .mutation(async ({ input }) => {
       const { id, ...data } = input
-      // Uniqueness check (exclude self)
-      if (data.dosya_no) {
-        const existing = await db
-          .select({ id: dosya.id })
-          .from(dosya)
-          .where(and(eq(dosya.dosya_no, data.dosya_no), sql`${dosya.id} != ${id}`))
-        if (existing.length > 0) {
-          throw new TRPCError({ code: 'CONFLICT', message: 'Bu dosya numarası zaten kullanılıyor.' })
+      // Uniqueness check + update + log in one transaction so the check can't
+      // be invalidated by a concurrent write between SELECT and UPDATE.
+      return db.transaction((tx) => {
+        if (data.dosya_no) {
+          const existing = tx
+            .select({ id: dosya.id })
+            .from(dosya)
+            .where(and(eq(dosya.dosya_no, data.dosya_no), sql`${dosya.id} != ${id}`))
+            .all()
+          if (existing.length > 0) {
+            throw new TRPCError({ code: 'CONFLICT', message: 'Bu dosya numarası zaten kullanılıyor.' })
+          }
         }
-      }
-      const [row] = await db
-        .update(dosya)
-        .set({ ...data, updated_at: sql`(datetime('now'))` })
-        .where(eq(dosya.id, id))
-        .returning()
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
-      await logOlay(id, 'guncelleme', 'Dosya bilgileri güncellendi')
-      return row
+        const row = tx
+          .update(dosya)
+          .set({ ...data, updated_at: sql`(datetime('now'))` })
+          .where(eq(dosya.id, id))
+          .returning()
+          .get()
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
+        const mv = tx.select({ ad: muvekkil.ad, soyad: muvekkil.soyad })
+          .from(muvekkil).where(eq(muvekkil.id, row.muvekkil_id)).get()
+        upsertDosyaFts(tx, row.id, { ...row, ad: mv?.ad, soyad: mv?.soyad })
+        logOlayTx(tx, id, 'guncelleme', 'Dosya bilgileri güncellendi')
+        return row
+      })
     }),
 
   archive: protectedProcedure
     .input(z.object({ id: z.number().int() }))
     .mutation(async ({ input }) => {
-      const [row] = await db
-        .update(dosya)
-        .set({ durum: 'arsiv', updated_at: sql`(datetime('now'))` })
-        .where(eq(dosya.id, input.id))
-        .returning()
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
-      await logOlay(input.id, 'durum_degisikligi', 'Dosya arşivlendi')
-      return row
+      return db.transaction((tx) => {
+        const row = tx
+          .update(dosya)
+          .set({ durum: 'arsiv', updated_at: sql`(datetime('now'))` })
+          .where(eq(dosya.id, input.id))
+          .returning()
+          .get()
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
+        logOlayTx(tx, input.id, 'durum_degisikligi', 'Dosya arşivlendi')
+        return row
+      })
     }),
 
   unarchive: protectedProcedure
     .input(z.object({ id: z.number().int() }))
     .mutation(async ({ input }) => {
-      const [row] = await db
-        .update(dosya)
-        .set({ durum: 'aktif', updated_at: sql`(datetime('now'))` })
-        .where(eq(dosya.id, input.id))
-        .returning()
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
-      await logOlay(input.id, 'durum_degisikligi', 'Dosya aktif hale getirildi')
-      return row
+      return db.transaction((tx) => {
+        const row = tx
+          .update(dosya)
+          .set({ durum: 'aktif', updated_at: sql`(datetime('now'))` })
+          .where(eq(dosya.id, input.id))
+          .returning()
+          .get()
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
+        logOlayTx(tx, input.id, 'durum_degisikligi', 'Dosya aktif hale getirildi')
+        return row
+      })
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.number().int() }))
     .mutation(async ({ input }) => {
       // taraf rows cascade-delete via FK (onDelete: 'cascade')
-      await db.delete(dosya).where(eq(dosya.id, input.id))
+      db.transaction((tx) => {
+        tx.delete(dosya).where(eq(dosya.id, input.id)).run()
+        deleteDosyaFts(tx, input.id)
+      })
       return { success: true }
     }),
 

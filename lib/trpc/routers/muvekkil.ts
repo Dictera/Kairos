@@ -4,6 +4,8 @@ import { db } from '@/lib/db'
 import { muvekkil, dosya } from '@/lib/schema'
 import { eq, count, desc, sql, inArray } from 'drizzle-orm'
 import { z } from 'zod'
+import { upsertMuvekkilFts, deleteMuvekkilFts, rebuildMuvekkilDosyaFts } from '@/lib/search-index'
+import { ftsMatchQuery } from '@/lib/turkish'
 
 const muvekkilSchema = z.object({
   ad: z.string().min(1, 'Ad zorunludur').max(100),
@@ -31,9 +33,12 @@ export const muvekkillRouter = createTRPCRouter({
       const { search, page, pageSize } = input
       const offset = (page - 1) * pageSize
 
-      // Turkish-aware search using lower_tr() registered in lib/db.ts
+      // ≥3 chars → trigram FTS substring index. <3 chars → lower_tr LIKE scan.
+      const match = search ? ftsMatchQuery(search) : null
       const where = search
-        ? sql`lower_tr(${muvekkil.ad} || ' ' || ${muvekkil.soyad}) LIKE lower_tr(${'%' + search + '%'}) OR lower_tr(${muvekkil.tc_vergi_no}) LIKE lower_tr(${'%' + search + '%'})`
+        ? (match
+            ? sql`${muvekkil.id} IN (SELECT rowid FROM muvekkil_fts WHERE muvekkil_fts MATCH ${match})`
+            : sql`lower_tr(${muvekkil.ad} || ' ' || ${muvekkil.soyad}) LIKE lower_tr(${'%' + search + '%'}) OR lower_tr(${muvekkil.tc_vergi_no}) LIKE lower_tr(${'%' + search + '%'})`)
         : undefined
 
       const [rows, totalResult] = await Promise.all([
@@ -95,39 +100,53 @@ export const muvekkillRouter = createTRPCRouter({
   create: protectedProcedure
     .input(muvekkilSchema)
     .mutation(async ({ input }) => {
-      const [row] = await db.insert(muvekkil).values(input).returning()
-      return row
+      return db.transaction((tx) => {
+        const row = tx.insert(muvekkil).values(input).returning().get()
+        upsertMuvekkilFts(tx, row.id, row)
+        return row
+      })
     }),
 
   update: protectedProcedure
     .input(muvekkilSchema.extend({ id: z.number().int() }))
     .mutation(async ({ input }) => {
       const { id, ...data } = input
-      const [row] = await db
-        .update(muvekkil)
-        .set({ ...data, updated_at: sql`(datetime('now'))` })
-        .where(eq(muvekkil.id, id))
-        .returning()
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Müvekkil bulunamadı.' })
-      return row
+      return db.transaction((tx) => {
+        const row = tx
+          .update(muvekkil)
+          .set({ ...data, updated_at: sql`(datetime('now'))` })
+          .where(eq(muvekkil.id, id))
+          .returning()
+          .get()
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Müvekkil bulunamadı.' })
+        upsertMuvekkilFts(tx, row.id, row)
+        // Name is denormalized into dosya_fts — refresh dependent dosya rows.
+        rebuildMuvekkilDosyaFts(tx, row.id)
+        return row
+      })
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.number().int() }))
     .mutation(async ({ input }) => {
-      // D-07: hard block if linked dosyalar exist
-      const [{ linkedCount }] = await db
-        .select({ linkedCount: count() })
-        .from(dosya)
-        .where(eq(dosya.muvekkil_id, input.id))
+      return db.transaction((tx) => {
+        // D-07: hard block if linked dosyalar exist
+        const linked = tx
+          .select({ linkedCount: count() })
+          .from(dosya)
+          .where(eq(dosya.muvekkil_id, input.id))
+          .get()
+        const linkedCount = linked?.linkedCount ?? 0
 
-      if (linkedCount > 0) {
-        throw new TRPCError({
-          code: 'PRECONDITION_FAILED',
-          message: `Bu müvekkile ait ${linkedCount} dosya bulunuyor. Müvekkili silmek için önce tüm dosyaları silin veya arşivleyin.`,
-        })
-      }
-      await db.delete(muvekkil).where(eq(muvekkil.id, input.id))
-      return { success: true }
+        if (linkedCount > 0) {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: `Bu müvekkile ait ${linkedCount} dosya bulunuyor. Müvekkili silmek için önce tüm dosyaları silin veya arşivleyin.`,
+          })
+        }
+        tx.delete(muvekkil).where(eq(muvekkil.id, input.id)).run()
+        deleteMuvekkilFts(tx, input.id)
+        return { success: true }
+      })
     }),
 })
