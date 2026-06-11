@@ -31,13 +31,6 @@ jobs:
       - name: Type check
         run: pnpm run typecheck
 
-      # Module-scope prepared statements (e.g. dashboard router) and the FTS
-      # backfill in lib/db.ts run at import time, so `next build` page-data
-      # collection needs the schema to exist. Apply migrations to a fresh
-      # data/db.sqlite first.
-      - name: Migrate database
-        run: pnpm run db:migrate
-
       - name: Build
         run: pnpm run build
 

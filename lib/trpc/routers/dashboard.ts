@@ -4,27 +4,33 @@ import { dosya, muvekkil, sure, durusma } from '@/lib/schema'
 import { eq, and, gte, lte, sql, count } from 'drizzle-orm'
 import { addDays, format } from 'date-fns'
 
-// ── Prepared statements (module scope) ──────────────────────────────────────
-// Compiled once and reused across requests. better-sqlite3 evaluates strftime
-// ('now') at run time, so the date-derived counts stay correct day to day.
+// ── Prepared statements (lazy, module scope) ─────────────────────────────────
+// Compiled once on first use and reused across requests. better-sqlite3
+// evaluates strftime('now') at run time, so the date-derived counts stay
+// correct day to day. Preparation is deferred (not run at import) so that
+// `next build` page-data collection doesn't hit the DB before migrations exist.
+function once<T>(factory: () => T): () => T {
+  let value: T | undefined
+  return () => (value ??= factory())
+}
 
 // Combined dosya counts — replaces 3 separate COUNT round-trips.
-const dosyaCountsPrep = db.select({
+const dosyaCountsPrep = once(() => db.select({
   total: count(),
   aktif: sql<number>`SUM(CASE WHEN ${dosya.durum} = 'aktif' THEN 1 ELSE 0 END)`,
   buAy: sql<number>`SUM(CASE WHEN strftime('%Y-%m', ${dosya.created_at}) = strftime('%Y-%m', 'now') THEN 1 ELSE 0 END)`,
-}).from(dosya).prepare()
+}).from(dosya).prepare())
 
 // stats endpoint also needs last month — one query instead of 4.
-const dosyaCountsWithPrevPrep = db.select({
+const dosyaCountsWithPrevPrep = once(() => db.select({
   total: count(),
   aktif: sql<number>`SUM(CASE WHEN ${dosya.durum} = 'aktif' THEN 1 ELSE 0 END)`,
   buAy: sql<number>`SUM(CASE WHEN strftime('%Y-%m', ${dosya.created_at}) = strftime('%Y-%m', 'now') THEN 1 ELSE 0 END)`,
   gecenAy: sql<number>`SUM(CASE WHEN strftime('%Y-%m', ${dosya.created_at}) = strftime('%Y-%m', 'now', '-1 month') THEN 1 ELSE 0 END)`,
-}).from(dosya).prepare()
+}).from(dosya).prepare())
 
 // Upcoming deadlines in a [today, today+14d] window — date bounds bound at run time.
-const deadlinesPrep = db.select({
+const deadlinesPrep = once(() => db.select({
   id: sure.id,
   ad: sure.ad,
   son_tarih: sure.son_tarih,
@@ -38,10 +44,10 @@ const deadlinesPrep = db.select({
   .innerJoin(muvekkil, eq(dosya.muvekkil_id, muvekkil.id))
   .where(and(gte(sure.son_tarih, sql.placeholder('today')), lte(sure.son_tarih, sql.placeholder('in14'))))
   .orderBy(sure.son_tarih)
-  .prepare()
+  .prepare())
 
 // Hearings scheduled for a given day.
-const hearingsPrep = db.select({
+const hearingsPrep = once(() => db.select({
   id: durusma.id,
   tarih: durusma.tarih,
   saat: durusma.saat,
@@ -53,7 +59,7 @@ const hearingsPrep = db.select({
   .innerJoin(dosya, eq(durusma.dosya_id, dosya.id))
   .where(eq(durusma.tarih, sql.placeholder('today')))
   .orderBy(durusma.saat)
-  .prepare()
+  .prepare())
 
 function todayStr(): string {
   const now = new Date()
@@ -71,9 +77,9 @@ export const dashboardRouter = createTRPCRouter({
     const in14 = in14Str()
 
     const [counts, deadlineRows, hearingRows] = await Promise.all([
-      dosyaCountsPrep.get(),
-      deadlinesPrep.all({ today, in14 }),
-      hearingsPrep.all({ today }),
+      dosyaCountsPrep().get(),
+      deadlinesPrep().all({ today, in14 }),
+      hearingsPrep().all({ today }),
     ])
 
     return {
@@ -86,7 +92,7 @@ export const dashboardRouter = createTRPCRouter({
   }),
 
   stats: protectedProcedure.query(async () => {
-    const counts = await dosyaCountsWithPrevPrep.get()
+    const counts = await dosyaCountsWithPrevPrep().get()
 
     const totalDosya = counts?.total ?? 0
     const aktivDosya = Number(counts?.aktif ?? 0)
@@ -104,10 +110,10 @@ export const dashboardRouter = createTRPCRouter({
   }),
 
   todaysHearings: protectedProcedure.query(async () => {
-    return hearingsPrep.all({ today: todayStr() })
+    return hearingsPrep().all({ today: todayStr() })
   }),
 
   upcomingDeadlines: protectedProcedure.query(async () => {
-    return deadlinesPrep.all({ today: todayStr(), in14: in14Str() })
+    return deadlinesPrep().all({ today: todayStr(), in14: in14Str() })
   }),
 })
