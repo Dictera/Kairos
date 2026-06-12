@@ -14,11 +14,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Telegram bildirim kategorileri — her bildirim türünü (duruşma, tahsilat vb.) ayrı ayrı açıp kapatma
 - Haftalık duruşma özeti — cumartesi sabahı Telegram üzerinden önümüzdeki haftanın duruşmalarını gönderme
 - Ayarlar › Changelog sekmesi — uygulama güncellemelerini doğrudan Ayarlar ekranından görüntüleme
+- Tek tıkla kurulum — son kullanıcılar için kurulum betiği ve başlatıcı kısayolu; PDF ve Telegram ayarları için adım adım soru-cevaplı kurulum
 
 ### Changed
 
 - Webcal butonu tek buton yerine "Uygulama Aç" + "Linki Kopyala" olarak ikiye bölündü
 - Telegram bildirim mesajları gruplandırıldı; müvekkil adı kaldırıldı
+- Hızlı metin arama — SQLite FTS5 trigram dizini ve pragma ayarlarıyla dosya/müvekkil aramaları belirgin şekilde hızlandı
+
+### Fixed
+
+- Kurulum başlatıcıları artık Türkçe olmayan Windows dil ayarlarında da çalışıyor
+- Erişilebilirlik ve arayüz render düzeltmeleri (React Doctor bulguları)
 
 ### Removed
 

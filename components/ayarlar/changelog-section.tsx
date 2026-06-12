@@ -8,20 +8,41 @@ interface ChangelogSectionProps {
 }
 
 function Inline({ text }: { text: string }): React.ReactNode {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g)
+  // Tokenize bold (**x**) and markdown links ([text](url)).
+  const parts = text.split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g)
   const seen = new Map<string, number>()
   return parts.map((part) => {
+    const n = seen.get(part) ?? 0
+    seen.set(part, n + 1)
+    const key = `${part}#${n}`
     if (part.startsWith('**') && part.endsWith('**')) {
-      const n = seen.get(part) ?? 0
-      seen.set(part, n + 1)
-      return <strong key={`${part}#${n}`}>{part.slice(2, -2)}</strong>
+      return <strong key={key}>{part.slice(2, -2)}</strong>
+    }
+    const link = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(part)
+    if (link) {
+      return (
+        <a
+          key={key}
+          href={link[2]}
+          target="_blank"
+          rel="noreferrer"
+          className="underline underline-offset-2 hover:text-foreground"
+        >
+          {link[1]}
+        </a>
+      )
     }
     return part
   })
 }
 
 export function ChangelogSection({ content }: ChangelogSectionProps) {
-  const lines = content.split('\n')
+  const allLines = content.split('\n')
+  // Drop the leading boilerplate (H1 title + intro + format note) and the
+  // link-reference definitions at the bottom (`[x]: https://...`).
+  const firstSection = allLines.findIndex((l) => l.startsWith('## '))
+  const lines = (firstSection === -1 ? allLines : allLines.slice(firstSection))
+    .filter((l) => !/^\[[^\]]+\]:\s/.test(l))
 
   const seen = new Map<string, number>()
   const keyFor = (line: string) => {
@@ -38,7 +59,7 @@ export function ChangelogSection({ content }: ChangelogSectionProps) {
           key={key}
           className="font-semibold text-base border-b pb-1 mb-2 mt-4 first:mt-0"
         >
-          <Inline text={line.replace(/^## /, '')} />
+          <Inline text={line.replace(/^## /, '').replace(/\[([^\]]+)\]/g, '$1')} />
         </h2>
       )
     }
