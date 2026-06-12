@@ -260,6 +260,8 @@ if ($wantPdf) {
 # ------------------------------------------------------------------
 Write-Step "Kısayollar oluşturuluyor"
 $launcher = Join-Path $RepoRoot 'start-kairos.bat'
+$iconFile = Join-Path $RepoRoot 'public\app-icon.ico'
+$iconLoc  = if (Test-Path $iconFile) { "$iconFile,0" } else { "$env:SystemRoot\System32\shell32.dll,13" }
 if (Test-Path $launcher) {
   $WshShell = New-Object -ComObject WScript.Shell
   foreach ($dir in @([Environment]::GetFolderPath('Desktop'),
@@ -271,7 +273,7 @@ if (Test-Path $launcher) {
       $sc.TargetPath       = $launcher
       $sc.WorkingDirectory = $RepoRoot
       $sc.Description       = 'Kairos - Sigorta Uyuşmazlık Takip'
-      $sc.IconLocation      = "$env:SystemRoot\System32\shell32.dll,13"
+      $sc.IconLocation      = $iconLoc
       $sc.Save()
     } catch {
       Write-Warn "Kısayol oluşturulamadı: $dir"
