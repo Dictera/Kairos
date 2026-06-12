@@ -252,87 +252,60 @@ if (-not $installOk) {
 }
 
 # ------------------------------------------------------------------
-# 4b. Visual Studio Build Tools (C++ workload) kontrolu
-# ------------------------------------------------------------------
-Write-Step "Visual Studio Build Tools kontrol ediliyor"
-$vsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-$hasVCTools = $false
-if (Test-Path $vsWhere) {
-  $vsInstallPath = & $vsWhere -latest -property installationPath 2>$null
-  if ($vsInstallPath) {
-    $vcToolsDir = Join-Path $vsInstallPath 'VC\Tools\MSVC'
-    $hasVCTools = Test-Path $vcToolsDir
-  }
-}
-if (-not $hasVCTools) {
-  Write-Warn "Visual Studio C++ Build Tools bulunamadi."
-  if (Test-Command 'winget') {
-    Write-Note "VS Build Tools + C++ workload, winget ile kuruluyor..."
-    Write-Note "Bu islem birkaç dakika surebilir (buyuk indirme)."
-    $vsExit = Invoke-Safe 'winget' @('install', '--id', 'Microsoft.VisualStudio.2022.BuildTools', '-e', '--source', 'winget', '--accept-source-agreements', '--accept-package-agreements', '--override', '--wait --quiet --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended')
-    if ($vsExit -eq 0) {
-      Write-Ok "Visual Studio Build Tools + C++ workload kuruldu"
-      Write-Warn "PATH'in guncellenmesi icin bu pencereyi KAPATIP setup.bat'i TEKRAR calistirin."
-      exit 0
-    } else {
-      Write-Warn "VS Build Tools otomatik kurulamadi. better-sqlite3 derlemesi denenecek..."
-    }
-  } else {
-    Write-Warn "winget yok, VS Build Tools otomatik kurulamiyor."
-  }
-} else {
-  Write-Ok "Visual Studio C++ Build Tools mevcut"
-}
-
-# ------------------------------------------------------------------
-# 4c. better-sqlite3 native modulunu dogrula
+# 4b. better-sqlite3 native modulunu dogrula
 # ------------------------------------------------------------------
 Write-Step "Veritabani modulu dogrulanioor (better-sqlite3)"
-try {
-  $nodeExe = Resolve-Exe 'node'
-  if ($nodeExe) {
+$nodeExe = Resolve-Exe 'node'
+$bs3Ok = $false
+if ($nodeExe) {
+  Push-Location $RepoRoot
+  $prevEAP = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  $bs3Test = & $nodeExe -e "try{require('better-sqlite3');console.log('OK')}catch(e){console.error('FAIL:'+e.message)}" 2>&1
+  $ErrorActionPreference = $prevEAP
+  Pop-Location
+  $bs3Str = ($bs3Test | ForEach-Object {
+    if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.Exception.Message }
+    else { $_ }
+  }) -join ''
+  if ($bs3Str -match 'OK') {
+    $bs3Ok = $true
+    Write-Ok "better-sqlite3 modulu hazir"
+  }
+}
+if (-not $bs3Ok) {
+  Write-Warn "better-sqlite3 yuklenemedi, yeniden kurulum deneniyor..."
+  if ($pnpmExe) {
+    Invoke-Safe $pnpmExe @('rebuild', 'better-sqlite3') | Out-Null
     Push-Location $RepoRoot
-    $prevEAP = $ErrorActionPreference
+    $prevEAP2 = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
-    $bs3Test = & $nodeExe -e "try{require('better-sqlite3');console.log('OK')}catch(e){console.error('FAIL:'+e.message)}" 2>&1
-    $ErrorActionPreference = $prevEAP
+    $bs3Test2 = & $nodeExe -e "try{require('better-sqlite3');console.log('OK')}catch(e){console.error('FAIL:'+e.message)}" 2>&1
+    $ErrorActionPreference = $prevEAP2
     Pop-Location
-    $bs3Str = ($bs3Test | ForEach-Object {
+    $bs3Str2 = ($bs3Test2 | ForEach-Object {
       if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.Exception.Message }
       else { $_ }
     }) -join ''
-    if ($bs3Str -match 'FAIL') {
-      Write-Warn "better-sqlite3 yuklenemedi, yeniden derleme deneniyor..."
-      if ($pnpmExe) {
-        Invoke-Safe $pnpmExe @('rebuild', 'better-sqlite3') | Out-Null
-      }
-      Push-Location $RepoRoot
-      $prevEAP2 = $ErrorActionPreference
-      $ErrorActionPreference = 'Continue'
-      $bs3Test2 = & $nodeExe -e "try{require('better-sqlite3');console.log('OK')}catch(e){console.error('FAIL:'+e.message)}" 2>&1
-      $ErrorActionPreference = $prevEAP2
-      Pop-Location
-      $bs3Str2 = ($bs3Test2 | ForEach-Object {
-        if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.Exception.Message }
-        else { $_ }
-      }) -join ''
-      if ($bs3Str2 -match 'FAIL') {
-        Write-Host ""
-        Write-Host "[HATA] better-sqlite3 yerel modulu derlenemiyor." -ForegroundColor Red
-        Write-Host "   Cozum: Visual Studio Build Tools kurun (C++ workload):" -ForegroundColor Yellow
-        Write-Host "   winget install Microsoft.VisualStudio.2022.BuildTools --override `"--quiet --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended`"" -ForegroundColor Yellow
-        Write-Host "   Veya manuel: https://visualstudio.microsoft.com/visual-cpp-build-tools/" -ForegroundColor Yellow
-        Write-Host "   Ardindan setup.bat'i tekrar calistirin." -ForegroundColor Yellow
-        Write-Host ""
-        Fail "better-sqlite3 modulu yuklenemiyor. Yukaridaki cozumu uygulayin."
-      }
+    if ($bs3Str2 -match 'OK') {
+      $bs3Ok = $true
       Write-Ok "better-sqlite3 yeniden derlendi"
-    } else {
-      Write-Ok "better-sqlite3 modulu hazir"
     }
   }
-} catch {
-  Write-Warn "better-sqlite3 dogrulamasi atlandi (devam ediliyor)"
+  if (-not $bs3Ok) {
+    Write-Host ""
+    Write-Host "[HATA] better-sqlite3 yerel modulu derlenemiyor." -ForegroundColor Red
+    Write-Host "   Node.js surumunuz icin hazir binary bulunamadi." -ForegroundColor Yellow
+    Write-Host "   Cozum (birini secin):" -ForegroundColor Yellow
+    Write-Host "   1. Node.js 22 LTS kurun (prebuild binary icerir):" -ForegroundColor Cyan
+    Write-Host "      winget install OpenJS.NodeJS.LTS" -ForegroundColor Cyan
+    Write-Host "      Ardindan setup.bat'i tekrar calistirin." -ForegroundColor Cyan
+    Write-Host "   2. Visual Studio Build Tools kurun (C++ derleyicisi):" -ForegroundColor Cyan
+    Write-Host "      winget install Microsoft.VisualStudio.2022.BuildTools --override `"--quiet --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended`"" -ForegroundColor Cyan
+    Write-Host "      Ardindan setup.bat'i tekrar calistirin." -ForegroundColor Cyan
+    Write-Host ""
+    Fail "better-sqlite3 modulu yuklenemiyor. Yukaridaki cozumlerden birini uygulayin."
+  }
 }
 
 # ------------------------------------------------------------------
