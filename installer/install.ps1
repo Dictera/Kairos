@@ -23,8 +23,9 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# Türkçe karakterlerin konsolda doğru görünmesi için UTF-8 çıktı
+# Türkçe karakterlerin konsolda doğru görünmesi için UTF-8 giriş/çıkış
 try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
+try { [Console]::InputEncoding  = [System.Text.Encoding]::UTF8 } catch {}
 
 # --- Repo kökü: bu betik installer\ içinde, kök bir üst dizin ---
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
