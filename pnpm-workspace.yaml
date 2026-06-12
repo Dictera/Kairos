@@ -1,6 +1,16 @@
 packages:
   - '.'
 
+# Temporary audit ignore: GHSA-gv7w-rqvm-qjhr (esbuild high).
+# The patched esbuild 0.28.1 was published 2026-06-11 and is blocked by our
+# own minimumReleaseAge (7-day) gate below until ~2026-06-18. esbuild reaches
+# us only via vite/vitest/drizzle-kit dev tooling (never the prod bundle), and
+# the advisory needs an attacker-controlled NPM_CONFIG_REGISTRY in Deno — not
+# our threat model. Remove this entry once the override can install cleanly.
+auditConfig:
+  ignoreGhsas:
+    - 'GHSA-gv7w-rqvm-qjhr'
+
 # Minimum 7 days after publish before install (supply chain security)
 minimumReleaseAge: 10080
 minimumReleaseAgeStrict: true
