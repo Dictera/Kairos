@@ -1,4 +1,5 @@
 import { requireAuth } from '@/lib/auth-guard'
+import { connection } from 'next/server'
 import { db } from '@/lib/db'
 import { dosya, muvekkil, sure, durusma } from '@/lib/schema'
 import { eq, sql } from 'drizzle-orm'
@@ -88,6 +89,7 @@ function buildVevent(params: {
 }
 
 export async function GET(): Promise<Response> {
+  await connection()
   const authError = await requireAuth()
   if (authError) return authError
 

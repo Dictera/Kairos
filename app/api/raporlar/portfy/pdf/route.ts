@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { dosya } from '@/lib/schema'
 import { requireAuth } from '@/lib/auth-guard'
+import { connection } from 'next/server'
 
 // pdfmake's @types/pdfmake only covers the browser API (createPdf).
 // The PdfPrinter class lives in js/Printer.js — access it directly.
@@ -33,6 +34,7 @@ async function generatePdfBuffer(docDefinition: DocDefinition): Promise<Buffer> 
 }
 
 export async function GET() {
+  await connection()
   const authError = await requireAuth()
   if (authError) return authError
 

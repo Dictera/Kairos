@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { connection } from 'next/server'
 import { db } from '@/lib/db'
 import { belge, dosya } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
@@ -36,6 +37,7 @@ async function resolveDir(dosyaRow: {
 }
 
 export async function GET(request: NextRequest) {
+  await connection()
   const authError = await requireAuth()
   if (authError) return authError
 

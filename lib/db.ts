@@ -8,11 +8,11 @@ import { drizzle } from 'drizzle-orm/better-sqlite3'
 import * as schema from './schema'
 import { foldTr, dosyaFtsText, muvekkilFtsText } from './turkish'
 
-// globalThis singleton prevents multiple SQLite connections during Next.js hot reload.
-// Each reload re-executes this module but reuses the existing connection.
 const globalForDb = globalThis as unknown as {
   db: ReturnType<typeof drizzle<typeof schema>> | undefined
 }
+
+const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build'
 
 function createDb() {
   const sqlite = new Database('./data/db.sqlite')
@@ -38,12 +38,14 @@ function createDb() {
   // Shares foldTr() with the FTS index so both normalize text identically.
   sqlite.function('lower_tr', (s: unknown) => foldTr(s))
 
-  // FTS5 trigram indexes for substring search (≥3 chars). Created idempotently
-  // here — not in a drizzle migration — because FTS virtual tables aren't modeled
-  // by drizzle and this connection (unlike drizzle-kit's) has foldTr available.
-  sqlite.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS dosya_fts USING fts5(txt, tokenize='trigram')`)
-  sqlite.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS muvekkil_fts USING fts5(txt, tokenize='trigram')`)
-  backfillFts(sqlite)
+  // FTS5 trigram indexes and backfill are WRITE operations that cause SQLITE_BUSY
+  // when Next.js build spawns multiple workers that import this module concurrently.
+  // Skip all FTS setup during build; it will run on first request at runtime.
+  if (!isBuildPhase) {
+    sqlite.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS dosya_fts USING fts5(txt, tokenize='trigram')`)
+    sqlite.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS muvekkil_fts USING fts5(txt, tokenize='trigram')`)
+    backfillFts(sqlite)
+  }
 
   return drizzle({ client: sqlite, schema })
 }
@@ -87,9 +89,20 @@ function backfillFts(sqlite: Database.Database) {
   }
 }
 
-export const db = globalForDb.db ?? (globalForDb.db = createDb())
+// Lazy getter: the db connection is only created when first accessed, not at
+// module import time. During `next build`, multiple workers import this module
+// to collect page data; a static `export const db = createDb()` would fire
+// immediately and WRITE-lock the SQLite database (FTS setup + backfill),
+// causing SQLITE_BUSY. With the getter, the connection is deferred until an
+// actual request hits a route handler — build workers never trigger it.
+export const db: ReturnType<typeof createDb> = new Proxy({} as ReturnType<typeof createDb>, {
+  get(_target, prop, receiver) {
+    if (!globalForDb.db) globalForDb.db = createDb()
+    return Reflect.get(globalForDb.db, prop, receiver)
+  },
+})
 
 // Transaction client type — the `tx` passed into db.transaction((tx) => …).
 // better-sqlite3 transactions are SYNCHRONOUS: the callback must not be async,
 // and queries inside it use the sync runners (.run()/.get()/.all()), never await.
-export type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0]
+export type Transaction = Parameters<Parameters<ReturnType<typeof createDb>['transaction']>[0]>[0]

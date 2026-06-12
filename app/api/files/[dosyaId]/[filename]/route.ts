@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { connection } from 'next/server'
 import { db } from '@/lib/db'
 import { dosya } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
@@ -22,6 +23,7 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ dosyaId: string; filename: string }> }
 ) {
+  await connection()
   const authError = await requireAuth()
   if (authError) return authError
 

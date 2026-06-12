@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { connection } from 'next/server'
 import { db } from '@/lib/db'
 import { dosya } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
@@ -19,6 +20,7 @@ const ALLOWED_TYPES = [
 const MAX_SIZE = 20 * 1024 * 1024 // 20 MB
 
 export async function POST(request: NextRequest) {
+  await connection()
   const authError = await requireAuth()
   if (authError) return authError
 
