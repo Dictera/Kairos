@@ -9,8 +9,9 @@
     3. Kurulum seçenekleri + .env.local oluşturma
        (rastgele SESSION_PASSWORD, APP_PASSWORD, opsiyonel Telegram)
     4. Bağımlılıkların yüklenmesi (pnpm install)
+    4b. better-sqlite3 native modülünü yeniden derle
     5. Uygulama derlemesi (pnpm build)
-    6. Veritabanı şeması (pnpm db:migrate)
+    6. Veritabanı şeması (pnpm db:migrate) + hata tanısı
     7. Opsiyonel Python pipeline kurulumu (.docx -> PDF)
     8. Masaüstü + Başlat menüsü kısayolu
 
@@ -77,10 +78,10 @@ function Invoke-Pnpm {
   param([Parameter(ValueFromRemainingArguments = $true)][string[]]$PnpmArgs)
   $pnpm = Resolve-Exe 'pnpm'
   if ($pnpm) {
-    & $pnpm @PnpmArgs
+    & $pnpm @PnpmArgs 2>&1
   } else {
     $corepack = Resolve-Exe 'corepack'
-    if ($corepack) { & $corepack pnpm @PnpmArgs }
+    if ($corepack) { & $corepack pnpm @PnpmArgs 2>&1 }
     else { Fail "pnpm veya corepack bulunamadı." }
   }
   if ($LASTEXITCODE -ne 0) { Fail "pnpm $($PnpmArgs -join ' ') komutu başarısız oldu (kod $LASTEXITCODE)." }
@@ -128,7 +129,7 @@ Write-Step "pnpm hazırlanıyor"
 $corepackExe = Resolve-Exe 'corepack'
 if ($corepackExe) {
   & $corepackExe enable 2>$null | Out-Null
-  & $corepackExe prepare pnpm@11.5.0 --activate 2>$null | Out-Null
+  & $corepackExe prepare pnpm@11.6.0 --activate 2>$null | Out-Null
 }
 if (-not (Resolve-Exe 'pnpm') -and -not $corepackExe) {
   Write-Note "corepack yok, pnpm npm ile kuruluyor..."
@@ -228,8 +229,69 @@ TELEGRAM_CHAT_ID=$telegramChatId
 # 4. Bağımlılıklar
 # ------------------------------------------------------------------
 Write-Step "Bağımlılıklar yükleniyor (pnpm install) - birkaç dakika sürebilir"
-Invoke-Pnpm install --frozen-lockfile
-Write-Ok "Bağımlılıklar yüklendi"
+# Önce frozen-lockfile ile dene (tekrar üretilebilir kurulum), başarısız olursa normal install'a düş
+$pnpmExe = Resolve-Exe 'pnpm'
+if (-not $pnpmExe) {
+  $corepackTmp = Resolve-Exe 'corepack'
+  if ($corepackTmp) { $pnpmExe = $corepackTmp }
+}
+if (-not $pnpmExe) { Fail "pnpm bulunamadı." }
+
+$installOk = $false
+if ($pnpmExe) {
+  Write-Note "pnpm install --frozen-lockfile deneniyor..."
+  & $pnpmExe install --frozen-lockfile 2>&1 | Write-Host
+  if ($LASTEXITCODE -eq 0) {
+    $installOk = $true
+    Write-Ok "Bağımlılıklar yüklendi (frozen-lockfile)"
+  } else {
+    Write-Warn "frozen-lockfile başarısız oldu, normal install deneniyor..."
+    & $pnpmExe install 2>&1 | Write-Host
+    if ($LASTEXITCODE -eq 0) {
+      $installOk = $true
+      Write-Ok "Bağımlılıklar yüklendi"
+    }
+  }
+}
+if (-not $installOk) {
+  Fail "Bağımlılıklar yüklenemedi. Node.js 18+ LTS kurulu olduğundan emin olun."
+}
+
+# ------------------------------------------------------------------
+# 4b. better-sqlite3 native modülünü doğrula ve gerekirse yeniden derle
+# ------------------------------------------------------------------
+Write-Step "Veritabanı modülü doğrulanıyor (better-sqlite3)"
+try {
+  $nodeExe = Resolve-Exe 'node'
+  if ($nodeExe) {
+    Push-Location $RepoRoot
+    $bs3Test = & $nodeExe -e "try{require('better-sqlite3');console.log('OK')}catch(e){console.error('FAIL:'+e.message)}" 2>&1
+    Pop-Location
+    if ($bs3Test -match 'FAIL') {
+      Write-Warn "better-sqlite3 yüklenemedi, yeniden derleme deneniyor..."
+      if ($pnpmExe) {
+        & $pnpmExe rebuild better-sqlite3 2>&1 | Write-Host
+      }
+      Push-Location $RepoRoot
+      $bs3Test2 = & $nodeExe -e "try{require('better-sqlite3');console.log('OK')}catch(e){console.error('FAIL:'+e.message)}" 2>&1
+      Pop-Location
+      if ($bs3Test2 -match 'FAIL') {
+        Write-Host ""
+        Write-Host "[HATA] better-sqlite3 yerel modülü derlenemiyor." -ForegroundColor Red
+        Write-Host "   Çözüm: Visual Studio Build Tools kurun (C++ workload):" -ForegroundColor Yellow
+        Write-Host "   https://visualstudio.microsoft.com/visual-cpp-build-tools/" -ForegroundColor Yellow
+        Write-Host "   Ardından setup.bat'i tekrar çalıştırın." -ForegroundColor Yellow
+        Write-Host ""
+        Fail "better-sqlite3 modülü yüklenemiyor. Yukarıdaki çözümü uygulayın."
+      }
+      Write-Ok "better-sqlite3 yeniden derlendi"
+    } else {
+      Write-Ok "better-sqlite3 modülü hazır"
+    }
+  }
+} catch {
+  Write-Warn "better-sqlite3 doğrulaması atlandı (devam ediliyor)"
+}
 
 # ------------------------------------------------------------------
 # 5. Derleme
@@ -248,7 +310,25 @@ if (-not (Test-Path $dataDir)) {
   New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
   Write-Note "data/ dizini oluşturuldu"
 }
-Invoke-Pnpm db:migrate
+
+# db:migrate - çıktıyı yakala, hata durumunda detaylı mesaj göster
+$migrateOutput = & $pnpmExe db:migrate 2>&1
+$migrateExit = $LASTEXITCODE
+Write-Host $migrateOutput
+if ($migrateExit -ne 0) {
+  Write-Host ""
+  Write-Host "=== VERİTABANI GEÇİŞ HATASI ===" -ForegroundColor Red
+  Write-Host $migrateOutput -ForegroundColor Red
+  Write-Host ""
+  Write-Host "Olası nedenler ve çözümler:" -ForegroundColor Yellow
+  Write-Host "  1. better-sqlite3 native modülü derlenmemiş" -ForegroundColor Yellow
+  Write-Host "     -> Visual Studio Build Tools (C++ workload) kurun:" -ForegroundColor Yellow
+  Write-Host "        https://visualstudio.microsoft.com/visual-cpp-build-tools/" -ForegroundColor Yellow
+  Write-Host "  2. Node.js sürüm uyumsuzluğu (18+ LTS gerekli)" -ForegroundColor Yellow
+  Write-Host "  3. data/ dizini yazılabilir değil" -ForegroundColor Yellow
+  Write-Host ""
+  Fail "Veritabanı geçişi başarısız oldu. Yukarıdaki hata mesajını inceleyin."
+}
 Write-Ok "Veritabanı hazır (data\db.sqlite)"
 
 # ------------------------------------------------------------------
