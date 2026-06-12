@@ -242,6 +242,12 @@ Write-Ok "Derleme tamamlandı"
 # 6. Veritabanı
 # ------------------------------------------------------------------
 Write-Step "Veritabanı hazırlanıyor (db:migrate)"
+# data/ dizininin var olduğundan emin ol (ZIP çıkarmada .gitkeep korunmayabilir)
+$dataDir = Join-Path $RepoRoot 'data'
+if (-not (Test-Path $dataDir)) {
+  New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+  Write-Note "data/ dizini oluşturuldu"
+}
 Invoke-Pnpm db:migrate
 Write-Ok "Veritabanı hazır (data\db.sqlite)"
 
