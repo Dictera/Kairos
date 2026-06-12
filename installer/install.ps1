@@ -63,13 +63,25 @@ function Read-YesNo {
   }
 }
 
-# pnpm'i güvenilir çağırmak için: önce doğrudan, olmazsa corepack üzerinden
+# Çalıştırılabilir shim'i (.cmd/.exe/.bat) çöz. Node/corepack, isimlerin
+# uzantısız (bash) sürümlerini de PATH'e koyar; bunlar PATHEXT'te olmadığından
+# Windows "Bu dosyayı nasıl açmak istersiniz?" penceresini gösterir.
+# Bu yüzden adı eşleşen ilk .cmd/.exe/.bat shim'ini seçeriz.
+function Resolve-Exe {
+  param([string]$Name)
+  Get-Command $Name -All -ErrorAction SilentlyContinue |
+    Where-Object { $_.Source -match '\.(cmd|exe|bat)$' } |
+    Select-Object -First 1 -ExpandProperty Source
+}
 function Invoke-Pnpm {
   param([Parameter(ValueFromRemainingArguments = $true)][string[]]$PnpmArgs)
-  if (Test-Command 'pnpm') {
-    & pnpm @PnpmArgs
+  $pnpm = Resolve-Exe 'pnpm'
+  if ($pnpm) {
+    & $pnpm @PnpmArgs
   } else {
-    & corepack pnpm @PnpmArgs
+    $corepack = Resolve-Exe 'corepack'
+    if ($corepack) { & $corepack pnpm @PnpmArgs }
+    else { Fail "pnpm veya corepack bulunamadı." }
   }
   if ($LASTEXITCODE -ne 0) { Fail "pnpm $($PnpmArgs -join ' ') komutu başarısız oldu (kod $LASTEXITCODE)." }
 }
@@ -113,13 +125,16 @@ if (-not $nodeOk) {
 # 2. pnpm (corepack)
 # ------------------------------------------------------------------
 Write-Step "pnpm hazırlanıyor"
-if (Test-Command 'corepack') {
-  & corepack enable 2>$null | Out-Null
-  & corepack prepare pnpm@11.5.0 --activate 2>$null | Out-Null
+$corepackExe = Resolve-Exe 'corepack'
+if ($corepackExe) {
+  & $corepackExe enable 2>$null | Out-Null
+  & $corepackExe prepare pnpm@11.5.0 --activate 2>$null | Out-Null
 }
-if (-not (Test-Command 'pnpm') -and -not (Test-Command 'corepack')) {
+if (-not (Resolve-Exe 'pnpm') -and -not $corepackExe) {
   Write-Note "corepack yok, pnpm npm ile kuruluyor..."
-  & npm install -g pnpm
+  $npmExe = Resolve-Exe 'npm'
+  if (-not $npmExe) { Fail "npm bulunamadı, pnpm kurulamadı." }
+  & $npmExe install -g pnpm
   if ($LASTEXITCODE -ne 0) { Fail "pnpm kurulamadı." }
 }
 Write-Ok "pnpm hazır"

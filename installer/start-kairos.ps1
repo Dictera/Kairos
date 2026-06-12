@@ -26,11 +26,27 @@ Write-Host ""
 # Sunucu hazır olunca tarayıcıyı aç (gecikmeli, ayrı süreç)
 Start-Job -ScriptBlock { Start-Sleep -Seconds 5; Start-Process 'http://localhost:3000' } | Out-Null
 
-# pnpm bul: doğrudan veya corepack üzerinden
-if (Get-Command pnpm -ErrorAction SilentlyContinue) {
-  & pnpm start
+# pnpm bul: çalıştırılabilir shim (.cmd/.exe), olmazsa corepack.
+# Uzantısız 'pnpm'/'corepack' dosyaları PATHEXT'te olmadığından Windows "Bu
+# dosyayı nasıl açmak istersiniz?" penceresini gösterir; sadece .cmd/.exe/.bat seçilir.
+function Resolve-Exe {
+  param([string]$Name)
+  Get-Command $Name -All -ErrorAction SilentlyContinue |
+    Where-Object { $_.Source -match '\.(cmd|exe|bat)$' } |
+    Select-Object -First 1 -ExpandProperty Source
+}
+$pnpm = Resolve-Exe 'pnpm'
+if ($pnpm) {
+  & $pnpm start
 } else {
-  & corepack pnpm start
+  $corepack = Resolve-Exe 'corepack'
+  if ($corepack) {
+    & $corepack pnpm start
+  } else {
+    Write-Host "  pnpm bulunamadı. Önce setup.bat dosyasını çalıştırın." -ForegroundColor Yellow
+    Read-Host "  Kapatmak için Enter'a basın" | Out-Null
+    exit 1
+  }
 }
 
 Write-Host ""
