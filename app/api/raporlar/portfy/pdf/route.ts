@@ -6,6 +6,8 @@ import { requireAuth } from '@/lib/auth-guard'
 // The PdfPrinter class lives in js/Printer.js — access it directly.
 import PdfPrinterClass from 'pdfmake/js/Printer'
 
+export const dynamic = 'force-dynamic'
+
 const fonts = {
   Roboto: {
     normal: 'Helvetica',

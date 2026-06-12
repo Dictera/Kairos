@@ -3,6 +3,8 @@ import { requireAuth } from '@/lib/auth-guard'
 import fs from 'fs'
 import path from 'path'
 
+export const dynamic = 'force-dynamic'
+
 const ALLOWED_EXTENSIONS = ['.docx'] as const
 const ALLOWED_MIME_TYPES = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',

@@ -7,6 +7,8 @@ import { requireAuth } from '@/lib/auth-guard'
 import fs from 'fs'
 import path from 'path'
 
+export const dynamic = 'force-dynamic'
+
 const MIME_TYPES: Record<string, string> = {
   '.pdf': 'application/pdf',
   '.doc': 'application/msword',

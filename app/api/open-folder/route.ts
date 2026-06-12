@@ -7,6 +7,8 @@ import { requireAuth } from '@/lib/auth-guard'
 import path from 'path'
 import { execFile } from 'child_process'
 
+export const dynamic = 'force-dynamic'
+
 async function resolveDir(dosyaRow: {
   tur: string
   muvekkil_plaka: string | null

@@ -3,6 +3,8 @@ import { db } from '@/lib/db'
 import { dosya, muvekkil, sure, durusma } from '@/lib/schema'
 import { eq, sql } from 'drizzle-orm'
 
+export const dynamic = 'force-dynamic'
+
 // RFC 5545 iCalendar helpers
 
 /** Fold a single iCal property line at 75 octets (CRLF + space continuation) */
