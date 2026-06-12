@@ -252,7 +252,40 @@ if (-not $installOk) {
 }
 
 # ------------------------------------------------------------------
-# 4b. better-sqlite3 native modulunu dogrula
+# 4b. Visual Studio Build Tools (C++ workload) kontrolu
+# ------------------------------------------------------------------
+Write-Step "Visual Studio Build Tools kontrol ediliyor"
+$vsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+$hasVCTools = $false
+if (Test-Path $vsWhere) {
+  $vsInstallPath = & $vsWhere -latest -property installationPath 2>$null
+  if ($vsInstallPath) {
+    $vcToolsDir = Join-Path $vsInstallPath 'VC\Tools\MSVC'
+    $hasVCTools = Test-Path $vcToolsDir
+  }
+}
+if (-not $hasVCTools) {
+  Write-Warn "Visual Studio C++ Build Tools bulunamadi."
+  if (Test-Command 'winget') {
+    Write-Note "VS Build Tools + C++ workload, winget ile kuruluyor..."
+    Write-Note "Bu islem birkaç dakika surebilir (buyuk indirme)."
+    $vsExit = Invoke-Safe 'winget' @('install', '--id', 'Microsoft.VisualStudio.2022.BuildTools', '-e', '--source', 'winget', '--accept-source-agreements', '--accept-package-agreements', '--override', '--wait --quiet --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended')
+    if ($vsExit -eq 0) {
+      Write-Ok "Visual Studio Build Tools + C++ workload kuruldu"
+      Write-Warn "PATH'in guncellenmesi icin bu pencereyi KAPATIP setup.bat'i TEKRAR calistirin."
+      exit 0
+    } else {
+      Write-Warn "VS Build Tools otomatik kurulamadi. better-sqlite3 derlemesi denenecek..."
+    }
+  } else {
+    Write-Warn "winget yok, VS Build Tools otomatik kurulamiyor."
+  }
+} else {
+  Write-Ok "Visual Studio C++ Build Tools mevcut"
+}
+
+# ------------------------------------------------------------------
+# 4c. better-sqlite3 native modulunu dogrula
 # ------------------------------------------------------------------
 Write-Step "Veritabani modulu dogrulanioor (better-sqlite3)"
 try {
@@ -287,7 +320,8 @@ try {
         Write-Host ""
         Write-Host "[HATA] better-sqlite3 yerel modulu derlenemiyor." -ForegroundColor Red
         Write-Host "   Cozum: Visual Studio Build Tools kurun (C++ workload):" -ForegroundColor Yellow
-        Write-Host "   https://visualstudio.microsoft.com/visual-cpp-build-tools/" -ForegroundColor Yellow
+        Write-Host "   winget install Microsoft.VisualStudio.2022.BuildTools --override `"--quiet --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended`"" -ForegroundColor Yellow
+        Write-Host "   Veya manuel: https://visualstudio.microsoft.com/visual-cpp-build-tools/" -ForegroundColor Yellow
         Write-Host "   Ardindan setup.bat'i tekrar calistirin." -ForegroundColor Yellow
         Write-Host ""
         Fail "better-sqlite3 modulu yuklenemiyor. Yukaridaki cozumu uygulayin."
