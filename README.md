@@ -34,21 +34,40 @@ Sigorta uyuşmazlık davalarını takip eden, avukatlar için tasarlanmış yere
 
 ## Hızlı Başlangıç
 
-### Tek Tıkla Kurulum (Windows — son kullanıcı)
+### Otomatik Kurulum (son kullanıcı)
 
-Teknik bilgi gerektirmeyen otomatik kurulum:
+Teknik bilgi gerektirmeyen kurulum; işletim sisteminize uygun dosyayı çalıştırın:
 
-1. **`setup.bat`** dosyasına çift tıklayın.
-2. Açılan pencerede uygulamaya giriş için bir şifre belirleyin (`APP_PASSWORD`) ve opsiyonel özellikleri seçin: **şablondan PDF üretimi** (Python pipeline) ve **Telegram bildirimleri** (token + chat ID istenir).
-3. Kurulumun bitmesini bekleyin. Betik şu adımları sizin için yapar: Node.js 18+ kontrolü (yoksa winget ile kurar), pnpm hazırlama, bağımlılık yükleme, `.env.local` oluşturma (rastgele `SESSION_PASSWORD` üretir), derleme, veritabanı şeması ve masaüstü kısayolu.
-4. Kurulum bitince masaüstündeki **Kairos** kısayoluyla (veya **`start-kairos.bat`**) uygulamayı başlatın. Tarayıcı otomatik olarak [http://localhost:3000](http://localhost:3000) adresini açar.
+| Platform | Kurulum | Başlatma |
+|----------|---------|-----------|
+| **Windows** | `setup.bat` dosyasına çift tıklayın | Masaüstü kısayolu veya `start-kairos.bat` |
+| **macOS / Linux** | `chmod +x installer/install.sh && ./installer/install.sh` | `./start-kairos.sh` |
+
+Kurulum sırasında uygulama girişi için bir şifre belirlersiniz (`APP_PASSWORD`) ve opsiyonel özellikleri seçersiniz: **şablondan PDF üretimi** (Python + LibreOffice gerektirir) ve **Telegram bildirimleri** (bot token + chat ID).
+
+Kurulum betikleri şu adımları otomatik yapar:
+
+- **Node.js 18+** kontrolü (yoksa: Windows'ta winget, macOS'te Homebrew, Linux'ta NodeSource ile kurar)
+- **pnpm** hazırlama (corepack üzerinden veya npm ile)
+- **Bağımlılık** yükleme (`pnpm install`)
+- **`.env.local`** oluşturma (rastgele `SESSION_PASSWORD` üretir, `APP_PASSWORD` gizli girişle alınır)
+- **better-sqlite3** doğrulama ve gerektiğinde yeniden derleme
+- **Derleme** (`pnpm build`) ve **veritabanı şeması** (`pnpm db:migrate`)
+- Opsiyonel: **Python pipeline** kurulumu, **kısayol** oluşturma (Windows)
+
+Kurulum tamamlandığında uygulamayı başlatmak için:
+
+- **Windows:** Masaüstündeki **Kairos** kısayoluna çift tıklayın veya `start-kairos.bat` dosyasını çalıştırın.
+- **macOS / Linux:** `./start-kairos.sh` dosyasını çalıştırın.
+
+Başlatma betikleri `.env.local` dosyasının varlığını kontrol eder, sunucuyu başlatır ve tarayıcıyı otomatik olarak [http://localhost:3000](http://localhost:3000) adresine açar.
 
 > Ayrıntılar ve sorun giderme için [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) belgesine bakın.
 
 ### Manuel Kurulum (geliştirici)
 
 1. **Node.js 18+** kur — [nodejs.org](https://nodejs.org)
-2. **pnpm** kur — `npm install -g pnpm`
+2. **pnpm** etkinleştir — `corepack enable && corepack prepare pnpm@latest --activate`
 3. **Python 3.8+** kur — [python.org](https://www.python.org) (PDF şablon özelliği için)
 4. **LibreOffice** kur — [libreoffice.org](https://www.libreoffice.org) (PDF dönüşümü için)
 5. Bağımlılıkları yükle:
@@ -64,18 +83,14 @@ Teknik bilgi gerektirmeyen otomatik kurulum:
    ```bash
    pnpm run db:migrate
    ```
-8. Python bağımlılıklarını yükle:
+8. Python bağımlılıklarını yükle (opsiyonel — PDF şablonu için):
    ```bash
    cd scripts/docx-pipeline
    python3 -m venv .venv
-   ```
-   ```bash
    # Windows:
    .venv\Scripts\activate
    # Linux/macOS:
    source .venv/bin/activate
-   ```
-   ```bash
    pip install -r requirements.txt
    cd ../..
    ```
