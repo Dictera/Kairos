@@ -90,7 +90,7 @@ Write-Host "  Kairos - Sigorta Uyuşmazlık Takip - Kurulum" -ForegroundColor Wh
 Write-Host "===========================================================" -ForegroundColor White
 
 # ------------------------------------------------------------------
-# 1. Node.js (22 LTS zorunlu - better-sqlite3 prebuild binary uyumlulugu)
+# 1. Node.js
 # ------------------------------------------------------------------
 Write-Step "Node.js kontrol ediliyor"
 $nodeOk = $false
@@ -100,28 +100,25 @@ if ($nodeExe) {
   $nodeVersion = ($nodeVersionRaw -replace '^v', '').Split("`n")[0].Trim()
   $major = 0
   if ($nodeVersion -match '^(\d+)') { $major = [int]$Matches[1] }
-  if ($major -eq 22) {
-    Write-Ok "Node.js $nodeVersion bulundu (22 LTS)"
+  if ($major -ge 18) {
+    Write-Ok "Node.js $nodeVersion bulundu"
     $nodeOk = $true
-  } elseif ($major -ge 23) {
-    Write-Warn "Node.js $nodeVersion bulundu ama better-sqlite3 ile uyumlu degil."
-    Write-Warn "Node.js 22 LTS gerekiyor. Mevcut surum kaldirilip 22 LTS kurulacak."
   } else {
-    Write-Warn "Node.js $nodeVersion cok eski (22 LTS gerekli)."
+    Write-Warn "Node.js $nodeVersion cok eski (18+ gerekli)."
   }
 }
 
 if (-not $nodeOk) {
   if (Test-Command 'winget') {
-    Write-Note "Node.js 22 LTS, winget ile kuruluyor..."
+    Write-Note "Node.js LTS, winget ile kuruluyor..."
     $wingetExit = Invoke-Safe 'winget' @('install', '--id', 'OpenJS.NodeJS.LTS', '-e', '--source', 'winget', '--accept-source-agreements', '--accept-package-agreements')
     if ($wingetExit -ne 0) {
-      Fail "Node.js otomatik kurulamadi. Lutfen https://nodejs.org adresinden 22 LTS surumunu kurup setup.bat dosyasini tekrar calistirin."
+      Fail "Node.js otomatik kurulamadi. Lutfen https://nodejs.org adresinden LTS surumunu kurup setup.bat dosyasini tekrar calistirin."
     }
-    Write-Warn "Node.js 22 LTS kuruldu. PATH'in guncellenmesi icin bu pencereyi KAPATIP setup.bat dosyasini TEKRAR calistirin."
+    Write-Warn "Node.js kuruldu. PATH'in guncellenmesi icin bu pencereyi KAPATIP setup.bat dosyasini TEKRAR calistirin."
     exit 0
   } else {
-    Fail "Node.js bulunamadi ve winget yok. Lutfen https://nodejs.org adresinden Node.js 22 LTS kurup setup.bat dosyasini tekrar calistirin."
+    Fail "Node.js bulunamadi ve winget yok. Lutfen https://nodejs.org adresinden Node.js 18+ LTS kurup setup.bat dosyasini tekrar calistirin."
   }
 }
 
