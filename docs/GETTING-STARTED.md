@@ -7,7 +7,7 @@
 | Gereksinim | Minimum Sürüm | Notlar |
 |-----------|--------------|--------|
 | Node.js | 18+ | `node --version` ile kontrol edin |
-| pnpm | 11.5.0 | `corepack enable` ile etkinleştirin (proje bu sürüme sabitlenmiştir) |
+| pnpm | 11.6.0 | `corepack enable` ile etkinleştirin (proje bu sürüme sabitlenmiştir) |
 | Python | 3.8+ | PDF şablon özelliği için (opsiyonel) |
 | LibreOffice | Herhangi bir güncel sürüm | PDF şablon özelliği için (opsiyonel) — [libreoffice.org](https://www.libreoffice.org) adresinden indirin |
 
@@ -25,7 +25,7 @@ Son kullanıcılar için tek tıkla kurulum. Aşağıdaki manuel adımların tam
    - **Telegram bildirimleri** — kurulacaksa betik sizden `TELEGRAM_BOT_TOKEN` (@BotFather) ve `TELEGRAM_CHAT_ID` (@userinfobot) değerlerini ister; seçmezseniz alanlar boş bırakılır ve bildirimler atlanır.
 3. Betik şunları otomatik yürütür:
    - Node.js 18+ kontrolü — kurulu değilse `winget` ile kurar (winget yoksa nodejs.org bağlantısını gösterip durur).
-   - `corepack` ile pnpm@11.5.0 etkinleştirme.
+   - `corepack` ile pnpm@11.6.0 etkinleştirme.
    - `pnpm install --frozen-lockfile`.
    - `.env.local` oluşturma — kriptografik olarak güvenli, 48 karakterlik rastgele bir `SESSION_PASSWORD` üretir; `APP_PASSWORD` değerini sizden alır. **Mevcut bir `.env.local` dosyasının üzerine asla yazılmaz.**
    - `pnpm build` ve `pnpm db:migrate`.

@@ -261,8 +261,12 @@ if [ ! -d "$DATA_DIR" ]; then
   note "data/ dizini oluşturuldu"
 fi
 
-MIGRATE_OUTPUT="$(pnpm db:migrate 2>&1)" || true
+# set +e: db:migrate hatasinda betik abort olmasin; gercek cikis kodunu yakala
+# (eski "... || true; MIGRATE_EXIT=$?" her zaman 0 donduruyordu -> hata yolu olu kaliyordu)
+set +e
+MIGRATE_OUTPUT="$(pnpm db:migrate 2>&1)"
 MIGRATE_EXIT=$?
+set -e
 printf "%s\n" "$MIGRATE_OUTPUT"
 if [ "$MIGRATE_EXIT" -ne 0 ]; then
   printf "\n${RED}=== VERİTABANI GEÇİŞ HATASI ===${NC}\n"

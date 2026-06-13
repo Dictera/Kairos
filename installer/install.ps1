@@ -1,28 +1,30 @@
 ﻿#requires -Version 5.1
 <#
   Kairos - Sigorta Uyuşmazlık Takip
-  Son kullanici kurulum betigi (Windows).
+  Son kullanıcı kurulum betiği (Windows).
 
-  Yaptiklari:
-    1. Node.js 18+ kontrolu (yoksa winget ile kurar)
-    2. pnpm etkinlestirme (corepack)
-    3. Kurulum secenekleri + .env.local olusturma
+  Yaptıkları:
+    1. Node.js 18+ kontrolü (yoksa winget ile kurar)
+    2. pnpm etkinleştirme (corepack)
+    3. Kurulum seçenekleri + .env.local oluşturma
        (rastgele SESSION_PASSWORD, APP_PASSWORD, opsiyonel Telegram)
-    4. Bagimliliklarin yuklenmesi (pnpm install)
+    4. Bağımlılıkların yüklenmesi (pnpm install)
     5. Uygulama derlemesi (pnpm build)
-    6. Veritabani semasi (pnpm db:migrate) + hata tanisi
+    6. Veritabanı şeması (pnpm db:migrate) + hata tanısı
     7. Opsiyonel Python pipeline kurulumu (.docx -> PDF)
-    8. Masaustu + Baslat menuyu kisayolu
+    8. Masaüstü + Başlat menüsü kısayolu
 
-  Guvenlik:
-    - SESSION_PASSWORD kriptografik RNG ile uretilir.
-    - Mevcut .env.local ASLA uzerine yazilmaz.
-    - APP_PASSWORD ekrana yazilmaz / okunmaz.
+  Güvenlik:
+    - SESSION_PASSWORD kriptografik RNG ile üretilir.
+    - Mevcut .env.local ASLA üzerine yazılmaz.
+    - APP_PASSWORD ekrana yazılmaz / okunmaz.
 #>
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# UTF-8 cikti: Turkce karakterler her sistem dilinde dogru gorunsun.
+# Bu betik UTF-8 (BOM'lu) kaydedilmistir; setup.bat ayrica `chcp 65001` yapar.
 try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
 try { [Console]::InputEncoding  = [System.Text.Encoding]::UTF8 } catch {}
 
@@ -52,8 +54,8 @@ function Read-YesNo {
     $ans = (Read-Host "    $Question $hint").Trim().ToLower()
     if ([string]::IsNullOrEmpty($ans)) { return $Default }
     if ($ans -in @('e', 'evet', 'y', 'yes')) { return $true }
-    if ($ans -in @('h', 'hayir', 'hayir', 'n', 'no')) { return $false }
-    Write-Warn "Lutfen E (evet) veya H (hayir) girin."
+    if ($ans -in @('h', 'hayir', 'hayır', 'n', 'no')) { return $false }
+    Write-Warn "Lütfen E (evet) veya H (hayır) girin."
   }
 }
 
@@ -103,7 +105,7 @@ if ($nodeExe) {
     Write-Ok "Node.js $nodeVersion bulundu"
     $nodeOk = $true
   } else {
-    Write-Warn "Node.js $nodeVersion cok eski (18+ gerekli)."
+    Write-Warn "Node.js $nodeVersion çok eski (18+ gerekli)."
   }
 }
 
@@ -112,19 +114,19 @@ if (-not $nodeOk) {
     Write-Note "Node.js LTS, winget ile kuruluyor..."
     $wingetExit = Invoke-Safe 'winget' @('install', '--id', 'OpenJS.NodeJS.LTS', '-e', '--source', 'winget', '--accept-source-agreements', '--accept-package-agreements')
     if ($wingetExit -ne 0) {
-      Fail "Node.js otomatik kurulamadi. Lutfen https://nodejs.org adresinden LTS surumunu kurup setup.bat dosyasini tekrar calistirin."
+      Fail "Node.js otomatik kurulamadı. Lütfen https://nodejs.org adresinden LTS sürümünü kurup setup.bat dosyasını tekrar çalıştırın."
     }
-    Write-Warn "Node.js kuruldu. PATH'in guncellenmesi icin bu pencereyi KAPATIP setup.bat dosyasini TEKRAR calistirin."
+    Write-Warn "Node.js kuruldu. PATH'in güncellenmesi için bu pencereyi KAPATIP setup.bat dosyasını TEKRAR çalıştırın."
     exit 0
   } else {
-    Fail "Node.js bulunamadi ve winget yok. Lutfen https://nodejs.org adresinden Node.js 18+ LTS kurup setup.bat dosyasini tekrar calistirin."
+    Fail "Node.js bulunamadı ve winget yok. Lütfen https://nodejs.org adresinden Node.js 18+ LTS kurup setup.bat dosyasını tekrar çalıştırın."
   }
 }
 
 # ------------------------------------------------------------------
 # 2. pnpm (corepack)
 # ------------------------------------------------------------------
-Write-Step "pnpm hazirlaniyor"
+Write-Step "pnpm hazırlanıyor"
 $corepackExe = Resolve-Exe 'corepack'
 if ($corepackExe) {
   Invoke-Safe $corepackExe @('enable') | Out-Null
@@ -133,28 +135,28 @@ if ($corepackExe) {
 if (-not (Resolve-Exe 'pnpm') -and -not $corepackExe) {
   Write-Note "corepack yok, pnpm npm ile kuruluyor..."
   $npmExe = Resolve-Exe 'npm'
-  if (-not $npmExe) { Fail "npm bulunamadi, pnpm kurulamadi." }
+  if (-not $npmExe) { Fail "npm bulunamadı, pnpm kurulamadı." }
   $npmExit = Invoke-Safe $npmExe @('install', '-g', 'pnpm')
-  if ($npmExit -ne 0) { Fail "pnpm kurulamadi." }
+  if ($npmExit -ne 0) { Fail "pnpm kurulamadı." }
 }
-Write-Ok "pnpm hazir"
+Write-Ok "pnpm hazır"
 
 # ------------------------------------------------------------------
-# 3. Kurulum secenekleri + .env.local
+# 3. Kurulum seçenekleri + .env.local
 # ------------------------------------------------------------------
-Write-Step "Kurulum secenekleri"
+Write-Step "Kurulum seçenekleri"
 
 Write-Host ""
-Write-Host "    Belge sablonu (.docx) -> PDF uretimi opsiyonel bir ozelliktir." -ForegroundColor White
+Write-Host "    Belge şablonu (.docx) -> PDF üretimi opsiyonel bir özelliktir." -ForegroundColor White
 Write-Host "    Python 3.8+ ve LibreOffice gerektirir." -ForegroundColor DarkGray
-$wantPdf = Read-YesNo "Sablonlar PDF uretimi kurulsun mu?" $false
+$wantPdf = Read-YesNo "Şablonlar PDF üretimi kurulsun mu?" $false
 
 $envPath   = Join-Path $RepoRoot '.env.local'
 $envExists = Test-Path $envPath
 
 if ($envExists) {
-  Write-Ok ".env.local zaten var - dokunulmadi"
-  Write-Note "Telegram bildirimlerini eklemek icin .env.local icindeki TELEGRAM_* alanlarini duzenleyin."
+  Write-Ok ".env.local zaten var - dokunulmadı"
+  Write-Note "Telegram bildirimlerini eklemek için .env.local içindeki TELEGRAM_* alanlarını düzenleyin."
 } else {
   $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
   $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
@@ -170,34 +172,34 @@ if ($envExists) {
   }
 
   Write-Host ""
-  Write-Host "    Uygulamaya giris icin bir sifre belirleyin." -ForegroundColor White
+  Write-Host "    Uygulamaya giriş için bir şifre belirleyin." -ForegroundColor White
   $appPassword = ''
   while ([string]::IsNullOrWhiteSpace($appPassword)) {
-    $secure = Read-Host "    Giris sifresi (APP_PASSWORD)" -AsSecureString
+    $secure = Read-Host "    Giriş şifresi (APP_PASSWORD)" -AsSecureString
     $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
     try { $appPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr) }
     finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr) }
-    if ([string]::IsNullOrWhiteSpace($appPassword)) { Write-Warn "Sifre bos olamaz." }
+    if ([string]::IsNullOrWhiteSpace($appPassword)) { Write-Warn "Şifre boş olamaz." }
   }
 
   $telegramToken  = ''
   $telegramChatId = ''
   Write-Host ""
-  Write-Host "    Telegram bildirimleri (gunluk durusma/sure uyarlari) opsiyoneldir." -ForegroundColor White
+  Write-Host "    Telegram bildirimleri (günlük duruşma/süre uyarıları) opsiyoneldir." -ForegroundColor White
   if (Read-YesNo "Telegram bildirimleri kurulsun mu?" $false) {
-    Write-Note "Bot token: Telegram'da @BotFather -> /newbot ile alinir."
-    Write-Note "Chat ID: Telegram'da @userinfobot'a mesaj atinca gorunur."
+    Write-Note "Bot token: Telegram'da @BotFather -> /newbot ile alınır."
+    Write-Note "Chat ID: Telegram'da @userinfobot'a mesaj atınca görünür."
     while ([string]::IsNullOrWhiteSpace($telegramToken)) {
       $telegramToken = (Read-Host "    TELEGRAM_BOT_TOKEN").Trim()
-      if ([string]::IsNullOrWhiteSpace($telegramToken)) { Write-Warn "Token bos olamaz (vazgecmek icin Ctrl+C)." }
+      if ([string]::IsNullOrWhiteSpace($telegramToken)) { Write-Warn "Token boş olamaz (vazgeçmek için Ctrl+C)." }
     }
     while ([string]::IsNullOrWhiteSpace($telegramChatId)) {
       $telegramChatId = (Read-Host "    TELEGRAM_CHAT_ID").Trim()
-      if ([string]::IsNullOrWhiteSpace($telegramChatId)) { Write-Warn "Chat ID bos olamaz (vazgecmek icin Ctrl+C)." }
+      if ([string]::IsNullOrWhiteSpace($telegramChatId)) { Write-Warn "Chat ID boş olamaz (vazgeçmek için Ctrl+C)." }
     }
     Write-Ok "Telegram bilgileri kaydedilecek"
   } else {
-    Write-Note "Telegram atlandi - bildirimler devre disi (sonradan .env.local'dan eklenebilir)."
+    Write-Note "Telegram atlandı - bildirimler devre dışı (sonradan .env.local'dan eklenebilir)."
   }
 
   $envContent = @"
@@ -205,11 +207,11 @@ SESSION_PASSWORD="$sessionPassword"
 SESSION_COOKIE_NAME=sigorta-session
 APP_PASSWORD="$appPassword"
 
-# Pipeline yapilandirmasi (bos birtililrsa otomatik algilanir)
+# Pipeline yapılandırması (boş bırakılırsa otomatik algılanır)
 PYTHON_PATH=
 LIBREOFFICE_PATH=
 
-# Telegram bildirimleri (opsiyonel - bos ise bildirimler atlanir)
+# Telegram bildirimleri (opsiyonel - boş ise bildirimler atlanır)
 TELEGRAM_BOT_TOKEN="$telegramToken"
 TELEGRAM_CHAT_ID="$telegramChatId"
 "@
@@ -218,54 +220,54 @@ TELEGRAM_CHAT_ID="$telegramChatId"
   Remove-Variable sessionPassword -ErrorAction SilentlyContinue
   Remove-Variable telegramToken -ErrorAction SilentlyContinue
   Remove-Variable telegramChatId -ErrorAction SilentlyContinue
-  Write-Ok ".env.local olusturuldu (SESSION_PASSWORD otomatik uretildi)"
+  Write-Ok ".env.local oluşturuldu (SESSION_PASSWORD otomatik üretildi)"
 }
 
 # ------------------------------------------------------------------
-# 4. Bagimliliklar
+# 4. Bağımlılıklar
 # ------------------------------------------------------------------
-Write-Step "Bagimliliklar yukleniyor (pnpm install) - birkac dakika surebilir"
+Write-Step "Bağımlılıklar yükleniyor (pnpm install) - birkaç dakika sürebilir"
 $pnpmExe = Resolve-Exe 'pnpm'
 if (-not $pnpmExe) {
   $corepackTmp = Resolve-Exe 'corepack'
   if ($corepackTmp) { $pnpmExe = $corepackTmp }
 }
-if (-not $pnpmExe) { Fail "pnpm bulunamadi." }
+if (-not $pnpmExe) { Fail "pnpm bulunamadı." }
 
 $installOk = $false
 Write-Note "pnpm install --frozen-lockfile deneniyor..."
 $frzExit = Invoke-Safe $pnpmExe @('install', '--frozen-lockfile')
 if ($frzExit -eq 0) {
   $installOk = $true
-  Write-Ok "Bagimliliklar yuklendi (frozen-lockfile)"
+  Write-Ok "Bağımlılıklar yüklendi (frozen-lockfile)"
 } else {
-  Write-Warn "frozen-lockfile basarisiz oldu, normal install deneniyor..."
+  Write-Warn "frozen-lockfile başarısız oldu, normal install deneniyor..."
   $normExit = Invoke-Safe $pnpmExe @('install')
   if ($normExit -eq 0) {
     $installOk = $true
-    Write-Ok "Bagimliliklar yuklendi"
+    Write-Ok "Bağımlılıklar yüklendi"
   }
 }
 if (-not $installOk) {
-  Fail "Bagimliliklar yuklenemedi. Node.js 18+ LTS kurulu oldugundan emin olun."
+  Fail "Bağımlılıklar yüklenemedi. Node.js 18+ LTS kurulu olduğundan emin olun."
 }
 
 # ------------------------------------------------------------------
 # 5. Derleme
 # ------------------------------------------------------------------
-Write-Step "Uygulama derleniyor (pnpm build) - birkac dakika surebilir"
+Write-Step "Uygulama derleniyor (pnpm build) - birkaç dakika sürebilir"
 $buildExit = Invoke-Safe $pnpmExe @('build')
-if ($buildExit -ne 0) { Fail "Derleme basarisiz oldu (kod $buildExit)." }
-Write-Ok "Derleme tamamlandi"
+if ($buildExit -ne 0) { Fail "Derleme başarısız oldu (kod $buildExit)." }
+Write-Ok "Derleme tamamlandı"
 
 # ------------------------------------------------------------------
-# 6. Veritabani
+# 6. Veritabanı
 # ------------------------------------------------------------------
-Write-Step "Veritabani hazirlaniyor (db:migrate)"
+Write-Step "Veritabanı hazırlanıyor (db:migrate)"
 $dataDir = Join-Path $RepoRoot 'data'
 if (-not (Test-Path $dataDir)) {
   New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
-  Write-Note "data/ dizini olusturuldu"
+  Write-Note "data/ dizini oluşturuldu"
 }
 
 $prevEAP3 = $ErrorActionPreference
@@ -280,50 +282,50 @@ $migrateOutput = ($migrateRaw | ForEach-Object {
 Write-Host $migrateOutput
 if ($migrateExit -ne 0) {
   Write-Host ""
-  Write-Host "=== VERITABANI GECIS HATASI ===" -ForegroundColor Red
+  Write-Host "=== VERİTABANI GEÇİŞ HATASI ===" -ForegroundColor Red
   Write-Host $migrateOutput -ForegroundColor Red
   Write-Host ""
-  Write-Host "Not: derleme (adim 5) basarili oldu; better-sqlite3 native modul ve" -ForegroundColor Yellow
-  Write-Host "C++ derleyici bu noktada SORUN DEGILDIR." -ForegroundColor Yellow
-  Write-Host "Olasin nedenler ve cozumler:" -ForegroundColor Yellow
-  Write-Host "  1. drizzle/ icindeki bir migration SQL hatasi (en olasi neden)" -ForegroundColor Yellow
-  Write-Host "     -> Ayrintili hata icin: pnpm exec drizzle-kit migrate" -ForegroundColor Yellow
-  Write-Host "  2. data/ dizini yazilabilir degil" -ForegroundColor Yellow
-  Write-Host "  3. data\db.sqlite baska bir surec tarafindan kilitli (uygulamayi kapatin)" -ForegroundColor Yellow
+  Write-Host "Not: derleme (adım 5) başarılı oldu; better-sqlite3 native modül ve" -ForegroundColor Yellow
+  Write-Host "C++ derleyici bu noktada SORUN DEĞİLDİR." -ForegroundColor Yellow
+  Write-Host "Olası nedenler ve çözümler:" -ForegroundColor Yellow
+  Write-Host "  1. drizzle/ içindeki bir migration SQL hatası (en olası neden)" -ForegroundColor Yellow
+  Write-Host "     -> Ayrıntılı hata için: pnpm exec drizzle-kit migrate" -ForegroundColor Yellow
+  Write-Host "  2. data/ dizini yazılabilir değil" -ForegroundColor Yellow
+  Write-Host "  3. data\db.sqlite başka bir süreç tarafından kilitli (uygulamayı kapatın)" -ForegroundColor Yellow
   Write-Host ""
-  Fail "Veritabani gecisi basarisiz oldu. Yukaridaki hata mesajini inceleyin."
+  Fail "Veritabanı geçişi başarısız oldu. Yukarıdaki hata mesajını inceleyin."
 }
-Write-Ok "Veritabani hazir (data\db.sqlite)"
+Write-Ok "Veritabanı hazır (data\db.sqlite)"
 
 # ------------------------------------------------------------------
 # 7. Opsiyonel Python pipeline (.docx -> PDF)
 # ------------------------------------------------------------------
-Write-Step "Belge sablonu (PDF) pipeline'i"
+Write-Step "Belge şablonu (PDF) pipeline'ı"
 if ($wantPdf) {
   $venvScript = Join-Path $RepoRoot 'scripts\docx-pipeline\setup-venv.ps1'
   if ((Test-Command 'python') -and (Test-Path $venvScript)) {
     try {
       & powershell -NoProfile -ExecutionPolicy Bypass -File $venvScript
       if ($LASTEXITCODE -eq 0) { Write-Ok "Python pipeline kuruldu" }
-      else { Write-Warn "Python pipeline kurulamadi - sablon PDF ozelligi devre disi (uygulama yine de calisir)." }
+      else { Write-Warn "Python pipeline kurulamadı - şablon PDF özelliği devre dışı (uygulama yine de çalışır)." }
     } catch {
-      Write-Warn "Python pipeline kurulumu atlandi - sablon PDF ozelligi devre disi (uygulama yine de calisir)."
+      Write-Warn "Python pipeline kurulumu atlandı - şablon PDF özelliği devre dışı (uygulama yine de çalışır)."
     }
     if (-not (Test-Command 'soffice')) {
-      Write-Note "LibreOffice (soffice) PATH'te bulunamadi - PDF donusumu icin kurulu olmali: https://www.libreoffice.org"
+      Write-Note "LibreOffice (soffice) PATH'te bulunamadı - PDF dönüşümü için kurulu olmalı: https://www.libreoffice.org"
     }
   } else {
-    Write-Warn "Python bulunamadi - sablon PDF ozelligi kurulamadi."
-    Write-Note "Python 3.8+ ve LibreOffice kurup setup.bat'i tekrar calistirin."
+    Write-Warn "Python bulunamadı - şablon PDF özelliği kurulamadı."
+    Write-Note "Python 3.8+ ve LibreOffice kurup setup.bat'i tekrar çalıştırın."
   }
 } else {
-  Write-Note "Sablonlar PDF uretimi atlandi (secilmedi)."
+  Write-Note "Şablonlar PDF üretimi atlandı (seçilmedi)."
 }
 
 # ------------------------------------------------------------------
-# 8. Kisayollar
+# 8. Kısayollar
 # ------------------------------------------------------------------
-Write-Step "Kisayollar olusturuluyor"
+Write-Step "Kısayollar oluşturuluyor"
 $launcher = Join-Path $RepoRoot 'start-kairos.bat'
 $iconFile = Join-Path $RepoRoot 'public\app-icon.ico'
 $iconLoc  = if (Test-Path $iconFile) { "$iconFile,0" } else { "$env:SystemRoot\System32\shell32.dll,13" }
@@ -337,16 +339,16 @@ if (Test-Path $launcher) {
       $sc = $WshShell.CreateShortcut($lnkPath)
       $sc.TargetPath       = $launcher
       $sc.WorkingDirectory = $RepoRoot
-      $sc.Description       = 'Kairos - Sigorta Uyusmazlik Takip'
+      $sc.Description       = 'Kairos - Sigorta Uyuşmazlık Takip'
       $sc.IconLocation      = $iconLoc
       $sc.Save()
     } catch {
-      Write-Warn "Kisayol olusturulamadi: $dir"
+      Write-Warn "Kısayol oluşturulamadı: $dir"
     }
   }
-  Write-Ok "Masaustu ve Baslat menuyu kisayollari olusturuldu"
+  Write-Ok "Masaüstü ve Başlat menüsü kısayolları oluşturuldu"
 } else {
-  Write-Warn "start-kairos.bat bulunamadi - kisayol atlandi."
+  Write-Warn "start-kairos.bat bulunamadı - kısayol atlandı."
 }
 
 # ------------------------------------------------------------------
@@ -354,10 +356,10 @@ if (Test-Path $launcher) {
 # ------------------------------------------------------------------
 Write-Host ""
 Write-Host "===========================================================" -ForegroundColor Green
-Write-Host "  Kurulum tamamlandi!" -ForegroundColor Green
+Write-Host "  Kurulum tamamlandı!" -ForegroundColor Green
 Write-Host "===========================================================" -ForegroundColor Green
-Write-Host "  Uygulamayi baslatmak icin masaustundeki 'Kairos'" -ForegroundColor White
-Write-Host "  kisayoluna cift tiklayin (veya start-kairos.bat)." -ForegroundColor White
-Write-Host "  Tarayicida http://localhost:3000 acilacaktir." -ForegroundColor White
+Write-Host "  Uygulamayı başlatmak için masaüstündeki 'Kairos'" -ForegroundColor White
+Write-Host "  kısayoluna çift tıklayın (veya start-kairos.bat)." -ForegroundColor White
+Write-Host "  Tarayıcıda http://localhost:3000 açılacaktır." -ForegroundColor White
 Write-Host ""
 exit 0
