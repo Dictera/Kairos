@@ -3,9 +3,13 @@ chcp 65001 >nul
 REM ============================================================
 REM  Kairos - Sigorta Uyusmazlik Takip
 REM  Kurulum baslaticisi (cift tiklayin)
-REM ============================================================
-REM  Bu dosya kurulumu PowerShell uzerinden calistirir.
-REM  Tum kurulum adimlari installer\install.ps1 icindedir.
+REM ------------------------------------------------------------
+REM  NOT: Bu .bat dosyasi BILEREK yalnizca ASCII icerir.
+REM  cmd.exe, UTF-8 batch dosyalarindaki cok-baytli karakterlerde
+REM  (s/i/c gibi) dosya pozisyonunu kaybedip komutlari bolerek
+REM  yanlis ayristirir (ozellikle Almanca/Fransiz vb. konsollarda).
+REM  Turkce/diakritikli tum kullanici metni installer\install.ps1
+REM  icindedir (UTF-8 + BOM ile her dilde dogru gorunur).
 REM ============================================================
 
 setlocal

@@ -51,7 +51,6 @@ Kurulum betikleri şu adımları otomatik yapar:
 - **pnpm** hazırlama (corepack üzerinden veya npm ile)
 - **Bağımlılık** yükleme (`pnpm install`)
 - **`.env.local`** oluşturma (rastgele `SESSION_PASSWORD` üretir, `APP_PASSWORD` gizli girişle alınır)
-- **better-sqlite3** doğrulama ve gerektiğinde yeniden derleme
 - **Derleme** (`pnpm build`) ve **veritabanı şeması** (`pnpm db:migrate`)
 - Opsiyonel: **Python pipeline** kurulumu, **kısayol** oluşturma (Windows)
 
@@ -67,7 +66,7 @@ Başlatma betikleri `.env.local` dosyasının varlığını kontrol eder, sunucu
 ### Manuel Kurulum (geliştirici)
 
 1. **Node.js 18+** kur — [nodejs.org](https://nodejs.org)
-2. **pnpm** etkinleştir — `corepack enable && corepack prepare pnpm@latest --activate`
+2. **pnpm** etkinleştir — `corepack enable && corepack prepare pnpm@11.6.0 --activate`
 3. **Python 3.8+** kur — [python.org](https://www.python.org) (PDF şablon özelliği için)
 4. **LibreOffice** kur — [libreoffice.org](https://www.libreoffice.org) (PDF dönüşümü için)
 5. Bağımlılıkları yükle:
