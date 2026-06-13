@@ -17,6 +17,7 @@ CREATE TABLE `taraf_new` (
   `surucu_police_no` text,
   FOREIGN KEY (`dosya_id`) REFERENCES `dosya`(`id`) ON DELETE CASCADE
 );
+--> statement-breakpoint
 
 -- Step 2: Copy data, keeping only the first row per dosya_id to resolve any existing duplicates
 INSERT INTO `taraf_new`
@@ -27,7 +28,9 @@ FROM `taraf`
 WHERE id IN (
   SELECT MIN(id) FROM `taraf` GROUP BY dosya_id
 );
+--> statement-breakpoint
 
 -- Step 3: Drop old table and rename new one
 DROP TABLE `taraf`;
+--> statement-breakpoint
 ALTER TABLE `taraf_new` RENAME TO `taraf`;

@@ -9,8 +9,12 @@ CREATE TABLE IF NOT EXISTS "bildirim" (
 	"tarih" TEXT NOT NULL,
 	"created_at" TEXT NOT NULL DEFAULT (datetime('now'))
 );
+--> statement-breakpoint
 
 CREATE INDEX IF NOT EXISTS "idx_bildirim_dosya" ON "bildirim" ("dosya_id");
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "idx_bildirim_tarih" ON "bildirim" ("tarih");
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "idx_bildirim_tip_tarih" ON "bildirim" ("tip", "tarih");
+--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "uniq_bildirim_tip_dosya_tarih" ON "bildirim" ("tip", "dosya_id", "tarih");

@@ -13,6 +13,9 @@ CREATE TABLE `docx_sablon` (
   `updated_at` text DEFAULT (datetime('now')) NOT NULL,
   CONSTRAINT `kategori_check` CHECK (`kategori` IN ('STK', 'Mahkeme', 'Genel'))
 );
+--> statement-breakpoint
 CREATE INDEX `idx_docx_sablon_kategori` ON `docx_sablon` (`kategori`);
+--> statement-breakpoint
 ALTER TABLE `belge` ADD `sablon_id` integer REFERENCES `docx_sablon`(`id`) ON DELETE SET NULL;
+--> statement-breakpoint
 CREATE INDEX `idx_belge_sablon` ON `belge` (`sablon_id`);

@@ -82,7 +82,7 @@
     {
       "idx": 11,
       "version": "6",
-      "when": 1745539200000,
+      "when": 1777276800000,
       "tag": "0011_add_finans_odeme_asamasi",
       "breakpoints": true
     },

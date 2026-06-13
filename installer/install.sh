@@ -8,7 +8,6 @@
 #   3. Kurulum seçenekleri + .env.local oluşturma
 #      (rastgele SESSION_PASSWORD, APP_PASSWORD, opsiyonel Telegram)
 #   4. Bağımlılıkların yüklenmesi (pnpm install)
-#   4b. better-sqlite3 native modülünü doğrula / yeniden derle
 #   5. Uygulama derlemesi (pnpm build)
 #   6. Veritabanı şeması (pnpm db:migrate) + hata tanısı
 #   7. Opsiyonel Python pipeline kurulumu (.docx -> PDF)
@@ -246,36 +245,6 @@ else
 fi
 
 # ------------------------------------------------------------------
-# 4b. better-sqlite3 native modülünü doğrula
-# ------------------------------------------------------------------
-step "Veritabanı modülü doğrulanıyor (better-sqlite3)"
-if has_cmd node; then
-  BS3_TEST="$(node -e "try{require('better-sqlite3');console.log('OK')}catch(e){console.error('FAIL:'+e.message)}" 2>&1 || true)"
-  if echo "$BS3_TEST" | grep -q '^FAIL'; then
-    warn "better-sqlite3 yüklenemedi, yeniden derleme deneniyor..."
-    pnpm rebuild better-sqlite3 2>&1 || true
-    BS3_TEST2="$(node -e "try{require('better-sqlite3');console.log('OK')}catch(e){console.error('FAIL:'+e.message)}" 2>&1 || true)"
-    if echo "$BS3_TEST2" | grep -q '^FAIL'; then
-      printf "\n${RED}[HATA] better-sqlite3 yerel modülü derlenemiyor.${NC}\n"
-      if is_macos; then
-        printf "   ${YELLOW}Çözüm: Xcode Command Line Tools kurun:${NC}\n"
-        printf "   ${YELLOW}  xcode-select --install${NC}\n"
-        printf "   ${YELLOW}Ardından install.sh dosyasını tekrar çalıştırın.${NC}\n"
-      else
-        printf "   ${YELLOW}Çözüm: C++ derleyici ve build araçlarını kurun:${NC}\n"
-        printf "   ${YELLOW}  Ubuntu/Debian: sudo apt-get install build-essential python3${NC}\n"
-        printf "   ${YELLOW}  Fedora/RHEL:  sudo dnf groupinstall 'Development Tools'${NC}\n"
-        printf "   ${YELLOW}Ardından install.sh dosyasını tekrar çalıştırın.${NC}\n"
-      fi
-      fail "better-sqlite3 modülü yüklenemiyor. Yukarıdaki çözümü uygulayın."
-    fi
-    ok "better-sqlite3 yeniden derlendi"
-  else
-    ok "better-sqlite3 modülü hazır"
-  fi
-fi
-
-# ------------------------------------------------------------------
 # 5. Derleme
 # ------------------------------------------------------------------
 step "Uygulama derleniyor (pnpm build) - birkaç dakika sürebilir"
@@ -298,16 +267,13 @@ printf "%s\n" "$MIGRATE_OUTPUT"
 if [ "$MIGRATE_EXIT" -ne 0 ]; then
   printf "\n${RED}=== VERİTABANI GEÇİŞ HATASI ===${NC}\n"
   printf "%s\n" "$MIGRATE_OUTPUT"
-  printf "\n${YELLOW}Olası nedenler ve çözümler:${NC}\n"
-  if is_macos; then
-    printf "  ${YELLOW}1. better-sqlite3 native modülü derlenmemiş${NC}\n"
-    printf "     ${YELLOW}-> Xcode Command Line Tools kurun: xcode-select --install${NC}\n"
-  else
-    printf "  ${YELLOW}1. better-sqlite3 native modülü derlenmemiş${NC}\n"
-    printf "     ${YELLOW}-> build-essential / Development Tools kurun${NC}\n"
-  fi
-  printf "  ${YELLOW}2. Node.js sürüm uyumsuzluğu (18+ LTS gerekli)${NC}\n"
-  printf "  ${YELLOW}3. data/ dizini yazılabilir değil${NC}\n\n"
+  printf "\n${YELLOW}Not: derleme (adım 5) başarılı oldu; better-sqlite3 native modül ve${NC}\n"
+  printf "${YELLOW}C++ derleyici bu noktada SORUN DEĞİLDİR.${NC}\n"
+  printf "${YELLOW}Olası nedenler ve çözümler:${NC}\n"
+  printf "  ${YELLOW}1. drizzle/ içindeki bir migration SQL hatası (en olası neden)${NC}\n"
+  printf "     ${YELLOW}-> Ayrıntılı hata için: pnpm exec drizzle-kit migrate${NC}\n"
+  printf "  ${YELLOW}2. data/ dizini yazılabilir değil${NC}\n"
+  printf "  ${YELLOW}3. data/db.sqlite başka bir süreç tarafından kilitli (uygulamayı kapatın)${NC}\n\n"
   fail "Veritabanı geçişi başarısız oldu. Yukarıdaki hata mesajını inceleyin."
 fi
 ok "Veritabanı hazır (data/db.sqlite)"

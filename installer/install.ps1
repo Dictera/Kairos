@@ -9,7 +9,6 @@
     3. Kurulum secenekleri + .env.local olusturma
        (rastgele SESSION_PASSWORD, APP_PASSWORD, opsiyonel Telegram)
     4. Bagimliliklarin yuklenmesi (pnpm install)
-    4b. better-sqlite3 native modulunu yeniden derle
     5. Uygulama derlemesi (pnpm build)
     6. Veritabani semasi (pnpm db:migrate) + hata tanisi
     7. Opsiyonel Python pipeline kurulumu (.docx -> PDF)
@@ -252,63 +251,6 @@ if (-not $installOk) {
 }
 
 # ------------------------------------------------------------------
-# 4b. better-sqlite3 native modulunu dogrula
-# ------------------------------------------------------------------
-Write-Step "Veritabani modulu dogrulanioor (better-sqlite3)"
-$nodeExe = Resolve-Exe 'node'
-$bs3Ok = $false
-if ($nodeExe) {
-  Push-Location $RepoRoot
-  $prevEAP = $ErrorActionPreference
-  $ErrorActionPreference = 'Continue'
-  $bs3Test = & $nodeExe -e "try{require('better-sqlite3');console.log('OK')}catch(e){console.error('FAIL:'+e.message)}" 2>&1
-  $ErrorActionPreference = $prevEAP
-  Pop-Location
-  $bs3Str = ($bs3Test | ForEach-Object {
-    if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.Exception.Message }
-    else { $_ }
-  }) -join ''
-  if ($bs3Str -match 'OK') {
-    $bs3Ok = $true
-    Write-Ok "better-sqlite3 modulu hazir"
-  }
-}
-if (-not $bs3Ok) {
-  Write-Warn "better-sqlite3 yuklenemedi, yeniden kurulum deneniyor..."
-  if ($pnpmExe) {
-    Invoke-Safe $pnpmExe @('rebuild', 'better-sqlite3') | Out-Null
-    Push-Location $RepoRoot
-    $prevEAP2 = $ErrorActionPreference
-    $ErrorActionPreference = 'Continue'
-    $bs3Test2 = & $nodeExe -e "try{require('better-sqlite3');console.log('OK')}catch(e){console.error('FAIL:'+e.message)}" 2>&1
-    $ErrorActionPreference = $prevEAP2
-    Pop-Location
-    $bs3Str2 = ($bs3Test2 | ForEach-Object {
-      if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.Exception.Message }
-      else { $_ }
-    }) -join ''
-    if ($bs3Str2 -match 'OK') {
-      $bs3Ok = $true
-      Write-Ok "better-sqlite3 yeniden derlendi"
-    }
-  }
-  if (-not $bs3Ok) {
-    Write-Host ""
-    Write-Host "[HATA] better-sqlite3 yerel modulu derlenemiyor." -ForegroundColor Red
-    Write-Host "   Node.js surumunuz icin hazir binary bulunamadi." -ForegroundColor Yellow
-    Write-Host "   Cozum (birini secin):" -ForegroundColor Yellow
-    Write-Host "   1. Node.js 22 LTS kurun (prebuild binary icerir):" -ForegroundColor Cyan
-    Write-Host "      winget install OpenJS.NodeJS.LTS" -ForegroundColor Cyan
-    Write-Host "      Ardindan setup.bat'i tekrar calistirin." -ForegroundColor Cyan
-    Write-Host "   2. Visual Studio Build Tools kurun (C++ derleyicisi):" -ForegroundColor Cyan
-    Write-Host "      winget install Microsoft.VisualStudio.2022.BuildTools --override `"--quiet --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended`"" -ForegroundColor Cyan
-    Write-Host "      Ardindan setup.bat'i tekrar calistirin." -ForegroundColor Cyan
-    Write-Host ""
-    Fail "better-sqlite3 modulu yuklenemiyor. Yukaridaki cozumlerden birini uygulayin."
-  }
-}
-
-# ------------------------------------------------------------------
 # 5. Derleme
 # ------------------------------------------------------------------
 Write-Step "Uygulama derleniyor (pnpm build) - birkac dakika surebilir"
@@ -341,12 +283,13 @@ if ($migrateExit -ne 0) {
   Write-Host "=== VERITABANI GECIS HATASI ===" -ForegroundColor Red
   Write-Host $migrateOutput -ForegroundColor Red
   Write-Host ""
+  Write-Host "Not: derleme (adim 5) basarili oldu; better-sqlite3 native modul ve" -ForegroundColor Yellow
+  Write-Host "C++ derleyici bu noktada SORUN DEGILDIR." -ForegroundColor Yellow
   Write-Host "Olasin nedenler ve cozumler:" -ForegroundColor Yellow
-  Write-Host "  1. better-sqlite3 native modulu derlenmemis" -ForegroundColor Yellow
-  Write-Host "     -> Visual Studio Build Tools (C++ workload) kurun:" -ForegroundColor Yellow
-  Write-Host "        https://visualstudio.microsoft.com/visual-cpp-build-tools/" -ForegroundColor Yellow
-  Write-Host "  2. Node.js surum uyumsuzlugu (18+ LTS gerekli)" -ForegroundColor Yellow
-  Write-Host "  3. data/ dizini yazilabilir degil" -ForegroundColor Yellow
+  Write-Host "  1. drizzle/ icindeki bir migration SQL hatasi (en olasi neden)" -ForegroundColor Yellow
+  Write-Host "     -> Ayrintili hata icin: pnpm exec drizzle-kit migrate" -ForegroundColor Yellow
+  Write-Host "  2. data/ dizini yazilabilir degil" -ForegroundColor Yellow
+  Write-Host "  3. data\db.sqlite baska bir surec tarafindan kilitli (uygulamayi kapatin)" -ForegroundColor Yellow
   Write-Host ""
   Fail "Veritabani gecisi basarisiz oldu. Yukaridaki hata mesajini inceleyin."
 }
