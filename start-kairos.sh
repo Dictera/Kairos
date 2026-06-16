@@ -24,12 +24,12 @@ apply_update() {
     cp -f "$SCRIPT_DIR/data/db.sqlite" "$SCRIPT_DIR/data/backups/db-$(date +%Y%m%d-%H%M%S).sqlite" 2>/dev/null \
       && printf "    [OK] Veritabanı yedeklendi\n" || true
   fi
-  # Güvenlik: yalnızca resmi depodan çek (origin değiştirilmişse güncelleme yapma).
+  # Güvenlik: yalnızca resmi github.com/dictera/kairos deposundan çek (tam eşleşme).
   remote="$(git remote get-url origin 2>/dev/null | tr '[:upper:]' '[:lower:]' || true)"
-  case "$remote" in
-    *dictera/kairos*) : ;;
-    *) printf "    \033[33m[!] Güncelleme kaynağı doğrulanamadı (origin resmi depo değil) — atlandı.\033[0m\n"; rm -f "$UPDATE_FLAG"; return 0 ;;
-  esac
+  if ! printf '%s' "$remote" | grep -Eq '(^|[/@])github\.com[:/]dictera/kairos(\.git)?/?$'; then
+    printf "    \033[33m[!] Güncelleme kaynağı doğrulanamadı (origin resmi depo değil) — atlandı.\033[0m\n"
+    rm -f "$UPDATE_FLAG"; return 0
+  fi
   if ! git pull --ff-only origin main; then
     printf "    \033[33m[!] git pull başarısız — güncelleme atlandı, mevcut sürümle devam.\033[0m\n"
     rm -f "$UPDATE_FLAG"; return 0

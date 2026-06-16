@@ -30,11 +30,19 @@ function isGitRepo(): boolean {
   return fs.existsSync(path.join(REPO_ROOT, '.git'))
 }
 
-/** origin uzak adresi resmi depoya mı işaret ediyor? */
+/** github.com remote URL'inden owner/repo çıkar (https ve ssh biçimleri). */
+function parseRepoSlug(remoteUrl: string): string | null {
+  // https://github.com/owner/repo(.git) ve git@github.com:owner/repo(.git)
+  // Host sınırı (^|[/@]) — 'evilgithub.com' gibi benzer-host'lar reddedilir.
+  const m = remoteUrl.match(/(?:^|[/@])github\.com[:/]([^/\s]+)\/([^/\s]+?)(?:\.git)?\/?$/i)
+  return m ? `${m[1].toLowerCase()}/${m[2].toLowerCase()}` : null
+}
+
+/** origin uzak adresi TAM olarak resmi depoya mı işaret ediyor? (fork/benzer-host reddedilir) */
 export async function isRemoteTrusted(): Promise<boolean> {
   try {
-    const url = (await git(['remote', 'get-url', 'origin'])).toLowerCase()
-    return url.includes(EXPECTED_REMOTE)
+    const url = await git(['remote', 'get-url', 'origin'])
+    return parseRepoSlug(url) === EXPECTED_REMOTE
   } catch {
     return false
   }

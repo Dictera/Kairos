@@ -372,10 +372,9 @@ apply_update() {
     cp -f "$SCRIPT_DIR/data/db.sqlite" "$SCRIPT_DIR/data/backups/db-$(date +%Y%m%d-%H%M%S).sqlite" 2>/dev/null || true
   fi
   remote="$(git remote get-url origin 2>/dev/null | tr '[:upper:]' '[:lower:]' || true)"
-  case "$remote" in
-    *dictera/kairos*) : ;;
-    *) printf "    [!] Güncelleme kaynağı doğrulanamadı — atlandı.\n"; rm -f "$UPDATE_FLAG"; return 0 ;;
-  esac
+  if ! printf '%s' "$remote" | grep -Eq '(^|[/@])github\.com[:/]dictera/kairos(\.git)?/?$'; then
+    printf "    [!] Güncelleme kaynağı doğrulanamadı — atlandı.\n"; rm -f "$UPDATE_FLAG"; return 0
+  fi
   if ! git pull --ff-only origin main; then
     printf "    [!] git pull başarısız — güncelleme atlandı.\n"; rm -f "$UPDATE_FLAG"; return 0
   fi

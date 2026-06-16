@@ -90,9 +90,9 @@ function Apply-Update {
 
   $git = Resolve-Exe 'git'
   if (-not $git) { $git = 'git' }
-  # Güvenlik: yalnızca resmi depodan çek (origin değiştirilmişse güncelleme yapma).
+  # Güvenlik: yalnızca resmi github.com/dictera/kairos deposundan çek (tam eşleşme).
   $remoteUrl = (& $git remote get-url origin 2>$null)
-  if (-not ($remoteUrl -and $remoteUrl.ToLower().Contains('dictera/kairos'))) {
+  if (-not ($remoteUrl -and ($remoteUrl.ToLower() -match '(^|[/@])github\.com[:/]dictera/kairos(\.git)?/?$'))) {
     Write-Host "    [!] Güncelleme kaynağı doğrulanamadı (origin resmi depo değil) — atlandı." -ForegroundColor Yellow
     Remove-Item $UpdateFlag -Force -ErrorAction SilentlyContinue
     return
