@@ -4,7 +4,7 @@
   Son kullanıcı kurulum betiği (Windows).
 
   Yaptıkları:
-    1. Node.js 18+ kontrolü (yoksa winget ile kurar)
+    1. Node.js 20.9+ kontrolü (yoksa winget ile kurar)
     2. pnpm etkinleştirme (corepack)
     3. Kurulum seçenekleri + .env.local oluşturma
        (rastgele SESSION_PASSWORD, APP_PASSWORD, opsiyonel Telegram)
@@ -101,25 +101,43 @@ if ($nodeExe) {
   $nodeVersion = ($nodeVersionRaw -replace '^v', '').Split("`n")[0].Trim()
   $major = 0
   if ($nodeVersion -match '^(\d+)') { $major = [int]$Matches[1] }
-  if ($major -ge 18) {
+  if ($major -ge 20) {
     Write-Ok "Node.js $nodeVersion bulundu"
     $nodeOk = $true
   } else {
-    Write-Warn "Node.js $nodeVersion çok eski (18+ gerekli)."
+    Write-Warn "Node.js $nodeVersion çok eski (Next.js 16 için 20.9+ gerekli)."
   }
 }
 
 if (-not $nodeOk) {
   if (Test-Command 'winget') {
-    Write-Note "Node.js LTS, winget ile kuruluyor..."
-    $wingetExit = Invoke-Safe 'winget' @('install', '--id', 'OpenJS.NodeJS.LTS', '-e', '--source', 'winget', '--accept-source-agreements', '--accept-package-agreements')
+    # Kullanıcı kapsamı: yönetici (admin) hakkı gerektirmez.
+    Write-Note "Node.js LTS, winget ile kuruluyor (kullanıcı kapsamı)..."
+    $wingetExit = Invoke-Safe 'winget' @('install', '--id', 'OpenJS.NodeJS.LTS', '-e', '--source', 'winget', '--scope', 'user', '--accept-source-agreements', '--accept-package-agreements')
     if ($wingetExit -ne 0) {
       Fail "Node.js otomatik kurulamadı. Lütfen https://nodejs.org adresinden LTS sürümünü kurup setup.bat dosyasını tekrar çalıştırın."
     }
-    Write-Warn "Node.js kuruldu. PATH'in güncellenmesi için bu pencereyi KAPATIP setup.bat dosyasını TEKRAR çalıştırın."
-    exit 0
+    # winget mevcut oturumun PATH'ini güncellemez — elle yenile, yeniden kapatıp açmaya gerek kalmasın.
+    $machinePath = [System.Environment]::GetEnvironmentVariable('PATH', 'Machine')
+    $userPath    = [System.Environment]::GetEnvironmentVariable('PATH', 'User')
+    $env:PATH    = ($machinePath, $userPath, $env:PATH | Where-Object { $_ }) -join ';'
+    $nodeExe = Resolve-Exe 'node'
+    if ($nodeExe) {
+      $nodeVersionRaw = & $nodeExe --version 2>$null
+      $nodeVersion = ($nodeVersionRaw -replace '^v', '').Split("`n")[0].Trim()
+      $major = 0
+      if ($nodeVersion -match '^(\d+)') { $major = [int]$Matches[1] }
+      if ($major -ge 20) {
+        Write-Ok "Node.js $nodeVersion kuruldu ve etkin"
+        $nodeOk = $true
+      }
+    }
+    if (-not $nodeOk) {
+      Write-Warn "Node.js kuruldu ancak bu oturumda görünmüyor. Bu pencereyi KAPATIP setup.bat dosyasını TEKRAR çalıştırın."
+      exit 0
+    }
   } else {
-    Fail "Node.js bulunamadı ve winget yok. Lütfen https://nodejs.org adresinden Node.js 18+ LTS kurup setup.bat dosyasını tekrar çalıştırın."
+    Fail "Node.js bulunamadı ve winget yok. Lütfen https://nodejs.org adresinden Node.js 20+ LTS kurup setup.bat dosyasını tekrar çalıştırın."
   }
 }
 
@@ -131,13 +149,24 @@ $corepackExe = Resolve-Exe 'corepack'
 if ($corepackExe) {
   Invoke-Safe $corepackExe @('enable') | Out-Null
   Invoke-Safe $corepackExe @('prepare', 'pnpm@11.6.0', '--activate') | Out-Null
+  # corepack enable PATH'i mevcut oturumda güncellemez — elle yenile
+  $machinePath = [System.Environment]::GetEnvironmentVariable('PATH', 'Machine')
+  $userPath    = [System.Environment]::GetEnvironmentVariable('PATH', 'User')
+  $env:PATH    = ($machinePath, $userPath, $env:PATH | Where-Object { $_ }) -join ';'
 }
-if (-not (Resolve-Exe 'pnpm') -and -not $corepackExe) {
-  Write-Note "corepack yok, pnpm npm ile kuruluyor..."
-  $npmExe = Resolve-Exe 'npm'
-  if (-not $npmExe) { Fail "npm bulunamadı, pnpm kurulamadı." }
-  $npmExit = Invoke-Safe $npmExe @('install', '-g', 'pnpm')
-  if ($npmExit -ne 0) { Fail "pnpm kurulamadı." }
+if (-not (Resolve-Exe 'pnpm')) {
+  if (-not $corepackExe) {
+    Write-Note "corepack yok, pnpm npm ile kuruluyor..."
+    $npmExe = Resolve-Exe 'npm'
+    if (-not $npmExe) { Fail "npm bulunamadı, pnpm kurulamadı." }
+    $npmExit = Invoke-Safe $npmExe @('install', '-g', 'pnpm')
+    if ($npmExit -ne 0) { Fail "pnpm kurulamadı." }
+    # npm global bin PATH'ini ekle
+    $npmPrefix = & $npmExe prefix -g 2>$null
+    if ($npmPrefix) { $env:PATH = "$env:PATH;$npmPrefix" }
+  } else {
+    Fail "pnpm kurulamadı. Terminali kapatıp açın ve setup.bat'i tekrar çalıştırın."
+  }
 }
 Write-Ok "pnpm hazır"
 
@@ -191,11 +220,21 @@ if ($envExists) {
     Write-Note "Chat ID: Telegram'da @userinfobot'a mesaj atınca görünür."
     while ([string]::IsNullOrWhiteSpace($telegramToken)) {
       $telegramToken = (Read-Host "    TELEGRAM_BOT_TOKEN").Trim()
-      if ([string]::IsNullOrWhiteSpace($telegramToken)) { Write-Warn "Token boş olamaz (vazgeçmek için Ctrl+C)." }
+      if ([string]::IsNullOrWhiteSpace($telegramToken)) {
+        Write-Warn "Token boş olamaz (vazgeçmek için Ctrl+C)."
+      } elseif ($telegramToken -notmatch '^[0-9]+:[A-Za-z0-9_-]+$') {
+        Write-Warn "Token biçimi hatalı (örn. 123456789:ABC... ). Tekrar deneyin."
+        $telegramToken = ''
+      }
     }
     while ([string]::IsNullOrWhiteSpace($telegramChatId)) {
       $telegramChatId = (Read-Host "    TELEGRAM_CHAT_ID").Trim()
-      if ([string]::IsNullOrWhiteSpace($telegramChatId)) { Write-Warn "Chat ID boş olamaz (vazgeçmek için Ctrl+C)." }
+      if ([string]::IsNullOrWhiteSpace($telegramChatId)) {
+        Write-Warn "Chat ID boş olamaz (vazgeçmek için Ctrl+C)."
+      } elseif ($telegramChatId -notmatch '^-?[0-9]+$') {
+        Write-Warn "Chat ID sadece rakam olmalı (gruplar için - ile başlar). Tekrar deneyin."
+        $telegramChatId = ''
+      }
     }
     Write-Ok "Telegram bilgileri kaydedilecek"
   } else {
@@ -228,11 +267,7 @@ TELEGRAM_CHAT_ID="$telegramChatId"
 # ------------------------------------------------------------------
 Write-Step "Bağımlılıklar yükleniyor (pnpm install) - birkaç dakika sürebilir"
 $pnpmExe = Resolve-Exe 'pnpm'
-if (-not $pnpmExe) {
-  $corepackTmp = Resolve-Exe 'corepack'
-  if ($corepackTmp) { $pnpmExe = $corepackTmp }
-}
-if (-not $pnpmExe) { Fail "pnpm bulunamadı." }
+if (-not $pnpmExe) { Fail "pnpm bulunamadı. Terminali kapatıp açın ve setup.bat'i tekrar çalıştırın." }
 
 $installOk = $false
 Write-Note "pnpm install --frozen-lockfile deneniyor..."
@@ -249,7 +284,7 @@ if ($frzExit -eq 0) {
   }
 }
 if (-not $installOk) {
-  Fail "Bağımlılıklar yüklenemedi. Node.js 18+ LTS kurulu olduğundan emin olun."
+  Fail "Bağımlılıklar yüklenemedi. Node.js 20+ LTS kurulu olduğundan emin olun."
 }
 
 # ------------------------------------------------------------------

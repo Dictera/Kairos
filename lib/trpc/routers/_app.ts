@@ -18,6 +18,7 @@ import { retirementRouter } from './retirement'
 import { bildirimRouter } from './bildirim'
 import { searchRouter } from './search'
 import { telegramRouter } from './telegram'
+import { updateRouter } from './update'
 
 export const appRouter = createTRPCRouter({
   health: publicProcedure.query(() => ({
@@ -43,6 +44,7 @@ export const appRouter = createTRPCRouter({
   bildirim: bildirimRouter,
   search: searchRouter,
   telegram: telegramRouter,
+  update: updateRouter,
 })
 
 export type AppRouter = typeof appRouter

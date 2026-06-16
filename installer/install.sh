@@ -3,7 +3,7 @@
 # Son kullanıcı kurulum betiği (macOS / Linux).
 #
 # Yaptıkları:
-#   1. Node.js 18+ kontrolü (yoksa Homebrew / apt'den kurar)
+#   1. Node.js 20.9+ kontrolü (yoksa Homebrew / apt'den kurar)
 #   2. pnpm etkinleştirme (corepack)
 #   3. Kurulum seçenekleri + .env.local oluşturma
 #      (rastgele SESSION_PASSWORD, APP_PASSWORD, opsiyonel Telegram)
@@ -70,12 +70,16 @@ yesno() {
 has_cmd() { command -v "$1" >/dev/null 2>&1; }
 
 # --- Kriptografik rastgele parola üret ---
+# NOT: `head -c` boruyu erken kapatır -> openssl/tr SIGPIPE (141) alır.
+# `set -o pipefail` aktifken bu, $(...) içinde `set -e` ile betiği öldürür.
+# Bu yüzden fonksiyon gövdesinde pipefail geçici kapatılır.
 rand_password() {
   local len="${1:-48}"
+  set +o pipefail
   if has_cmd openssl; then
     openssl rand -base64 64 | tr -dc 'a-zA-Z0-9' | head -c "$len"
   elif [ -c /dev/urandom ]; then
-    head -c "$((len * 3))" /dev/urandom 2>/dev/null | tr -dc 'a-zA-Z0-9' | head -c "$len" || true
+    head -c "$((len * 3))" /dev/urandom 2>/dev/null | tr -dc 'a-zA-Z0-9' | head -c "$len"
   else
     local i result=""
     for i in $(seq 1 "$len"); do
@@ -83,6 +87,7 @@ rand_password() {
     done
     echo "$result" | head -c "$len"
   fi
+  set -o pipefail
 }
 
 # --- macOS belirleni ---
@@ -102,11 +107,11 @@ NODE_OK=false
 if has_cmd node; then
   NODE_VERSION="$(node --version | sed 's/^v//')"
   NODE_MAJOR="$(echo "$NODE_VERSION" | cut -d. -f1)"
-  if [ "$NODE_MAJOR" -ge 18 ] 2>/dev/null; then
+  if [[ "$NODE_MAJOR" =~ ^[0-9]+$ ]] && [ "$NODE_MAJOR" -ge 20 ]; then
     ok "Node.js $NODE_VERSION bulundu"
     NODE_OK=true
   else
-    warn "Node.js $NODE_VERSION çok eski (18+ gerekli)."
+    warn "Node.js $NODE_VERSION çok eski (Next.js 16 için 20.9+ gerekli)."
   fi
 fi
 
@@ -121,21 +126,30 @@ if [ "$NODE_OK" = false ]; then
     hash -r 2>/dev/null || true
     exec "$0" "$@"
   elif is_linux && has_cmd apt-get; then
-    note "Node.js LTS, NodeSource ile kuruluyor..."
+    # Tedarik zinciri güvenliği: 'curl | sudo bash' yerine NodeSource'un
+    # imzalı apt deposunu kur. apt, paketleri GPG anahtarına karşı doğrular.
+    note "Node.js LTS, NodeSource imzalı apt deposu ile kuruluyor..."
     sudo apt-get update -qq
-    sudo apt-get install -y -qq curl
-    NS_TMP="$(mktemp)"
-    _CLEANUP_FILES+=("$NS_TMP")
-    curl -fsSL -o "$NS_TMP" https://deb.nodesource.com/setup_22.x || { rm -f "$NS_TMP"; fail "NodeSource betiği indirilemedi."; }
-    sudo -E bash "$NS_TMP"
-    NS_EXIT=$?
-    rm -f "$NS_TMP"
-    if [ $NS_EXIT -ne 0 ]; then fail "NodeSource betiği çalıştırılamadı."; fi
-    sudo apt-get install -y -qq nodejs || fail "Node.js otomatik kurulamadı. Lütfen https://nodejs.org adresinden LTS sürümünü kurun."
-    ok "Node.js kuruldu"
+    sudo apt-get install -y -qq ca-certificates curl gnupg
+    sudo install -m 0755 -d /etc/apt/keyrings
+    NS_KEY="$(mktemp)"
+    _CLEANUP_FILES+=("$NS_KEY")
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key -o "$NS_KEY" \
+      || fail "NodeSource GPG anahtarı indirilemedi."
+    sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/nodesource.gpg "$NS_KEY" \
+      || fail "NodeSource GPG anahtarı işlenemedi."
+    rm -f "$NS_KEY"
+    sudo chmod 0644 /etc/apt/keyrings/nodesource.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" \
+      | sudo tee /etc/apt/sources.list.d/nodesource.list >/dev/null
+    sudo apt-get update -qq
+    # apt burada paket imzasını doğrular (doğrulama başarısızsa kurulum durur)
+    sudo apt-get install -y -qq nodejs \
+      || fail "Node.js otomatik kurulamadı. Lütfen https://nodejs.org adresinden LTS sürümünü kurun."
+    ok "Node.js kuruldu (imzalı depodan)"
     exec "$0" "$@"
   else
-    fail "Node.js bulunamadı. Lütfen https://nodejs.org adresinden Node.js 18+ LTS kurup install.sh dosyasını tekrar çalıştırın."
+    fail "Node.js bulunamadı. Lütfen https://nodejs.org adresinden Node.js 20+ LTS kurup install.sh dosyasını tekrar çalıştırın."
   fi
 fi
 
@@ -200,12 +214,22 @@ else
     while [ -z "$TELEGRAM_TOKEN" ]; do
       read -p "    TELEGRAM_BOT_TOKEN: " TELEGRAM_TOKEN
       TELEGRAM_TOKEN="$(echo "$TELEGRAM_TOKEN" | tr -d '[:space:]')"
-      if [ -z "$TELEGRAM_TOKEN" ]; then warn "Token boş olamaz (vazgeçmek için Ctrl+C)."; fi
+      if [ -z "$TELEGRAM_TOKEN" ]; then
+        warn "Token boş olamaz (vazgeçmek için Ctrl+C)."
+      elif ! [[ "$TELEGRAM_TOKEN" =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]]; then
+        warn "Token biçimi hatalı (örn. 123456789:ABC... ). Tekrar deneyin."
+        TELEGRAM_TOKEN=''
+      fi
     done
     while [ -z "$TELEGRAM_CHAT_ID" ]; do
       read -p "    TELEGRAM_CHAT_ID: " TELEGRAM_CHAT_ID
       TELEGRAM_CHAT_ID="$(echo "$TELEGRAM_CHAT_ID" | tr -d '[:space:]')"
-      if [ -z "$TELEGRAM_CHAT_ID" ]; then warn "Chat ID boş olamaz (vazgeçmek için Ctrl+C)."; fi
+      if [ -z "$TELEGRAM_CHAT_ID" ]; then
+        warn "Chat ID boş olamaz (vazgeçmek için Ctrl+C)."
+      elif ! [[ "$TELEGRAM_CHAT_ID" =~ ^-?[0-9]+$ ]]; then
+        warn "Chat ID sadece rakam olmalı (gruplar için - ile başlar). Tekrar deneyin."
+        TELEGRAM_CHAT_ID=''
+      fi
     done
     ok "Telegram bilgileri kaydedilecek"
   else
@@ -240,7 +264,7 @@ if pnpm install --frozen-lockfile 2>&1; then
   ok "Bağımlılıklar yüklendi (frozen-lockfile)"
 else
   warn "frozen-lockfile başarısız oldu, normal install deneniyor..."
-  pnpm install || fail "Bağımlılıklar yüklenemedi. Node.js 18+ LTS kurulu olduğundan emin olun."
+  pnpm install || fail "Bağımlılıklar yüklenemedi. Node.js 20+ LTS kurulu olduğundan emin olun."
   ok "Bağımlılıklar yüklendi"
 fi
 
@@ -333,18 +357,62 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
+export KAIROS_MANAGED=1
+UPDATE_FLAG="$SCRIPT_DIR/data/.update-requested"
+
 if [ ! -f .env.local ]; then
   printf "\n  Kurulum bulunamadı. Önce installer/install.sh dosyasını çalıştırın.\n\n"
   exit 1
 fi
 
+apply_update() {
+  printf "\n  ==> Güncelleme uygulanıyor...\n"
+  if [ -f "$SCRIPT_DIR/data/db.sqlite" ]; then
+    mkdir -p "$SCRIPT_DIR/data/backups"
+    cp -f "$SCRIPT_DIR/data/db.sqlite" "$SCRIPT_DIR/data/backups/db-$(date +%Y%m%d-%H%M%S).sqlite" 2>/dev/null || true
+  fi
+  remote="$(git remote get-url origin 2>/dev/null | tr '[:upper:]' '[:lower:]' || true)"
+  case "$remote" in
+    *dictera/kairos*) : ;;
+    *) printf "    [!] Güncelleme kaynağı doğrulanamadı — atlandı.\n"; rm -f "$UPDATE_FLAG"; return 0 ;;
+  esac
+  if ! git pull --ff-only origin main; then
+    printf "    [!] git pull başarısız — güncelleme atlandı.\n"; rm -f "$UPDATE_FLAG"; return 0
+  fi
+  pnpm install --frozen-lockfile || pnpm install || true
+  if ! pnpm build; then
+    printf "    [!] Derleme başarısız — installer/install.sh ile yeniden kurun.\n"; rm -f "$UPDATE_FLAG"; return 0
+  fi
+  pnpm db:migrate || true
+  rm -f "$UPDATE_FLAG"
+  printf "    [OK] Güncelleme tamamlandı\n"
+}
+
 printf "\n  Kairos başlatılıyor... (bu terminali açık bırakın)\n"
 printf "  Tarayıcı birkaç saniye içinde açılacaktır.\n\n"
 
-# Tarayıcıyı arka planda aç (gecikmeli)
-( sleep 5 && open http://localhost:3000 2>/dev/null || xdg-open http://localhost:3000 2>/dev/null || python3 -m webbrowser http://localhost:3000 2>/dev/null ) &
+# Tarayıcıyı arka planda aç (sunucu HTTP 200 dönünce)
+open_browser() {
+  local url="http://localhost:3000" i code
+  for i in $(seq 1 120); do
+    if command -v curl >/dev/null 2>&1; then
+      code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 2 "$url" 2>/dev/null || true)"
+      [ "$code" = "200" ] && break
+    elif (exec 3<>/dev/tcp/127.0.0.1/3000) 2>/dev/null; then
+      exec 3>&- 3<&-; break
+    fi
+    sleep 1
+  done
+  open "$url" 2>/dev/null || xdg-open "$url" 2>/dev/null || python3 -m webbrowser "$url" 2>/dev/null || true
+}
+open_browser &
 
-pnpm start
+while true; do
+  [ -f "$UPDATE_FLAG" ] && apply_update
+  pnpm start || true
+  if [ -f "$UPDATE_FLAG" ]; then printf "\n  Güncelleme isteği alındı, yeniden başlatılıyor...\n"; continue; fi
+  break
+done
 
 printf "\n  Sunucu durdu.\n"
 STARTEOF
