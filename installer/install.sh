@@ -157,23 +157,25 @@ fi
 # 2. pnpm (corepack)
 # ------------------------------------------------------------------
 step "pnpm hazırlanıyor"
+# pnpm çağrı biçimini belirle. corepack 'enable' global shim yazamazsa (yetki/EACCES)
+# bu HATA DEĞİL — pnpm'i 'corepack pnpm' olarak çalıştırırız (yönetici/sudo gerekmez).
+PNPM=()
 if has_cmd corepack; then
-  corepack enable 2>/dev/null || true
   corepack prepare pnpm@11.6.0 --activate 2>/dev/null || true
+  corepack enable 2>/dev/null || true
 fi
-if ! has_cmd pnpm; then
-  if has_cmd corepack; then
-    note "pnpm corepack üzerinden etkinleştiriliyor..."
-    corepack enable
-    corepack prepare pnpm@11.6.0 --activate
-  elif has_cmd npm; then
-    note "corepack yok, pnpm npm ile kuruluyor..."
-    npm install -g pnpm || fail "pnpm kurulamadı."
-  else
-    fail "npm/corepack bulunamadı, pnpm kurulamadı."
-  fi
+if has_cmd pnpm; then
+  PNPM=(pnpm)
+elif has_cmd corepack; then
+  note "pnpm, corepack üzerinden çalıştırılacak (global shim yazılamadı — yetki gerekmiyor)."
+  PNPM=(corepack pnpm)
+elif has_cmd npm; then
+  note "corepack yok, pnpm npm ile kuruluyor..."
+  npm install -g pnpm || fail "pnpm kurulamadı."
+  if has_cmd pnpm; then PNPM=(pnpm); else fail "pnpm kurulamadı (PATH'te bulunamadı)."; fi
+else
+  fail "npm/corepack bulunamadı, pnpm kurulamadı."
 fi
-has_cmd pnpm || fail "pnpm bulunamadı."
 ok "pnpm hazır"
 
 # ------------------------------------------------------------------
@@ -260,11 +262,11 @@ fi
 # ------------------------------------------------------------------
 step "Bağımlılıklar yükleniyor (pnpm install) - birkaç dakika sürebilir"
 note "pnpm install --frozen-lockfile deneniyor..."
-if pnpm install --frozen-lockfile 2>&1; then
+if "${PNPM[@]}" install --frozen-lockfile 2>&1; then
   ok "Bağımlılıklar yüklendi (frozen-lockfile)"
 else
   warn "frozen-lockfile başarısız oldu, normal install deneniyor..."
-  pnpm install || fail "Bağımlılıklar yüklenemedi. Node.js 20+ LTS kurulu olduğundan emin olun."
+  "${PNPM[@]}" install || fail "Bağımlılıklar yüklenemedi. Node.js 20+ LTS kurulu olduğundan emin olun."
   ok "Bağımlılıklar yüklendi"
 fi
 
@@ -272,7 +274,7 @@ fi
 # 5. Derleme
 # ------------------------------------------------------------------
 step "Uygulama derleniyor (pnpm build) - birkaç dakika sürebilir"
-pnpm build || fail "Derleme başarısız oldu (kod $?)."
+"${PNPM[@]}" build || fail "Derleme başarısız oldu (kod $?)."
 ok "Derleme tamamlandı"
 
 # ------------------------------------------------------------------
@@ -288,7 +290,7 @@ fi
 # set +e: db:migrate hatasinda betik abort olmasin; gercek cikis kodunu yakala
 # (eski "... || true; MIGRATE_EXIT=$?" her zaman 0 donduruyordu -> hata yolu olu kaliyordu)
 set +e
-MIGRATE_OUTPUT="$(pnpm db:migrate 2>&1)"
+MIGRATE_OUTPUT="$("${PNPM[@]}" db:migrate 2>&1)"
 MIGRATE_EXIT=$?
 set -e
 printf "%s\n" "$MIGRATE_OUTPUT"
@@ -365,6 +367,16 @@ if [ ! -f .env.local ]; then
   exit 1
 fi
 
+# pnpm çağrı biçimi: global shim yoksa corepack üzerinden çalıştır (yetki gerekmez).
+if command -v pnpm >/dev/null 2>&1; then
+  PNPM=(pnpm)
+elif command -v corepack >/dev/null 2>&1; then
+  PNPM=(corepack pnpm)
+else
+  printf "\n  pnpm bulunamadı. Önce installer/install.sh dosyasını çalıştırın.\n\n"
+  exit 1
+fi
+
 apply_update() {
   printf "\n  ==> Güncelleme uygulanıyor...\n"
   if [ -f "$SCRIPT_DIR/data/db.sqlite" ]; then
@@ -378,11 +390,11 @@ apply_update() {
   if ! git pull --ff-only origin main; then
     printf "    [!] git pull başarısız — güncelleme atlandı.\n"; rm -f "$UPDATE_FLAG"; return 0
   fi
-  pnpm install --frozen-lockfile || pnpm install || true
-  if ! pnpm build; then
+  "${PNPM[@]}" install --frozen-lockfile || "${PNPM[@]}" install || true
+  if ! "${PNPM[@]}" build; then
     printf "    [!] Derleme başarısız — installer/install.sh ile yeniden kurun.\n"; rm -f "$UPDATE_FLAG"; return 0
   fi
-  pnpm db:migrate || true
+  "${PNPM[@]}" db:migrate || true
   rm -f "$UPDATE_FLAG"
   printf "    [OK] Güncelleme tamamlandı\n"
 }
@@ -408,7 +420,7 @@ open_browser &
 
 while true; do
   [ -f "$UPDATE_FLAG" ] && apply_update
-  pnpm start || true
+  "${PNPM[@]}" start || true
   if [ -f "$UPDATE_FLAG" ]; then printf "\n  Güncelleme isteği alındı, yeniden başlatılıyor...\n"; continue; fi
   break
 done

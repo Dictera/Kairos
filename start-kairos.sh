@@ -15,6 +15,16 @@ if [ ! -f .env.local ]; then
   exit 1
 fi
 
+# pnpm çağrı biçimi: global shim yoksa (corepack enable yetki ile yazamadıysa) corepack üzerinden çalıştır.
+if command -v pnpm >/dev/null 2>&1; then
+  PNPM=(pnpm)
+elif command -v corepack >/dev/null 2>&1; then
+  PNPM=(corepack pnpm)
+else
+  printf "\n  \033[33mpnpm bulunamadı. Önce installer/install.sh dosyasını çalıştırın.\033[0m\n\n"
+  exit 1
+fi
+
 # Bekleyen güncellemeyi uygula (git pull + install + build + migrate). Hata olursa eski sürümle devam.
 apply_update() {
   printf "\n  \033[36m==> Güncelleme uygulanıyor...\033[0m\n"
@@ -34,12 +44,12 @@ apply_update() {
     printf "    \033[33m[!] git pull başarısız — güncelleme atlandı, mevcut sürümle devam.\033[0m\n"
     rm -f "$UPDATE_FLAG"; return 0
   fi
-  pnpm install --frozen-lockfile || pnpm install || true
-  if ! pnpm build; then
+  "${PNPM[@]}" install --frozen-lockfile || "${PNPM[@]}" install || true
+  if ! "${PNPM[@]}" build; then
     printf "    \033[33m[!] Derleme başarısız — güncelleme yarıda kaldı. installer/install.sh ile yeniden kurun.\033[0m\n"
     rm -f "$UPDATE_FLAG"; return 0
   fi
-  pnpm db:migrate || true
+  "${PNPM[@]}" db:migrate || true
   rm -f "$UPDATE_FLAG"
   printf "    [OK] Güncelleme tamamlandı\n"
 }
@@ -66,7 +76,7 @@ open_browser &
 # Çalıştırma döngüsü: bayrak varsa güncelle, sunucuyu başlat; buton tekrar bayrak yazıp çıkarsa yeniden başlat.
 while true; do
   [ -f "$UPDATE_FLAG" ] && apply_update
-  pnpm start || true
+  "${PNPM[@]}" start || true
   if [ -f "$UPDATE_FLAG" ]; then
     printf "\n  \033[36mGüncelleme isteği alındı, yeniden başlatılıyor...\033[0m\n"
     continue

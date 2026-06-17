@@ -145,29 +145,42 @@ if (-not $nodeOk) {
 # 2. pnpm (corepack)
 # ------------------------------------------------------------------
 Write-Step "pnpm hazırlanıyor"
+# pnpm'i nasıl çağıracağımızı belirle. $PnpmPrefix corepack fallback için (@('pnpm')).
+$PnpmExe = $null
+$PnpmPrefix = @()
 $corepackExe = Resolve-Exe 'corepack'
 if ($corepackExe) {
-  Invoke-Safe $corepackExe @('enable') | Out-Null
+  # Sürümü corepack önbelleğine al — kullanıcı dizinine yazar, yönetici gerektirmez.
   Invoke-Safe $corepackExe @('prepare', 'pnpm@11.6.0', '--activate') | Out-Null
-  # corepack enable PATH'i mevcut oturumda güncellemez — elle yenile
+  # 'enable' global shim yazmaya çalışır; dizin yazılamazsa (yetki) HATA DEĞİL —
+  # bu durumda pnpm'i 'corepack pnpm' olarak çağırırız.
+  Invoke-Safe $corepackExe @('enable') | Out-Null
+  # enable mevcut oturumun PATH'ini güncellemez — elle yenile
   $machinePath = [System.Environment]::GetEnvironmentVariable('PATH', 'Machine')
   $userPath    = [System.Environment]::GetEnvironmentVariable('PATH', 'User')
   $env:PATH    = ($machinePath, $userPath, $env:PATH | Where-Object { $_ }) -join ';'
 }
-if (-not (Resolve-Exe 'pnpm')) {
-  if (-not $corepackExe) {
-    Write-Note "corepack yok, pnpm npm ile kuruluyor..."
-    $npmExe = Resolve-Exe 'npm'
-    if (-not $npmExe) { Fail "npm bulunamadı, pnpm kurulamadı." }
-    $npmExit = Invoke-Safe $npmExe @('install', '-g', 'pnpm')
-    if ($npmExit -ne 0) { Fail "pnpm kurulamadı." }
-    # npm global bin PATH'ini ekle
-    $npmPrefix = & $npmExe prefix -g 2>$null
-    if ($npmPrefix) { $env:PATH = "$env:PATH;$npmPrefix" }
-  } else {
-    Fail "pnpm kurulamadı. Terminali kapatıp açın ve setup.bat'i tekrar çalıştırın."
-  }
+
+$pnpmOnPath = Resolve-Exe 'pnpm'
+if ($pnpmOnPath) {
+  $PnpmExe = $pnpmOnPath
+} elseif ($corepackExe) {
+  # Global shim yazılamadı (muhtemelen yetki) — corepack üzerinden çalıştır, yetki gerekmez.
+  $PnpmExe = $corepackExe
+  $PnpmPrefix = @('pnpm')
+  Write-Note "pnpm, corepack üzerinden çalıştırılacak (global shim yazılamadı — yetki gerekmiyor)."
+} else {
+  Write-Note "corepack yok, pnpm npm ile kuruluyor..."
+  $npmExe = Resolve-Exe 'npm'
+  if (-not $npmExe) { Fail "npm bulunamadı, pnpm kurulamadı." }
+  if ((Invoke-Safe $npmExe @('install', '-g', 'pnpm')) -ne 0) { Fail "pnpm kurulamadı." }
+  $npmPrefix = & $npmExe prefix -g 2>$null
+  if ($npmPrefix) { $env:PATH = "$env:PATH;$npmPrefix" }
+  $PnpmExe = Resolve-Exe 'pnpm'
+  if (-not $PnpmExe) { Fail "pnpm kurulamadı (PATH'te bulunamadı). Terminali kapatıp tekrar deneyin." }
 }
+
+function Invoke-Pnpm { param([string[]]$ArgList) return (Invoke-Safe $PnpmExe ($PnpmPrefix + $ArgList)) }
 Write-Ok "pnpm hazır"
 
 # ------------------------------------------------------------------
@@ -266,18 +279,15 @@ TELEGRAM_CHAT_ID="$telegramChatId"
 # 4. Bağımlılıklar
 # ------------------------------------------------------------------
 Write-Step "Bağımlılıklar yükleniyor (pnpm install) - birkaç dakika sürebilir"
-$pnpmExe = Resolve-Exe 'pnpm'
-if (-not $pnpmExe) { Fail "pnpm bulunamadı. Terminali kapatıp açın ve setup.bat'i tekrar çalıştırın." }
-
 $installOk = $false
 Write-Note "pnpm install --frozen-lockfile deneniyor..."
-$frzExit = Invoke-Safe $pnpmExe @('install', '--frozen-lockfile')
+$frzExit = Invoke-Pnpm @('install', '--frozen-lockfile')
 if ($frzExit -eq 0) {
   $installOk = $true
   Write-Ok "Bağımlılıklar yüklendi (frozen-lockfile)"
 } else {
   Write-Warn "frozen-lockfile başarısız oldu, normal install deneniyor..."
-  $normExit = Invoke-Safe $pnpmExe @('install')
+  $normExit = Invoke-Pnpm @('install')
   if ($normExit -eq 0) {
     $installOk = $true
     Write-Ok "Bağımlılıklar yüklendi"
@@ -291,7 +301,7 @@ if (-not $installOk) {
 # 5. Derleme
 # ------------------------------------------------------------------
 Write-Step "Uygulama derleniyor (pnpm build) - birkaç dakika sürebilir"
-$buildExit = Invoke-Safe $pnpmExe @('build')
+$buildExit = Invoke-Pnpm @('build')
 if ($buildExit -ne 0) { Fail "Derleme başarısız oldu (kod $buildExit)." }
 Write-Ok "Derleme tamamlandı"
 
@@ -307,7 +317,7 @@ if (-not (Test-Path $dataDir)) {
 
 $prevEAP3 = $ErrorActionPreference
 $ErrorActionPreference = 'Continue'
-$migrateRaw = & $pnpmExe db:migrate 2>&1
+$migrateRaw = & $PnpmExe @($PnpmPrefix + 'db:migrate') 2>&1
 $migrateExit = $LASTEXITCODE
 $ErrorActionPreference = $prevEAP3
 $migrateOutput = ($migrateRaw | ForEach-Object {
