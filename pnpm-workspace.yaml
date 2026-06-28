@@ -1,22 +1,6 @@
 packages:
   - '.'
 
-# Temporary audit ignore: GHSA-gv7w-rqvm-qjhr (esbuild high).
-# The patched esbuild 0.28.1 was published 2026-06-11 and is blocked by our
-# own minimumReleaseAge (7-day) gate below until ~2026-06-18. esbuild reaches
-# us only via vite/vitest/drizzle-kit dev tooling (never the prod bundle), and
-# the advisory needs an attacker-controlled NPM_CONFIG_REGISTRY in Deno — not
-# our threat model. Remove this entry once the override can install cleanly.
-# Temporary audit ignore: GHSA-fx2h-pf6j-xcff (vite high, server.fs.deny
-# bypass on Windows). Patched in vite 8.0.16, but vite is a transitive dev dep
-# pulled only through vitest (never the prod bundle). Leaving it pinned to
-# vitest's resolution — drops out automatically once vitest bumps its vite
-# range. The dev-server fs.deny bypass is not in our threat model.
-auditConfig:
-  ignoreGhsas:
-    - 'GHSA-gv7w-rqvm-qjhr'
-    - 'GHSA-fx2h-pf6j-xcff'
-
 # Minimum 7 days after publish before install (supply chain security)
 minimumReleaseAge: 10080
 minimumReleaseAgeStrict: true
@@ -39,3 +23,12 @@ allowBuilds:
   msw: true
   sharp: true
   unrs-resolver: true
+# Force patched transitives. pnpm's resolver keeps the older in-range version
+# for these (rolldown churn), so an explicit override is needed even though the
+# patched versions pass our supply-chain policies cleanly.
+# vite 8.0.16: fixes GHSA-fx2h-pf6j-xcff (high) + GHSA-v6wh-96g9-6wx3 (mod), via vitest.
+# esbuild 0.28.1: fixes GHSA-g7r4-m6w7-qqqr (low), via vite — leaves the
+#   esbuild 0.18.x under deprecated @esbuild-kit/drizzle-kit untouched.
+overrides:
+  vite: '^8.0.16'
+  esbuild@^0.28.0: '0.28.1'
