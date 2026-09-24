@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@11.6.0",
   "engines": {
-    "node": ">=20.9.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "dev": "next dev --turbopack",
@@ -33,7 +33,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.4.0",
     "drizzle-orm": "^0.45.2",
-    "execa": "^9.6.1",
+    "execa": "^10.0.1",
     "iron-session": "^8.0.4",
     "lightningcss": "^1.32.0",
     "lucide-react": "^1.17.0",

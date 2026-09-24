@@ -24,7 +24,7 @@ Son kullanıcılar için tek tıkla kurulum. Aşağıdaki manuel adımların tam
    - **Şablondan PDF üretimi** — `.docx → PDF` için Python pipeline'ı kurulsun mu? (Python 3.8+ ve LibreOffice gerektirir.)
    - **Telegram bildirimleri** — kurulacaksa betik sizden `TELEGRAM_BOT_TOKEN` (@BotFather) ve `TELEGRAM_CHAT_ID` (@userinfobot) değerlerini ister; seçmezseniz alanlar boş bırakılır ve bildirimler atlanır.
 3. Betik şunları otomatik yürütür:
-   - Node.js 18+ kontrolü — kurulu değilse `winget` ile kurar (winget yoksa nodejs.org bağlantısını gösterip durur).
+   - Node.js 22+ kontrolü — kurulu değilse `winget` ile kurar (winget yoksa nodejs.org bağlantısını gösterip durur).
    - `corepack` ile pnpm@11.6.0 etkinleştirme.
    - `pnpm install --frozen-lockfile`.
    - `.env.local` oluşturma — kriptografik olarak güvenli, 48 karakterlik rastgele bir `SESSION_PASSWORD` üretir; `APP_PASSWORD` değerini sizden alır. **Mevcut bir `.env.local` dosyasının üzerine asla yazılmaz.**

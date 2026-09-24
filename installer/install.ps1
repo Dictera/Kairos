@@ -4,7 +4,7 @@
   Son kullanıcı kurulum betiği (Windows).
 
   Yaptıkları:
-    1. Node.js 20.9+ kontrolü (yoksa winget ile kurar)
+    1. Node.js 22+ kontrolü (yoksa winget ile kurar)
     2. pnpm etkinleştirme (corepack)
     3. Kurulum seçenekleri + .env.local oluşturma
        (rastgele SESSION_PASSWORD, APP_PASSWORD, opsiyonel Telegram)
@@ -101,11 +101,11 @@ if ($nodeExe) {
   $nodeVersion = ($nodeVersionRaw -replace '^v', '').Split("`n")[0].Trim()
   $major = 0
   if ($nodeVersion -match '^(\d+)') { $major = [int]$Matches[1] }
-  if ($major -ge 20) {
+  if ($major -ge 22) {
     Write-Ok "Node.js $nodeVersion bulundu"
     $nodeOk = $true
   } else {
-    Write-Warn "Node.js $nodeVersion çok eski (Next.js 16 için 20.9+ gerekli)."
+    Write-Warn "Node.js $nodeVersion çok eski (Kairos için 22+ gerekli)."
   }
 }
 
@@ -127,7 +127,7 @@ if (-not $nodeOk) {
       $nodeVersion = ($nodeVersionRaw -replace '^v', '').Split("`n")[0].Trim()
       $major = 0
       if ($nodeVersion -match '^(\d+)') { $major = [int]$Matches[1] }
-      if ($major -ge 20) {
+      if ($major -ge 22) {
         Write-Ok "Node.js $nodeVersion kuruldu ve etkin"
         $nodeOk = $true
       }
@@ -137,7 +137,7 @@ if (-not $nodeOk) {
       exit 0
     }
   } else {
-    Fail "Node.js bulunamadı ve winget yok. Lütfen https://nodejs.org adresinden Node.js 20+ LTS kurup setup.bat dosyasını tekrar çalıştırın."
+    Fail "Node.js bulunamadı ve winget yok. Lütfen https://nodejs.org adresinden Node.js 22+ LTS kurup setup.bat dosyasını tekrar çalıştırın."
   }
 }
 
@@ -294,7 +294,7 @@ if ($frzExit -eq 0) {
   }
 }
 if (-not $installOk) {
-  Fail "Bağımlılıklar yüklenemedi. Node.js 20+ LTS kurulu olduğundan emin olun."
+  Fail "Bağımlılıklar yüklenemedi. Node.js 22+ LTS kurulu olduğundan emin olun."
 }
 
 # ------------------------------------------------------------------
