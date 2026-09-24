@@ -3,7 +3,7 @@
 # Son kullanıcı kurulum betiği (macOS / Linux).
 #
 # Yaptıkları:
-#   1. Node.js 20.9+ kontrolü (yoksa Homebrew / apt'den kurar)
+#   1. Node.js 22+ kontrolü (yoksa Homebrew / apt'den kurar)
 #   2. pnpm etkinleştirme (corepack)
 #   3. Kurulum seçenekleri + .env.local oluşturma
 #      (rastgele SESSION_PASSWORD, APP_PASSWORD, opsiyonel Telegram)
@@ -107,15 +107,22 @@ NODE_OK=false
 if has_cmd node; then
   NODE_VERSION="$(node --version | sed 's/^v//')"
   NODE_MAJOR="$(echo "$NODE_VERSION" | cut -d. -f1)"
-  if [[ "$NODE_MAJOR" =~ ^[0-9]+$ ]] && [ "$NODE_MAJOR" -ge 20 ]; then
+  if [[ "$NODE_MAJOR" =~ ^[0-9]+$ ]] && [ "$NODE_MAJOR" -ge 22 ]; then
     ok "Node.js $NODE_VERSION bulundu"
     NODE_OK=true
   else
-    warn "Node.js $NODE_VERSION çok eski (Next.js 16 için 20.9+ gerekli)."
+    warn "Node.js $NODE_VERSION çok eski (Kairos için 22+ gerekli)."
   fi
 fi
 
 if [ "$NODE_OK" = false ]; then
+  # Kurulumdan sonra script kendini yeniden çalıştırır (exec). Yeni Node PATH'te
+  # görünmüyorsa (ör. keg-only node@22 veya nvm ile eski sürüm önde) sonsuz
+  # döngüye girmemek için ikinci turda dur.
+  if [ -n "${KAIROS_NODE_REEXEC:-}" ]; then
+    fail "Node.js 22+ kuruldu ancak PATH'te eski sürüm görünüyor. Node.js 22+ sürümünü PATH'e ekleyip install.sh dosyasını tekrar çalıştırın."
+  fi
+  export KAIROS_NODE_REEXEC=1
   if is_macos && has_cmd brew; then
     note "Node.js LTS, Homebrew ile kuruluyor..."
     brew install node@22 || brew install node
@@ -149,7 +156,7 @@ if [ "$NODE_OK" = false ]; then
     ok "Node.js kuruldu (imzalı depodan)"
     exec "$0" "$@"
   else
-    fail "Node.js bulunamadı. Lütfen https://nodejs.org adresinden Node.js 20+ LTS kurup install.sh dosyasını tekrar çalıştırın."
+    fail "Node.js bulunamadı. Lütfen https://nodejs.org adresinden Node.js 22+ LTS kurup install.sh dosyasını tekrar çalıştırın."
   fi
 fi
 
@@ -266,7 +273,7 @@ if "${PNPM[@]}" install --frozen-lockfile 2>&1; then
   ok "Bağımlılıklar yüklendi (frozen-lockfile)"
 else
   warn "frozen-lockfile başarısız oldu, normal install deneniyor..."
-  "${PNPM[@]}" install || fail "Bağımlılıklar yüklenemedi. Node.js 20+ LTS kurulu olduğundan emin olun."
+  "${PNPM[@]}" install || fail "Bağımlılıklar yüklenemedi. Node.js 22+ LTS kurulu olduğundan emin olun."
   ok "Bağımlılıklar yüklendi"
 fi
 

@@ -47,7 +47,7 @@ Kurulum sırasında uygulama girişi için bir şifre belirlersiniz (`APP_PASSWO
 
 Kurulum betikleri şu adımları otomatik yapar:
 
-- **Node.js 18+** kontrolü (yoksa: Windows'ta winget, macOS'te Homebrew, Linux'ta NodeSource ile kurar)
+- **Node.js 22+** kontrolü (yoksa: Windows'ta winget, macOS'te Homebrew, Linux'ta NodeSource ile kurar)
 - **pnpm** hazırlama (corepack üzerinden veya npm ile)
 - **Bağımlılık** yükleme (`pnpm install`)
 - **`.env.local`** oluşturma (rastgele `SESSION_PASSWORD` üretir, `APP_PASSWORD` gizli girişle alınır)
@@ -65,7 +65,7 @@ Başlatma betikleri `.env.local` dosyasının varlığını kontrol eder, sunucu
 
 ### Manuel Kurulum (geliştirici)
 
-1. **Node.js 18+** kur — [nodejs.org](https://nodejs.org)
+1. **Node.js 22+** kur — [nodejs.org](https://nodejs.org)
 2. **pnpm** etkinleştir — `corepack enable && corepack prepare pnpm@11.6.0 --activate`
 3. **Python 3.8+** kur — [python.org](https://www.python.org) (PDF şablon özelliği için)
 4. **LibreOffice** kur — [libreoffice.org](https://www.libreoffice.org) (PDF dönüşümü için)
