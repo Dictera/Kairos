@@ -29,6 +29,28 @@ allowBuilds:
 # vite 8.0.16: fixes GHSA-fx2h-pf6j-xcff (high) + GHSA-v6wh-96g9-6wx3 (mod), via vitest.
 # esbuild 0.28.1: fixes GHSA-g7r4-m6w7-qqqr (low), via vite — leaves the
 #   esbuild 0.18.x under deprecated @esbuild-kit/drizzle-kit untouched.
+# Transitive security patches (each pinned within its current major so the
+# parent's API contract is unchanged). All flagged by `pnpm audit`:
+# brace-expansion: GHSA DoS via exponential/unbounded expansion (high), via eslint/shadcn.
+# fast-uri 3.1.8: host confusion / SSRF (high), via shadcn>ajv.
+# undici 7.29.1: cross-user info disclosure, CRLF injection (high), via shadcn>dotenvx.
+# ip-address 10.7.2, js-yaml 4.3.2, nanoid 3.3.19, browserslist 4.29.0: high.
+# hono/@hono/node-server, qs, baseline-browser-mapping, postcss: moderate.
+# esbuild@<0.24.3: GHSA-67mh-4wv8-2f99 (mod) in drizzle-kit>@esbuild-kit.
 overrides:
   vite: '^8.0.16'
-  esbuild@^0.28.0: '0.28.1'
+  esbuild@^0.28.0: '0.28.2'
+  esbuild@<0.24.3: '^0.25.12'
+  brace-expansion@<2: '^1.1.21'
+  brace-expansion@>=3 <6: '^5.0.12'
+  fast-uri@^3: '^3.1.8'
+  undici@^7: '^7.29.1'
+  ip-address@^10: '^10.7.2'
+  js-yaml@^4: '^4.3.2'
+  nanoid@^3: '^3.3.19'
+  browserslist@^4: '^4.29.0'
+  postcss@^8: '^8.5.28'
+  hono@^4: '^4.13.8'
+  '@hono/node-server@^1': '^1.19.17'
+  qs@^6: '^6.16.0'
+  baseline-browser-mapping@^2: '^2.11.24'
