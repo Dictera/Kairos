@@ -79,7 +79,10 @@ export async function getUpdateStatus(): Promise<UpdateStatus> {
   }
 
   const currentSha = await git(['rev-parse', '--short', 'HEAD'])
-  const dirty = (await git(['status', '--porcelain'])).length > 0
+  // Yalnızca izlenen dosyalardaki değişiklikler 'git pull --ff-only'yi engeller. İzlenmeyen
+  // dosyalar (ör. launcher'ın data/backups/ altına aldığı DB yedekleri) sayılırsa ilk
+  // güncellemeden sonra kurulum kalıcı olarak "dirty" görünür ve güncelleme hiç sunulmaz.
+  const dirty = (await git(['status', '--porcelain', '--untracked-files=no'])).length > 0
   const remoteTrusted = await isRemoteTrusted()
 
   // origin/main'i güncelle. Ağ yoksa sessizce offline işaretle (hata fırlatma).
