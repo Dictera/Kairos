@@ -5,19 +5,11 @@ import { dosya } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
 import { buildBelgelerDir, BELGELER_BASE, isInsideDir } from '@/lib/belgeler-storage'
 import { requireAuth } from '@/lib/auth-guard'
-import fs from 'fs'
+import { fileResponse, MIME_FOR_EXTENSION, statFile } from '@/lib/file-transfer'
+import type { Stats } from 'fs'
 import path from 'path'
 
 export const dynamic = 'force-dynamic'
-
-const MIME_TYPES: Record<string, string> = {
-  '.pdf': 'application/pdf',
-  '.doc': 'application/msword',
-  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.png': 'image/png',
-}
 
 export async function GET(
   _request: NextRequest,
@@ -42,6 +34,7 @@ export async function GET(
   // Use the parsed id, never the raw segment: params are URL-decoded, so
   // "1%2F..%2F.." would otherwise become "1/../.." and escape BELGELER_BASE.
   let filePath = path.join(BELGELER_BASE, String(dosyaId), filename)
+  let stat: Stats | null = null
 
   try {
     const dosyaRow = await db.query.dosya.findFirst({
@@ -66,7 +59,8 @@ export async function GET(
       // Try full name first, then ad-only fallback (handles files uploaded before soyad was added)
       for (const muvekkilAd of [adSoyad, adOnly]) {
         const candidate = path.join(buildBelgelerDir({ ...base, muvekkilAd }), filename)
-        if (fs.existsSync(candidate)) {
+        stat = await statFile(candidate)
+        if (stat) {
           filePath = candidate
           break
         }
@@ -80,17 +74,15 @@ export async function GET(
     return NextResponse.json({ error: 'Geçersiz dosya yolu' }, { status: 400 })
   }
 
-  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+  stat ??= await statFile(filePath)
+  if (!stat) {
     return NextResponse.json({ error: 'Dosya bulunamadı' }, { status: 404 })
   }
 
-  const file = fs.readFileSync(filePath)
   const ext = path.extname(filename).toLowerCase()
-
-  return new NextResponse(file, {
-    headers: {
-      'Content-Type': MIME_TYPES[ext] || 'application/octet-stream',
-      'Content-Disposition': `inline; filename*=UTF-8''${encodeURIComponent(filename)}`,
-    },
+  return fileResponse(filePath, {
+    size: stat.size,
+    contentType: MIME_FOR_EXTENSION[ext] || 'application/octet-stream',
+    filename,
   })
 }

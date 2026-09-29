@@ -11,6 +11,10 @@ import { buildBelgelerDir, safeDeleteBelge } from '@/lib/belgeler-storage'
 
 const belgeKategoriEnum = z.enum(BELGE_KATEGORILER)
 
+// dosya_yolu is rendered as a link and later resolved to a path on disk for
+// deletion, so only accept the exact shape /api/upload returns.
+const API_FILE_PATH = /^\/api\/files\/(\d+)\/([^/\\]+)$/
+
 export const belgeRouter = createTRPCRouter({
   list: protectedProcedure
     .input(z.object({ dosya_id: z.number().int() }))
@@ -49,15 +53,23 @@ export const belgeRouter = createTRPCRouter({
 
   create: protectedProcedure
     .input(
-      z.object({
-        dosya_id: z.number().int(),
-        dosya_no: z.string(),
-        kategori: belgeKategoriEnum,
-        dosya_adi: z.string(),
-        dosya_yolu: z.string(),
-        dosya_boyutu: z.number().int(),
-        mime_tur: z.string(),
-      }),
+      z
+        .object({
+          dosya_id: z.number().int(),
+          dosya_no: z.string().max(200),
+          kategori: belgeKategoriEnum,
+          dosya_adi: z.string().min(1).max(255),
+          dosya_yolu: z.string().max(1024).regex(API_FILE_PATH),
+          dosya_boyutu: z.number().int().nonnegative(),
+          mime_tur: z.string().max(255),
+        })
+        .refine(
+          (v) => {
+            const [, id, filename] = API_FILE_PATH.exec(v.dosya_yolu) ?? []
+            return Number(id) === v.dosya_id && filename !== '.' && !filename?.includes('..')
+          },
+          { message: 'Geçersiz belge yolu.', path: ['dosya_yolu'] },
+        ),
     )
     .mutation(async ({ input }) => {
       return db.transaction((tx) => {
@@ -80,7 +92,7 @@ export const belgeRouter = createTRPCRouter({
       }
 
       const dosyaYolu = existing.dosya_yolu
-      const apiMatch = dosyaYolu?.match(/^\/api\/files\/(\d+)\/(.+)$/)
+      const apiMatch = dosyaYolu?.match(API_FILE_PATH)
 
       // Resolve filesystem target(s) BEFORE the transaction (this read is async).
       const fsTargets: string[] = []

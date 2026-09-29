@@ -35,3 +35,36 @@ describe('proxy: logged-out access', () => {
     expect(new URL(location!).pathname).toBe('/login')
   })
 })
+
+describe('proxy: cross-origin writes', () => {
+  function post(headers: Record<string, string>) {
+    return proxy(
+      new NextRequest('http://127.0.0.1:3000/api/auth/login', {
+        method: 'POST',
+        headers: { host: '127.0.0.1:3000', ...headers },
+      }),
+    )
+  }
+
+  it('rejects a POST whose Origin is another local app', async () => {
+    expect((await post({ origin: 'http://127.0.0.1:8080' })).status).toBe(403)
+  })
+
+  it('rejects an opaque "null" Origin', async () => {
+    expect((await post({ origin: 'null' })).status).toBe(403)
+  })
+
+  it('allows same-origin and Origin-less POSTs', async () => {
+    expect((await post({ origin: 'http://127.0.0.1:3000' })).status).toBe(200)
+    expect((await post({})).status).toBe(200)
+  })
+
+  it('does not check GET requests', async () => {
+    const res = await proxy(
+      new NextRequest('http://127.0.0.1:3000/api/health', {
+        headers: { host: '127.0.0.1:3000', origin: 'http://evil.test' },
+      }),
+    )
+    expect(res.status).toBe(200)
+  })
+})

@@ -111,7 +111,10 @@ export const sablonRouter = createTRPCRouter({
 
       // Remove old file BEFORE updating DB so a failed unlink leaves the old row pointing
       // at a still-valid file (replaced new file). safeUnlink swallows errors per pattern.
-      safeUnlink(existing.dosya_yolu)
+      // Re-submitting the current file name must not delete the file just validated.
+      if (path.resolve(existing.dosya_yolu) !== path.resolve(newFilePath)) {
+        safeUnlink(existing.dosya_yolu)
+      }
 
       const [updated] = await db
         .update(docxSablon)

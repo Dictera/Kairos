@@ -10,6 +10,14 @@ import {
   sanitizeFsSegment,
 } from '@/lib/belgeler-storage'
 import { requireAuth } from '@/lib/auth-guard'
+import {
+  declaredBodyTooLarge,
+  EXTENSION_FOR_MIME,
+  matchesSignature,
+  MIME_FOR_EXTENSION,
+  readFormData,
+} from '@/lib/file-transfer'
+import { randomUUID } from 'crypto'
 import fs from 'fs'
 import path from 'path'
 
@@ -23,24 +31,33 @@ const ALLOWED_TYPES = [
   'image/png',
 ]
 const MAX_SIZE = 20 * 1024 * 1024 // 20 MB
+const SIZE_ERROR = "Dosya boyutu 20 MB'ı aşamaz"
 
 export async function POST(request: NextRequest) {
   await connection()
   const authError = await requireAuth()
   if (authError) return authError
 
-  const formData = await request.formData()
-  const file = formData.get('file') as File | null
-  const dosyaIdRaw = formData.get('dosyaId') as string | null
-  const dosyaId = parseInt(dosyaIdRaw ?? '', 10)
-  const dosyaNo = formData.get('dosyaNo') as string | null
-  const kategori = formData.get('kategori') as string | null
+  // Reject before buffering the body when the client already says it is too big.
+  if (declaredBodyTooLarge(request, MAX_SIZE)) {
+    return NextResponse.json({ error: SIZE_ERROR }, { status: 413 })
+  }
 
-  if (!file || !dosyaNo) {
+  const formData = await readFormData(request)
+  if (!formData) {
+    return NextResponse.json({ error: 'Geçersiz istek' }, { status: 400 })
+  }
+  const file = formData.get('file')
+  const dosyaIdRaw = formData.get('dosyaId')
+  const dosyaId = typeof dosyaIdRaw === 'string' ? Number(dosyaIdRaw) : NaN
+  const dosyaNo = formData.get('dosyaNo')
+  const kategori = formData.get('kategori')
+
+  if (!(file instanceof File) || typeof dosyaNo !== 'string' || !dosyaNo) {
     return NextResponse.json({ error: 'Eksik veri' }, { status: 400 })
   }
 
-  if (isNaN(dosyaId)) {
+  if (!Number.isSafeInteger(dosyaId) || dosyaId <= 0) {
     return NextResponse.json({ error: 'Geçersiz dosya ID' }, { status: 400 })
   }
 
@@ -49,7 +66,16 @@ export async function POST(request: NextRequest) {
   }
 
   if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: "Dosya boyutu 20 MB'ı aşamaz" }, { status: 400 })
+    return NextResponse.json({ error: SIZE_ERROR }, { status: 400 })
+  }
+
+  // file.type is only the browser's guess from the extension — check the content.
+  const buffer = Buffer.from(await file.arrayBuffer())
+  if (!matchesSignature(buffer, file.type)) {
+    return NextResponse.json(
+      { error: 'Dosya içeriği bildirilen dosya türüyle uyuşmuyor' },
+      { status: 400 },
+    )
   }
 
   // Look up dosya to build hierarchical directory
@@ -79,19 +105,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Geçersiz dizin' }, { status: 400 })
   }
 
-  fs.mkdirSync(uploadDir, { recursive: true })
+  await fs.promises.mkdir(uploadDir, { recursive: true })
 
   const timestamp = Date.now()
   // file.name is client-controlled and may carry path segments ("../../x") —
   // keep only the final segment and strip unsafe characters.
-  const originalName = sanitizeFsSegment(path.basename(file.name.replace(/\\/g, '/')))
-  const ext = path.extname(originalName)
+  let originalName = sanitizeFsSegment(path.basename(file.name.replace(/\\/g, '/')))
+  // The extension decides the Content-Type the file is served with later, so it
+  // must agree with the verified content type.
+  let ext = path.extname(originalName).toLowerCase()
+  if (MIME_FOR_EXTENSION[ext] !== file.type) {
+    ext = EXTENSION_FOR_MIME[file.type]
+    originalName = `${path.basename(originalName, path.extname(originalName))}${ext}`
+  }
 
   let filename: string
   let dosya_adi: string
 
-  if (kategori) {
-    const safeKategori = kategori.replace(/[^a-zA-Z0-9ÇçĞğıİÖöŞşÜü\s-]/g, '').trim()
+  const safeKategori =
+    typeof kategori === 'string' ? kategori.replace(/[^a-zA-Z0-9ÇçĞğıİÖöŞşÜü\s-]/g, '').trim() : ''
+  if (safeKategori) {
     filename = `${timestamp}-${safeKategori}${ext}`
     dosya_adi = `${safeKategori}${ext}`
   } else {
@@ -104,8 +137,16 @@ export async function POST(request: NextRequest) {
   if (!isInsideDir(uploadDir, filePath)) {
     return NextResponse.json({ error: 'Geçersiz dosya adı' }, { status: 400 })
   }
-  const buffer = Buffer.from(await file.arrayBuffer())
-  fs.writeFileSync(filePath, buffer)
+
+  // 'wx' never overwrites: two uploads in the same millisecond with the same
+  // name must not clobber each other.
+  try {
+    await fs.promises.writeFile(filePath, buffer, { flag: 'wx' })
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== 'EEXIST') throw err
+    filename = `${timestamp}-${randomUUID().slice(0, 8)}-${filename.slice(String(timestamp).length + 1)}`
+    await fs.promises.writeFile(path.join(uploadDir, filename), buffer, { flag: 'wx' })
+  }
 
   return NextResponse.json({
     filename,

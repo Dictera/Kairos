@@ -35,12 +35,18 @@ afterAll(() => {
   fs.rmSync(OUTSIDE, { recursive: true, force: true })
 })
 
-function uploadRequest(fileName: string, extra: Record<string, string> = {}) {
+const PDF_BYTES = new Uint8Array([0x25, 0x50, 0x44, 0x46])
+
+function uploadRequest(
+  fileName: string,
+  extra: Record<string, string> = {},
+  content: { bytes: Uint8Array<ArrayBuffer>; type: string } = {
+    bytes: PDF_BYTES,
+    type: 'application/pdf',
+  },
+) {
   const fd = new FormData()
-  fd.append(
-    'file',
-    new File([new Uint8Array([0x25, 0x50, 0x44, 0x46])], fileName, { type: 'application/pdf' }),
-  )
+  fd.append('file', new File([content.bytes], fileName, { type: content.type }))
   fd.append('dosyaId', String(dosyaId))
   fd.append('dosyaNo', 'SEC-1')
   for (const [k, v] of Object.entries(extra)) fd.append(k, v)
@@ -104,6 +110,33 @@ describe('POST /api/upload: path traversal', () => {
   })
 })
 
+describe('POST /api/upload: content validation', () => {
+  it('rejects content that does not match the declared type', async () => {
+    const html = new TextEncoder().encode('<html><script>alert(1)</script></html>')
+    const res = await upload(
+      uploadRequest('fatura.pdf', {}, { bytes: html, type: 'application/pdf' }),
+    )
+    expect(res.status).toBe(400)
+  })
+
+  it('stores the file with the extension of its verified type', async () => {
+    const res = await upload(uploadRequest('rapor.html', { kategori: 'Dilekçe' }))
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.filename).toMatch(/^\d+-Dilekçe\.pdf$/)
+    expect(body.dosya_adi).toBe('Dilekçe.pdf')
+    const written = listFilesRecursive(BELGELER_BASE).filter((f) => f.endsWith(body.filename))
+    fs.rmSync(written[0])
+  })
+
+  it('rejects an oversized declared body before parsing it', async () => {
+    const req = uploadRequest('a.pdf')
+    req.headers.set('content-length', String(30 * 1024 * 1024))
+    const res = await upload(req)
+    expect(res.status).toBe(413)
+  })
+})
+
 describe('GET /api/files/[dosyaId]/[filename]: path traversal', () => {
   const secret = path.join(OUTSIDE, 'secret.txt')
 
@@ -143,6 +176,8 @@ describe('GET /api/files/[dosyaId]/[filename]: path traversal', () => {
     fs.writeFileSync(path.join(dir, 'ok.pdf'), 'PDF')
     const res = await get('999998', 'ok.pdf')
     expect(res.status).toBe(200)
+    expect(res.headers.get('content-length')).toBe('3')
+    expect(res.headers.get('x-content-type-options')).toBe('nosniff')
     expect(await res.text()).toBe('PDF')
     fs.rmSync(dir, { recursive: true, force: true })
   })

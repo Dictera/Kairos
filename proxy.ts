@@ -7,8 +7,31 @@ import { sessionOptions, type SessionData } from '@/lib/session'
 // (it only returns { ok: true }).
 const PUBLIC_PATHS = ['/login', '/api/trpc', '/api/auth', '/api/health']
 
+const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
+
+/**
+ * CSRF guard for state-changing requests. SameSite=Lax does not stop them from
+ * other apps on the same machine (every localhost port is "same-site"), so a
+ * browser-sent Origin must match the Host this server was reached on.
+ * Requests without an Origin header (curl, launchers) are not browser CSRF.
+ */
+function isCrossOrigin(request: NextRequest): boolean {
+  if (SAFE_METHODS.has(request.method)) return false
+  const origin = request.headers.get('origin')
+  if (!origin) return false
+  try {
+    return new URL(origin).host !== request.headers.get('host')
+  } catch {
+    return true // "null" or malformed origin
+  }
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  if (isCrossOrigin(request)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   // Allow public paths through without auth check
   if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))) {
