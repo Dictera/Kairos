@@ -13,6 +13,7 @@ import {
   Calendar,
   Clock,
   Check,
+  LogOut,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -26,6 +27,12 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useTRPC } from '@/lib/trpc/context'
@@ -199,6 +206,48 @@ function NotificationDropdown() {
   )
 }
 
+function AccountMenu() {
+  const router = useRouter()
+  const queryClient = useQueryClient()
+  const [pending, setPending] = React.useState(false)
+
+  async function logout() {
+    setPending(true)
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } finally {
+      // Drop cached data so nothing from the old session lingers in memory.
+      queryClient.clear()
+      router.replace('/login')
+      router.refresh()
+    }
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label="Hesap menüsü"
+          className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Avatar size="sm" className="size-10 border border-border/60">
+            <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+              S
+            </AvatarFallback>
+          </Avatar>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem disabled={pending} onSelect={() => void logout()}>
+          <LogOut className="size-4" />
+          Çıkış yap
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 export function DashboardHeader() {
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
@@ -265,11 +314,7 @@ export function DashboardHeader() {
 
           <NotificationDropdown />
 
-          <Avatar size="sm" className="size-10 border border-border/60">
-            <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-              S
-            </AvatarFallback>
-          </Avatar>
+          <AccountMenu />
         </div>
       </header>
 

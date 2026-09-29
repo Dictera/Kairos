@@ -148,7 +148,7 @@ export function BelgeList({ dosyaId }: BelgeListProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => fetch(`/api/open-folder?belgeId=${belge.id}`)}
+                onClick={() => fetch(`/api/open-folder?belgeId=${belge.id}`, { method: 'POST' })}
                 title="Klasörde göster"
               >
                 <FolderOpen className="h-4 w-4" />

@@ -34,7 +34,7 @@ import { muvekkillRouter } from '@/lib/trpc/routers/muvekkil'
 import { searchRouter } from '@/lib/trpc/routers/search'
 import { createCallerFactory } from '@/lib/trpc/init'
 import type { IronSession } from 'iron-session'
-import type { SessionData } from '@/lib/session'
+import { passwordVersion, type SessionData } from '@/lib/session'
 
 // ── foldTr ────────────────────────────────────────────────────────────────
 describe('foldTr — Turkish normalization', () => {
@@ -290,7 +290,10 @@ describe('FTS5 trigram integration', () => {
 // Proves the mutations actually maintain the FTS index and that search reads it.
 // Unique token + cleanup keep the shared in-memory db unpolluted for other files.
 describe('router wiring: mutations ↔ FTS ↔ search', () => {
-  const mockSession = { isLoggedIn: true } as unknown as IronSession<SessionData>
+  const mockSession = {
+    isLoggedIn: true,
+    pwv: passwordVersion(),
+  } as unknown as IronSession<SessionData>
   const ctx = { session: mockSession, headers: new Headers() }
   const muvekkilCaller = createCallerFactory(muvekkillRouter)(ctx)
   const dosyaCaller = createCallerFactory(dosyaRouter)(ctx)

@@ -34,7 +34,9 @@ async function resolveDir(dosyaRow: {
   return dir
 }
 
-export async function GET(request: NextRequest) {
+// POST: opening Explorer is a side effect; a GET could be triggered cross-site by a link
+// (SameSite=Lax cookies are sent on top-level navigations).
+export async function POST(request: NextRequest) {
   await connection()
   const authError = await requireAuth()
   if (authError) return authError

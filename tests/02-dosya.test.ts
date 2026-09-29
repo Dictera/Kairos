@@ -3,7 +3,7 @@ import { dosyaRouter, dosyaSchema } from '@/lib/trpc/routers/dosya'
 import { muvekkillRouter } from '@/lib/trpc/routers/muvekkil'
 import { createCallerFactory } from '@/lib/trpc/init'
 import type { IronSession } from 'iron-session'
-import type { SessionData } from '@/lib/session'
+import { passwordVersion, type SessionData } from '@/lib/session'
 
 describe('dosya router: procedure existence', () => {
   it('has list procedure', () => {
@@ -71,7 +71,10 @@ describe('dosyaSchema constraints', () => {
 // it via globalThis.__testSqlite. The create/delete mutations maintain dosya_fts,
 // so the FTS virtual tables must exist (idempotent — 27-search-fts may create them too).
 describe('dosya router: behavior', () => {
-  const mockSession = { isLoggedIn: true } as unknown as IronSession<SessionData>
+  const mockSession = {
+    isLoggedIn: true,
+    pwv: passwordVersion(),
+  } as unknown as IronSession<SessionData>
   const ctx = { session: mockSession, headers: new Headers() }
   const dosya = createCallerFactory(dosyaRouter)(ctx)
   const muvekkil = createCallerFactory(muvekkillRouter)(ctx)

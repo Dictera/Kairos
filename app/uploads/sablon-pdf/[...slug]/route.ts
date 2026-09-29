@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 import { ARCHIVE_BASE } from '@/lib/docx/archive'
+import { requireAuth } from '@/lib/auth-guard'
 
 const MIME_TYPES: Record<string, string> = {
   '.pdf': 'application/pdf',
@@ -16,6 +17,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string[] }> }
 ) {
+  const authError = await requireAuth()
+  if (authError) return authError
+
   const { slug } = await params
 
   const relativePath = slug.join('/')

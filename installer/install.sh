@@ -204,15 +204,26 @@ if [ -f "$ENV_PATH" ]; then
 else
   SESSION_PASSWORD="$(rand_password 48)"
 
-  printf "\n    Uygulamaya giriş için bir şifre belirleyin.\n"
+  # En az 8 karakter (NIST SP 800-63B, kullanıcı seçimli şifre alt sınırı). Girdi
+  # gizli olduğundan yazım hatasına karşı iki kez sorulur.
+  printf "\n    Uygulamaya giriş için bir şifre belirleyin (en az 8 karakter).\n"
   APP_PASSWORD=''
   while [ -z "$APP_PASSWORD" ]; do
     read -s -p "    Giriş şifresi (APP_PASSWORD): " APP_PASSWORD
     printf "\n"
-    if [ -z "$APP_PASSWORD" ]; then
-      warn "Şifre boş olamaz."
+    if [ "${#APP_PASSWORD}" -lt 8 ]; then
+      warn "Şifre en az 8 karakter olmalı."
+      APP_PASSWORD=''
+      continue
+    fi
+    read -s -p "    Şifre (tekrar): " APP_PASSWORD_CONFIRM
+    printf "\n"
+    if [ "$APP_PASSWORD" != "$APP_PASSWORD_CONFIRM" ]; then
+      warn "Şifreler eşleşmiyor, tekrar deneyin."
+      APP_PASSWORD=''
     fi
   done
+  unset APP_PASSWORD_CONFIRM
 
   TELEGRAM_TOKEN=''
   TELEGRAM_CHAT_ID=''

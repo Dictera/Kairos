@@ -8,6 +8,7 @@ import fs from 'fs'
 import os from 'os'
 
 // Set test-specific env vars before importing any module that reads them
+process.env.APP_PASSWORD ??= 'test-app-password'
 process.env.TEST_BELGELER_BASE = path.join(os.tmpdir(), 'sigorta-test-belgeler')
 fs.mkdirSync(process.env.TEST_BELGELER_BASE, { recursive: true })
 
