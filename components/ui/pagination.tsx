@@ -41,6 +41,7 @@ function PaginationLink({
   className,
   isActive,
   size = "icon",
+  children,
   ...props
 }: PaginationLinkProps) {
   return (
@@ -55,7 +56,9 @@ function PaginationLink({
         data-slot="pagination-link"
         data-active={isActive}
         {...props}
-      />
+      >
+        {children}
+      </a>
     </Button>
   )
 }

@@ -191,6 +191,8 @@ export function AyarlarPage() {
                   onChange={(e) => setBelgelerPathInput(e.target.value)}
                   placeholder="E:/sigorta-belgeler"
                   className="font-mono text-sm"
+                  // Field appears after the user clicks "edit"; moving focus to it is intended.
+                  // oxlint-disable-next-line jsx-a11y/no-autofocus
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') setBelgelerPath.mutate({ path: belgelerPath })

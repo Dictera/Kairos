@@ -48,6 +48,8 @@ function InputGroupAddon({
   ...props
 }: React.ComponentProps<"fieldset"> & VariantProps<typeof inputGroupAddonVariants>) {
   return (
+    // Click-to-focus is a pointer convenience only; keyboard users Tab to the input.
+    // oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <fieldset
       data-slot="input-group-addon"
       data-align={align}

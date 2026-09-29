@@ -32,7 +32,7 @@ Gerekli ortam değişkenleri `.env.example` dosyasında listelenmiştir. Detayla
 
 ## Code Style
 
-Proje [oxlint](https://oxc.rs/docs/guide/usage/linter) kullanır; yapılandırma `.oxlintrc.json` dosyasındadır (TypeScript, React/hooks, Next.js ve temel jsx-a11y kuralları). Ayrı bir Prettier veya Biome yapılandırması yoktur. Lint CI'da her PR'da çalışır.
+Proje [oxlint](https://oxc.rs/docs/guide/usage/linter) kullanır; yapılandırma `.oxlintrc.json` dosyasındadır (TypeScript, React/hooks, Next.js ve jsx-a11y erişilebilirlik kuralları). Ayrı bir Prettier veya Biome yapılandırması yoktur. Lint CI'da her PR'da çalışır.
 
 ```bash
 pnpm run lint          # Tüm projeyi kontrol et
