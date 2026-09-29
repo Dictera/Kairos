@@ -10,7 +10,7 @@ Sigorta uyuşmazlık davalarını takip eden, avukatlar için tasarlanmış yere
 - **STK Süreç Takibi** — 9 aşamalı STK izleme (İhtar → Kesinleşme), otomatik tarih hesaplama
 - **Mahkeme Süreç Takibi** — 12 aşamalı mahkeme izleme, birden fazla duruşma kaydı
 - **Otomatik Süre Hesaplama** — STK itiraz (10 gün), istinaf (14 gün), cevap dilekçesi (14 gün); adli tatil uyarıları
-- **Belge Yönetimi** — 20 MB'a kadar yükleme/indirme, kategori etiketleri, silme
+- **Belge Yönetimi** — 10 MB'a kadar yükleme/indirme, kategori etiketleri, silme
 - **Şablon & PDF Üretimi** — `.docx` şablon yükleme, Jinja2 değişken doldurma, LibreOffice headless PDF dönüşümü
 - **Finans Takibi** — Gelen/Giden/Masraf girişleri, net bakiye, finans dashboard
 - **Raporlar** — Portföy ve finansal raporlar, PDF dışa aktarım

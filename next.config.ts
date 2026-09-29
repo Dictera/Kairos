@@ -13,10 +13,10 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   experimental: {
     // proxy.ts runs on every request, and Next.js only hands the first 10 MB of
-    // a body through a proxy by default — which silently truncated 10–20 MB
-    // document uploads. Keep this above the largest upload cap (20 MB in
-    // app/api/upload) plus multipart overhead.
-    proxyClientMaxBodySize: '21mb',
+    // a body through a proxy by default. Uploads are capped at 10 MB of file
+    // data (app/api/upload, app/api/templates/upload); the multipart framing
+    // around it needs a little headroom or a file right at the cap is truncated.
+    proxyClientMaxBodySize: '11mb',
   },
   headers: async () => [{ source: '/:path*', headers: securityHeaders }],
   redirects: async () => [

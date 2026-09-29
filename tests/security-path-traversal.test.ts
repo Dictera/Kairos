@@ -3,7 +3,8 @@ import fs from 'fs'
 import os from 'os'
 import path from 'path'
 import { NextRequest } from 'next/server'
-import { muvekkil, dosya } from '@/lib/schema'
+import { muvekkil, dosya, belge, olayGunlugu } from '@/lib/schema'
+import { eq } from 'drizzle-orm'
 import { BELGELER_BASE, isInsideDir } from '@/lib/belgeler-storage'
 
 vi.mock('@/lib/auth-guard', () => ({
@@ -48,9 +49,13 @@ function uploadRequest(
   const fd = new FormData()
   fd.append('file', new File([content.bytes], fileName, { type: content.type }))
   fd.append('dosyaId', String(dosyaId))
-  fd.append('dosyaNo', 'SEC-1')
-  for (const [k, v] of Object.entries(extra)) fd.append(k, v)
+  for (const [k, v] of Object.entries({ kategori: 'Dilekçe', ...extra })) fd.append(k, v)
   return new NextRequest('http://localhost/api/upload', { method: 'POST', body: fd })
+}
+
+/** File name on disk, taken from the belge row the route returns. */
+function storedName(body: { dosya_yolu: string }): string {
+  return body.dosya_yolu.split('/').pop()!
 }
 
 function listFilesRecursive(dir: string): string[] {
@@ -87,26 +92,74 @@ describe('POST /api/upload: path traversal', () => {
       expect(res.status).toBe(200)
       const body = await res.json()
 
-      expect(body.filename).not.toMatch(/[\\/]/)
+      expect(body.dosya_yolu).toMatch(/^\/api\/files\/\d+\/[^\\/]+$/)
       expect(body.dosya_adi).not.toMatch(/[\\/]/)
       expect(listFilesRecursive(OUTSIDE)).toEqual([])
 
-      const written = listFilesRecursive(BELGELER_BASE).filter((f) => f.endsWith(body.filename))
+      const written = listFilesRecursive(BELGELER_BASE).filter((f) => f.endsWith(storedName(body)))
       expect(written).toHaveLength(1)
       expect(isInsideDir(BELGELER_BASE, written[0])).toBe(true)
       fs.rmSync(written[0])
     })
   }
 
-  it('still stores ordinary file names', async () => {
-    const res = await upload(uploadRequest('Bilirkişi Raporu.pdf'))
+  it('names the stored file after the category', async () => {
+    const res = await upload(uploadRequest('x.pdf', { kategori: 'Bilirkişi Raporu' }))
     expect(res.status).toBe(200)
     const body = await res.json()
-    expect(body.filename).toMatch(/^\d+-bilirkişi-raporu\.pdf$/)
+    expect(storedName(body)).toMatch(/^\d+-Bilirkişi Raporu\.pdf$/)
     expect(body.dosya_adi).toBe('Bilirkişi Raporu.pdf')
-    const written = listFilesRecursive(BELGELER_BASE).filter((f) => f.endsWith(body.filename))
+    const written = listFilesRecursive(BELGELER_BASE).filter((f) => f.endsWith(storedName(body)))
     expect(written).toHaveLength(1)
     fs.rmSync(written[0])
+  })
+})
+
+describe('POST /api/upload: belge row', () => {
+  it('creates the belge row and activity log entry with the file', async () => {
+    const res = await upload(uploadRequest('a.pdf', { kategori: 'Karar' }))
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    const db = globalThis.__testDb!
+    const [row] = await db.select().from(belge).where(eq(belge.id, body.id))
+    expect(row).toMatchObject({
+      dosya_id: dosyaId,
+      dosya_no: 'SEC-1',
+      kategori: 'Karar',
+      dosya_adi: 'Karar.pdf',
+      mime_tur: 'application/pdf',
+      dosya_boyutu: PDF_BYTES.length,
+    })
+    const logs = await db.select().from(olayGunlugu).where(eq(olayGunlugu.dosya_id, dosyaId))
+    expect(logs.some((l) => l.aciklama === 'Belge eklendi: Karar.pdf')).toBe(true)
+    fs.rmSync(listFilesRecursive(BELGELER_BASE).find((f) => f.endsWith(storedName(body)))!)
+  })
+
+  it('removes the written file when the row cannot be saved', async () => {
+    const db = globalThis.__testDb!
+    const before = listFilesRecursive(BELGELER_BASE).length
+    const spy = vi.spyOn(db, 'transaction').mockImplementationOnce(() => {
+      throw new Error('disk I/O error')
+    })
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const res = await upload(uploadRequest('a.pdf'))
+    spy.mockRestore()
+    errSpy.mockRestore()
+    expect(res.status).toBe(500)
+    expect(listFilesRecursive(BELGELER_BASE)).toHaveLength(before)
+  })
+
+  it('rejects a missing or unknown category', async () => {
+    expect((await upload(uploadRequest('a.pdf', { kategori: '' }))).status).toBe(400)
+    expect((await upload(uploadRequest('a.pdf', { kategori: '../x' }))).status).toBe(400)
+  })
+
+  it('rejects files over 10 MB', async () => {
+    const big = new Uint8Array(10 * 1024 * 1024 + 1)
+    big.set(PDF_BYTES)
+    const res = await upload(uploadRequest('a.pdf', {}, { bytes: big, type: 'application/pdf' }))
+    expect(res.status).toBe(400)
+    expect((await res.json()).error).toMatch(/10 MB/)
   })
 })
 
@@ -123,15 +176,15 @@ describe('POST /api/upload: content validation', () => {
     const res = await upload(uploadRequest('rapor.html', { kategori: 'Dilekçe' }))
     expect(res.status).toBe(200)
     const body = await res.json()
-    expect(body.filename).toMatch(/^\d+-Dilekçe\.pdf$/)
+    expect(storedName(body)).toMatch(/^\d+-Dilekçe\.pdf$/)
     expect(body.dosya_adi).toBe('Dilekçe.pdf')
-    const written = listFilesRecursive(BELGELER_BASE).filter((f) => f.endsWith(body.filename))
+    const written = listFilesRecursive(BELGELER_BASE).filter((f) => f.endsWith(storedName(body)))
     fs.rmSync(written[0])
   })
 
   it('rejects an oversized declared body before parsing it', async () => {
     const req = uploadRequest('a.pdf')
-    req.headers.set('content-length', String(30 * 1024 * 1024))
+    req.headers.set('content-length', String(12 * 1024 * 1024))
     const res = await upload(req)
     expect(res.status).toBe(413)
   })

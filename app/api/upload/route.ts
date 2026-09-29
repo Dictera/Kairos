@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { connection } from 'next/server'
 import { db } from '@/lib/db'
-import { dosya } from '@/lib/schema'
+import { belge, BELGE_KATEGORILER, dosya } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
-import {
-  buildBelgelerDir,
-  BELGELER_BASE,
-  isInsideDir,
-  sanitizeFsSegment,
-} from '@/lib/belgeler-storage'
+import { buildBelgelerDir, BELGELER_BASE, isInsideDir } from '@/lib/belgeler-storage'
 import { requireAuth } from '@/lib/auth-guard'
+import { logOlayTx } from '@/lib/trpc/routers/olay'
 import {
   declaredBodyTooLarge,
   EXTENSION_FOR_MIME,
@@ -30,8 +26,8 @@ const ALLOWED_TYPES = [
   'image/jpeg',
   'image/png',
 ]
-const MAX_SIZE = 20 * 1024 * 1024 // 20 MB
-const SIZE_ERROR = "Dosya boyutu 20 MB'ı aşamaz"
+const MAX_SIZE = 10 * 1024 * 1024 // 10 MB
+const SIZE_ERROR = "Dosya boyutu 10 MB'ı aşamaz"
 
 export async function POST(request: NextRequest) {
   await connection()
@@ -50,11 +46,14 @@ export async function POST(request: NextRequest) {
   const file = formData.get('file')
   const dosyaIdRaw = formData.get('dosyaId')
   const dosyaId = typeof dosyaIdRaw === 'string' ? Number(dosyaIdRaw) : NaN
-  const dosyaNo = formData.get('dosyaNo')
-  const kategori = formData.get('kategori')
+  const kategori = BELGE_KATEGORILER.find((k) => k === formData.get('kategori'))
 
-  if (!(file instanceof File) || typeof dosyaNo !== 'string' || !dosyaNo) {
+  if (!(file instanceof File)) {
     return NextResponse.json({ error: 'Eksik veri' }, { status: 400 })
+  }
+
+  if (!kategori) {
+    return NextResponse.json({ error: 'Geçersiz kategori' }, { status: 400 })
   }
 
   if (!Number.isSafeInteger(dosyaId) || dosyaId <= 0) {
@@ -107,33 +106,18 @@ export async function POST(request: NextRequest) {
 
   await fs.promises.mkdir(uploadDir, { recursive: true })
 
-  const timestamp = Date.now()
-  // file.name is client-controlled and may carry path segments ("../../x") —
-  // keep only the final segment and strip unsafe characters.
-  let originalName = sanitizeFsSegment(path.basename(file.name.replace(/\\/g, '/')))
   // The extension decides the Content-Type the file is served with later, so it
-  // must agree with the verified content type.
-  let ext = path.extname(originalName).toLowerCase()
-  if (MIME_FOR_EXTENSION[ext] !== file.type) {
-    ext = EXTENSION_FOR_MIME[file.type]
-    originalName = `${path.basename(originalName, path.extname(originalName))}${ext}`
-  }
+  // must agree with the verified content type; file.name itself is never used
+  // as a path.
+  let ext = path.extname(file.name).toLowerCase()
+  if (MIME_FOR_EXTENSION[ext] !== file.type) ext = EXTENSION_FOR_MIME[file.type]
 
-  let filename: string
-  let dosya_adi: string
+  const timestamp = Date.now()
+  const safeKategori = kategori.replace(/[^a-zA-Z0-9ÇçĞğıİÖöŞşÜü\s-]/g, '').trim()
+  const dosya_adi = `${safeKategori}${ext}`
+  let filename = `${timestamp}-${dosya_adi}`
 
-  const safeKategori =
-    typeof kategori === 'string' ? kategori.replace(/[^a-zA-Z0-9ÇçĞğıİÖöŞşÜü\s-]/g, '').trim() : ''
-  if (safeKategori) {
-    filename = `${timestamp}-${safeKategori}${ext}`
-    dosya_adi = `${safeKategori}${ext}`
-  } else {
-    const normalizedName = originalName.toLowerCase().replace(/\s+/g, '-')
-    filename = `${timestamp}-${normalizedName}`
-    dosya_adi = originalName
-  }
-
-  const filePath = path.join(uploadDir, filename)
+  let filePath = path.join(uploadDir, filename)
   if (!isInsideDir(uploadDir, filePath)) {
     return NextResponse.json({ error: 'Geçersiz dosya adı' }, { status: 400 })
   }
@@ -144,15 +128,35 @@ export async function POST(request: NextRequest) {
     await fs.promises.writeFile(filePath, buffer, { flag: 'wx' })
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code !== 'EEXIST') throw err
-    filename = `${timestamp}-${randomUUID().slice(0, 8)}-${filename.slice(String(timestamp).length + 1)}`
-    await fs.promises.writeFile(path.join(uploadDir, filename), buffer, { flag: 'wx' })
+    filename = `${timestamp}-${randomUUID().slice(0, 8)}-${dosya_adi}`
+    filePath = path.join(uploadDir, filename)
+    await fs.promises.writeFile(filePath, buffer, { flag: 'wx' })
   }
 
-  return NextResponse.json({
-    filename,
-    dosya_yolu: `/api/files/${dosyaId}/${filename}`,
-    dosya_boyutu: file.size,
-    mime_tur: file.type,
-    dosya_adi,
-  })
+  // The belge row is created here, in the same request as the file, so a
+  // failed insert can remove the file instead of leaving it orphaned on disk.
+  try {
+    const row = db.transaction((tx) => {
+      const inserted = tx
+        .insert(belge)
+        .values({
+          dosya_id: dosyaId,
+          dosya_no: dosyaRow.dosya_no,
+          kategori,
+          dosya_adi,
+          dosya_yolu: `/api/files/${dosyaId}/${filename}`,
+          dosya_boyutu: file.size,
+          mime_tur: file.type,
+        })
+        .returning()
+        .get()
+      logOlayTx(tx, dosyaId, 'belge_eklendi', `Belge eklendi: ${dosya_adi}`)
+      return inserted
+    })
+    return NextResponse.json(row)
+  } catch (err) {
+    await fs.promises.unlink(filePath).catch(() => {})
+    console.error('[upload] belge kaydı oluşturulamadı:', err)
+    return NextResponse.json({ error: 'Belge kaydedilemedi' }, { status: 500 })
+  }
 }

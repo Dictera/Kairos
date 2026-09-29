@@ -18,11 +18,10 @@ import { toast } from 'sonner'
 
 interface BelgeUploadProps {
   dosyaId: number
-  dosyaNo: string
   onUploadComplete?: () => void
 }
 
-export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadProps) {
+export function BelgeUpload({ dosyaId, onUploadComplete }: BelgeUploadProps) {
   const [file, setFile] = useState<File | null>(null)
   const [kategori, setKategori] = useState<string>('')
   const [dragActive, setDragActive] = useState(false)
@@ -31,23 +30,32 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  const createMutation = useMutation(
-    trpc.belge.create.mutationOptions({
-      onSuccess: () => {
-        void queryClient.invalidateQueries({
-          queryKey: trpc.belge.list.queryKey({ dosya_id: dosyaId }),
-        })
-        toast.success('Belge yüklendi')
-        setFile(null)
-        setKategori('')
-        setError(null)
-        onUploadComplete?.()
-      },
-      onError: (err) => {
-        toast.error('Belge kaydedilemedi: ' + err.message)
-      },
-    }),
-  )
+  // /api/upload stores the file and creates the belge row in one request.
+  const uploadMutation = useMutation({
+    mutationFn: async (vars: { file: File; kategori: string }) => {
+      const formData = new FormData()
+      formData.append('file', vars.file)
+      formData.append('dosyaId', dosyaId.toString())
+      formData.append('kategori', vars.kategori)
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      const data = (await res.json().catch(() => ({}))) as { error?: string }
+      if (!res.ok) throw new Error(data.error || 'Yükleme başarısız')
+      return data
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: trpc.belge.list.queryKey({ dosya_id: dosyaId }),
+      })
+      toast.success('Belge yüklendi')
+      setFile(null)
+      setKategori('')
+      setError(null)
+      onUploadComplete?.()
+    },
+    onError: (err) => {
+      setError(err.message || 'Yükleme başarısız. Lütfen tekrar deneyin.')
+    },
+  })
 
   const handleFile = useCallback((selectedFile: File) => {
     setError(null)
@@ -65,9 +73,9 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
       return
     }
 
-    // Validate size (20MB)
-    if (selectedFile.size > 20 * 1024 * 1024) {
-      setError("Dosya boyutu 20 MB'ı aşamaz.")
+    // Validate size (10MB)
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      setError("Dosya boyutu 10 MB'ı aşamaz.")
       return
     }
 
@@ -84,45 +92,12 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
     [handleFile],
   )
 
-  const handleUpload = async () => {
+  const handleUpload = () => {
     if (!file || !kategori) {
       setError('Lütfen hem dosya seçin hem de kategori belirleyin.')
       return
     }
-
-    // Upload to Route Handler
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('dosyaId', dosyaId.toString())
-    formData.append('dosyaNo', dosyaNo)
-    formData.append('kategori', kategori)
-
-    let uploadResult
-    try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || 'Yükleme başarısız')
-      }
-      uploadResult = await res.json()
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Yükleme başarısız. Lütfen tekrar deneyin.')
-      return
-    }
-
-    // Call tRPC to save metadata
-    createMutation.mutate({
-      dosya_id: dosyaId,
-      dosya_no: dosyaNo,
-      kategori: kategori as (typeof BELGE_KATEGORILER)[number],
-      dosya_adi: uploadResult.dosya_adi,
-      dosya_yolu: uploadResult.dosya_yolu,
-      dosya_boyutu: uploadResult.dosya_boyutu,
-      mime_tur: uploadResult.mime_tur,
-    })
+    uploadMutation.mutate({ file, kategori })
   }
 
   return (
@@ -172,7 +147,7 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
           <>
             <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-lg font-medium mb-1">Dosyayı sürükle & bırak veya tıkla</p>
-            <p className="text-sm text-muted-foreground">PDF, DOC, DOCX, JPG, PNG — maks. 20 MB</p>
+            <p className="text-sm text-muted-foreground">PDF, DOC, DOCX, JPG, PNG — maks. 10 MB</p>
           </>
         )}
         <input
@@ -217,10 +192,10 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
       {/* Upload button - accent colored per UI-SPEC */}
       <Button
         onClick={handleUpload}
-        disabled={!file || !kategori || createMutation.isPending}
+        disabled={!file || !kategori || uploadMutation.isPending}
         className="bg-[var(--accent)] hover:bg-[var(--accent)]/90"
       >
-        {createMutation.isPending ? 'Yükleniyor...' : 'Belge Yükle'}
+        {uploadMutation.isPending ? 'Yükleniyor...' : 'Belge Yükle'}
       </Button>
     </div>
   )

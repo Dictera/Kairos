@@ -21,11 +21,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Webcal butonu tek buton yerine "Uygulama Aç" + "Linki Kopyala" olarak ikiye bölündü
 - Telegram bildirim mesajları gruplandırıldı; müvekkil adı kaldırıldı
 - Hızlı metin arama — SQLite FTS5 trigram dizini ve pragma ayarlarıyla dosya/müvekkil aramaları belirgin şekilde hızlandı
+- Belge yükleme sınırı 20 MB'tan 10 MB'a indirildi
 
 ### Fixed
 
 - Kurulum başlatıcıları artık Türkçe olmayan Windows dil ayarlarında da çalışıyor
 - Erişilebilirlik ve arayüz render düzeltmeleri (React Doctor bulguları)
+- Belge yükleme: kayıt oluşturulamazsa yüklenen dosya diskte sahipsiz kalmıyor; dosya içeriği bildirilen türle doğrulanıyor
+- Finansal rapor PDF'i: "Son 30 Gün İşlem Sayısı" artık tüm kayıtları değil, son 30 gündeki işlemleri sayıyor
+- Finans ve portföy rapor PDF'leri (`/api/raporlar/*/pdf`) pdfmake 0.3 ile hiç üretilemiyordu (500); düzeltildi ve Türkçe karakterler (İ, ş, ğ, ı) doğru görünüyor
 
 ### Removed
 

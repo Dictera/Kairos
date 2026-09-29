@@ -124,7 +124,7 @@ Migration dosyaları `./drizzle/*.sql` altındadır ve her biri bir önceki migr
 
 | Tür | Konum | Maks. Boyut |
 |-----|-------|-------------|
-| Müvekkil belgeleri | `E:/sigorta-belgeler/{tur}/{sigortaTuru}/{muvekkilAd}/` | 20 MB |
+| Müvekkil belgeleri | `E:/sigorta-belgeler/{tur}/{sigortaTuru}/{muvekkilAd}/` | 10 MB |
 | Şablon `.docx` dosyaları | `./uploads/templates/` | 10 MB |
 
 `uploads/` dizini git ile takip edilmez. Müvekkil belgeleri `E:/sigorta-belgeler` sabit yolunda, dosya türüne (STK / Asliye Ticaret / Asliye Hukuk), sigorta türüne ve müvekkil adına göre hiyerarşik klasör yapısında saklanır (`lib/belgeler-storage.ts`).
