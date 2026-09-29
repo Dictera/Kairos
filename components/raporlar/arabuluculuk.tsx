@@ -58,7 +58,10 @@ export function Arabuluculuk() {
   const { data, isLoading } = useQuery(
     trpc.raporlar.arabuluculuk.queryOptions() as unknown as {
       queryKey: unknown[]
-      queryFn: () => Promise<{ aylik: ArabuluculukAylikRow[] }>
+      queryFn: () => Promise<{
+        aylik: ArabuluculukAylikRow[]
+        ozet: { araSure: number | null; davaSure: number | null }
+      }>
     },
   )
 
@@ -72,13 +75,13 @@ export function Arabuluculuk() {
   const totDavaCoz = aylik.reduce((a, r) => a + r.davaCoz, 0)
   const araBasari = totAra > 0 ? ((totAraCoz / totAra) * 100).toFixed(0) : '0'
   const davaBasari = totDava > 0 ? ((totDavaCoz / totDava) * 100).toFixed(0) : '0'
-  const ortAraSure = Math.round(aylik.reduce((a, r) => a + r.araSure, 0) / aylik.length)
-  const ortDavaSure = Math.round(aylik.reduce((a, r) => a + r.davaSure, 0) / aylik.length)
+  // Weighted by case count on the server; null when there is no such case.
+  const { araSure: ortAraSure, davaSure: ortDavaSure } = data.ozet
 
   const karisikChart = aylik.map((r) => ({ name: r.ay, Arabuluculuk: r.ara, Dava: r.dava }))
   const sureChart = [
-    { name: 'Arabuluculuk', Sure: ortAraSure, fill: C.accent },
-    { name: 'Dava', Sure: ortDavaSure, fill: C.danger },
+    { name: 'Arabuluculuk', Sure: ortAraSure ?? 0, fill: C.accent },
+    { name: 'Dava', Sure: ortDavaSure ?? 0, fill: C.danger },
   ]
 
   return (
@@ -100,17 +103,21 @@ export function Arabuluculuk() {
         />
         <KPICard
           label="Ort. Ara Süresi"
-          value={`${ortAraSure} gün`}
+          value={ortAraSure === null ? '—' : `${ortAraSure} gün`}
           color={C.success}
           Icon={Clock}
           sub="Arabuluculuk tamamlanma"
         />
         <KPICard
           label="Ort. Dava Süresi"
-          value={`${ortDavaSure} gün`}
+          value={ortDavaSure === null ? '—' : `${ortDavaSure} gün`}
           color={C.masraf}
           Icon={Clock}
-          sub={ortAraSure > 0 ? `${Math.round(ortDavaSure / ortAraSure)}× daha uzun` : undefined}
+          sub={
+            ortAraSure && ortDavaSure !== null
+              ? `${Math.round(ortDavaSure / ortAraSure)}× daha uzun`
+              : undefined
+          }
         />
       </div>
 

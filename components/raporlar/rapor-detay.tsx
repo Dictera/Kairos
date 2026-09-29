@@ -52,9 +52,14 @@ function ReportBody({ slug, yil }: { slug: string; yil: YilFilter }) {
   }
 }
 
+// Current year and the two before it. Computed once at module load (stable
+// across SSR/hydration) — avoids new Date() in render.
+const BU_YIL = new Date().getFullYear()
+const YIL_SECENEKLERI = [BU_YIL, BU_YIL - 1, BU_YIL - 2].map((y) => String(y) as YilFilter)
+
 export function RaporDetay({ slug }: { slug: string }) {
   const router = useRouter()
-  const [yil, setYil] = useState<YilFilter>('2026')
+  const [yil, setYil] = useState<YilFilter>(YIL_SECENEKLERI[0])
 
   const currentIndex = REPORTS.findIndex((r) => r.id === slug)
   const rpt = REPORTS[currentIndex] ?? null
@@ -124,8 +129,11 @@ export function RaporDetay({ slug }: { slug: string }) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="2025">2025</SelectItem>
-                <SelectItem value="2026">2026</SelectItem>
+                {YIL_SECENEKLERI.map((y) => (
+                  <SelectItem key={y} value={y}>
+                    {y}
+                  </SelectItem>
+                ))}
                 <SelectItem value="all">Tümü</SelectItem>
               </SelectContent>
             </Select>

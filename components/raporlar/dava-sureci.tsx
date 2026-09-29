@@ -14,14 +14,14 @@ interface DavaSureData {
   asamalar: AsamaRow[]
   uzunDosyalar: UzunDosyaRow[]
   sirketSureleri: { ad: string; ortGun: number }[]
+  yil: string
   kapananYil: number
+  aktifDosya: number
+  ortKapanisGun: number | null
 }
 
 type AsamaBarItem = { name: string; 'Ort. Süre': number; 'Maks. Süre': number; fill: string }
 type SirketBarItem = { name: string; Gun: number; fill: string }
-
-// Computed once at module load (stable across SSR/hydration) — avoids new Date() in render
-const PREV_YEAR = new Date().getFullYear() - 1
 
 const AsamaBarChart = dynamic<{ data: AsamaBarItem[] }>(
   async () => {
@@ -117,9 +117,9 @@ const SirketBarChart = dynamic<{ data: SirketBarItem[] }>(
 const ASAMA_COLORS: Record<string, string> = {
   Başvuru: C.accent,
   'Belge Toplama': C.success,
-  'Şirket Görüşme': C.masraf,
   Uzlaşma: C.purple,
   Dava: C.danger,
+  'Kanun Yolu': '#0ea5e9',
   'Karar & Tahsilat': C.amber,
 }
 
@@ -133,12 +133,11 @@ export function DavaSureci() {
   )
 
   if (isLoading) return <ReportLoading />
-  if (!data || data.asamalar.length === 0) return <ReportEmpty />
+  if (!data || (data.aktifDosya === 0 && data.ortKapanisGun === null)) return <ReportEmpty />
 
-  const { asamalar, uzunDosyalar, sirketSureleri, kapananYil } = data
-  const ortToplam = asamalar.reduce((a, s) => a + s.ort, 0)
-  const enUzun = asamalar.reduce((a, b) => (b.ort > a.ort ? b : a))
-  const aktif = asamalar.reduce((a, s) => a + s.adet, 0)
+  const { asamalar, uzunDosyalar, sirketSureleri, yil, kapananYil, aktifDosya, ortKapanisGun } =
+    data
+  const enUzun = asamalar.length ? asamalar.reduce((a, b) => (b.ort > a.ort ? b : a)) : null
 
   const asamaChart: AsamaBarItem[] = asamalar.map((a) => ({
     name: a.asama,
@@ -157,21 +156,21 @@ export function DavaSureci() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KPICard
           label="Ort. Toplam Süre"
-          value={`${ortToplam} gün`}
+          value={ortKapanisGun === null ? '—' : `${ortKapanisGun} gün`}
           color={C.accent}
           Icon={Clock}
-          sub="Açılıştan kapanışa"
+          sub="Kapanan dosyalarda açılıştan kapanışa"
         />
         <KPICard
           label="En Uzun Aşama"
-          value={enUzun.asama}
+          value={enUzun?.asama ?? '—'}
           color={C.danger}
           Icon={AlertOctagon}
-          sub={`Ort. ${enUzun.ort} gün`}
+          sub={enUzun ? `Aktif dosyalarda ort. ${enUzun.ort} gün` : undefined}
         />
-        <KPICard label="Aktif Dosya" value={aktif} color={C.success} Icon={Layers} />
+        <KPICard label="Aktif Dosya" value={aktifDosya} color={C.success} Icon={Layers} />
         <KPICard
-          label={`${PREV_YEAR} Kapanan`}
+          label={`${yil} Kapanan`}
           value={kapananYil}
           color={C.masraf}
           Icon={CheckCircle2}
@@ -181,7 +180,10 @@ export function DavaSureci() {
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
         <Card className="overflow-hidden p-0">
-          <CardHead title="Aşama Bazlı Süre" sub="Ortalama (koyu) ve maksimum (soluk) gün" />
+          <CardHead
+            title="Aşama Bazlı Süre"
+            sub="Aktif dosyalar, bulunduğu aşamaya göre — ortalama (koyu) ve maksimum (soluk) gün"
+          />
           <CardContent className="px-[18px] py-4">
             <div className="h-[260px]">
               <AsamaBarChart data={asamaChart} />
@@ -190,7 +192,10 @@ export function DavaSureci() {
         </Card>
 
         <Card className="overflow-hidden p-0">
-          <CardHead title="Şirket Bazlı Ort. Çözüm Süresi" sub="Hedef: 180 gün — kırmızı aşıldı" />
+          <CardHead
+            title="Şirket Bazlı Ort. Çözüm Süresi"
+            sub="Kapanan dosyalar — turuncu 200+, kırmızı 270+ gün"
+          />
           <CardContent className="px-[18px] py-4">
             <div className="h-[260px]">
               <SirketBarChart data={sirketChart} />

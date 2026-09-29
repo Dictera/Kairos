@@ -30,6 +30,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Belge yükleme: kayıt oluşturulamazsa yüklenen dosya diskte sahipsiz kalmıyor; dosya içeriği bildirilen türle doğrulanıyor
 - Finansal rapor PDF'i: "Son 30 Gün İşlem Sayısı" artık tüm kayıtları değil, son 30 gündeki işlemleri sayıyor
 - Finans ve portföy rapor PDF'leri (`/api/raporlar/*/pdf`) pdfmake 0.3 ile hiç üretilemiyordu (500); düzeltildi ve Türkçe karakterler (İ, ş, ğ, ı) doğru görünüyor
+- Yönetim Özeti: Toplam Talep / Karar / Tahsilat ve tazminat hunisi yalnızca ilk 8 şirketten hesaplanıyordu (şirketi girilmemiş dosyalar hiç sayılmıyordu); artık tüm portföyden. Gelir trendi 2026'ya sabitti, artık içinde bulunulan yıl
+- Genel Bakış yıl filtresi 2025/2026'ya sabitti; artık son üç yıl
+- Dava Süreci: Replik, Düplik, Karar Tebliğ, İstinaf ve Temyiz aşamasındaki dosyalar "Belge Toplama"da görünüyordu (istinaf, temyiz ve STK itirazı artık "Kanun Yolu"); "Aktif Dosya" arşivdekileri de sayıyordu; "Ort. Toplam Süre" aşama ortalamalarının toplamıydı (artık kapanan dosyalarda açılıştan kapanışa); "Kapanan" kartı geçen yılın etiketiyle bu yılı sayıyordu ve kapanışı son düzenleme tarihinden alıyordu (artık arşivleme kaydından); kapanan dosyaların süresi bugüne kadar uzamaya devam ediyordu; tutar sütunu talep ile karar tutarını topluyordu
+- Arabuluculuk: ortalama süreler aylık ortalamaların ortalamasıydı, dosyasız aylar 0 gün sayılıyordu; artık dosya sayısıyla ağırlıklı ve son tutanak / karar tarihinde duruyor
+- Sonuç & Başarı: aylık sonuç grafiği son düzenleme tarihine göre değil, kayıtlıysa karar tarihine göre; aylık grafiklerde ay etiketlerine yıl eklendi
 - Portföy rapor PDF'i: Aktif/Pasif ve "Mahkeme" sayıları var olmayan değerlere bakıldığı için hep 0'dı; artık Aktif/Arşiv ve STK / Asliye Ticaret / Asliye Hukuk dağılımı doğru sayılıyor
 
 ### Removed
