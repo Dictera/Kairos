@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getIronSession } from 'iron-session'
 import { cookies } from 'next/headers'
-import { sessionOptions, type SessionData } from '@/lib/session'
+import { isAuthenticated, sessionOptions, type SessionData } from '@/lib/session'
 
 // /api/health is public so launchers can probe readiness without a session
 // (it only returns { ok: true }).
@@ -19,7 +19,7 @@ export async function proxy(request: NextRequest) {
   const cookieStore = await cookies()
   const session = await getIronSession<SessionData>(cookieStore, sessionOptions)
 
-  if (!session.isLoggedIn) {
+  if (!isAuthenticated(session)) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 

@@ -5,12 +5,15 @@ import { sablonRouter } from '@/lib/trpc/routers/sablon'
 import { db } from '@/lib/db'
 import { docxSablon, belge, muvekkil, dosya } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
+import { passwordVersion } from '@/lib/session'
 
 const FIXTURE = path.resolve(process.cwd(), 'tests/fixtures/test-template.docx')
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'templates')
 
-// Mock auth context — SessionData only requires isLoggedIn
-const ctx = { session: { isLoggedIn: true } } as Parameters<typeof sablonRouter.createCaller>[0]
+// Mock auth context — logged in with the current APP_PASSWORD fingerprint
+const ctx = { session: { isLoggedIn: true, pwv: passwordVersion() } } as Parameters<
+  typeof sablonRouter.createCaller
+>[0]
 
 function copyFixtureForTest(suffix: string): string {
   if (!existsSync(UPLOAD_DIR)) mkdirSync(UPLOAD_DIR, { recursive: true })

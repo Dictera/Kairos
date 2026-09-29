@@ -6,7 +6,9 @@ Bu uygulama iki tür API sunar: **tRPC** (iş mantığı için) ve **REST Route 
 
 ## Authentication
 
-Kimlik doğrulama **iron-session** tabanlı cookie-session mekanizması ile sağlanır. Oturum `POST /api/auth/login` endpoint'inden `password` alanı ile başlatılır — şifre `APP_PASSWORD` ortam değişkeniyle eşleşmelidir.
+Kimlik doğrulama **iron-session** tabanlı cookie-session mekanizması ile sağlanır. Oturum `POST /api/auth/login` endpoint'inden `password` alanı ile başlatılır — şifre `APP_PASSWORD` ortam değişkeniyle eşleşmelidir. `POST /api/auth/logout` oturumu sonlandırır (arayüzde sağ üstteki hesap menüsü → **Çıkış yap**).
+
+Oturum, giriş anındaki `APP_PASSWORD`'ün kısa bir parmak izini (`pwv`) taşır ve her istekte güncel şifreyle karşılaştırılır: **şifre değiştirilince tüm açık oturumlar geçersiz olur.**
 
 **Session cookie özellikleri:**
 - **Cookie adı:** `sigorta-session` (varsayılan, `SESSION_COOKIE_NAME` ortam değişkeniyle değiştirilebilir)
@@ -16,7 +18,7 @@ Kimlik doğrulama **iron-session** tabanlı cookie-session mekanizması ile sağ
 - **SameSite:** `lax`
 - **Path:** `/`
 
-Tüm tRPC procedure'ları (`health`, `pipeline.healthCheck`, ve `pipeline.status` hariç) `protectedProcedure` ile korunur — geçerli oturum olmadan `UNAUTHORIZED` (401) hatası döner. REST file-serving endpoint'leri de session kontrolü yapar.
+Tüm tRPC procedure'ları (`health` hariç) `protectedProcedure` ile korunur — geçerli oturum olmadan `UNAUTHORIZED` (401) hatası döner. REST file-serving endpoint'leri de session kontrolü yapar.
 
 ### Oturum Açma
 

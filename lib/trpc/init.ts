@@ -2,7 +2,7 @@ import { initTRPC, TRPCError } from '@trpc/server'
 import superjson from 'superjson'
 import { getIronSession } from 'iron-session'
 import { cookies } from 'next/headers'
-import { sessionOptions, type SessionData } from '@/lib/session'
+import { isAuthenticated, sessionOptions, type SessionData } from '@/lib/session'
 
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   // IMPORTANT: cookies() is async in Next.js 15 — must await
@@ -22,9 +22,9 @@ export const createTRPCRouter = t.router
 export const publicProcedure = t.procedure
 export const createCallerFactory = t.createCallerFactory
 
-// protectedProcedure: throws UNAUTHORIZED if session.isLoggedIn is false
+// protectedProcedure: throws UNAUTHORIZED unless the session is logged in with the current password
 export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
-  if (!ctx.session.isLoggedIn) {
+  if (!isAuthenticated(ctx.session)) {
     throw new TRPCError({ code: 'UNAUTHORIZED' })
   }
   return next({ ctx: { session: ctx.session } })
