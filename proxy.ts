@@ -3,7 +3,9 @@ import { getIronSession } from 'iron-session'
 import { cookies } from 'next/headers'
 import { sessionOptions, type SessionData } from '@/lib/session'
 
-const PUBLIC_PATHS = ['/login', '/api/trpc', '/api/auth']
+// /api/health is public so launchers can probe readiness without a session
+// (it only returns { ok: true }).
+const PUBLIC_PATHS = ['/login', '/api/trpc', '/api/auth', '/api/health']
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl

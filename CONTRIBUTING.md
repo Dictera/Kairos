@@ -23,7 +23,7 @@ pnpm run dev                  # localhost:3000
 
 ## Kod Standartları / Coding Standards
 
-Proje [oxlint](https://oxc.rs/docs/guide/usage/linter) kullanır; yapılandırma `.oxlintrc.json` dosyasındadır. TypeScript, React (hooks dahil), Next.js ve temel jsx-a11y kuralları etkindir.
+Proje [oxlint](https://oxc.rs/docs/guide/usage/linter) kullanır; yapılandırma `.oxlintrc.json` dosyasındadır. TypeScript, React (hooks dahil), Next.js ve jsx-a11y erişilebilirlik kuralları etkindir. Bilinçli istisnalar gerekçesiyle `oxlint-disable-next-line` yorumuyla işaretlenir.
 
 - **Lint komutu:** `pnpm run lint`
 - **Formatlama:** Ayrı bir Prettier veya Biome yapılandırması yoktur.

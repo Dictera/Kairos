@@ -64,6 +64,8 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                // Single-field login page: focusing the password field is the expected entry point.
+                // oxlint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
               />
             </div>
