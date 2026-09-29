@@ -51,7 +51,7 @@ export const C = {
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type YilFilter = 'all' | '2025' | '2026'
+export type YilFilter = 'all' | `${number}`
 
 export interface AyRow {
   ay: string // "YYYY-MM"
@@ -131,8 +131,8 @@ export interface ArabuluculukAylikRow {
   dava: number
   araCoz: number
   davaCoz: number
-  araSure: number
-  davaSure: number
+  araSure: number | null // null: no case of that kind in the month
+  davaSure: number | null
 }
 
 export interface AsamaRow {

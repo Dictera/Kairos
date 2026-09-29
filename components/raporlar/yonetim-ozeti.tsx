@@ -44,7 +44,9 @@ const ResponsiveContainer = dynamic(() => import('recharts').then((m) => m.Respo
 })
 
 interface YonetimOzetiData {
-  ay2026: AyRow[]
+  yil: string
+  ayBuYil: AyRow[]
+  toplam: { talep: number; karar: number; tahsilat: number }
   sirketler: SirketRow[]
   sonucTur: SonucTurRow[]
   dosyaStatus: DosyaStatusRow[]
@@ -59,16 +61,15 @@ export function YonetimOzeti() {
     },
   )
 
-  const ay2026 = useMemo(() => enrichAy(data?.ay2026 ?? []), [data?.ay2026])
+  const ayBuYil = useMemo(() => enrichAy(data?.ayBuYil ?? []), [data?.ayBuYil])
 
   if (isLoading) return <ReportLoading />
   if (!data) return <ReportEmpty />
 
-  const { sirketler, sonucTur, dosyaStatus } = data
+  const { yil, toplam, sirketler, sonucTur, dosyaStatus } = data
 
-  const topTalep = sirketler.reduce((a, s) => a + s.talep, 0)
-  const topKarar = sirketler.reduce((a, s) => a + s.karar, 0)
-  const topTahsilat = sirketler.reduce((a, s) => a + s.tahsilat, 0)
+  // Portfolio-wide totals from the server (sirketler is only the top 8 companies).
+  const { talep: topTalep, karar: topKarar, tahsilat: topTahsilat } = toplam
   const topDosya = dosyaStatus.reduce((a, d) => a + d.adet, 0)
 
   const sonucTot = sonucTur.reduce(
@@ -96,7 +97,7 @@ export function YonetimOzeti() {
     },
   ].filter(Boolean) as Array<{ sev: string; color: string; msg: string; Icon: LucideIcon }>
 
-  const trendData = ay2026.map((d) => ({ name: d.label, Gelen: d.gelen, Net: d.net }))
+  const trendData = ayBuYil.map((d) => ({ name: d.label, Gelen: d.gelen, Net: d.net }))
 
   return (
     <div className="flex flex-col gap-3.5">
@@ -172,7 +173,7 @@ export function YonetimOzeti() {
         </Card>
 
         <Card className="overflow-hidden p-0">
-          <CardHead title="2026 Yılı Gelir Trendi" sub="Aylık gelen tahsilat ve net gelir" />
+          <CardHead title={`${yil} Yılı Gelir Trendi`} sub="Aylık gelen tahsilat ve net gelir" />
           <CardContent className="px-[18px] py-4">
             <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">

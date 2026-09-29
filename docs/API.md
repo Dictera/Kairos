@@ -271,14 +271,14 @@ Arama alanları: dosya_no, müvekkil ad/soyad, hasar dosya no, plaka, TC/Vergi n
 ### `rapor`
 | Procedure | Tip | Açıklama |
 |-----------|-----|----------|
-| `yonetimOzeti` | query | Yönetim özeti: dosya sayıları, finans özeti, başarı oranı, şirket/tür analizi |
-| `genelBakis` | query | Aylık finans ve dosya trendi (gelen/giden/masraf/net + yeni dosya) |
+| `yonetimOzeti` | query | Yönetim özeti: portföy geneli talep/karar/tahsilat toplamları, içinde bulunulan yılın aylık trendi, başarı oranı, ilk 8 şirket, tür analizi |
+| `genelBakis` | query | `{ yil: 'all' \| 'YYYY' }` — aylık finans ve dosya trendi (gelen/giden/masraf/net + yeni dosya) |
 | `tahsilat` | query | Sigorta şirketi bazlı tahsilat analizi (talep/karar/tahsilat oranları, ödeme aşaması dağılımı) |
 | `sonucBasari` | query | Başarı oranı analizi: kazanılan/uzlaşma/kaybedilen/devam eden, tür ve şirket bazlı |
-| `arabuluculuk` | query | STK arabuluculuk analizi: arabuluculukta kalan vs davaya giden, çözülme oranları, ortalama süreler |
+| `arabuluculuk` | query | STK arabuluculuk analizi: arabuluculukta kalan vs davaya giden, çözülme oranları, dosya sayısıyla ağırlıklı ortalama süreler (son tutanak / karar tarihinde durur) |
 | `dosyaRaporu` | query | Dosya dağılım raporu: durum, tür ve alt tür (sigorta türü) bazlı sayılar ve tahsilat |
 | `muvekkilRaporu` | query | Müvekkil bazlı rapor: dosya sayısı, tahsilat/gider/masraf/net, tahsilat oranı, son aktivite |
-| `davaSureci` | query | Dava süreç analizi: aşama bazlı ortalama/min/max süreler, en uzun süren aktif dosyalar |
+| `davaSureci` | query | Dava süreç analizi: aktif dosyaların aşama bazlı ortalama/min/max süreleri, en uzun süren aktif dosyalar, kapanan dosyaların şirket bazlı çözüm süresi, bu yıl kapanan (kapanış tarihi etkinlik günlüğündeki arşivleme kaydından) |
 | `sirketAnalizi` | query | Sigorta şirketi karşılaştırmalı analizi: talep/karar/tahsilat oranları, kümülatif trend verisi |
 
 ---

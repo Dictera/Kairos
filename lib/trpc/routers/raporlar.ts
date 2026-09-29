@@ -1,13 +1,16 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { db } from '@/lib/db'
+import { and, eq, max } from 'drizzle-orm'
 import {
   dosya,
   muvekkil,
   finans_kalemi,
+  olayGunlugu,
   sigortaSirketi,
   sigortaTuru,
   parseSurecDetay,
+  type SurecDetay,
 } from '@/lib/schema'
 
 const MONTHS_TR = [
@@ -37,14 +40,56 @@ const DAVA_ASAMALARI = new Set([
   'KESİNLEŞME',
 ])
 
-function daysBetween(from: string, to: Date = new Date()): number {
+function daysBetween(from: string, to: Date | string = new Date()): number {
   const d = new Date(from)
-  return Math.max(0, Math.ceil((to.getTime() - d.getTime()) / 86_400_000))
+  const end = typeof to === 'string' ? new Date(to) : to
+  return Math.max(0, Math.ceil((end.getTime() - d.getTime()) / 86_400_000))
 }
 
+/** "2026-03" → "Mar'26" — same format as enrichAy on the client, so months of different years stay distinct. */
 function ayLabel(ay: string): string {
-  const [, m] = ay.split('-').map(Number)
-  return MONTHS_TR[m - 1] ?? ay
+  const [y, m] = ay.split('-').map(Number)
+  const ad = MONTHS_TR[m - 1]
+  return ad ? `${ad}'${String(y).slice(2)}` : ay
+}
+
+/**
+ * When each archived dosya was closed: the latest "Dosya arşivlendi" entry in
+ * the activity log. dosya.updated_at is not usable on its own because any
+ * later edit moves it.
+ */
+async function arsivlenmeTarihleri(): Promise<Map<number, string>> {
+  const rows = await db
+    .select({ dosya_id: olayGunlugu.dosya_id, tarih: max(olayGunlugu.created_at) })
+    .from(olayGunlugu)
+    .where(
+      and(
+        eq(olayGunlugu.olay_turu, 'durum_degisikligi'),
+        eq(olayGunlugu.aciklama, 'Dosya arşivlendi'),
+      ),
+    )
+    .groupBy(olayGunlugu.dosya_id)
+  return new Map(rows.flatMap((r) => (r.tarih ? [[r.dosya_id, r.tarih] as const] : [])))
+}
+
+/** Closing date of an archived dosya (null while active); updated_at for rows archived before logging. */
+function kapanisTarihi(
+  d: { id: number; durum: string; updated_at: string },
+  arsivlenme: Map<number, string>,
+): string | null {
+  if (d.durum !== 'arsiv') return null
+  return arsivlenme.get(d.id) ?? d.updated_at
+}
+
+/** Best available date of a case's outcome: the decision date when recorded, else the last edit. */
+function sonucTarihi(surec: SurecDetay, updatedAt: string): string {
+  return (
+    surec.stk?.karar_tarihi ??
+    surec.mahkeme?.karar_tebliğ_tarihi ??
+    surec.stk?.kesinlesme_tarihi ??
+    surec.mahkeme?.kesinlesme_tarihi ??
+    updatedAt
+  )
 }
 
 export const raporlarRouter = createTRPCRouter({
@@ -58,28 +103,35 @@ export const raporlarRouter = createTRPCRouter({
 
     const sirketMap = Object.fromEntries(tumSirket.map((s) => [s.id, s.ad]))
 
-    // ay2026 — monthly rows filtered to 2026
-    const byMonth2026: Record<
-      string,
-      { gelen: number; giden: number; masraf: number; dosya: number }
-    > = {}
+    // ayBuYil — monthly rows of the current year
+    const yil = String(new Date().getFullYear())
+    const byMonth: Record<string, { gelen: number; giden: number; masraf: number; dosya: number }> =
+      {}
     tumFinans.forEach((f) => {
-      if (!f.tarih.startsWith('2026')) return
+      if (!f.tarih.startsWith(yil)) return
       const ay = f.tarih.substring(0, 7)
-      if (!byMonth2026[ay]) byMonth2026[ay] = { gelen: 0, giden: 0, masraf: 0, dosya: 0 }
-      if (f.tur === 'Gelen') byMonth2026[ay].gelen += f.tutar ?? 0
-      if (f.tur === 'Giden') byMonth2026[ay].giden += f.tutar ?? 0
-      if (f.tur === 'Masraf') byMonth2026[ay].masraf += f.tutar ?? 0
+      if (!byMonth[ay]) byMonth[ay] = { gelen: 0, giden: 0, masraf: 0, dosya: 0 }
+      if (f.tur === 'Gelen') byMonth[ay].gelen += f.tutar ?? 0
+      if (f.tur === 'Giden') byMonth[ay].giden += f.tutar ?? 0
+      if (f.tur === 'Masraf') byMonth[ay].masraf += f.tutar ?? 0
     })
     tumDosyalar.forEach((d) => {
-      if (!d.created_at.startsWith('2026')) return
+      if (!d.created_at.startsWith(yil)) return
       const ay = d.created_at.substring(0, 7)
-      if (!byMonth2026[ay]) byMonth2026[ay] = { gelen: 0, giden: 0, masraf: 0, dosya: 0 }
-      byMonth2026[ay].dosya++
+      if (!byMonth[ay]) byMonth[ay] = { gelen: 0, giden: 0, masraf: 0, dosya: 0 }
+      byMonth[ay].dosya++
     })
-    const ay2026 = Object.entries(byMonth2026)
+    const ayBuYil = Object.entries(byMonth)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([ay, d]) => ({ ay, ...d }))
+
+    // toplam — portfolio-wide totals. sirketler below is cut to the top 8 and
+    // skips dosyalar without a karşı taraf şirket, so KPIs must not sum it.
+    const toplam = {
+      talep: tumDosyalar.reduce((a, d) => a + (d.talep_tutari ?? 0), 0),
+      karar: tumDosyalar.reduce((a, d) => a + (d.karar_tutari ?? 0), 0),
+      tahsilat: tumFinans.reduce((a, f) => a + (f.tur === 'Gelen' ? (f.tutar ?? 0) : 0), 0),
+    }
 
     // sirketler — per company talep/karar/tahsilat
     const sirketAgg: Record<
@@ -142,12 +194,12 @@ export const raporlarRouter = createTRPCRouter({
       renk: STATUS_RENK[durum] ?? '#1c768f',
     }))
 
-    return { ay2026, sirketler, sonucTur, dosyaStatus }
+    return { yil, ayBuYil, toplam, sirketler, sonucTur, dosyaStatus }
   }),
 
   // ── Genel Bakış ────────────────────────────────────────────────────────────
   genelBakis: protectedProcedure
-    .input(z.object({ yil: z.enum(['all', '2025', '2026']) }))
+    .input(z.object({ yil: z.union([z.literal('all'), z.string().regex(/^\d{4}$/)]) }))
     .query(async ({ input }) => {
       const [tumFinans, tumDosyalar] = await Promise.all([
         db.select().from(finans_kalemi),
@@ -270,7 +322,7 @@ export const raporlarRouter = createTRPCRouter({
     const aylikAgg: Record<string, { kazan: number; uzlasma: number; kaybet: number }> = {}
     tumDosyalar.forEach((d) => {
       if (!d.sonuc || d.sonuc === 'devam') return
-      const ay = d.updated_at?.substring(0, 7) ?? d.created_at.substring(0, 7)
+      const ay = sonucTarihi(parseSurecDetay(d.surec_detay), d.updated_at).substring(0, 7)
       if (!aylikAgg[ay]) aylikAgg[ay] = { kazan: 0, uzlasma: 0, kaybet: 0 }
       if (d.sonuc === 'kazanıldı') aylikAgg[ay].kazan++
       else if (d.sonuc === 'uzlaşma') aylikAgg[ay].uzlasma++
@@ -329,14 +381,16 @@ export const raporlarRouter = createTRPCRouter({
         aylikAgg[ay].ara++
         if (cozuldu) aylikAgg[ay].araCoz++
         const basTarih = surec.stk?.ihtar_tarihi ?? d.created_at
-        const sure = daysBetween(basTarih, bugun)
+        // Ends at the final mediation minutes when recorded; open files count to today.
+        const sure = daysBetween(basTarih, surec.stk?.arabuluculuk_son_tutanak_tarihi ?? bugun)
         aylikAgg[ay].araSureToplam += sure
         aylikAgg[ay].araSureAdet++
       } else if (isDava) {
         aylikAgg[ay].dava++
         if (cozuldu) aylikAgg[ay].davaCoz++
         const basTarih = surec.stk?.basvuru_tarihi ?? surec.stk?.ihtar_tarihi ?? d.created_at
-        const sure = daysBetween(basTarih, bugun)
+        const bitis = surec.stk?.kesinlesme_tarihi ?? surec.stk?.karar_tarihi ?? bugun
+        const sure = daysBetween(basTarih, bitis)
         aylikAgg[ay].davaSureToplam += sure
         aylikAgg[ay].davaSureAdet++
       }
@@ -350,11 +404,27 @@ export const raporlarRouter = createTRPCRouter({
         dava: d.dava,
         araCoz: d.araCoz,
         davaCoz: d.davaCoz,
-        araSure: d.araSureAdet > 0 ? Math.round(d.araSureToplam / d.araSureAdet) : 0,
-        davaSure: d.davaSureAdet > 0 ? Math.round(d.davaSureToplam / d.davaSureAdet) : 0,
+        araSure: d.araSureAdet > 0 ? Math.round(d.araSureToplam / d.araSureAdet) : null,
+        davaSure: d.davaSureAdet > 0 ? Math.round(d.davaSureToplam / d.davaSureAdet) : null,
       }))
 
-    return { aylik }
+    // Overall averages weighted by case count. Averaging the monthly averages
+    // would count a month without any case as 0 days.
+    const toplamlar = Object.values(aylikAgg).reduce(
+      (a, d) => ({
+        araGun: a.araGun + d.araSureToplam,
+        araAdet: a.araAdet + d.araSureAdet,
+        davaGun: a.davaGun + d.davaSureToplam,
+        davaAdet: a.davaAdet + d.davaSureAdet,
+      }),
+      { araGun: 0, araAdet: 0, davaGun: 0, davaAdet: 0 },
+    )
+    const ozet = {
+      araSure: toplamlar.araAdet > 0 ? Math.round(toplamlar.araGun / toplamlar.araAdet) : null,
+      davaSure: toplamlar.davaAdet > 0 ? Math.round(toplamlar.davaGun / toplamlar.davaAdet) : null,
+    }
+
+    return { aylik, ozet }
   }),
 
   // ── Dosya Raporu ───────────────────────────────────────────────────────────
@@ -500,67 +570,73 @@ export const raporlarRouter = createTRPCRouter({
 
   // ── Dava Süreci ────────────────────────────────────────────────────────────
   davaSureci: protectedProcedure.query(async () => {
-    const [tumDosyalar, tumMuvekkil, tumSirket] = await Promise.all([
+    const [tumDosyalar, tumMuvekkil, tumSirket, arsivlenme] = await Promise.all([
       db.select().from(dosya),
       db.select().from(muvekkil),
       db.select().from(sigortaSirketi),
+      arsivlenmeTarihleri(),
     ])
 
     const muvekkilMap = Object.fromEntries(tumMuvekkil.map((m) => [m.id, `${m.ad} ${m.soyad}`]))
     const sirketMap = Object.fromEntries(tumSirket.map((s) => [s.id, s.ad]))
     const bugun = new Date()
-    const thisYear = bugun.getFullYear()
+    const yil = String(bugun.getFullYear())
 
-    // Compute per-dosya: asama + elapsed days
+    // Every STK_ASAMALAR and MAHKEME_ASAMALAR value maps to a group.
+    const ASAMA_GRUBU: Record<string, string> = {
+      İHTAR: 'Başvuru',
+      BAŞVURU: 'Başvuru',
+      ARABULUCULUK: 'Uzlaşma',
+      DAVA_DİLEKÇESİ_TEBLİĞ: 'Dava',
+      CEVAP_DİLEKÇESİ_TEBLİĞ: 'Dava',
+      REPLİK_DİLEKÇESİ_TEBLİĞ: 'Dava',
+      DUPLİK_DİLEKÇESİ_TEBLİĞ: 'Dava',
+      ÖN_İNCELEME: 'Dava',
+      BİLİRKİŞİ: 'Dava',
+      ISLAH: 'Dava',
+      DURUŞMALAR: 'Dava',
+      KARAR: 'Karar & Tahsilat',
+      KARAR_TEBLİĞ: 'Karar & Tahsilat',
+      KESİNLEŞME: 'Karar & Tahsilat',
+      İTİRAZ: 'Kanun Yolu',
+      İSTİNAF: 'Kanun Yolu',
+      TEMYİZ: 'Kanun Yolu',
+    }
+
+    // Per dosya: stage group and days elapsed — to today while active, to the
+    // closing date once archived (otherwise closed files keep "ageing").
     const dosyaInfo = tumDosyalar.map((d) => {
       const surec = parseSurecDetay(d.surec_detay)
       const asama = d.tur === 'STK' ? surec.stk?.asama : surec.mahkeme?.asama
       const start = surec.stk?.ihtar_tarihi ?? d.created_at
-      const gun = daysBetween(start, bugun)
-      const tutar = (d.talep_tutari ?? 0) + (d.karar_tutari ?? 0)
-      const asamaLabel: string = (() => {
-        if (!asama) return 'Başvuru'
-        const map: Record<string, string> = {
-          İHTAR: 'Başvuru',
-          ARABULUCULUK: 'Uzlaşma',
-          BAŞVURU: 'Başvuru',
-          ÖN_İNCELEME: 'Dava',
-          BİLİRKİŞİ: 'Dava',
-          ISLAH: 'Dava',
-          KARAR: 'Karar & Tahsilat',
-          İTİRAZ: 'Karar & Tahsilat',
-          KESİNLEŞME: 'Karar & Tahsilat',
-          DAVA_DİLEKÇESİ_TEBLİĞ: 'Dava',
-          CEVAP_DİLEKÇESİ_TEBLİĞ: 'Dava',
-          DURUŞMALAR: 'Dava',
-        }
-        return map[asama] ?? 'Belge Toplama'
-      })()
+      const kapanis = kapanisTarihi(d, arsivlenme)
       return {
         no: d.dosya_no,
         muvekkil: muvekkilMap[d.muvekkil_id] ?? '',
         sirket: d.karsitaraf_sigorta_id ? (sirketMap[d.karsitaraf_sigorta_id] ?? '') : '',
-        asama: asamaLabel,
-        gun,
-        tutar,
-        durum: d.durum,
+        asama: asama ? (ASAMA_GRUBU[asama] ?? 'Belge Toplama') : 'Başvuru',
+        gun: daysBetween(start, kapanis ?? bugun),
+        tutar: d.karar_tutari ?? d.talep_tutari ?? 0,
+        aktif: d.durum === 'aktif',
+        kapanis,
         sid: d.karsitaraf_sigorta_id,
-        created_at: d.created_at,
       }
     })
+    const aktifDosyalar = dosyaInfo.filter((d) => d.aktif)
+    const kapananDosyalar = dosyaInfo.filter((d) => d.kapanis !== null)
 
-    // asamalar
+    // asamalar — how long active files have been open, grouped by current stage
     const STAGE_RENK: Record<string, string> = {
       Başvuru: '#1c768f',
       'Belge Toplama': '#22c55e',
-      'Şirket Görüşme': '#f97316',
       Uzlaşma: '#746cac',
       Dava: '#ef4444',
+      'Kanun Yolu': '#0ea5e9',
       'Karar & Tahsilat': '#f59e0b',
     }
-    const STAGES = ['Başvuru', 'Belge Toplama', 'Uzlaşma', 'Dava', 'Karar & Tahsilat']
+    const STAGES = ['Başvuru', 'Belge Toplama', 'Uzlaşma', 'Dava', 'Kanun Yolu', 'Karar & Tahsilat']
     const asamaAgg: Record<string, number[]> = {}
-    dosyaInfo.forEach((d) => {
+    aktifDosyalar.forEach((d) => {
       if (!asamaAgg[d.asama]) asamaAgg[d.asama] = []
       asamaAgg[d.asama].push(d.gun)
     })
@@ -580,9 +656,8 @@ export const raporlarRouter = createTRPCRouter({
     })
 
     // uzunDosyalar
-    const uzunDosyalar = dosyaInfo
-      .filter((d) => d.durum === 'aktif')
-      .sort((a, b) => b.gun - a.gun)
+    const uzunDosyalar = aktifDosyalar
+      .toSorted((a, b) => b.gun - a.gun)
       .slice(0, 10)
       .map((d) => ({
         no: d.no,
@@ -593,9 +668,9 @@ export const raporlarRouter = createTRPCRouter({
         tutar: d.tutar,
       }))
 
-    // sirketSureleri
+    // sirketSureleri — resolution time: opening to closing of closed files
     const sirketGunAgg: Record<number, number[]> = {}
-    dosyaInfo.forEach((d) => {
+    kapananDosyalar.forEach((d) => {
       if (!d.sid) return
       if (!sirketGunAgg[d.sid]) sirketGunAgg[d.sid] = []
       sirketGunAgg[d.sid].push(d.gun)
@@ -607,12 +682,20 @@ export const raporlarRouter = createTRPCRouter({
       }))
       .sort((a, b) => b.ortGun - a.ortGun)
 
-    // kapananYil
-    const kapananYil = tumDosyalar.filter(
-      (d) => d.durum === 'arsiv' && d.updated_at?.startsWith(String(thisYear)),
-    ).length
+    const ortKapanisGun = kapananDosyalar.length
+      ? Math.round(kapananDosyalar.reduce((s, d) => s + d.gun, 0) / kapananDosyalar.length)
+      : null
+    const kapananYil = kapananDosyalar.filter((d) => d.kapanis?.startsWith(yil)).length
 
-    return { asamalar, uzunDosyalar, sirketSureleri, kapananYil }
+    return {
+      asamalar,
+      uzunDosyalar,
+      sirketSureleri,
+      yil,
+      kapananYil,
+      aktifDosya: aktifDosyalar.length,
+      ortKapanisGun,
+    }
   }),
 
   // ── Şirket Analizi ─────────────────────────────────────────────────────────
