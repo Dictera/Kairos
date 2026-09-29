@@ -49,6 +49,11 @@ PDF şablon özelliği kullanılmayacaksa bu iki değeri boş bırakabilirsiniz.
 
 `pnpm start` sunucuyu yalnızca `127.0.0.1:3000` üzerinde başlatır; uygulamaya aynı ağdaki başka cihazlardan erişilemez. (Production'da cookie `secure` olduğu için düz HTTP üzerinden ağdan giriş zaten çalışmıyordu.)
 
+Proxy (`proxy.ts`) iki ek kontrol yapar:
+
+- **Host kontrolü (DNS rebinding):** `Host` başlığı `localhost`, `127.0.0.1` veya `[::1]` değilse istek `403` ile reddedilir. Yerel bir reverse proxy arkasında çalıştırıyorsanız ek host adlarını `KAIROS_ALLOWED_HOSTS` (virgülle ayrılmış) ile tanımlayın.
+- **Origin kontrolü (CSRF):** `GET`/`HEAD`/`OPTIONS` dışındaki isteklerde `Origin` başlığı varsa `Host` ile aynı olmalıdır; aynı bilgisayardaki başka bir porttan (ör. `localhost:8080`) gelen istekler de reddedilir.
+
 `POST /api/auth/login` art arda 5 hatalı denemeden sonra girişi 1 dakika kilitler (`429`, `Retry-After` başlığıyla); her yeni kilit süresi ikiye katlanır, en fazla 15 dakika. Doğru şifreyle giriş sayacı sıfırlar. Sayaç bellekte tutulur, sunucu yeniden başlatılınca sıfırlanır.
 
 ### Per-Environment Overrides
