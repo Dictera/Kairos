@@ -74,7 +74,27 @@ export function UpdateBanner() {
     )
   }
 
-  if (!data || !data.supported || !data.updateAvailable) return null
+  if (!data || !data.supported) return null
+
+  // Yeni sürüm var ama otomatik güncelleme engelli: sessizce gizlemek yerine nedenini göster.
+  if (!data.updateAvailable && data.behind > 0) {
+    return (
+      <div className="bg-muted/40 border border-border px-4 py-3">
+        <div className="flex items-center gap-2 text-foreground">
+          <ArrowUpCircle className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <p className="text-sm">
+            Yeni sürüm mevcut ({data.behind} güncelleme geride) ancak otomatik güncelleme
+            yapılamıyor:{' '}
+            {!data.remoteTrusted
+              ? 'güncelleme kaynağı resmi depo değil.'
+              : 'kurulum klasöründe yerel değişiklikler var (git status ile kontrol edin).'}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!data.updateAvailable) return null
 
   return (
     <div className="bg-accent/10 border border-accent/30 px-4 py-3">
