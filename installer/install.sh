@@ -411,10 +411,11 @@ printf "  Tarayıcı birkaç saniye içinde açılacaktır.\n\n"
 
 # Tarayıcıyı arka planda aç (sunucu HTTP 200 dönünce)
 open_browser() {
-  local url="http://localhost:3000" i code
+  # /api/health oturumsuz 200 döner (/ ise /login'e 307 yönlendirir).
+  local url="http://localhost:3000" probe="http://127.0.0.1:3000/api/health" i code
   for i in $(seq 1 120); do
     if command -v curl >/dev/null 2>&1; then
-      code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 2 "$url" 2>/dev/null || true)"
+      code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 2 "$probe" 2>/dev/null || true)"
       [ "$code" = "200" ] && break
     elif (exec 3<>/dev/tcp/127.0.0.1/3000) 2>/dev/null; then
       exec 3>&- 3<&-; break

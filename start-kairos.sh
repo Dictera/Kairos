@@ -59,8 +59,9 @@ printf "  Tarayıcı birkaç saniye içinde açılacaktır.\n\n"
 
 open_browser() {
   # Sunucu yalnızca 127.0.0.1 üzerinde dinler; yoklamayı IPv4 adrese yap
-  # (localhost bazı sistemlerde önce ::1'e çözülür).
-  local url="http://localhost:3000" probe="http://127.0.0.1:3000" i code
+  # (localhost bazı sistemlerde önce ::1'e çözülür). /api/health oturumsuz
+  # 200 döner; / ise /login'e 307 yönlendirir ve yoklama hiç bitmezdi.
+  local url="http://localhost:3000" probe="http://127.0.0.1:3000/api/health" i code
   # Sunucu HTTP 200 dönene kadar bekle (port açık != sayfa hazır), en fazla ~120sn
   for i in $(seq 1 120); do
     if command -v curl >/dev/null 2>&1; then

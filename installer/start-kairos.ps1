@@ -28,11 +28,13 @@ Write-Host ""
 
 # Tarayıcıyı sunucu HTTP 200 dönünce aç (port açık != sayfa hazır), en fazla ~120sn
 $browserJob = Start-Job -ScriptBlock {
+  # /api/health oturumsuz 200 döner; sunucu yalnızca 127.0.0.1'de dinler.
   for ($i = 0; $i -lt 120; $i++) {
     try {
-      $r = Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 'http://127.0.0.1:3000'
+      $r = Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 -MaximumRedirection 0 'http://127.0.0.1:3000/api/health'
       if ($r.StatusCode -eq 200) { break }
-    } catch { Start-Sleep -Seconds 1 }
+    } catch {}
+    Start-Sleep -Seconds 1
   }
   Start-Process 'http://localhost:3000'
 }
