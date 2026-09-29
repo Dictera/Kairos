@@ -54,8 +54,8 @@ function formatTutar(tutar: number | null | undefined) {
   return TRY_FORMAT.format(tutar)
 }
 
-type DosyaTur = 'STK' | 'AT' | 'AH' | string
-type DosyaDurum = 'aktif' | 'arsiv' | string
+type DosyaTur = 'STK' | 'AT' | 'AH' | (string & {})
+type DosyaDurum = 'aktif' | 'arsiv' | (string & {})
 
 function TurBadge({ tur }: { tur: DosyaTur }) {
   if (tur === 'STK') {
@@ -87,7 +87,7 @@ export function MuvekkilDetail({ muvekkilId }: MuvekkilDetailProps) {
     trpc.muvekkil.delete.mutationOptions({
       onSuccess: () => {
         toast.success('Silindi.')
-        queryClient.invalidateQueries({ queryKey: [['muvekkil']] })
+        void queryClient.invalidateQueries({ queryKey: [['muvekkil']] })
         router.push('/muvekkiller')
       },
       onError: (err) => {

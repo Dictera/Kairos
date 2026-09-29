@@ -6,7 +6,7 @@
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import * as schema from './schema'
-import { foldTr, dosyaFtsText, muvekkilFtsText } from './turkish'
+import { foldTr, dosyaFtsText, muvekkilFtsText, type SqliteValue } from './turkish'
 
 const globalForDb = globalThis as unknown as {
   db: ReturnType<typeof drizzle<typeof schema>> | undefined
@@ -36,7 +36,7 @@ function createDb() {
   // Used in the <3-char LIKE fallback: sql`lower_tr(col) LIKE lower_tr(${pattern})`
   // IMPORTANT: must be registered BEFORE drizzle() wraps the connection.
   // Shares foldTr() with the FTS index so both normalize text identically.
-  sqlite.function('lower_tr', (s: unknown) => foldTr(s))
+  sqlite.function('lower_tr', (s: SqliteValue) => foldTr(s))
 
   // FTS5 trigram indexes and backfill are WRITE operations that cause SQLITE_BUSY
   // when Next.js build spawns multiple workers that import this module concurrently.

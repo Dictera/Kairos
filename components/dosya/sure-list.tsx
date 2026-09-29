@@ -86,8 +86,8 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
   const createMutation = useMutation(
     trpc.sure.createManuel.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['sure', 'list']] })
-        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        void queryClient.invalidateQueries({ queryKey: [['sure', 'list']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
         toast.success('Süre kaydedildi.')
         form.reset()
         setShowForm(false)
@@ -101,8 +101,8 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
   const updateMutation = useMutation(
     trpc.sure.updateManuel.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['sure', 'list']] })
-        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        void queryClient.invalidateQueries({ queryKey: [['sure', 'list']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
         toast.success('Süre güncellendi.')
         setEditingSure(null)
       },
@@ -115,8 +115,8 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
   const deleteMutation = useMutation(
     trpc.sure.deleteSure.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['sure', 'list']] })
-        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        void queryClient.invalidateQueries({ queryKey: [['sure', 'list']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
         toast.success('Süre silindi.')
         setDeletingSure(null)
       },

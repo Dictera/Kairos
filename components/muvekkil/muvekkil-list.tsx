@@ -72,7 +72,7 @@ export function MuvekkilList() {
       onSuccess: () => {
         toast.success('Silindi.')
         setPendingDelete(null)
-        queryClient.invalidateQueries({ queryKey: [['muvekkil']] })
+        void queryClient.invalidateQueries({ queryKey: [['muvekkil']] })
       },
       onError: (err) => {
         setPendingDelete(null)

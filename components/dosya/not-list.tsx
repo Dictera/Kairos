@@ -57,7 +57,7 @@ export function NotList({ dosyaId }: NotListProps) {
   const updateMutation = useMutation(
     trpc.notlar.update.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.notlar.list.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({ queryKey: trpc.notlar.list.queryKey({ dosya_id: dosyaId }) })
         toast.success('Not güncellendi.')
         setEditingId(null)
       },
@@ -70,7 +70,7 @@ export function NotList({ dosyaId }: NotListProps) {
   const deleteMutation = useMutation(
     trpc.notlar.delete.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.notlar.list.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({ queryKey: trpc.notlar.list.queryKey({ dosya_id: dosyaId }) })
         toast.success('Not silindi.')
         setDeleteId(null)
       },

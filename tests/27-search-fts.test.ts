@@ -15,7 +15,7 @@ import path from 'path'
 import fs from 'fs'
 import * as schema from '@/lib/schema'
 import { dosya, muvekkil } from '@/lib/schema'
-import { foldTr, ftsMatchQuery, dosyaFtsText, muvekkilFtsText } from '@/lib/turkish'
+import { foldTr, ftsMatchQuery, dosyaFtsText, muvekkilFtsText, type SqliteValue } from '@/lib/turkish'
 import {
   upsertDosyaFts, deleteDosyaFts,
   upsertMuvekkilFts, deleteMuvekkilFts, rebuildMuvekkilDosyaFts,
@@ -137,7 +137,7 @@ describe('FTS5 trigram integration', () => {
   beforeAll(() => {
     sqlite = new Database(':memory:')
     sqlite.pragma('foreign_keys = ON')
-    sqlite.function('lower_tr', (s: unknown) => foldTr(s))
+    sqlite.function('lower_tr', (s: SqliteValue) => foldTr(s))
 
     // Apply real migrations so dosya/muvekkil tables exist (rebuild helper joins them)
     const migrationsDir = path.resolve(process.cwd(), 'drizzle')

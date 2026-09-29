@@ -43,8 +43,8 @@ export function FinansEntryList({ dosyaId }: FinansEntryListProps) {
   const deleteMutation = useMutation(
     trpc.finans.delete.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.finans.list.queryKey({ dosya_id: dosyaId }) })
-        queryClient.invalidateQueries({ queryKey: trpc.finans.getSummary.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({ queryKey: trpc.finans.list.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({ queryKey: trpc.finans.getSummary.queryKey({ dosya_id: dosyaId }) })
         toast.success('Finans kaydı silindi')
       },
       onError: (err) => toast.error('Silme başarısız: ' + (err.message || 'Bilinmeyen hata'))

@@ -31,7 +31,7 @@ export function TelegramBildirimSection() {
   const updateSchedule = useMutation(
     trpc.telegram.updateSchedule.mutationOptions({
       onSuccess: () => {
-        qc.invalidateQueries({ queryKey: scheduleOpts.queryKey })
+        void qc.invalidateQueries({ queryKey: scheduleOpts.queryKey })
         toast.success('Bildirim saatleri güncellendi.')
       },
       onError: () => toast.error('Güncelleme başarısız.'),
@@ -42,8 +42,8 @@ export function TelegramBildirimSection() {
   const updateToggles = useMutation(
     trpc.telegram.updateToggles.mutationOptions({
       onSuccess: () => {
-        qc.invalidateQueries({ queryKey: togglesOpts.queryKey })
-        qc.invalidateQueries({ queryKey: scheduleOpts.queryKey })
+        void qc.invalidateQueries({ queryKey: togglesOpts.queryKey })
+        void qc.invalidateQueries({ queryKey: scheduleOpts.queryKey })
         toast.success('Bildirim ayarları güncellendi.')
       },
       onError: () => toast.error('Güncelleme başarısız. Lütfen tekrar deneyin.'),

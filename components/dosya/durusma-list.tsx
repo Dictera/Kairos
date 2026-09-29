@@ -62,8 +62,8 @@ export function DurusmaList({ dosyaId }: DurusmaListProps) {
   const deleteMutation = useMutation(
     trpc.surec.durusmaDelete.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['surec', 'durusmaList']] })
-        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        void queryClient.invalidateQueries({ queryKey: [['surec', 'durusmaList']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
         toast.success('Duruşma silindi.')
         setDeletingId(null)
       },

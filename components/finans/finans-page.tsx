@@ -12,7 +12,7 @@ import { Pipeline }        from './pipeline'
 import { FinansDashboard } from './finans-dashboard'
 import { FinansTablolar }  from './finans-tablolar'
 
-type YilFilter = 'all' | string
+type YilFilter = 'all' | (string & {})
 
 // ── Summary strip ─────────────────────────────────────────────────────────────
 

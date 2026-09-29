@@ -148,9 +148,9 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
   const upsertMutation = useMutation(
     trpc.dosya.upsertTaraf.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['dosya', 'getById', { id: dosyaId }] })
-        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
-        queryClient.invalidateQueries({ queryKey: ['dosya'] })
+        void queryClient.invalidateQueries({ queryKey: ['dosya', 'getById', { id: dosyaId }] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        void queryClient.invalidateQueries({ queryKey: ['dosya'] })
         toast.success('Kaydedildi.')
         setIsEditing(false)
       },

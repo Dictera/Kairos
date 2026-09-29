@@ -29,7 +29,7 @@ const SureBarChart = dynamic<{ data: { name: string; Sure: number; fill: string 
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v} gün`} width={56} />
-            <Tooltip formatter={(v: unknown) => `${v} gün`} />
+            <Tooltip formatter={(v: unknown) => `${Number(v)} gün`} />
             <Bar dataKey="Sure" radius={[6, 6, 0, 0]} barSize={60}>
               {data.map((d) => <Cell key={d.name} fill={d.fill} />)}
             </Bar>
@@ -86,7 +86,7 @@ export function Arabuluculuk() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} width={36} />
-                  <Tooltip formatter={(v: unknown, n: unknown) => `${v} ${String(n)}`} />
+                  <Tooltip formatter={(v: unknown, n: unknown) => `${Number(v)} ${String(n)}`} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Bar dataKey="Arabuluculuk" stackId="s" fill={C.accent} />
                   <Bar dataKey="Dava"         stackId="s" fill={C.danger} radius={[3, 3, 0, 0]} />

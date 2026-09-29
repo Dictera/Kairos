@@ -43,7 +43,7 @@ export function SablondanUret({ dosyaId }: SablondanUretProps) {
   const generateMutation = useMutation(
     trpc.pdf.generate.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.belge.list.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({ queryKey: trpc.belge.list.queryKey({ dosya_id: dosyaId }) })
         toast.success('PDF üretildi.')
         resetProgress()
       },

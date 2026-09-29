@@ -115,7 +115,7 @@ function DosyaFormInner({
   const createMutation = useMutation(
     trpc.dosya.create.mutationOptions({
       onSuccess: (row) => {
-        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya']] })
         toast.success(`Dosya başarıyla oluşturuldu. Dosya No: ${row.dosya_no}`)
         router.push('/dosyalar/' + row.id)
       },
@@ -128,7 +128,7 @@ function DosyaFormInner({
   const updateMutation = useMutation(
     trpc.dosya.update.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya']] })
         toast.success('Kaydedildi.')
         router.push('/dosyalar/' + dosyaId)
       },
@@ -145,7 +145,7 @@ function DosyaFormInner({
   const archiveMutation = useMutation(
     trpc.dosya.archive.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya']] })
         toast.success('Dosya arşivlendi.')
         router.push('/dosyalar/' + dosyaId)
       },

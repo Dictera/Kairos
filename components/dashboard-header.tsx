@@ -70,24 +70,24 @@ function NotificationDropdown() {
   const syncMutation = useMutation({
     ...trpc.bildirim.sync.mutationOptions(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: trpc.bildirim.list.queryKey() })
-      queryClient.invalidateQueries({ queryKey: trpc.bildirim.unreadCount.queryKey() })
+      void queryClient.invalidateQueries({ queryKey: trpc.bildirim.list.queryKey() })
+      void queryClient.invalidateQueries({ queryKey: trpc.bildirim.unreadCount.queryKey() })
     },
   })
 
   const markAsRead = useMutation({
     ...trpc.bildirim.markAsRead.mutationOptions(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: trpc.bildirim.list.queryKey() })
-      queryClient.invalidateQueries({ queryKey: trpc.bildirim.unreadCount.queryKey() })
+      void queryClient.invalidateQueries({ queryKey: trpc.bildirim.list.queryKey() })
+      void queryClient.invalidateQueries({ queryKey: trpc.bildirim.unreadCount.queryKey() })
     },
   })
 
   const markAllAsRead = useMutation({
     ...trpc.bildirim.markAllAsRead.mutationOptions(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: trpc.bildirim.list.queryKey() })
-      queryClient.invalidateQueries({ queryKey: trpc.bildirim.unreadCount.queryKey() })
+      void queryClient.invalidateQueries({ queryKey: trpc.bildirim.list.queryKey() })
+      void queryClient.invalidateQueries({ queryKey: trpc.bildirim.unreadCount.queryKey() })
     },
   })
 

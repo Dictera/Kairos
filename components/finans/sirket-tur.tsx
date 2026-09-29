@@ -114,7 +114,7 @@ export function SirketTur() {
                 <BarChart data={oranData} layout="vertical" margin={{ top: 4, right: 20, left: 80, bottom: 4 }}>
                   <XAxis type="number" domain={[0, 100]} tickFormatter={(v) => `%${v}`} tick={{ fontSize: 11 }} />
                   <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={80} />
-                  <Tooltip formatter={(v: unknown) => `%${v}`} />
+                  <Tooltip formatter={(v: unknown) => `%${Number(v)}`} />
                   <Bar dataKey="Oran" radius={[0, 3, 3, 0]}>
                     {oranData.map((entry) => <Cell key={entry.name} fill={entry.fill} />)}
                   </Bar>

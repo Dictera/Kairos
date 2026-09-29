@@ -37,7 +37,7 @@ const AsamaBarChart = dynamic<{ data: AsamaBarItem[] }>(
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" tick={{ fontSize: 10.5 }} interval={0} angle={-12} textAnchor="end" height={56} />
             <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}g`} width={42} />
-            <Tooltip formatter={(v: unknown) => `${v} gün`} />
+            <Tooltip formatter={(v: unknown) => `${Number(v)} gün`} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             <Bar dataKey="Ort. Süre" fill={C.accent} radius={[4, 4, 0, 0]}>
               {data.map((a) => <Cell key={a.name} fill={a.fill} />)}
@@ -67,7 +67,7 @@ const SirketBarChart = dynamic<{ data: SirketBarItem[] }>(
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" tick={{ fontSize: 10.5 }} interval={0} angle={-15} textAnchor="end" height={60} />
             <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v} gün`} width={56} />
-            <Tooltip formatter={(v: unknown) => `${v} gün`} />
+            <Tooltip formatter={(v: unknown) => `${Number(v)} gün`} />
             <ReferenceLine y={180} stroke={C.accent} strokeDasharray="6 4" />
             <Bar dataKey="Gun" radius={[5, 5, 0, 0]} name="Ort. Çözüm">
               {data.map((s) => <Cell key={s.name} fill={s.fill} />)}

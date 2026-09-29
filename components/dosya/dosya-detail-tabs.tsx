@@ -69,7 +69,7 @@ export function DosyaDetailTabs({ dosyaId }: DosyaDetailTabsProps) {
   const archiveMutation = useMutation(
     trpc.dosya.archive.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya']] })
         toast.success('Dosya arşivlendi.')
         router.push('/dosyalar')
       },
@@ -80,7 +80,7 @@ export function DosyaDetailTabs({ dosyaId }: DosyaDetailTabsProps) {
   const deleteMutation = useMutation(
     trpc.dosya.delete.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya']] })
         toast.success('Silindi.')
         router.push('/dosyalar')
       },

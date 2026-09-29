@@ -28,7 +28,7 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
   const createMutation = useMutation(
     trpc.belge.create.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.belge.list.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({ queryKey: trpc.belge.list.queryKey({ dosya_id: dosyaId }) })
         toast.success('Belge yüklendi')
         setFile(null)
         setKategori('')

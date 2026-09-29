@@ -56,7 +56,7 @@ export function BelgeList({ dosyaId }: BelgeListProps) {
   const deleteMutation = useMutation(
     trpc.belge.delete.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.belge.list.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({ queryKey: trpc.belge.list.queryKey({ dosya_id: dosyaId }) })
         toast.success('Belge silindi')
       },
       onError: (err) => {

@@ -34,7 +34,7 @@ export function NotForm({ dosyaId, onSuccess }: NotFormProps) {
   const createMutation = useMutation(
     trpc.notlar.create.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.notlar.list.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({ queryKey: trpc.notlar.list.queryKey({ dosya_id: dosyaId }) })
         toast.success('Not eklendi.')
         form.reset()
         setIsOpen(false)

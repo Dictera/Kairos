@@ -83,25 +83,25 @@ export function SigortaSirketiSection() {
 
   const createSirketi = useMutation(
     trpc.ayarlar.sigortaSirketi.create.mutationOptions({
-      onSuccess: () => { invalidate(); toast.success('Kaydedildi.') },
+      onSuccess: () => { void invalidate(); toast.success('Kaydedildi.') },
       onError: () => toast.error('Kaydedilemedi. Lütfen tekrar deneyin.'),
     })
   )
   const updateSirketi = useMutation(
     trpc.ayarlar.sigortaSirketi.update.mutationOptions({
-      onSuccess: () => { invalidate(); toast.success('Kaydedildi.') },
+      onSuccess: () => { void invalidate(); toast.success('Kaydedildi.') },
       onError: () => toast.error('Kaydedilemedi. Lütfen tekrar deneyin.'),
     })
   )
   const deleteSirketi = useMutation(
     trpc.ayarlar.sigortaSirketi.delete.mutationOptions({
-      onSuccess: () => { invalidate(); toast.success('Silindi.') },
+      onSuccess: () => { void invalidate(); toast.success('Silindi.') },
       onError: () => toast.error('Silinemedi.'),
     })
   )
   const removeAvukat = useMutation(
     trpc.ayarlar.avukat.removeSirket.mutationOptions({
-      onSuccess: () => { invalidate(); toast.success('Silindi.') },
+      onSuccess: () => { void invalidate(); toast.success('Silindi.') },
       onError: () => toast.error('Silinemedi.'),
     })
   )

@@ -37,7 +37,7 @@ export function YargilamaSureciTab({
   const stkIleriAlMutation = useMutation(
     trpc.surec.stkIleriAl.mutationOptions({
       onSuccess: (data) => {
-        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
         const label = STK_ASAMA_LABELS[data.asama as keyof typeof STK_ASAMA_LABELS] ?? data.asama
         toast.success(`Aşama güncellendi: ${label}`)
       },
@@ -48,7 +48,7 @@ export function YargilamaSureciTab({
   const stkGeriAlMutation = useMutation(
     trpc.surec.stkGeriAl.mutationOptions({
       onSuccess: (data) => {
-        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
         const label = STK_ASAMA_LABELS[data.asama as keyof typeof STK_ASAMA_LABELS] ?? data.asama
         toast.success(`Aşama güncellendi: ${label}`)
       },
@@ -59,7 +59,7 @@ export function YargilamaSureciTab({
   const initMahkemeMutation = useMutation(
     trpc.surec.initMahkemeSurec.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
         toast.success('Mahkeme süreci başlatıldı.')
       },
       onError: (err) => toast.error(err.message ?? 'İşlem sırasında hata oluştu.'),
@@ -69,7 +69,7 @@ export function YargilamaSureciTab({
   const mahkemeIleriAlMutation = useMutation(
     trpc.surec.mahkemeIleriAl.mutationOptions({
       onSuccess: (data) => {
-        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
         const label = MAHKEME_ASAMA_LABELS[data.asama as keyof typeof MAHKEME_ASAMA_LABELS] ?? data.asama
         toast.success(`Aşama güncellendi: ${label}`)
       },
@@ -80,7 +80,7 @@ export function YargilamaSureciTab({
   const mahkemeGeriAlMutation = useMutation(
     trpc.surec.mahkemeGeriAl.mutationOptions({
       onSuccess: (data) => {
-        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
         const label = MAHKEME_ASAMA_LABELS[data.asama as keyof typeof MAHKEME_ASAMA_LABELS] ?? data.asama
         toast.success(`Aşama güncellendi: ${label}`)
       },

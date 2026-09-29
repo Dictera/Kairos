@@ -42,8 +42,8 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
   const createMutation = useMutation(
     trpc.finans.create.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.finans.list.queryKey({ dosya_id: dosyaId }) })
-        queryClient.invalidateQueries({ queryKey: trpc.finans.getSummary.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({ queryKey: trpc.finans.list.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({ queryKey: trpc.finans.getSummary.queryKey({ dosya_id: dosyaId }) })
         toast.success('Finans kaydı eklendi')
         resetForm()
         onSuccess?.()
@@ -55,8 +55,8 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
   const updateMutation = useMutation(
     trpc.finans.update.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.finans.list.queryKey({ dosya_id: dosyaId }) })
-        queryClient.invalidateQueries({ queryKey: trpc.finans.getSummary.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({ queryKey: trpc.finans.list.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({ queryKey: trpc.finans.getSummary.queryKey({ dosya_id: dosyaId }) })
         toast.success('Finans kaydı güncellendi')
         onCancel?.()
       },

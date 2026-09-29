@@ -76,11 +76,10 @@ export const dashboardRouter = createTRPCRouter({
     const today = todayStr()
     const in14 = in14Str()
 
-    const [counts, deadlineRows, hearingRows] = await Promise.all([
-      dosyaCountsPrep().get(),
-      deadlinesPrep().all({ today, in14 }),
-      hearingsPrep().all({ today }),
-    ])
+    // better-sqlite3 is synchronous — no Promise.all needed.
+    const counts = dosyaCountsPrep().get()
+    const deadlineRows = deadlinesPrep().all({ today, in14 })
+    const hearingRows = hearingsPrep().all({ today })
 
     return {
       totalDosya: counts?.total ?? 0,
@@ -92,7 +91,7 @@ export const dashboardRouter = createTRPCRouter({
   }),
 
   stats: protectedProcedure.query(async () => {
-    const counts = await dosyaCountsWithPrevPrep().get()
+    const counts = dosyaCountsWithPrevPrep().get()
 
     const totalDosya = counts?.total ?? 0
     const aktivDosya = Number(counts?.aktif ?? 0)

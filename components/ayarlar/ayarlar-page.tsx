@@ -78,7 +78,7 @@ export function AyarlarPage() {
   const setBelgelerPath = useMutation(
     trpc.ayarlar.belgeler.setPath.mutationOptions({
       onSuccess: () => {
-        qc.invalidateQueries({ queryKey: belgelerOpts.queryKey })
+        void qc.invalidateQueries({ queryKey: belgelerOpts.queryKey })
         setEditingPath(false)
         toast.success('Klasör yolu güncellendi.')
       },

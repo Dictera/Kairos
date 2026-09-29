@@ -132,7 +132,7 @@ export function Karlilik() {
                 <LineChart data={masrafOranData} margin={{ top: 32, right: 20, left: 0, bottom: 55 }}>
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-35} textAnchor="end" />
                   <YAxis tickFormatter={(v) => `%${v}`} domain={[0, 100]} tick={{ fontSize: 11 }} width={40} />
-                  <Tooltip formatter={(v: unknown) => `%${v}`} />
+                  <Tooltip formatter={(v: unknown) => `%${Number(v)}`} />
                   <Legend verticalAlign="top" wrapperStyle={{ fontSize: 12, paddingBottom: 8 }} />
                   <ReferenceLine y={0} stroke="#888" strokeDasharray="4 2" />
                   <Line type="monotone" dataKey="Masraf/Gelir"         stroke={C.masraf} strokeWidth={2} dot={{ r: 3 }} />

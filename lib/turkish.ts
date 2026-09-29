@@ -4,7 +4,10 @@
 //   2. FTS5 trigram content is stored already-folded (write path)
 //   3. FTS5 MATCH queries are folded before binding (read path)
 // Folds ş→s, ğ→g, ü→u, ö→o, ç→c, ı→i, İ→i (both cases) then lowercases.
-export function foldTr(s: unknown): string {
+/** Values SQLite can hand to a user-defined function (plus undefined for JS callers). */
+export type SqliteValue = string | number | bigint | Buffer | null | undefined
+
+export function foldTr(s: SqliteValue): string {
   return String(s ?? '')
     .toLowerCase()
     .replace(/ş/g, 's').replace(/Ş/g, 's')

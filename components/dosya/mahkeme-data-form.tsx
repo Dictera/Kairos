@@ -85,7 +85,7 @@ export function MahkemeDataForm({ dosyaId, initialData }: MahkemeDataFormProps) 
   const saveMutation = useMutation(
     trpc.surec.updateMahkemeData.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
         toast.success('Bilgiler kaydedildi.')
       },
       onError: () => {

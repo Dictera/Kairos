@@ -66,7 +66,7 @@ export function SirketAnalizi() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="ay" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `%${v}`} domain={[60, 100]} width={42} />
-                <Tooltip formatter={(v: unknown) => `%${v}`} />
+                <Tooltip formatter={(v: unknown) => `%${Number(v)}`} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 {trendSeries.map((s, i) => (
                   <Line

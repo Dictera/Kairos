@@ -95,7 +95,7 @@ export default function SablonYonetimiSection() {
   const createSablon = useMutation(
     trpc.sablon.create.mutationOptions({
       onSuccess: () => {
-        invalidate()
+        void invalidate()
         toast.success('Şablon yüklendi.')
         resetUpload()
       },
@@ -106,7 +106,7 @@ export default function SablonYonetimiSection() {
   const updateSablon = useMutation(
     trpc.sablon.update.mutationOptions({
       onSuccess: () => {
-        invalidate()
+        void invalidate()
         toast.success('Şablon güncellendi.')
         setOverwriteTarget(null)
         setFile(null)
@@ -118,7 +118,7 @@ export default function SablonYonetimiSection() {
   const deleteSablon = useMutation(
     trpc.sablon.delete.mutationOptions({
       onSuccess: () => {
-        invalidate()
+        void invalidate()
         toast.success('Şablon silindi.')
         setDeleteTarget(null)
       },

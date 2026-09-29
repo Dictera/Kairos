@@ -94,7 +94,7 @@ export function DosyaList() {
   const archiveMutation = useMutation(
     trpc.dosya.archive.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya']] })
         toast.success('Dosya arşivlendi.')
       },
       onError: () => toast.error('Arşivlenemedi.'),
@@ -104,7 +104,7 @@ export function DosyaList() {
   const unarchiveMutation = useMutation(
     trpc.dosya.unarchive.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya']] })
         toast.success('Dosya aktifleştirildi.')
       },
       onError: () => toast.error('Aktifleştirilemedi.'),
