@@ -13,7 +13,6 @@ export async function GET(
   { params }: { params: Promise<{ slug: string[] }> },
 ) {
   await connection()
-  // proxy.ts already guards this path; checked again so the handler is safe on its own.
   const authError = await requireAuth()
   if (authError) return authError
 

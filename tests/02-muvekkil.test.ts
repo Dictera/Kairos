@@ -3,12 +3,15 @@ import { muvekkillRouter } from '@/lib/trpc/routers/muvekkil'
 import { dosyaRouter } from '@/lib/trpc/routers/dosya'
 import { createCallerFactory } from '@/lib/trpc/init'
 import type { IronSession } from 'iron-session'
-import type { SessionData } from '@/lib/session'
+import { passwordVersion, type SessionData } from '@/lib/session'
 
 const createCaller = createCallerFactory(muvekkillRouter)
 let caller: ReturnType<typeof createCaller>
 
-const mockSession = { isLoggedIn: true } as unknown as IronSession<SessionData>
+const mockSession = {
+  isLoggedIn: true,
+  pwv: passwordVersion(),
+} as unknown as IronSession<SessionData>
 
 beforeAll(() => {
   caller = createCaller({ session: mockSession, headers: new Headers() })

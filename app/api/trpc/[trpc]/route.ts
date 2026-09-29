@@ -8,6 +8,11 @@ const handler = (req: Request) =>
     req,
     router: appRouter,
     createContext: () => createTRPCContext({ headers: req.headers }),
+    onError({ error, path }) {
+      // Clients only see a generic message for these (see errorFormatter) — keep details in the log.
+      if (error.code === 'INTERNAL_SERVER_ERROR' && error.cause)
+        console.error(`[trpc] ${path ?? '?'}:`, error)
+    },
   })
 
 export { handler as GET, handler as POST }

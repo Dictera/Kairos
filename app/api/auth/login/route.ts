@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { getIronSession } from 'iron-session'
-import { sessionOptions, type SessionData } from '@/lib/session'
+import { passwordVersion, sessionOptions, type SessionData } from '@/lib/session'
 import {
   loginLockRemainingMs,
   passwordMatches,
@@ -43,6 +43,7 @@ export async function POST(req: Request) {
   const cookieStore = await cookies()
   const session = await getIronSession<SessionData>(cookieStore, sessionOptions)
   session.isLoggedIn = true
+  session.pwv = passwordVersion() ?? undefined
   await session.save()
 
   return Response.json({ ok: true })
