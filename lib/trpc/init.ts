@@ -16,6 +16,23 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
 
 const t = initTRPC.context<Awaited<ReturnType<typeof createTRPCContext>>>().create({
   transformer: superjson,
+  errorFormatter({ shape, error }) {
+    // Unexpected errors can carry internals (SQL, file paths): tRPC wraps any non-TRPCError
+    // throw as INTERNAL_SERVER_ERROR with the original as `cause`. Hide those in production.
+    // TRPCErrors thrown on purpose (no cause) keep their user-facing Turkish message.
+    if (
+      process.env.NODE_ENV === 'production' &&
+      error.code === 'INTERNAL_SERVER_ERROR' &&
+      error.cause !== undefined
+    ) {
+      return {
+        ...shape,
+        message: 'Sunucu hatası. Lütfen tekrar deneyin.',
+        data: { ...shape.data, stack: undefined },
+      }
+    }
+    return shape
+  },
 })
 
 export const createTRPCRouter = t.router

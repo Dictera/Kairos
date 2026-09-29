@@ -111,7 +111,7 @@ export function DosyaDetailTabs({ dosyaId }: DosyaDetailTabsProps) {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => fetch(`/api/open-folder?dosyaId=${dosyaId}`)}
+          onClick={() => fetch(`/api/open-folder?dosyaId=${dosyaId}`, { method: 'POST' })}
           title="Klasörde göster"
         >
           <FolderOpen className="h-4 w-4" />

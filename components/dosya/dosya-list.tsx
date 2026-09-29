@@ -305,7 +305,9 @@ export function DosyaList() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="flex items-center gap-2"
-                          onClick={() => fetch(`/api/open-folder?dosyaId=${row.id}`)}
+                          onClick={() =>
+                            fetch(`/api/open-folder?dosyaId=${row.id}`, { method: 'POST' })
+                          }
                         >
                           <FolderOpen className="h-4 w-4" />
                           Klasörde Göster
