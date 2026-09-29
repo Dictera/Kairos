@@ -3,7 +3,7 @@ import { connection } from 'next/server'
 import { db } from '@/lib/db'
 import { dosya } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
-import { buildBelgelerDir, BELGELER_BASE } from '@/lib/belgeler-storage'
+import { buildBelgelerDir, BELGELER_BASE, isInsideDir } from '@/lib/belgeler-storage'
 import { requireAuth } from '@/lib/auth-guard'
 import fs from 'fs'
 import path from 'path'
@@ -38,8 +38,10 @@ export async function GET(
     return NextResponse.json({ error: 'Geçersiz dosya ID' }, { status: 400 })
   }
 
-  // Look up dosya to compute hierarchical disk path; fall back to flat path on any error
-  let filePath = path.join(BELGELER_BASE, dosyaIdStr, filename)
+  // Look up dosya to compute hierarchical disk path; fall back to flat path on any error.
+  // Use the parsed id, never the raw segment: params are URL-decoded, so
+  // "1%2F..%2F.." would otherwise become "1/../.." and escape BELGELER_BASE.
+  let filePath = path.join(BELGELER_BASE, String(dosyaId), filename)
 
   try {
     const dosyaRow = await db.query.dosya.findFirst({
@@ -74,7 +76,11 @@ export async function GET(
     // DB lookup failed — serve from flat fallback path
   }
 
-  if (!fs.existsSync(filePath)) {
+  if (!isInsideDir(BELGELER_BASE, filePath)) {
+    return NextResponse.json({ error: 'Geçersiz dosya yolu' }, { status: 400 })
+  }
+
+  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
     return NextResponse.json({ error: 'Dosya bulunamadı' }, { status: 404 })
   }
 

@@ -30,7 +30,7 @@ Write-Host ""
 $browserJob = Start-Job -ScriptBlock {
   for ($i = 0; $i -lt 120; $i++) {
     try {
-      $r = Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 'http://localhost:3000'
+      $r = Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 'http://127.0.0.1:3000'
       if ($r.StatusCode -eq 200) { break }
     } catch { Start-Sleep -Seconds 1 }
   }

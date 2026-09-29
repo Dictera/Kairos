@@ -23,11 +23,11 @@ pnpm run dev                  # localhost:3000
 
 ## Kod Standartları / Coding Standards
 
-Proje [ESLint](https://eslint.org/) kullanır; yapılandırma `eslint.config.mjs` dosyasındadır. Next.js flat config yapısı ile `next/core-web-vitals` ve `next/typescript` kural setleri etkindir.
+Proje [oxlint](https://oxc.rs/docs/guide/usage/linter) kullanır; yapılandırma `.oxlintrc.json` dosyasındadır. TypeScript, React (hooks dahil), Next.js ve temel jsx-a11y kuralları etkindir.
 
 - **Lint komutu:** `pnpm run lint`
-- **Formatlama:** Ayrı bir Prettier veya Biome yapılandırması yoktur — kod formatlaması ESLint tarafından yönetilir.
-- **CI:** Her PR ve `main` dalına push işleminde `pnpm run build` ve `pnpm test` otomatik çalıştırılır. Lint kontrolü `next build` aşamasında yapılır. PR açmadan önce `pnpm run lint` çalıştırarak temiz bir çıktı aldığınızdan emin olun.
+- **Formatlama:** Ayrı bir Prettier veya Biome yapılandırması yoktur.
+- **CI:** Her PR ve `main` dalına push işleminde `pnpm run lint`, `pnpm run typecheck`, `pnpm run build` ve `pnpm test` otomatik çalıştırılır. PR açmadan önce `pnpm run lint` çalıştırarak temiz bir çıktı aldığınızdan emin olun.
 
 CI iş akışı `.github/workflows/ci.yml` dosyasında tanımlıdır.
 

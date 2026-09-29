@@ -45,6 +45,12 @@ PDF şablon özelliği kullanılmayacaksa bu iki değeri boş bırakabilirsiniz.
 | `sameSite` | `lax` |
 | `path` | `/` |
 
+### Ağ Erişimi ve Giriş Koruması
+
+`pnpm start` sunucuyu yalnızca `127.0.0.1:3000` üzerinde başlatır; uygulamaya aynı ağdaki başka cihazlardan erişilemez. (Production'da cookie `secure` olduğu için düz HTTP üzerinden ağdan giriş zaten çalışmıyordu.)
+
+`POST /api/auth/login` art arda 5 hatalı denemeden sonra girişi 1 dakika kilitler (`429`, `Retry-After` başlığıyla); her yeni kilit süresi ikiye katlanır, en fazla 15 dakika. Doğru şifreyle giriş sayacı sıfırlar. Sayaç bellekte tutulur, sunucu yeniden başlatılınca sıfırlanır.
+
 ### Per-Environment Overrides
 
 Next.js ortam değişkeni öncelik sırasına göre şu dosyaları yükler:
@@ -67,7 +73,7 @@ Proje kökünde bulunan yapılandırma dosyaları:
 | `drizzle.config.ts` | Drizzle ORM ve migration ayarları |
 | `tailwind.config.ts` | Tailwind CSS tema ve içerik ayarları |
 | `postcss.config.mjs` | PostCSS eklentileri |
-| `eslint.config.mjs` | ESLint kuralları |
+| `.oxlintrc.json` | oxlint kuralları |
 
 ### Next.js Configuration (`next.config.ts`)
 

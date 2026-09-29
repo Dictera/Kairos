@@ -9,8 +9,8 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint .",
+    "start": "next start -H 127.0.0.1",
+    "lint": "oxlint",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
@@ -58,7 +58,6 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.7",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.9.2",
     "@types/pdfmake": "^0.3.3",
@@ -67,8 +66,7 @@
     "@types/which": "^3.0.4",
     "@vitest/coverage-v8": "^4.1.11",
     "drizzle-kit": "^0.31.10",
-    "eslint": "^10.5.0",
-    "eslint-config-next": "^16.3.5",
+    "oxlint": "^1.85.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.11"
   }

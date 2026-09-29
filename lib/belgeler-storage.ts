@@ -27,6 +27,8 @@ export const BELGELER_BASE = process.env.TEST_BELGELER_BASE
   ? process.env.TEST_BELGELER_BASE
   : readSettingsPath()
 
+// Control characters are matched on purpose: Windows forbids them in file names.
+// oxlint-disable-next-line no-control-regex
 const WINDOWS_UNSAFE = /[<>:"/\\|?*\x00-\x1f]/g
 
 export function sanitizeFsSegment(str: string): string {
@@ -66,12 +68,15 @@ export function buildBelgelerDir(info: BelgeDosyaBilgi): string {
   return path.join(BELGELER_BASE, turLabel, sigortaLabel, muvekkilLabel)
 }
 
+/** True when `target` resolves to `baseDir` itself or a path beneath it. */
+export function isInsideDir(baseDir: string, target: string): boolean {
+  const rel = path.relative(path.resolve(baseDir), path.resolve(target))
+  return rel !== '..' && !rel.startsWith('..' + path.sep) && !path.isAbsolute(rel)
+}
+
 export function safeDeleteBelge(filePath: string): void {
   try {
-    const resolved = path.resolve(filePath)
-    const baseResolved = path.resolve(BELGELER_BASE)
-    const rel = path.relative(baseResolved, resolved)
-    if (rel.startsWith('..') || path.isAbsolute(rel)) return
+    if (!isInsideDir(BELGELER_BASE, filePath)) return
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
   } catch {
     // ignore

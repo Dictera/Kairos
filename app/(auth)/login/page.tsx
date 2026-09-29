@@ -31,6 +31,9 @@ export default function LoginPage() {
       })
       if (res.ok) {
         router.push('/')
+      } else if (res.status === 429) {
+        const data = await res.json().catch(() => null)
+        setError(data?.error ?? 'Çok fazla hatalı deneme. Lütfen biraz sonra tekrar deneyin.')
       } else {
         setError('Şifre hatalı. Lütfen tekrar deneyin.')
       }
