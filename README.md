@@ -77,7 +77,7 @@ Başlatma betikleri `.env.local` dosyasının varlığını kontrol eder, sunucu
    ```bash
    cp .env.example .env.local
    ```
-   `.env.local` dosyasını açıp `SESSION_PASSWORD` ve `APP_PASSWORD` alanlarını doldur.
+   `.env.local` dosyasını açıp `SESSION_PASSWORD` (en az 32 karakter, rastgele) ve `APP_PASSWORD` (en az 8 karakter) alanlarını doldur. `APP_PASSWORD` değiştirildiğinde açık oturumlar kapanır.
 7. Veritabanı şemasını oluştur:
    ```bash
    pnpm run db:migrate

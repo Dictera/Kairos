@@ -214,14 +214,27 @@ if ($envExists) {
   }
 
   Write-Host ""
-  Write-Host "    Uygulamaya giriş için bir şifre belirleyin." -ForegroundColor White
+  # En az 8 karakter (NIST SP 800-63B, kullanıcı seçimli şifre alt sınırı). Girdi
+  # gizli olduğundan yazım hatasına karşı iki kez sorulur.
+  function Read-SecretPlain([string]$Prompt) {
+    $secure = Read-Host $Prompt -AsSecureString
+    $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+    try { return [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr) }
+    finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr) }
+  }
+  Write-Host "    Uygulamaya giriş için bir şifre belirleyin (en az 8 karakter)." -ForegroundColor White
   $appPassword = ''
   while ([string]::IsNullOrWhiteSpace($appPassword)) {
-    $secure = Read-Host "    Giriş şifresi (APP_PASSWORD)" -AsSecureString
-    $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
-    try { $appPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr) }
-    finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr) }
-    if ([string]::IsNullOrWhiteSpace($appPassword)) { Write-Warn "Şifre boş olamaz." }
+    $appPassword = Read-SecretPlain "    Giriş şifresi (APP_PASSWORD)"
+    if ($appPassword.Length -lt 8) {
+      Write-Warn "Şifre en az 8 karakter olmalı."
+      $appPassword = ''
+      continue
+    }
+    if ((Read-SecretPlain "    Şifre (tekrar)") -cne $appPassword) {
+      Write-Warn "Şifreler eşleşmiyor, tekrar deneyin."
+      $appPassword = ''
+    }
   }
 
   $telegramToken  = ''
