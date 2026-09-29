@@ -23,11 +23,11 @@ pnpm run dev                  # localhost:3000
 
 ## Kod Standartları / Coding Standards
 
-Proje [oxlint](https://oxc.rs/docs/guide/usage/linter) kullanır; yapılandırma `.oxlintrc.json` dosyasındadır. TypeScript, React (hooks dahil), Next.js ve jsx-a11y erişilebilirlik kuralları etkindir. Bilinçli istisnalar gerekçesiyle `oxlint-disable-next-line` yorumuyla işaretlenir.
+Proje [oxlint](https://oxc.rs/docs/guide/usage/linter) kullanır; yapılandırma `.oxlintrc.json` dosyasındadır. TypeScript (tip bilgili kurallar dahil, `oxlint-tsgolint`), React (hooks dahil), Next.js ve jsx-a11y erişilebilirlik kuralları etkindir. Bilinçli istisnalar gerekçesiyle `oxlint-disable-next-line` yorumuyla işaretlenir.
 
 - **Lint komutu:** `pnpm run lint`
-- **Formatlama:** Ayrı bir Prettier veya Biome yapılandırması yoktur.
-- **CI:** Her PR ve `main` dalına push işleminde `pnpm run lint`, `pnpm run typecheck`, `pnpm run build` ve `pnpm test` otomatik çalıştırılır. PR açmadan önce `pnpm run lint` çalıştırarak temiz bir çıktı aldığınızdan emin olun.
+- **Formatlama:** [oxfmt](https://oxc.rs/docs/guide/usage/formatter) (`.oxfmtrc.json`). `pnpm run format` dosyaları biçimlendirir, `pnpm run format:check` yalnızca kontrol eder.
+- **CI:** Her PR ve `main` dalına push işleminde `pnpm run lint`, `pnpm run format:check`, `pnpm run typecheck`, `pnpm run build` ve `pnpm test` otomatik çalıştırılır. PR açmadan önce `pnpm run format` ve `pnpm run lint` çalıştırın.
 
 CI iş akışı `.github/workflows/ci.yml` dosyasında tanımlıdır.
 
