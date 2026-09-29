@@ -56,25 +56,17 @@ function CurrentDateBanner() {
  */
 function DurumBadge({ durum }: { durum: string }) {
   if (durum === 'aktif') {
-    return (
-      <Badge className="bg-primary/10 text-primary hover:bg-primary/10 border-0">
-        Aktif
-      </Badge>
-    )
+    return <Badge className="bg-primary/10 text-primary hover:bg-primary/10 border-0">Aktif</Badge>
   }
   return (
-    <Badge className="bg-muted text-muted-foreground hover:bg-muted border-0">
-      Arşivlenmiş
-    </Badge>
+    <Badge className="bg-muted text-muted-foreground hover:bg-muted border-0">Arşivlenmiş</Badge>
   )
 }
 
 function RecentFilesTable() {
   const trpc = useTRPC()
   const router = useRouter()
-  const { data, isLoading } = useQuery(
-    trpc.dosya.list.queryOptions({ page: 1, pageSize: 5 })
-  )
+  const { data, isLoading } = useQuery(trpc.dosya.list.queryOptions({ page: 1, pageSize: 5 }))
 
   return (
     <div className="rounded-md border overflow-hidden">
@@ -120,7 +112,9 @@ function RecentFilesTable() {
                 <TableCell className="font-medium">{row.dosya_no}</TableCell>
                 <TableCell className="text-muted-foreground">{row.muvekkil_ad ?? '—'}</TableCell>
                 <TableCell>{row.tur}</TableCell>
-                <TableCell><DurumBadge durum={row.durum} /></TableCell>
+                <TableCell>
+                  <DurumBadge durum={row.durum} />
+                </TableCell>
               </TableRow>
             ))
           )}
@@ -133,14 +127,12 @@ function RecentFilesTable() {
 export function DashboardPage() {
   const trpc = useTRPC()
 
-  const { data: stats, isLoading: statsLoading } = useQuery(
-    trpc.dashboard.stats.queryOptions()
-  )
+  const { data: stats, isLoading: statsLoading } = useQuery(trpc.dashboard.stats.queryOptions())
   const { data: hearings = [], isLoading: hearingsLoading } = useQuery(
-    trpc.dashboard.todaysHearings.queryOptions()
+    trpc.dashboard.todaysHearings.queryOptions(),
   )
   const { data: deadlines = [], isLoading: deadlinesLoading } = useQuery(
-    trpc.dashboard.upcomingDeadlines.queryOptions()
+    trpc.dashboard.upcomingDeadlines.queryOptions(),
   )
 
   return (

@@ -101,11 +101,7 @@ export function AppSidebar() {
                     const Icon = item.icon
                     return (
                       <SidebarMenuItem key={item.href}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={active}
-                          tooltip={item.label}
-                        >
+                        <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
                           <Link
                             href={item.href}
                             style={
@@ -116,7 +112,8 @@ export function AppSidebar() {
                                     color: 'var(--sidebar-foreground)',
                                   }
                                 : {
-                                    color: 'color-mix(in oklch, var(--sidebar-foreground) 70%, transparent)',
+                                    color:
+                                      'color-mix(in oklch, var(--sidebar-foreground) 70%, transparent)',
                                     borderLeft: '3px solid transparent',
                                   }
                             }
@@ -155,7 +152,8 @@ export function AppSidebar() {
                             color: 'var(--sidebar-foreground)',
                           }
                         : {
-                            color: 'color-mix(in oklch, var(--sidebar-foreground) 70%, transparent)',
+                            color:
+                              'color-mix(in oklch, var(--sidebar-foreground) 70%, transparent)',
                             borderLeft: '3px solid transparent',
                           }
                     }

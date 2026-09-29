@@ -25,7 +25,11 @@ const formSchema = z.object({
   ad: z.string().min(1, 'Ad zorunludur').max(100),
   soyad: z.string().min(1, 'Soyad zorunludur').max(100),
   telefon: z.string().max(20).optional().or(z.literal('')),
-  iban: z.string().regex(/^TR\d{24}$/, 'Geçersiz IBAN formatı (TRXXXXXXXXXXXXXXXXXXXXXXXX)').optional().or(z.literal('')),
+  iban: z
+    .string()
+    .regex(/^TR\d{24}$/, 'Geçersiz IBAN formatı (TRXXXXXXXXXXXXXXXXXXXXXXXX)')
+    .optional()
+    .or(z.literal('')),
   tc_vergi_no: z.string().max(11).optional().or(z.literal('')),
   adres: z.string().max(500).optional().or(z.literal('')),
   notlar: z.string().max(2000).optional().or(z.literal('')),
@@ -68,7 +72,7 @@ function MuvekkilFormInner({ mode, defaultValues, muvekkilId }: MuvekkilFormProp
       onError: () => {
         toast.error('Kaydedilemedi. Lütfen tekrar deneyin.')
       },
-    })
+    }),
   )
 
   const updateMutation = useMutation(
@@ -81,7 +85,7 @@ function MuvekkilFormInner({ mode, defaultValues, muvekkilId }: MuvekkilFormProp
       onError: () => {
         toast.error('Kaydedilemedi. Lütfen tekrar deneyin.')
       },
-    })
+    }),
   )
 
   const isPending = createMutation.isPending || updateMutation.isPending
@@ -264,17 +268,18 @@ export function MuvekkilForm(props: MuvekkilFormProps) {
     )
   }
 
-  const defaultValues = props.mode === 'edit' && data
-    ? {
-        ad: data.ad,
-        soyad: data.soyad,
-        telefon: data.telefon ?? '',
-        iban: data.iban ?? '',
-        tc_vergi_no: data.tc_vergi_no ?? '',
-        adres: data.adres ?? '',
-        notlar: data.notlar ?? '',
-      }
-    : props.defaultValues
+  const defaultValues =
+    props.mode === 'edit' && data
+      ? {
+          ad: data.ad,
+          soyad: data.soyad,
+          telefon: data.telefon ?? '',
+          iban: data.iban ?? '',
+          tc_vergi_no: data.tc_vergi_no ?? '',
+          adres: data.adres ?? '',
+          notlar: data.notlar ?? '',
+        }
+      : props.defaultValues
 
   return <MuvekkilFormInner {...props} defaultValues={defaultValues} />
 }

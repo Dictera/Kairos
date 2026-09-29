@@ -23,7 +23,9 @@ afterAll(() => {
   if (existsSync(UPLOAD_DIR)) {
     for (const f of readdirSync(UPLOAD_DIR)) {
       if (f.includes('_router-test-')) {
-        try { rmSync(path.join(UPLOAD_DIR, f)) } catch {}
+        try {
+          rmSync(path.join(UPLOAD_DIR, f))
+        } catch {}
       }
     }
   }
@@ -80,45 +82,59 @@ describe('sablonRouter.delete: SET NULL FK on belge.sablon_id (SABLON-05, SABLON
     if (existingMuv) {
       seededMuvekkilId = existingMuv.id
     } else {
-      const [m] = await db.insert(muvekkil).values({
-        ad: 'fk-test-muvekkil',
-        soyad: 'cascade',
-      }).returning()
+      const [m] = await db
+        .insert(muvekkil)
+        .values({
+          ad: 'fk-test-muvekkil',
+          soyad: 'cascade',
+        })
+        .returning()
       seededMuvekkilId = m.id
     }
 
-    const [d] = await db.insert(dosya).values({
-      muvekkil_id: seededMuvekkilId,
-      dosya_no: `fk-cascade-${Date.now()}`,
-      tur: 'STK',
-    }).returning()
+    const [d] = await db
+      .insert(dosya)
+      .values({
+        muvekkil_id: seededMuvekkilId,
+        dosya_no: `fk-cascade-${Date.now()}`,
+        tur: 'STK',
+      })
+      .returning()
     seededDosyaId = d.id
   })
 
   afterAll(async () => {
     if (seededDosyaId) {
-      try { await db.delete(dosya).where(eq(dosya.id, seededDosyaId)) } catch {}
+      try {
+        await db.delete(dosya).where(eq(dosya.id, seededDosyaId))
+      } catch {}
     }
   })
 
   it('sets belge.sablon_id to NULL when template is deleted (SET NULL FK)', async () => {
-    const [tpl] = await db.insert(docxSablon).values({
-      ad: 'FK-test',
-      kategori: 'Genel',
-      dosya_yolu: copyFixtureForTest('fk-test'),
-      degiskenler: [],
-    }).returning()
+    const [tpl] = await db
+      .insert(docxSablon)
+      .values({
+        ad: 'FK-test',
+        kategori: 'Genel',
+        dosya_yolu: copyFixtureForTest('fk-test'),
+        degiskenler: [],
+      })
+      .returning()
 
-    const [b] = await db.insert(belge).values({
-      dosya_id: seededDosyaId,
-      dosya_no: `fk-cascade-${Date.now()}`,
-      kategori: 'Diğer',
-      dosya_adi: 'fk-test.pdf',
-      dosya_yolu: '/tmp/fk-test.pdf',
-      dosya_boyutu: 0,
-      mime_tur: 'application/pdf',
-      sablon_id: tpl.id,
-    }).returning()
+    const [b] = await db
+      .insert(belge)
+      .values({
+        dosya_id: seededDosyaId,
+        dosya_no: `fk-cascade-${Date.now()}`,
+        kategori: 'Diğer',
+        dosya_adi: 'fk-test.pdf',
+        dosya_yolu: '/tmp/fk-test.pdf',
+        dosya_boyutu: 0,
+        mime_tur: 'application/pdf',
+        sablon_id: tpl.id,
+      })
+      .returning()
 
     expect(b.sablon_id).toBe(tpl.id)
 

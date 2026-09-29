@@ -46,14 +46,22 @@ export const VARIABLE_REGISTRY: VariableInfo[] = [
   // stk — surec
   { path: 'stk.asama', tab: 'surec', label: 'STK aşaması' },
   { path: 'stk.ihtar_tarihi', tab: 'surec', label: 'İhtar tarihi' },
-  { path: 'stk.arabuluculuk_son_tutanak_tarihi', tab: 'surec', label: 'Arabuluculuk son tutanak tarihi' },
+  {
+    path: 'stk.arabuluculuk_son_tutanak_tarihi',
+    tab: 'surec',
+    label: 'Arabuluculuk son tutanak tarihi',
+  },
   { path: 'stk.basvuru_tarihi', tab: 'surec', label: 'STK başvuru tarihi' },
   { path: 'stk.stk_esas_no', tab: 'surec', label: 'STK esas numarası' },
   { path: 'stk.stk_karar_no', tab: 'surec', label: 'STK karar numarası' },
   { path: 'stk.stk_itiraz_esas_no', tab: 'surec', label: 'STK itiraz esas no' },
   { path: 'stk.stk_itiraz_karar_no', tab: 'surec', label: 'STK itiraz karar no' },
   { path: 'stk.bilirkisi_ucret_talep_tarihi', tab: 'surec', label: 'Bilirkişi ücret talep tarihi' },
-  { path: 'stk.bilirkisi_raporu_tebliğ_tarihi', tab: 'surec', label: 'Bilirkişi raporu tebliğ tarihi' },
+  {
+    path: 'stk.bilirkisi_raporu_tebliğ_tarihi',
+    tab: 'surec',
+    label: 'Bilirkişi raporu tebliğ tarihi',
+  },
   { path: 'stk.islah_tarihi', tab: 'surec', label: 'Islah tarihi' },
   { path: 'stk.karar_tarihi', tab: 'surec', label: 'STK karar tarihi' },
   { path: 'stk.kesinlesme_tarihi', tab: 'surec', label: 'STK kesinleşme tarihi' },
@@ -69,16 +77,52 @@ export const VARIABLE_REGISTRY: VariableInfo[] = [
   { path: 'mahkeme.temyiz_esas_no', tab: 'surec', label: 'Temyiz esas no' },
   { path: 'mahkeme.temyiz_karar_no', tab: 'surec', label: 'Temyiz karar no' },
   { path: 'mahkeme.temyiz_mahkeme_adi', tab: 'surec', label: 'Temyiz mahkeme adı' },
-  { path: 'mahkeme.dava_dilekcesi_tebliğ_tarihi', tab: 'surec', label: 'Dava dilekçesi tebliğ tarihi' },
-  { path: 'mahkeme.cevap_dilekcesi_tebliğ_tarihi', tab: 'surec', label: 'Cevap dilekçesi tebliğ tarihi' },
-  { path: 'mahkeme.replik_dilekcesi_tebliğ_tarihi', tab: 'surec', label: 'Replik dilekçesi tebliğ tarihi' },
-  { path: 'mahkeme.duplik_dilekcesi_tebliğ_tarihi', tab: 'surec', label: 'Duplik dilekçesi tebliğ tarihi' },
-  { path: 'mahkeme.bilirkisi_ucret_talep_tarihi', tab: 'surec', label: 'Bilirkişi ücret talep tarihi' },
-  { path: 'mahkeme.bilirkisi_raporu_tebliğ_tarihi', tab: 'surec', label: 'Bilirkişi raporu tebliğ tarihi' },
+  {
+    path: 'mahkeme.dava_dilekcesi_tebliğ_tarihi',
+    tab: 'surec',
+    label: 'Dava dilekçesi tebliğ tarihi',
+  },
+  {
+    path: 'mahkeme.cevap_dilekcesi_tebliğ_tarihi',
+    tab: 'surec',
+    label: 'Cevap dilekçesi tebliğ tarihi',
+  },
+  {
+    path: 'mahkeme.replik_dilekcesi_tebliğ_tarihi',
+    tab: 'surec',
+    label: 'Replik dilekçesi tebliğ tarihi',
+  },
+  {
+    path: 'mahkeme.duplik_dilekcesi_tebliğ_tarihi',
+    tab: 'surec',
+    label: 'Duplik dilekçesi tebliğ tarihi',
+  },
+  {
+    path: 'mahkeme.bilirkisi_ucret_talep_tarihi',
+    tab: 'surec',
+    label: 'Bilirkişi ücret talep tarihi',
+  },
+  {
+    path: 'mahkeme.bilirkisi_raporu_tebliğ_tarihi',
+    tab: 'surec',
+    label: 'Bilirkişi raporu tebliğ tarihi',
+  },
   { path: 'mahkeme.karar_tebliğ_tarihi', tab: 'surec', label: 'Karar tebliğ tarihi' },
-  { path: 'mahkeme.istinaf_dilekcesi_tebliğ_tarihi', tab: 'surec', label: 'İstinaf dilekçesi tebliğ tarihi' },
-  { path: 'mahkeme.istinaf_karar_tebliğ_tarihi', tab: 'surec', label: 'İstinaf karar tebliğ tarihi' },
-  { path: 'mahkeme.temyiz_dilekcesi_tebliğ_tarihi', tab: 'surec', label: 'Temyiz dilekçesi tebliğ tarihi' },
+  {
+    path: 'mahkeme.istinaf_dilekcesi_tebliğ_tarihi',
+    tab: 'surec',
+    label: 'İstinaf dilekçesi tebliğ tarihi',
+  },
+  {
+    path: 'mahkeme.istinaf_karar_tebliğ_tarihi',
+    tab: 'surec',
+    label: 'İstinaf karar tebliğ tarihi',
+  },
+  {
+    path: 'mahkeme.temyiz_dilekcesi_tebliğ_tarihi',
+    tab: 'surec',
+    label: 'Temyiz dilekçesi tebliğ tarihi',
+  },
   { path: 'mahkeme.temyiz_karar_tebliğ_tarihi', tab: 'surec', label: 'Temyiz karar tebliğ tarihi' },
   { path: 'mahkeme.kesinlesme_tarihi', tab: 'surec', label: 'Mahkeme kesinleşme tarihi' },
 
@@ -145,7 +189,7 @@ export function getNestedValue(obj: Record<string, unknown>, path: string): unkn
  */
 export function getMissingVariables(
   templateVars: string[],
-  context: Record<string, unknown>
+  context: Record<string, unknown>,
 ): Array<{ var: string; tab: string; label: string }> {
   const missing: Array<{ var: string; tab: string; label: string }> = []
   const registryByPath = new Map(VARIABLE_REGISTRY.map((v) => [v.path, v]))

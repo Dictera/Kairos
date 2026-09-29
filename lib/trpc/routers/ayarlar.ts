@@ -1,7 +1,15 @@
 import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { db } from '@/lib/db'
-import { sigortaSirketi, mahkeme, sigortaTuru, avukat, avukatSigortaSirketi, dosya, taraf } from '@/lib/schema'
+import {
+  sigortaSirketi,
+  mahkeme,
+  sigortaTuru,
+  avukat,
+  avukatSigortaSirketi,
+  dosya,
+  taraf,
+} from '@/lib/schema'
 import { eq, asc, and, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { sigortaSirketiSchema, avukatSchema } from '@/lib/validators/ayarlar'
@@ -38,10 +46,7 @@ const mahkemeSchema = z.object({
 
 // ── Generic CRUD helper (now narrowed to mahkeme | sigortaTuru only) ───────
 
-function makeCrudRouter(
-  table: typeof mahkeme | typeof sigortaTuru,
-  entityName: string
-) {
+function makeCrudRouter(table: typeof mahkeme | typeof sigortaTuru, entityName: string) {
   return createTRPCRouter({
     list: protectedProcedure.query(async () => {
       return db.select().from(table).orderBy(asc(table.ad))
@@ -88,15 +93,25 @@ export const ayarlarRouter = createTRPCRouter({
       .input(sigortaSirketiSchema.extend({ id: z.number().int() }))
       .mutation(async ({ input }) => {
         const { id, ...data } = input
-        const [row] = await db.update(sigortaSirketi).set(data).where(eq(sigortaSirketi.id, id)).returning()
+        const [row] = await db
+          .update(sigortaSirketi)
+          .set(data)
+          .where(eq(sigortaSirketi.id, id))
+          .returning()
         if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Sigorta şirketi bulunamadı.' })
         return row
       }),
     delete: protectedProcedure
       .input(z.object({ id: z.number().int() }))
       .mutation(async ({ input }) => {
-        await db.update(dosya).set({ karsitaraf_sigorta_id: null }).where(eq(dosya.karsitaraf_sigorta_id, input.id))
-        await db.update(taraf).set({ sigorta_sirketi_id: null }).where(eq(taraf.sigorta_sirketi_id, input.id))
+        await db
+          .update(dosya)
+          .set({ karsitaraf_sigorta_id: null })
+          .where(eq(dosya.karsitaraf_sigorta_id, input.id))
+        await db
+          .update(taraf)
+          .set({ sigorta_sirketi_id: null })
+          .where(eq(taraf.sigorta_sirketi_id, input.id))
         await db.delete(sigortaSirketi).where(eq(sigortaSirketi.id, input.id))
         return { success: true }
       }),
@@ -105,9 +120,7 @@ export const ayarlarRouter = createTRPCRouter({
   sigortaTuru: makeCrudRouter(sigortaTuru, 'Sigorta türü'),
 
   mahkeme: createTRPCRouter({
-    list: protectedProcedure.query(async () =>
-      db.select().from(mahkeme).orderBy(asc(mahkeme.ad))
-    ),
+    list: protectedProcedure.query(async () => db.select().from(mahkeme).orderBy(asc(mahkeme.ad))),
     create: protectedProcedure.input(mahkemeSchema).mutation(async ({ input }) => {
       const [row] = await db.insert(mahkeme).values(input).returning()
       return row
@@ -135,11 +148,12 @@ export const ayarlarRouter = createTRPCRouter({
     bySirket: protectedProcedure
       .input(z.object({ sigorta_sirketi_id: z.number().int() }))
       .query(async ({ input }) => {
-        return db.select({
-          id: avukat.id,
-          ad: avukat.ad,
-          tbb_sicil_no: avukat.tbb_sicil_no,
-        })
+        return db
+          .select({
+            id: avukat.id,
+            ad: avukat.ad,
+            tbb_sicil_no: avukat.tbb_sicil_no,
+          })
           .from(avukatSigortaSirketi)
           .innerJoin(avukat, eq(avukatSigortaSirketi.avukat_id, avukat.id))
           .where(eq(avukatSigortaSirketi.sigorta_sirketi_id, input.sigorta_sirketi_id))
@@ -153,7 +167,8 @@ export const ayarlarRouter = createTRPCRouter({
       .input(avukatSchema.extend({ id: z.number().int() }))
       .mutation(async ({ input }) => {
         const { id, ...data } = input
-        const [row] = await db.update(avukat)
+        const [row] = await db
+          .update(avukat)
           .set({ ...data, updated_at: sql`(datetime('now'))` })
           .where(eq(avukat.id, id))
           .returning()
@@ -175,12 +190,14 @@ export const ayarlarRouter = createTRPCRouter({
     removeSirket: protectedProcedure
       .input(z.object({ avukat_id: z.number().int(), sigorta_sirketi_id: z.number().int() }))
       .mutation(async ({ input }) => {
-        await db.delete(avukatSigortaSirketi).where(
-          and(
-            eq(avukatSigortaSirketi.avukat_id, input.avukat_id),
-            eq(avukatSigortaSirketi.sigorta_sirketi_id, input.sigorta_sirketi_id),
+        await db
+          .delete(avukatSigortaSirketi)
+          .where(
+            and(
+              eq(avukatSigortaSirketi.avukat_id, input.avukat_id),
+              eq(avukatSigortaSirketi.sigorta_sirketi_id, input.sigorta_sirketi_id),
+            ),
           )
-        )
         return { success: true }
       }),
   }),
@@ -188,7 +205,8 @@ export const ayarlarRouter = createTRPCRouter({
   takvim: createTRPCRouter({
     getExportGoster: protectedProcedure.query(() => {
       const settings = readSettings()
-      const goster: boolean = settings.takvimExportGoster !== undefined ? Boolean(settings.takvimExportGoster) : true
+      const goster: boolean =
+        settings.takvimExportGoster !== undefined ? Boolean(settings.takvimExportGoster) : true
       return { goster }
     }),
     setExportGoster: protectedProcedure
@@ -213,7 +231,10 @@ export const ayarlarRouter = createTRPCRouter({
   belgeler: createTRPCRouter({
     getPath: protectedProcedure.query(() => {
       const settings = readSettings()
-      return { path: settings.belgelerPath ?? path.join(os.homedir(), 'sigorta-belgeler').replace(/\\/g, '/') }
+      return {
+        path:
+          settings.belgelerPath ?? path.join(os.homedir(), 'sigorta-belgeler').replace(/\\/g, '/'),
+      }
     }),
     setPath: protectedProcedure
       .input(z.object({ path: z.string().min(1, 'Yol zorunludur') }))
@@ -257,7 +278,9 @@ export const ayarlarRouter = createTRPCRouter({
 
         const proc = spawn(cmd, args, { windowsHide: false })
         let output = ''
-        proc.stdout.on('data', (data: Buffer) => { output += data.toString() })
+        proc.stdout.on('data', (data: Buffer) => {
+          output += data.toString()
+        })
         proc.on('close', () => {
           const picked = output.trim()
           resolve({ path: picked ? picked.replace(/\\/g, '/').replace(/\n$/, '') : null })
@@ -267,14 +290,19 @@ export const ayarlarRouter = createTRPCRouter({
             // zenity not found, try kdialog
             const kd = spawn('kdialog', ['--getexistingdirectory', os.homedir()])
             let kdOut = ''
-            kd.stdout.on('data', (d: Buffer) => { kdOut += d.toString() })
+            kd.stdout.on('data', (d: Buffer) => {
+              kdOut += d.toString()
+            })
             kd.on('close', () => resolve({ path: kdOut.trim() || null }))
             kd.on('error', () => resolve({ path: null }))
           } else {
             resolve({ path: null })
           }
         })
-        setTimeout(() => { proc.kill(); resolve({ path: null }) }, 300000)
+        setTimeout(() => {
+          proc.kill()
+          resolve({ path: null })
+        }, 300000)
       })
     }),
   }),

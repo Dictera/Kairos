@@ -80,7 +80,7 @@ export function MuvekkilDetail({ muvekkilId }: MuvekkilDetailProps) {
   const [showLinkedError, setShowLinkedError] = useState(false)
 
   const { data, isLoading, isError } = useQuery(
-    trpc.muvekkil.getById.queryOptions({ id: muvekkilId })
+    trpc.muvekkil.getById.queryOptions({ id: muvekkilId }),
   )
 
   const deleteMutation = useMutation(
@@ -98,7 +98,7 @@ export function MuvekkilDetail({ muvekkilId }: MuvekkilDetailProps) {
           toast.error('Silinemedi. Lütfen tekrar deneyin.')
         }
       },
-    })
+    }),
   )
 
   const handleDeleteClick = () => {
@@ -125,11 +125,7 @@ export function MuvekkilDetail({ muvekkilId }: MuvekkilDetailProps) {
   }
 
   if (isError || !data) {
-    return (
-      <div className="text-sm text-muted-foreground p-4">
-        Müvekkil bulunamadı.
-      </div>
-    )
+    return <div className="text-sm text-muted-foreground p-4">Müvekkil bulunamadı.</div>
   }
 
   const dosyalar = data.dosyalar ?? []
@@ -167,7 +163,8 @@ export function MuvekkilDetail({ muvekkilId }: MuvekkilDetailProps) {
       {/* Linked dosyalar error banner (D-07) */}
       {showLinkedError && (
         <div className="bg-destructive/10 border border-destructive/30 rounded p-3 text-sm text-destructive">
-          Bu müvekkile ait {dosyalar.length} dosya bulunuyor. Müvekkili silmek için önce tüm dosyaları silin veya arşivleyin.
+          Bu müvekkile ait {dosyalar.length} dosya bulunuyor. Müvekkili silmek için önce tüm
+          dosyaları silin veya arşivleyin.
           <Link href={`/dosyalar?muvekkil=${muvekkilId}`} className="ml-1 underline">
             Dosyaları Gör
           </Link>
@@ -183,7 +180,9 @@ export function MuvekkilDetail({ muvekkilId }: MuvekkilDetailProps) {
           <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <dt className="text-sm font-semibold text-muted-foreground">Ad Soyad</dt>
-              <dd className="text-sm mt-1">{data.ad} {data.soyad}</dd>
+              <dd className="text-sm mt-1">
+                {data.ad} {data.soyad}
+              </dd>
             </div>
             <div>
               <dt className="text-sm font-semibold text-muted-foreground">Telefon</dt>
@@ -249,9 +248,7 @@ export function MuvekkilDetail({ muvekkilId }: MuvekkilDetailProps) {
                       <TableCell>
                         <DurumBadge durum={dosya.durum} />
                       </TableCell>
-                      <TableCell className="text-sm">
-                        {formatTutar(dosya.talep_tutari)}
-                      </TableCell>
+                      <TableCell className="text-sm">{formatTutar(dosya.talep_tutari)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

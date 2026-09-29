@@ -25,23 +25,14 @@ export async function POST(request: NextRequest) {
 
   // Validate extension AND MIME (defense in depth — spoofing mitigation)
   const ext = path.extname(file.name).toLowerCase()
-  if (!ALLOWED_EXTENSIONS.includes(ext as typeof ALLOWED_EXTENSIONS[number])) {
-    return NextResponse.json(
-      { error: 'Sadece .docx dosyaları kabul edilir' },
-      { status: 400 },
-    )
+  if (!ALLOWED_EXTENSIONS.includes(ext as (typeof ALLOWED_EXTENSIONS)[number])) {
+    return NextResponse.json({ error: 'Sadece .docx dosyaları kabul edilir' }, { status: 400 })
   }
-  if (!ALLOWED_MIME_TYPES.includes(file.type as typeof ALLOWED_MIME_TYPES[number])) {
-    return NextResponse.json(
-      { error: 'Sadece .docx dosyaları kabul edilir' },
-      { status: 400 },
-    )
+  if (!ALLOWED_MIME_TYPES.includes(file.type as (typeof ALLOWED_MIME_TYPES)[number])) {
+    return NextResponse.json({ error: 'Sadece .docx dosyaları kabul edilir' }, { status: 400 })
   }
   if (file.size > MAX_SIZE) {
-    return NextResponse.json(
-      { error: "Dosya boyutu 10 MB'ı aşamaz" },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: "Dosya boyutu 10 MB'ı aşamaz" }, { status: 400 })
   }
 
   // Ensure upload directory exists.

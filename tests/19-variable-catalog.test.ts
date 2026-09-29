@@ -8,7 +8,9 @@ describe('VariableCatalogModal (BUI-07, BUI-09)', () => {
   const src = readFileSync(MODAL_PATH, 'utf-8')
   it('uses client directive', () => expect(src.startsWith("'use client'")).toBe(true))
   it('imports VARIABLE_REGISTRY from lib/docx/variable-registry', () => {
-    expect(src).toMatch(/import\s*\{[^}]*VARIABLE_REGISTRY[^}]*\}\s*from\s*['"]@\/lib\/docx\/variable-registry['"]/)
+    expect(src).toMatch(
+      /import\s*\{[^}]*VARIABLE_REGISTRY[^}]*\}\s*from\s*['"]@\/lib\/docx\/variable-registry['"]/,
+    )
   })
   it('renders known/unknown badges with Turkish copy', () => {
     expect(src).toContain('✓ Bilinen')
@@ -41,7 +43,9 @@ describe('SablonYonetimiSection row-click catalog (BUI-06)', () => {
     expect(src).toMatch(/setCatalogTarget/)
   })
   it('imports VariableCatalogModal', () => {
-    expect(src).toMatch(/import\s*\{[^}]*VariableCatalogModal[^}]*\}\s*from\s*['"]\.\/variable-catalog-modal['"]/)
+    expect(src).toMatch(
+      /import\s*\{[^}]*VariableCatalogModal[^}]*\}\s*from\s*['"]\.\/variable-catalog-modal['"]/,
+    )
   })
   it('row has cursor-pointer and setCatalogTarget onClick', () => {
     expect(src).toMatch(/TableRow[^>]*className\s*=\s*['"][^'"]*cursor-pointer/)

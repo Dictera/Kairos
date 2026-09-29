@@ -4,8 +4,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
 import { toast } from 'sonner'
 import {
-  parseSurecDetay, STK_ASAMALAR, STK_ASAMA_LABELS,
-  MAHKEME_ASAMALAR, MAHKEME_ASAMA_LABELS,
+  parseSurecDetay,
+  STK_ASAMALAR,
+  STK_ASAMA_LABELS,
+  MAHKEME_ASAMALAR,
+  MAHKEME_ASAMA_LABELS,
 } from '@/lib/schema'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -18,15 +21,11 @@ import { SureList } from './sure-list'
 
 type YargilamaSureciTabProps = {
   dosyaId: number
-  dosyaTur: string  // 'STK' | 'AT' | 'AH'
+  dosyaTur: string // 'STK' | 'AT' | 'AH'
   surecDetayRaw: string | null
 }
 
-export function YargilamaSureciTab({
-  dosyaId,
-  dosyaTur,
-  surecDetayRaw,
-}: YargilamaSureciTabProps) {
+export function YargilamaSureciTab({ dosyaId, dosyaTur, surecDetayRaw }: YargilamaSureciTabProps) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
@@ -41,8 +40,9 @@ export function YargilamaSureciTab({
         const label = STK_ASAMA_LABELS[data.asama as keyof typeof STK_ASAMA_LABELS] ?? data.asama
         toast.success(`Aşama güncellendi: ${label}`)
       },
-      onError: () => toast.error('Aşama güncellenirken hata oluştu. Sayfayı yenileyip tekrar deneyin.'),
-    })
+      onError: () =>
+        toast.error('Aşama güncellenirken hata oluştu. Sayfayı yenileyip tekrar deneyin.'),
+    }),
   )
 
   const stkGeriAlMutation = useMutation(
@@ -53,7 +53,7 @@ export function YargilamaSureciTab({
         toast.success(`Aşama güncellendi: ${label}`)
       },
       onError: (err) => toast.error(err.message ?? 'Geri alınırken hata oluştu.'),
-    })
+    }),
   )
 
   const initMahkemeMutation = useMutation(
@@ -63,33 +63,37 @@ export function YargilamaSureciTab({
         toast.success('Mahkeme süreci başlatıldı.')
       },
       onError: (err) => toast.error(err.message ?? 'İşlem sırasında hata oluştu.'),
-    })
+    }),
   )
 
   const mahkemeIleriAlMutation = useMutation(
     trpc.surec.mahkemeIleriAl.mutationOptions({
       onSuccess: (data) => {
         void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
-        const label = MAHKEME_ASAMA_LABELS[data.asama as keyof typeof MAHKEME_ASAMA_LABELS] ?? data.asama
+        const label =
+          MAHKEME_ASAMA_LABELS[data.asama as keyof typeof MAHKEME_ASAMA_LABELS] ?? data.asama
         toast.success(`Aşama güncellendi: ${label}`)
       },
-      onError: () => toast.error('Aşama güncellenirken hata oluştu. Sayfayı yenileyip tekrar deneyin.'),
-    })
+      onError: () =>
+        toast.error('Aşama güncellenirken hata oluştu. Sayfayı yenileyip tekrar deneyin.'),
+    }),
   )
 
   const mahkemeGeriAlMutation = useMutation(
     trpc.surec.mahkemeGeriAl.mutationOptions({
       onSuccess: (data) => {
         void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
-        const label = MAHKEME_ASAMA_LABELS[data.asama as keyof typeof MAHKEME_ASAMA_LABELS] ?? data.asama
+        const label =
+          MAHKEME_ASAMA_LABELS[data.asama as keyof typeof MAHKEME_ASAMA_LABELS] ?? data.asama
         toast.success(`Aşama güncellendi: ${label}`)
       },
       onError: (err) => toast.error(err.message ?? 'Geri alınırken hata oluştu.'),
-    })
+    }),
   )
 
   const showStk = dosyaTur === 'STK'
-  const showMahkemeSection = dosyaTur === 'AT' || dosyaTur === 'AH' || (dosyaTur === 'STK' && mahkeme)
+  const showMahkemeSection =
+    dosyaTur === 'AT' || dosyaTur === 'AH' || (dosyaTur === 'STK' && mahkeme)
 
   const handleMahkemeIleriAl = () => {
     mahkemeIleriAlMutation.mutate({ dosya_id: dosyaId })

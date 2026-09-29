@@ -6,39 +6,42 @@ import { useTRPC } from '@/lib/trpc/context'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowDownCircle, ArrowUpCircle, Receipt, MinusCircle } from 'lucide-react'
 import { fmt } from './finans-data'
-import { SirketTur }       from './sirket-tur'
-import { Karlilik }        from './karlilik'
-import { Pipeline }        from './pipeline'
+import { SirketTur } from './sirket-tur'
+import { Karlilik } from './karlilik'
+import { Pipeline } from './pipeline'
 import { FinansDashboard } from './finans-dashboard'
-import { FinansTablolar }  from './finans-tablolar'
+import { FinansTablolar } from './finans-tablolar'
 
 type YilFilter = 'all' | (string & {})
 
 // ── Summary strip ─────────────────────────────────────────────────────────────
 
 function SummaryStrip({ yil }: { yil: YilFilter }) {
-  const trpc         = useTRPC()
+  const trpc = useTRPC()
   const selectedYear = yil === 'all' ? undefined : parseInt(yil)
 
-  const { data } = useQuery(
-    trpc.finans.dashboard.queryOptions({ yil: selectedYear })
-  )
+  const { data } = useQuery(trpc.finans.dashboard.queryOptions({ yil: selectedYear }))
 
   const totals = (data?.monthly ?? []).reduce(
     (a, m) => ({
-      gelen:  a.gelen  + m.gelen,
-      giden:  a.giden  + m.giden,
+      gelen: a.gelen + m.gelen,
+      giden: a.giden + m.giden,
       masraf: a.masraf + m.masraf,
-      net:    a.net    + (m.gelen - m.giden - m.masraf),
+      net: a.net + (m.gelen - m.giden - m.masraf),
     }),
     { gelen: 0, giden: 0, masraf: 0, net: 0 },
   )
 
   const items = [
-    { label: 'Gelen',      value: totals.gelen,  color: '#22c55e', Icon: ArrowDownCircle },
-    { label: 'Giden',      value: totals.giden,  color: '#ef4444', Icon: ArrowUpCircle   },
-    { label: 'Masraf',     value: totals.masraf, color: '#f97316', Icon: Receipt         },
-    { label: 'Net Bakiye', value: totals.net,    color: totals.net >= 0 ? '#1c768f' : '#ef4444', Icon: MinusCircle },
+    { label: 'Gelen', value: totals.gelen, color: '#22c55e', Icon: ArrowDownCircle },
+    { label: 'Giden', value: totals.giden, color: '#ef4444', Icon: ArrowUpCircle },
+    { label: 'Masraf', value: totals.masraf, color: '#f97316', Icon: Receipt },
+    {
+      label: 'Net Bakiye',
+      value: totals.net,
+      color: totals.net >= 0 ? '#1c768f' : '#ef4444',
+      Icon: MinusCircle,
+    },
   ]
 
   return (
@@ -66,7 +69,15 @@ function SummaryStrip({ yil }: { yil: YilFilter }) {
 
 // ── Year filter ───────────────────────────────────────────────────────────────
 
-function YilChips({ value, onChange, years }: { value: YilFilter; onChange: (v: YilFilter) => void; years: number[] }) {
+function YilChips({
+  value,
+  onChange,
+  years,
+}: {
+  value: YilFilter
+  onChange: (v: YilFilter) => void
+  years: number[]
+}) {
   return (
     <div className="flex gap-1.5 flex-wrap">
       <button
@@ -81,7 +92,7 @@ function YilChips({ value, onChange, years }: { value: YilFilter; onChange: (v: 
       >
         Tümü
       </button>
-      {years.map(y => (
+      {years.map((y) => (
         <button
           key={y}
           type="button"
@@ -106,10 +117,8 @@ export function FinansPage() {
   const [yil, setYil] = useState<YilFilter>('all')
   const trpc = useTRPC()
 
-  const { data: dashData } = useQuery(
-    trpc.finans.dashboard.queryOptions({})
-  )
-  const availableYears = (dashData?.yearly ?? []).map(y => parseInt(y.yil))
+  const { data: dashData } = useQuery(trpc.finans.dashboard.queryOptions({}))
+  const availableYears = (dashData?.yearly ?? []).map((y) => parseInt(y.yil))
 
   return (
     <div className="space-y-5">
@@ -132,11 +141,21 @@ export function FinansPage() {
           <TabsTrigger value="tablolar">Tablolar</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="sirket"   className="mt-4"><SirketTur /></TabsContent>
-        <TabsContent value="karlilik" className="mt-4"><Karlilik /></TabsContent>
-        <TabsContent value="pipeline" className="mt-4"><Pipeline /></TabsContent>
-        <TabsContent value="aylik"    className="mt-4"><FinansDashboard /></TabsContent>
-        <TabsContent value="tablolar" className="mt-4"><FinansTablolar /></TabsContent>
+        <TabsContent value="sirket" className="mt-4">
+          <SirketTur />
+        </TabsContent>
+        <TabsContent value="karlilik" className="mt-4">
+          <Karlilik />
+        </TabsContent>
+        <TabsContent value="pipeline" className="mt-4">
+          <Pipeline />
+        </TabsContent>
+        <TabsContent value="aylik" className="mt-4">
+          <FinansDashboard />
+        </TabsContent>
+        <TabsContent value="tablolar" className="mt-4">
+          <FinansTablolar />
+        </TabsContent>
       </Tabs>
     </div>
   )

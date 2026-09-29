@@ -32,9 +32,7 @@ export function TodaysHearings({ hearings }: TodaysHearingsProps) {
         {hearings.length === 0 ? (
           <div className="py-10 text-center space-y-1">
             <p className="text-sm font-semibold text-muted-foreground">Bugün duruşma yok</p>
-            <p className="text-sm text-muted-foreground">
-              Bugün için kayıtlı duruşma bulunmuyor.
-            </p>
+            <p className="text-sm text-muted-foreground">Bugün için kayıtlı duruşma bulunmuyor.</p>
           </div>
         ) : (
           <TooltipProvider>

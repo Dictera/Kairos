@@ -14,11 +14,9 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
   }
 }
 
-const t = initTRPC
-  .context<Awaited<ReturnType<typeof createTRPCContext>>>()
-  .create({
-    transformer: superjson,
-  })
+const t = initTRPC.context<Awaited<ReturnType<typeof createTRPCContext>>>().create({
+  transformer: superjson,
+})
 
 export const createTRPCRouter = t.router
 export const publicProcedure = t.procedure

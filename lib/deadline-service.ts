@@ -34,8 +34,8 @@ export function calcCevapDilekce(davaTebligatTarihi: string): string {
 export function isInAdliTatil(sonTarihStr: string): boolean {
   const [y, m, d] = sonTarihStr.split('-').map(Number)
   const date = new Date(y, m - 1, d)
-  const start = new Date(y, 6, 20)   // July 20 (month is 0-indexed)
-  const end = new Date(y, 7, 31)     // August 31
+  const start = new Date(y, 6, 20) // July 20 (month is 0-indexed)
+  const end = new Date(y, 7, 31) // August 31
   return isWithinInterval(date, { start, end })
 }
 
@@ -48,6 +48,14 @@ export function getDaysUntil(sonTarihStr: string): number {
   // Use noon to avoid timezone off-by-one errors
   const date = new Date(y, m - 1, d, 12, 0, 0, 0)
   const today = new Date()
-  const todayNormalized = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0, 0)
+  const todayNormalized = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+    12,
+    0,
+    0,
+    0,
+  )
   return differenceInCalendarDays(date, todayNormalized)
 }

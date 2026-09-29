@@ -41,7 +41,7 @@ export function SurecStepper<T extends string>({
                 'w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0',
                 isPast && 'bg-accent text-accent-foreground',
                 isCurrent && 'border-2 border-accent bg-background text-accent',
-                isFuture && 'border border-border bg-background text-muted-foreground'
+                isFuture && 'border border-border bg-background text-muted-foreground',
               )}
             >
               {isPast ? <Check size={12} /> : idx + 1}
@@ -53,7 +53,7 @@ export function SurecStepper<T extends string>({
                 'text-sm flex-1',
                 isPast && 'text-foreground',
                 isCurrent && 'font-semibold text-foreground',
-                isFuture && 'text-muted-foreground'
+                isFuture && 'text-muted-foreground',
               )}
             >
               {labels[stage]}
@@ -63,21 +63,11 @@ export function SurecStepper<T extends string>({
             {showButton && (
               <div className="flex gap-2">
                 {onBack && currentIdx > 0 && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={onBack}
-                    disabled={isPending}
-                  >
+                  <Button size="sm" variant="outline" onClick={onBack} disabled={isPending}>
                     ← Geri Al
                   </Button>
                 )}
-                <Button
-                  size="sm"
-                  variant="default"
-                  onClick={onAdvance}
-                  disabled={isPending}
-                >
+                <Button size="sm" variant="default" onClick={onAdvance} disabled={isPending}>
                   {isPending ? 'İlerletiliyor...' : 'İleri Al →'}
                 </Button>
               </div>
@@ -100,21 +90,11 @@ export function SurecStepper<T extends string>({
           <span className="text-sm text-muted-foreground flex-1">{labels[stages[0]]}</span>
           <div className="flex gap-2">
             {onBack && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={onBack}
-                disabled={isPending}
-              >
+              <Button size="sm" variant="outline" onClick={onBack} disabled={isPending}>
                 ← Geri Al
               </Button>
             )}
-            <Button
-              size="sm"
-              variant="default"
-              onClick={onAdvance}
-              disabled={isPending}
-            >
+            <Button size="sm" variant="default" onClick={onAdvance} disabled={isPending}>
               {isPending ? 'İlerletiliyor...' : 'İleri Al →'}
             </Button>
           </div>

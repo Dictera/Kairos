@@ -41,7 +41,8 @@ export const tarafSchema = z.object({
   surucu_ad: z.string().max(200).nullable().optional().or(z.literal('')),
   surucu_soyad: z.string().max(200).nullable().optional().or(z.literal('')),
   surucu_plaka: z.string().max(10).nullable().optional().or(z.literal('')),
-  surucu_telefon: z.string()
+  surucu_telefon: z
+    .string()
     .regex(/^05[0-9]{9}$/, 'Geçersiz telefon formatı (05XXXXXXXXX gerekli)')
     .nullable()
     .optional()
@@ -64,22 +65,27 @@ function generateDosyaNo(tx: Transaction): string {
     .get()
   const next = (row?.maxSeq ?? 0) + 1
   if (next > 9999) {
-    throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Yıllık dosya numarası limiti (9999) aşıldı.' })
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Yıllık dosya numarası limiti (9999) aşıldı.',
+    })
   }
   return `${year}/${next}`
 }
 
 export const dosyaRouter = createTRPCRouter({
   list: protectedProcedure
-    .input(z.object({
-      search: z.string().max(100).optional(),
-      tur: z.enum(['STK', 'AT', 'AH']).optional(),
-      durum: z.enum(['aktif', 'arsiv']).optional(),
-      tarih_baslangic: z.string().optional(),
-      tarih_bitis: z.string().optional(),
-      page: z.number().int().min(1).default(1),
-      pageSize: z.number().int().min(1).max(100).default(25),
-    }))
+    .input(
+      z.object({
+        search: z.string().max(100).optional(),
+        tur: z.enum(['STK', 'AT', 'AH']).optional(),
+        durum: z.enum(['aktif', 'arsiv']).optional(),
+        tarih_baslangic: z.string().optional(),
+        tarih_bitis: z.string().optional(),
+        page: z.number().int().min(1).default(1),
+        pageSize: z.number().int().min(1).max(100).default(25),
+      }),
+    )
     .query(async ({ input }) => {
       const { search, tur, durum, tarih_baslangic, tarih_bitis, page, pageSize } = input
       const offset = (page - 1) * pageSize
@@ -91,7 +97,7 @@ export const dosyaRouter = createTRPCRouter({
         conditions.push(
           match
             ? sql`${dosya.id} IN (SELECT rowid FROM dosya_fts WHERE dosya_fts MATCH ${match})`
-            : sql`lower_tr(${dosya.dosya_no}) LIKE lower_tr(${'%' + search + '%'}) OR lower_tr(${muvekkil.ad} || ' ' || ${muvekkil.soyad}) LIKE lower_tr(${'%' + search + '%'})`
+            : sql`lower_tr(${dosya.dosya_no}) LIKE lower_tr(${'%' + search + '%'}) OR lower_tr(${muvekkil.ad} || ' ' || ${muvekkil.soyad}) LIKE lower_tr(${'%' + search + '%'})`,
         )
       }
       if (tur) conditions.push(eq(dosya.tur, tur))
@@ -106,22 +112,23 @@ export const dosyaRouter = createTRPCRouter({
       const muvekkilSirketi = aliasedTable(sigortaSirketi, 'muvekkil_sirketi')
 
       const [rows, totalResult] = await Promise.all([
-        db.select({
-          id: dosya.id,
-          dosya_no: dosya.dosya_no,
-          tur: dosya.tur,
-          durum: dosya.durum,
-          muvekkil_id: dosya.muvekkil_id,
-          muvekkil_ad: sql<string>`${muvekkil.ad} || ' ' || ${muvekkil.soyad}`,
-          sigorta_turu_ad: sigortaTuru.ad,
-          karsitaraf_sigorta_ad: sigortaSirketi.ad,
-          hasar_dosya_no: dosya.hasar_dosya_no,
-          kaza_tarihi: dosya.kaza_tarihi,
-          kusur_orani_karsi: dosya.kusur_orani_karsi,
-          muvekkil_sigorta_ad: muvekkilSirketi.ad,
-          police_no: dosya.muvekkil_police_no,
-          created_at: dosya.created_at,
-        })
+        db
+          .select({
+            id: dosya.id,
+            dosya_no: dosya.dosya_no,
+            tur: dosya.tur,
+            durum: dosya.durum,
+            muvekkil_id: dosya.muvekkil_id,
+            muvekkil_ad: sql<string>`${muvekkil.ad} || ' ' || ${muvekkil.soyad}`,
+            sigorta_turu_ad: sigortaTuru.ad,
+            karsitaraf_sigorta_ad: sigortaSirketi.ad,
+            hasar_dosya_no: dosya.hasar_dosya_no,
+            kaza_tarihi: dosya.kaza_tarihi,
+            kusur_orani_karsi: dosya.kusur_orani_karsi,
+            muvekkil_sigorta_ad: muvekkilSirketi.ad,
+            police_no: dosya.muvekkil_police_no,
+            created_at: dosya.created_at,
+          })
           .from(dosya)
           .leftJoin(muvekkil, eq(dosya.muvekkil_id, muvekkil.id))
           .leftJoin(sigortaTuru, eq(dosya.sigorta_turu_id, sigortaTuru.id))
@@ -131,7 +138,8 @@ export const dosyaRouter = createTRPCRouter({
           .orderBy(desc(dosya.id))
           .limit(pageSize)
           .offset(offset),
-        db.select({ total: count() })
+        db
+          .select({ total: count() })
           .from(dosya)
           .leftJoin(muvekkil, eq(dosya.muvekkil_id, muvekkil.id))
           .where(where),
@@ -139,7 +147,7 @@ export const dosyaRouter = createTRPCRouter({
 
       const total = totalResult[0]?.total ?? 0
       return {
-        rows: rows.map(r => ({ ...r, police_no: r.police_no ?? null })),
+        rows: rows.map((r) => ({ ...r, police_no: r.police_no ?? null })),
         total,
         page,
         pageSize,
@@ -147,43 +155,46 @@ export const dosyaRouter = createTRPCRouter({
       }
     }),
 
-  getById: protectedProcedure
-    .input(z.object({ id: z.number().int() }))
-    .query(async ({ input }) => {
-      const row = await db.query.dosya.findFirst({
-        where: eq(dosya.id, input.id),
-        with: {
-          muvekkil: { columns: { id: true, ad: true, soyad: true } },
-          sigortaTuru: { columns: { id: true, ad: true } },
-          karsitarafSigorta: { columns: { id: true, ad: true } },
-          muvekkilSigorta: { columns: { id: true, ad: true } },
-          taraflar: {
-            with: {
-              sigortaSirketi: true,
-              avukat: true,
-            },
+  getById: protectedProcedure.input(z.object({ id: z.number().int() })).query(async ({ input }) => {
+    const row = await db.query.dosya.findFirst({
+      where: eq(dosya.id, input.id),
+      with: {
+        muvekkil: { columns: { id: true, ad: true, soyad: true } },
+        sigortaTuru: { columns: { id: true, ad: true } },
+        karsitarafSigorta: { columns: { id: true, ad: true } },
+        muvekkilSigorta: { columns: { id: true, ad: true } },
+        taraflar: {
+          with: {
+            sigortaSirketi: true,
+            avukat: true,
           },
         },
-      })
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
-      return row
-    }),
+      },
+    })
+    if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
+    return row
+  }),
 
-  create: protectedProcedure
-    .input(dosyaCreateSchema)
-    .mutation(async ({ input }) => {
-      // No-retry needed: number generation + insert + log run in one write
-      // transaction, which SQLite serializes — concurrent creates can't collide.
-      return db.transaction((tx) => {
-        const dosya_no = generateDosyaNo(tx)
-        const row = tx.insert(dosya).values({ ...input, dosya_no }).returning().get()
-        const mv = tx.select({ ad: muvekkil.ad, soyad: muvekkil.soyad })
-          .from(muvekkil).where(eq(muvekkil.id, row.muvekkil_id)).get()
-        upsertDosyaFts(tx, row.id, { ...row, ad: mv?.ad, soyad: mv?.soyad })
-        logOlayTx(tx, row.id, 'olusturma', 'Dosya oluşturuldu')
-        return row
-      })
-    }),
+  create: protectedProcedure.input(dosyaCreateSchema).mutation(async ({ input }) => {
+    // No-retry needed: number generation + insert + log run in one write
+    // transaction, which SQLite serializes — concurrent creates can't collide.
+    return db.transaction((tx) => {
+      const dosya_no = generateDosyaNo(tx)
+      const row = tx
+        .insert(dosya)
+        .values({ ...input, dosya_no })
+        .returning()
+        .get()
+      const mv = tx
+        .select({ ad: muvekkil.ad, soyad: muvekkil.soyad })
+        .from(muvekkil)
+        .where(eq(muvekkil.id, row.muvekkil_id))
+        .get()
+      upsertDosyaFts(tx, row.id, { ...row, ad: mv?.ad, soyad: mv?.soyad })
+      logOlayTx(tx, row.id, 'olusturma', 'Dosya oluşturuldu')
+      return row
+    })
+  }),
 
   update: protectedProcedure
     .input(dosyaSchema.extend({ id: z.number().int() }))
@@ -199,7 +210,10 @@ export const dosyaRouter = createTRPCRouter({
             .where(and(eq(dosya.dosya_no, data.dosya_no), sql`${dosya.id} != ${id}`))
             .all()
           if (existing.length > 0) {
-            throw new TRPCError({ code: 'CONFLICT', message: 'Bu dosya numarası zaten kullanılıyor.' })
+            throw new TRPCError({
+              code: 'CONFLICT',
+              message: 'Bu dosya numarası zaten kullanılıyor.',
+            })
           }
         }
         const row = tx
@@ -209,8 +223,11 @@ export const dosyaRouter = createTRPCRouter({
           .returning()
           .get()
         if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
-        const mv = tx.select({ ad: muvekkil.ad, soyad: muvekkil.soyad })
-          .from(muvekkil).where(eq(muvekkil.id, row.muvekkil_id)).get()
+        const mv = tx
+          .select({ ad: muvekkil.ad, soyad: muvekkil.soyad })
+          .from(muvekkil)
+          .where(eq(muvekkil.id, row.muvekkil_id))
+          .get()
         upsertDosyaFts(tx, row.id, { ...row, ad: mv?.ad, soyad: mv?.soyad })
         logOlayTx(tx, id, 'guncelleme', 'Dosya bilgileri güncellendi')
         return row
@@ -261,14 +278,13 @@ export const dosyaRouter = createTRPCRouter({
     }),
 
   // Upsert taraf (counter-party) for a dosya — DOSYA-05
-  upsertTaraf: protectedProcedure
-    .input(tarafSchema)
-    .mutation(async ({ input }) => {
-      const { dosya_id, ...data } = input
-      const [row] = await db.insert(taraf)
-        .values({ dosya_id, ...data })
-        .onConflictDoUpdate({ target: taraf.dosya_id, set: data })
-        .returning()
-      return row
-    }),
+  upsertTaraf: protectedProcedure.input(tarafSchema).mutation(async ({ input }) => {
+    const { dosya_id, ...data } = input
+    const [row] = await db
+      .insert(taraf)
+      .values({ dosya_id, ...data })
+      .onConflictDoUpdate({ target: taraf.dosya_id, set: data })
+      .returning()
+    return row
+  }),
 })

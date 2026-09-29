@@ -3,7 +3,12 @@ import { connection } from 'next/server'
 import { db } from '@/lib/db'
 import { dosya } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
-import { buildBelgelerDir, BELGELER_BASE, isInsideDir, sanitizeFsSegment } from '@/lib/belgeler-storage'
+import {
+  buildBelgelerDir,
+  BELGELER_BASE,
+  isInsideDir,
+  sanitizeFsSegment,
+} from '@/lib/belgeler-storage'
 import { requireAuth } from '@/lib/auth-guard'
 import fs from 'fs'
 import path from 'path'
@@ -44,7 +49,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: 'Dosya boyutu 20 MB\'ı aşamaz' }, { status: 400 })
+    return NextResponse.json({ error: "Dosya boyutu 20 MB'ı aşamaz" }, { status: 400 })
   }
 
   // Look up dosya to build hierarchical directory

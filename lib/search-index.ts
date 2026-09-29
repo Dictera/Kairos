@@ -12,7 +12,11 @@ import { dosyaFtsText, muvekkilFtsText } from './turkish'
 type Client = Transaction | typeof db
 
 // FTS5 (regular, not contentless) supports DELETE by rowid, so upsert = delete + insert.
-export function upsertDosyaFts(client: Client, id: number, parts: Parameters<typeof dosyaFtsText>[0]) {
+export function upsertDosyaFts(
+  client: Client,
+  id: number,
+  parts: Parameters<typeof dosyaFtsText>[0],
+) {
   client.run(sql`DELETE FROM dosya_fts WHERE rowid = ${id}`)
   client.run(sql`INSERT INTO dosya_fts(rowid, txt) VALUES (${id}, ${dosyaFtsText(parts)})`)
 }
@@ -21,7 +25,11 @@ export function deleteDosyaFts(client: Client, id: number) {
   client.run(sql`DELETE FROM dosya_fts WHERE rowid = ${id}`)
 }
 
-export function upsertMuvekkilFts(client: Client, id: number, parts: Parameters<typeof muvekkilFtsText>[0]) {
+export function upsertMuvekkilFts(
+  client: Client,
+  id: number,
+  parts: Parameters<typeof muvekkilFtsText>[0],
+) {
   client.run(sql`DELETE FROM muvekkil_fts WHERE rowid = ${id}`)
   client.run(sql`INSERT INTO muvekkil_fts(rowid, txt) VALUES (${id}, ${muvekkilFtsText(parts)})`)
 }
@@ -33,14 +41,15 @@ export function deleteMuvekkilFts(client: Client, id: number) {
 // A müvekkil's name is denormalized into every dosya_fts row of that müvekkil.
 // Call after a müvekkil name change to refresh all dependent dosya rows.
 export function rebuildMuvekkilDosyaFts(tx: Transaction, muvekkilId: number) {
-  const rows = tx.select({
-    id: dosya.id,
-    dosya_no: dosya.dosya_no,
-    hasar_dosya_no: dosya.hasar_dosya_no,
-    muvekkil_plaka: dosya.muvekkil_plaka,
-    ad: muvekkil.ad,
-    soyad: muvekkil.soyad,
-  })
+  const rows = tx
+    .select({
+      id: dosya.id,
+      dosya_no: dosya.dosya_no,
+      hasar_dosya_no: dosya.hasar_dosya_no,
+      muvekkil_plaka: dosya.muvekkil_plaka,
+      ad: muvekkil.ad,
+      soyad: muvekkil.soyad,
+    })
     .from(dosya)
     .innerJoin(muvekkil, eq(dosya.muvekkil_id, muvekkil.id))
     .where(eq(dosya.muvekkil_id, muvekkilId))

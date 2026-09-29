@@ -3,11 +3,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { ChevronRight, FileIcon, Download, FolderOpen } from 'lucide-react'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
@@ -122,7 +118,7 @@ function DosyaSection({ dosya }: { dosya: DosyaGroup }) {
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="ml-5 mt-1 space-y-0.5 border-l pl-2">
-          {dosya.belgeler.map(b => (
+          {dosya.belgeler.map((b) => (
             <BelgeRow key={b.id} belge={b} />
           ))}
         </div>
@@ -144,7 +140,7 @@ function SigortaSection({ sigorta }: { sigorta: SigortaGroup }) {
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="ml-4 mt-1 space-y-0.5">
-          {sigorta.dosyalar.map(d => (
+          {sigorta.dosyalar.map((d) => (
             <DosyaSection key={d.dosya_id} dosya={d} />
           ))}
         </div>
@@ -156,14 +152,16 @@ function SigortaSection({ sigorta }: { sigorta: SigortaGroup }) {
 function TurSection({ turGroup }: { turGroup: TurGroup }) {
   const totalBelge = turGroup.sigortaTurleri.reduce(
     (sum, s) => sum + s.dosyalar.reduce((s2, d) => s2 + d.belgeler.length, 0),
-    0
+    0,
   )
   return (
     <Collapsible defaultOpen>
-      <CollapsibleTrigger className={cn(
-        'flex w-full items-center gap-2 rounded-lg px-4 py-3 font-semibold',
-        'bg-muted/50 hover:bg-muted transition-colors group'
-      )}>
+      <CollapsibleTrigger
+        className={cn(
+          'flex w-full items-center gap-2 rounded-lg px-4 py-3 font-semibold',
+          'bg-muted/50 hover:bg-muted transition-colors group',
+        )}
+      >
         <ChevronRight className="h-4 w-4 flex-shrink-0 transition-transform group-data-[state=open]:rotate-90" />
         <span>{turGroup.turLabel}</span>
         <span className="ml-auto text-xs font-normal text-muted-foreground">
@@ -172,7 +170,7 @@ function TurSection({ turGroup }: { turGroup: TurGroup }) {
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="mt-1 ml-2 space-y-0.5">
-          {turGroup.sigortaTurleri.map(s => (
+          {turGroup.sigortaTurleri.map((s) => (
             <SigortaSection key={s.ad} sigorta={s} />
           ))}
         </div>
@@ -209,24 +207,29 @@ export default function BelgelerPage() {
       dosyaMap.get(row.dosya_id)!.belgeler.push(row)
     }
 
-    return TUR_ORDER
-      .flatMap(tur => turMap.has(tur)
-        ? [{
-            tur,
-            turLabel: TUR_LABELS[tur] ?? tur,
-            sigortaTurleri: Array.from(turMap.get(tur)!.entries()).map(([ad, dosyaMap]) => ({
-              ad,
-              dosyalar: Array.from(dosyaMap.values()),
-            })),
-          }]
-        : [])
+    return TUR_ORDER.flatMap((tur) =>
+      turMap.has(tur)
+        ? [
+            {
+              tur,
+              turLabel: TUR_LABELS[tur] ?? tur,
+              sigortaTurleri: Array.from(turMap.get(tur)!.entries()).map(([ad, dosyaMap]) => ({
+                ad,
+                dosyalar: Array.from(dosyaMap.values()),
+              })),
+            },
+          ]
+        : [],
+    )
   }, [rows])
 
   if (isLoading) {
     return (
       <div className="container py-8 space-y-3">
         <Skeleton className="h-8 w-40" />
-        {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}
+        {[1, 2, 3].map((i) => (
+          <Skeleton key={i} className="h-12 w-full rounded-lg" />
+        ))}
       </div>
     )
   }
@@ -238,7 +241,9 @@ export default function BelgelerPage() {
         <p className="text-muted-foreground">Henüz belge yüklenmedi.</p>
       ) : (
         <div className="space-y-2">
-          {tree.map(g => <TurSection key={g.tur} turGroup={g} />)}
+          {tree.map((g) => (
+            <TurSection key={g.tur} turGroup={g} />
+          ))}
         </div>
       )}
     </div>

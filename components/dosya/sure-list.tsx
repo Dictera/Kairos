@@ -80,7 +80,7 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
   const [deletingSure, setDeletingSure] = useState<SureRow | null>(null)
 
   const { data: sureList = [], isLoading } = useQuery(
-    trpc.sure.list.queryOptions({ dosya_id: dosyaId })
+    trpc.sure.list.queryOptions({ dosya_id: dosyaId }),
   )
 
   const createMutation = useMutation(
@@ -95,7 +95,7 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
       onError: () => {
         toast.error('Süre kaydedilemedi. Tekrar deneyin.')
       },
-    })
+    }),
   )
 
   const updateMutation = useMutation(
@@ -109,7 +109,7 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
       onError: () => {
         toast.error('Süre güncellenemedi. Tekrar deneyin.')
       },
-    })
+    }),
   )
 
   const deleteMutation = useMutation(
@@ -123,7 +123,7 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
       onError: () => {
         toast.error('Süre silinemedi. Tekrar deneyin.')
       },
-    })
+    }),
   )
 
   const form = useForm<SureFormValues>({
@@ -180,11 +180,7 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
     <div className="space-y-4">
       {/* Header + Add button */}
       <div className="flex items-center justify-between">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowForm(!showForm)}
-        >
+        <Button variant="outline" size="sm" onClick={() => setShowForm(!showForm)}>
           <Plus className="h-4 w-4 mr-1" />
           Manuel Süre Ekle
         </Button>
@@ -234,11 +230,7 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
                 <FormItem>
                   <FormLabel>Notlar (opsiyonel)</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Ek notlar..."
-                      rows={2}
-                      {...field}
-                    />
+                    <Textarea placeholder="Ek notlar..." rows={2} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -256,11 +248,7 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
               >
                 İptal
               </Button>
-              <Button
-                type="submit"
-                size="sm"
-                disabled={createMutation.isPending}
-              >
+              <Button type="submit" size="sm" disabled={createMutation.isPending}>
                 {createMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
               </Button>
             </div>
@@ -270,9 +258,7 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
 
       {/* Sure List */}
       {sureList.length === 0 && !showForm ? (
-        <p className="text-sm text-muted-foreground py-4">
-          Henüz süre kaydı yok.
-        </p>
+        <p className="text-sm text-muted-foreground py-4">Henüz süre kaydı yok.</p>
       ) : (
         <div className="space-y-2">
           {sureList.map((sure: SureRow) => {
@@ -285,9 +271,7 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
                 key={sure.id}
                 className="flex items-center gap-3 py-2 px-3 border rounded-md bg-card"
               >
-                <Badge className={urgencyBadgeClass(days)}>
-                  {daysLabel(days)}
-                </Badge>
+                <Badge className={urgencyBadgeClass(days)}>{daysLabel(days)}</Badge>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold truncate">{sure.ad}</p>
                   <p className="text-sm text-muted-foreground">
@@ -328,10 +312,7 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={deletingSure !== null}
-        onOpenChange={(open) => !open && setDeletingSure(null)}
-      >
+      <Dialog open={deletingSure !== null} onOpenChange={(open) => !open && setDeletingSure(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Süreyi Sil</DialogTitle>
@@ -340,10 +321,7 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
             Bu süre kaydı kalıcı olarak silinecek. Emin misiniz?
           </p>
           <DialogFooter>
-            <Button
-              variant="ghost"
-              onClick={() => setDeletingSure(null)}
-            >
+            <Button variant="ghost" onClick={() => setDeletingSure(null)}>
               İptal
             </Button>
             <Button
@@ -358,19 +336,13 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
       </Dialog>
 
       {/* Edit Dialog */}
-      <Dialog
-        open={editingSure !== null}
-        onOpenChange={(open) => !open && setEditingSure(null)}
-      >
+      <Dialog open={editingSure !== null} onOpenChange={(open) => !open && setEditingSure(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Süreyi Düzenle</DialogTitle>
           </DialogHeader>
           <Form {...editForm}>
-            <form
-              onSubmit={editForm.handleSubmit(handleEditSubmit)}
-              className="space-y-3"
-            >
+            <form onSubmit={editForm.handleSubmit(handleEditSubmit)} className="space-y-3">
               <FormField
                 control={editForm.control}
                 name="ad"
@@ -415,17 +387,10 @@ export function SureList({ dosyaId }: { dosyaId: number }) {
                 )}
               />
               <DialogFooter>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setEditingSure(null)}
-                >
+                <Button type="button" variant="ghost" onClick={() => setEditingSure(null)}>
                   İptal
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={updateMutation.isPending}
-                >
+                <Button type="submit" disabled={updateMutation.isPending}>
                   {updateMutation.isPending ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
                 </Button>
               </DialogFooter>

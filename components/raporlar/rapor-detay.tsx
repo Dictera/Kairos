@@ -7,47 +7,63 @@ import { ChevronLeft, ChevronRight, Printer, Download, type LucideIcon } from 'l
 
 import { Button } from '@/components/ui/button'
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select'
 
-import { YonetimOzeti }   from './yonetim-ozeti'
-import { GenelBakis }     from './genel-bakis'
-import { Tahsilat }       from './tahsilat'
-import { SonucBasari }    from './sonuc-basari'
-import { Arabuluculuk }   from './arabuluculuk'
-import { Zamanasimi }     from './zamanasimi'
-import { DosyaRaporu }    from './dosya-raporu'
+import { YonetimOzeti } from './yonetim-ozeti'
+import { GenelBakis } from './genel-bakis'
+import { Tahsilat } from './tahsilat'
+import { SonucBasari } from './sonuc-basari'
+import { Arabuluculuk } from './arabuluculuk'
+import { Zamanasimi } from './zamanasimi'
+import { DosyaRaporu } from './dosya-raporu'
 import { MuvekkilRaporu } from './muvekkil-raporu'
-import { DavaSureci }     from './dava-sureci'
-import { SirketAnalizi }  from './sirket-analizi'
+import { DavaSureci } from './dava-sureci'
+import { SirketAnalizi } from './sirket-analizi'
 import { Pill } from './raporlar-shared'
 import { REPORTS, REPORT_ICONS } from './reports-config'
 import type { YilFilter } from './raporlar-data'
 
 function ReportBody({ slug, yil }: { slug: string; yil: YilFilter }) {
   switch (slug) {
-    case 'yonetim-ozeti':  return <YonetimOzeti />
-    case 'genel-bakis':    return <GenelBakis yil={yil} />
-    case 'tahsilat':       return <Tahsilat />
-    case 'sonuc-basari':   return <SonucBasari />
-    case 'arabuluculuk':   return <Arabuluculuk />
-    case 'zamanasimi':     return <Zamanasimi />
-    case 'dosya-raporu':   return <DosyaRaporu />
-    case 'muvekkil-raporu':return <MuvekkilRaporu />
-    case 'dava-sureci':    return <DavaSureci />
-    case 'sirket-analizi': return <SirketAnalizi />
-    default:               return null
+    case 'yonetim-ozeti':
+      return <YonetimOzeti />
+    case 'genel-bakis':
+      return <GenelBakis yil={yil} />
+    case 'tahsilat':
+      return <Tahsilat />
+    case 'sonuc-basari':
+      return <SonucBasari />
+    case 'arabuluculuk':
+      return <Arabuluculuk />
+    case 'zamanasimi':
+      return <Zamanasimi />
+    case 'dosya-raporu':
+      return <DosyaRaporu />
+    case 'muvekkil-raporu':
+      return <MuvekkilRaporu />
+    case 'dava-sureci':
+      return <DavaSureci />
+    case 'sirket-analizi':
+      return <SirketAnalizi />
+    default:
+      return null
   }
 }
 
 export function RaporDetay({ slug }: { slug: string }) {
-  const router   = useRouter()
+  const router = useRouter()
   const [yil, setYil] = useState<YilFilter>('2026')
 
-  const currentIndex = REPORTS.findIndex(r => r.id === slug)
-  const rpt          = REPORTS[currentIndex] ?? null
-  const prevRpt      = currentIndex > 0 ? REPORTS[currentIndex - 1] : null
-  const nextRpt      = currentIndex >= 0 && currentIndex < REPORTS.length - 1 ? REPORTS[currentIndex + 1] : null
+  const currentIndex = REPORTS.findIndex((r) => r.id === slug)
+  const rpt = REPORTS[currentIndex] ?? null
+  const prevRpt = currentIndex > 0 ? REPORTS[currentIndex - 1] : null
+  const nextRpt =
+    currentIndex >= 0 && currentIndex < REPORTS.length - 1 ? REPORTS[currentIndex + 1] : null
 
   if (!rpt) {
     router.replace('/raporlar')

@@ -45,9 +45,7 @@ function StatusRow({
               {path}
             </span>
           )}
-          {version && (
-            <span className="text-xs text-muted-foreground">{version}</span>
-          )}
+          {version && <span className="text-xs text-muted-foreground">{version}</span>}
         </div>
         <Badge variant={accessible ? 'default' : 'destructive'}>
           {accessible ? 'Erişilebilir' : 'Bulunamadı'}
@@ -61,11 +59,9 @@ export function PipelineStatus() {
   const trpc = useTRPC()
 
   const { data: health, isLoading: healthLoading } = useQuery(
-    trpc.pipeline.healthCheck.queryOptions()
+    trpc.pipeline.healthCheck.queryOptions(),
   )
-  const { data: status, isLoading: statusLoading } = useQuery(
-    trpc.pipeline.status.queryOptions()
-  )
+  const { data: status, isLoading: statusLoading } = useQuery(trpc.pipeline.status.queryOptions())
   const isLoading = healthLoading || statusLoading
 
   if (isLoading) {

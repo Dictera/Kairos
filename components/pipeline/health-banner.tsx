@@ -37,7 +37,9 @@ export function HealthBanner() {
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <div className="flex flex-col gap-0.5">
             {messages.map((msg) => (
-              <p key={msg} className="text-sm font-medium">{msg}</p>
+              <p key={msg} className="text-sm font-medium">
+                {msg}
+              </p>
             ))}
           </div>
         </div>

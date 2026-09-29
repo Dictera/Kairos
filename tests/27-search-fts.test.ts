@@ -15,10 +15,19 @@ import path from 'path'
 import fs from 'fs'
 import * as schema from '@/lib/schema'
 import { dosya, muvekkil } from '@/lib/schema'
-import { foldTr, ftsMatchQuery, dosyaFtsText, muvekkilFtsText, type SqliteValue } from '@/lib/turkish'
 import {
-  upsertDosyaFts, deleteDosyaFts,
-  upsertMuvekkilFts, deleteMuvekkilFts, rebuildMuvekkilDosyaFts,
+  foldTr,
+  ftsMatchQuery,
+  dosyaFtsText,
+  muvekkilFtsText,
+  type SqliteValue,
+} from '@/lib/turkish'
+import {
+  upsertDosyaFts,
+  deleteDosyaFts,
+  upsertMuvekkilFts,
+  deleteMuvekkilFts,
+  rebuildMuvekkilDosyaFts,
 } from '@/lib/search-index'
 import { dosyaRouter } from '@/lib/trpc/routers/dosya'
 import { muvekkillRouter } from '@/lib/trpc/routers/muvekkil'
@@ -97,18 +106,31 @@ describe('ftsMatchQuery — trigram MATCH builder', () => {
 // ── text builders ────────────────────────────────────────────────────────────
 describe('dosyaFtsText / muvekkilFtsText', () => {
   it('joins present fields and folds them', () => {
-    expect(dosyaFtsText({
-      dosya_no: '2024/5034', hasar_dosya_no: 'H-9', muvekkil_plaka: '34ABC',
-      ad: 'Şişli', soyad: 'Öztürk',
-    })).toBe('2024/5034 h-9 34abc sisli ozturk')
+    expect(
+      dosyaFtsText({
+        dosya_no: '2024/5034',
+        hasar_dosya_no: 'H-9',
+        muvekkil_plaka: '34ABC',
+        ad: 'Şişli',
+        soyad: 'Öztürk',
+      }),
+    ).toBe('2024/5034 h-9 34abc sisli ozturk')
   })
   it('drops null / undefined / empty fields', () => {
-    expect(dosyaFtsText({ dosya_no: '2024/1', hasar_dosya_no: null, muvekkil_plaka: '', ad: null, soyad: undefined }))
-      .toBe('2024/1')
+    expect(
+      dosyaFtsText({
+        dosya_no: '2024/1',
+        hasar_dosya_no: null,
+        muvekkil_plaka: '',
+        ad: null,
+        soyad: undefined,
+      }),
+    ).toBe('2024/1')
   })
   it('muvekkilFtsText folds name + tc + telefon', () => {
-    expect(muvekkilFtsText({ ad: 'Çağlar', soyad: 'Ası', tc_vergi_no: '111', telefon: '0555' }))
-      .toBe('caglar asi 111 0555')
+    expect(
+      muvekkilFtsText({ ad: 'Çağlar', soyad: 'Ası', tc_vergi_no: '111', telefon: '0555' }),
+    ).toBe('caglar asi 111 0555')
   })
   it('muvekkilFtsText returns empty for all-null row', () => {
     expect(muvekkilFtsText({ ad: null, soyad: null, tc_vergi_no: null, telefon: null })).toBe('')
@@ -124,14 +146,18 @@ describe('FTS5 trigram integration', () => {
   function searchDosya(query: string): number[] {
     const match = ftsMatchQuery(query)
     if (!match) return [-1] // caller would fall back to LIKE; sentinel for "no FTS"
-    const rows = db.all(sql`SELECT rowid AS id FROM dosya_fts WHERE dosya_fts MATCH ${match} ORDER BY rowid`) as Array<{ id: number }>
-    return rows.map(r => r.id)
+    const rows = db.all(
+      sql`SELECT rowid AS id FROM dosya_fts WHERE dosya_fts MATCH ${match} ORDER BY rowid`,
+    ) as Array<{ id: number }>
+    return rows.map((r) => r.id)
   }
   function searchMuvekkil(query: string): number[] {
     const match = ftsMatchQuery(query)
     if (!match) return [-1]
-    const rows = db.all(sql`SELECT rowid AS id FROM muvekkil_fts WHERE muvekkil_fts MATCH ${match} ORDER BY rowid`) as Array<{ id: number }>
-    return rows.map(r => r.id)
+    const rows = db.all(
+      sql`SELECT rowid AS id FROM muvekkil_fts WHERE muvekkil_fts MATCH ${match} ORDER BY rowid`,
+    ) as Array<{ id: number }>
+    return rows.map((r) => r.id)
   }
 
   beforeAll(() => {
@@ -141,14 +167,26 @@ describe('FTS5 trigram integration', () => {
 
     // Apply real migrations so dosya/muvekkil tables exist (rebuild helper joins them)
     const migrationsDir = path.resolve(process.cwd(), 'drizzle')
-    for (const file of fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort()) {
+    for (const file of fs
+      .readdirSync(migrationsDir)
+      .filter((f) => f.endsWith('.sql'))
+      .sort()) {
       const content = fs.readFileSync(path.join(migrationsDir, file), 'utf-8')
-      for (const stmt of content.split('--> statement-breakpoint').map(s => s.trim()).filter(Boolean)) {
-        try { sqlite.exec(stmt) } catch { /* ALTER ... DROP COLUMN etc. may fail on fresh DB */ }
+      for (const stmt of content
+        .split('--> statement-breakpoint')
+        .map((s) => s.trim())
+        .filter(Boolean)) {
+        try {
+          sqlite.exec(stmt)
+        } catch {
+          /* ALTER ... DROP COLUMN etc. may fail on fresh DB */
+        }
       }
     }
     sqlite.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS dosya_fts USING fts5(txt, tokenize='trigram')`)
-    sqlite.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS muvekkil_fts USING fts5(txt, tokenize='trigram')`)
+    sqlite.exec(
+      `CREATE VIRTUAL TABLE IF NOT EXISTS muvekkil_fts USING fts5(txt, tokenize='trigram')`,
+    )
 
     db = drizzle({ client: sqlite, schema })
   })
@@ -157,26 +195,34 @@ describe('FTS5 trigram integration', () => {
 
   it('matches a substring inside a token (trigram)', () => {
     const m = db.insert(muvekkil).values({ ad: 'Ahmet', soyad: 'Yılmaz' }).returning().get()
-    const d = db.insert(dosya).values({ muvekkil_id: m.id, dosya_no: '2024/5034', tur: 'STK' }).returning().get()
+    const d = db
+      .insert(dosya)
+      .values({ muvekkil_id: m.id, dosya_no: '2024/5034', tur: 'STK' })
+      .returning()
+      .get()
     upsertDosyaFts(db, d.id, { ...d, ad: m.ad, soyad: m.soyad })
 
     expect(searchDosya('5034')).toContain(d.id)
-    expect(searchDosya('034')).toContain(d.id)   // middle of token
+    expect(searchDosya('034')).toContain(d.id) // middle of token
     expect(searchDosya('024/50')).toContain(d.id) // spans the slash
   })
 
   it('matches Turkish text case- and accent-insensitively', () => {
     const m = db.insert(muvekkil).values({ ad: 'Şişli', soyad: 'Öztürk' }).returning().get()
-    const d = db.insert(dosya).values({ muvekkil_id: m.id, dosya_no: '2024/77', tur: 'AT' }).returning().get()
+    const d = db
+      .insert(dosya)
+      .values({ muvekkil_id: m.id, dosya_no: '2024/77', tur: 'AT' })
+      .returning()
+      .get()
     upsertMuvekkilFts(db, m.id, m)
     upsertDosyaFts(db, d.id, { ...d, ad: m.ad, soyad: m.soyad })
 
     expect(searchMuvekkil('şiş')).toContain(m.id)
-    expect(searchMuvekkil('ŞİŞ')).toContain(m.id)   // uppercase İ
-    expect(searchMuvekkil('sis')).toContain(m.id)   // already-folded
+    expect(searchMuvekkil('ŞİŞ')).toContain(m.id) // uppercase İ
+    expect(searchMuvekkil('sis')).toContain(m.id) // already-folded
     expect(searchMuvekkil('öztürk')).toContain(m.id)
     expect(searchMuvekkil('OZTURK')).toContain(m.id)
-    expect(searchDosya('ozturk')).toContain(d.id)    // name denormalized into dosya_fts
+    expect(searchDosya('ozturk')).toContain(d.id) // name denormalized into dosya_fts
   })
 
   it('upsert replaces old content (no stale tokens)', () => {
@@ -200,7 +246,11 @@ describe('FTS5 trigram integration', () => {
 
   it('rebuildMuvekkilDosyaFts refreshes denormalized name in dosya_fts', () => {
     const m = db.insert(muvekkil).values({ ad: 'İlk', soyad: 'Soyad' }).returning().get()
-    const d = db.insert(dosya).values({ muvekkil_id: m.id, dosya_no: '2024/900', tur: 'AH' }).returning().get()
+    const d = db
+      .insert(dosya)
+      .values({ muvekkil_id: m.id, dosya_no: '2024/900', tur: 'AH' })
+      .returning()
+      .get()
     upsertDosyaFts(db, d.id, { ...d, ad: m.ad, soyad: m.soyad })
     expect(searchDosya('ilk')).toContain(d.id)
 
@@ -214,7 +264,11 @@ describe('FTS5 trigram integration', () => {
 
   it('dosya delete + deleteDosyaFts removes the entry', () => {
     const m = db.insert(muvekkil).values({ ad: 'Geçici', soyad: 'Dosya' }).returning().get()
-    const d = db.insert(dosya).values({ muvekkil_id: m.id, dosya_no: '2024/Z', tur: 'STK' }).returning().get()
+    const d = db
+      .insert(dosya)
+      .values({ muvekkil_id: m.id, dosya_no: '2024/Z', tur: 'STK' })
+      .returning()
+      .get()
     upsertDosyaFts(db, d.id, { ...d, ad: m.ad, soyad: m.soyad })
     expect(searchDosya('2024/z')).toContain(d.id)
 
@@ -246,14 +300,18 @@ describe('router wiring: mutations ↔ FTS ↔ search', () => {
 
   beforeAll(() => {
     // setup.ts builds the shared db but doesn't create the FTS tables.
-    globalThis.__testSqlite!.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS dosya_fts USING fts5(txt, tokenize='trigram')`)
-    globalThis.__testSqlite!.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS muvekkil_fts USING fts5(txt, tokenize='trigram')`)
+    globalThis.__testSqlite!.exec(
+      `CREATE VIRTUAL TABLE IF NOT EXISTS dosya_fts USING fts5(txt, tokenize='trigram')`,
+    )
+    globalThis.__testSqlite!.exec(
+      `CREATE VIRTUAL TABLE IF NOT EXISTS muvekkil_fts USING fts5(txt, tokenize='trigram')`,
+    )
   })
 
   it('muvekkil.create indexes the row; search.global finds it', async () => {
     const m = await muvekkilCaller.create({ ad: TOKEN, soyad: 'Bir' })
     const res = await searchCaller.global({ query: TOKEN })
-    expect(res.muvekkiller.map(r => r.id)).toContain(m.id)
+    expect(res.muvekkiller.map((r) => r.id)).toContain(m.id)
     await muvekkilCaller.delete({ id: m.id })
   })
 
@@ -261,7 +319,7 @@ describe('router wiring: mutations ↔ FTS ↔ search', () => {
     const m = await muvekkilCaller.create({ ad: TOKEN, soyad: 'Iki' })
     const d = await dosyaCaller.create({ muvekkil_id: m.id, tur: 'STK' })
     const res = await searchCaller.global({ query: TOKEN })
-    expect(res.dosyalar.map(r => r.id)).toContain(d.id)
+    expect(res.dosyalar.map((r) => r.id)).toContain(d.id)
     await dosyaCaller.delete({ id: d.id })
     await muvekkilCaller.delete({ id: m.id })
   })
@@ -272,9 +330,9 @@ describe('router wiring: mutations ↔ FTS ↔ search', () => {
     await muvekkilCaller.update({ id: m.id, ad: 'NewWireName', soyad: 'Uc' })
 
     const hit = await searchCaller.global({ query: 'newwirename' })
-    expect(hit.dosyalar.map(r => r.id)).toContain(d.id)
+    expect(hit.dosyalar.map((r) => r.id)).toContain(d.id)
     const miss = await searchCaller.global({ query: 'oldwirename' })
-    expect(miss.dosyalar.map(r => r.id)).not.toContain(d.id)
+    expect(miss.dosyalar.map((r) => r.id)).not.toContain(d.id)
 
     await dosyaCaller.delete({ id: d.id })
     await muvekkilCaller.delete({ id: m.id })
@@ -286,7 +344,7 @@ describe('router wiring: mutations ↔ FTS ↔ search', () => {
     await dosyaCaller.delete({ id: d.id })
 
     const res = await searchCaller.global({ query: TOKEN })
-    expect(res.dosyalar.map(r => r.id)).not.toContain(d.id)
+    expect(res.dosyalar.map((r) => r.id)).not.toContain(d.id)
     await muvekkilCaller.delete({ id: m.id })
   })
 })

@@ -16,7 +16,20 @@ import { format, startOfWeek, endOfWeek } from 'date-fns'
 import { sendTelegramMessage } from './send'
 import { readSettings, writeSettings } from './settings-helper'
 
-const TR_MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık']
+const TR_MONTHS = [
+  'Ocak',
+  'Şubat',
+  'Mart',
+  'Nisan',
+  'Mayıs',
+  'Haziran',
+  'Temmuz',
+  'Ağustos',
+  'Eylül',
+  'Ekim',
+  'Kasım',
+  'Aralık',
+]
 
 function escHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -29,15 +42,15 @@ function formatShortDate(dateStr: string): string {
 
 export async function sendWeeklySureSummary(): Promise<void> {
   const today = new Date()
-  if (today.getDay() !== 1) return  // only Mondays (1 = Monday)
+  if (today.getDay() !== 1) return // only Mondays (1 = Monday)
 
   const todayStr = format(today, 'yyyy-MM-dd')
   const settings = readSettings()
-  if (settings.weekly_sure_summary_last_sent === todayStr) return  // already sent this Monday
+  if (settings.weekly_sure_summary_last_sent === todayStr) return // already sent this Monday
 
   // Toggle check — use ?? true (NOT || true) to respect explicit false values
   const haftalikAktif = (settings.telegram_haftalik_ozet_aktif as boolean | undefined) ?? true
-  if (!haftalikAktif) return  // user disabled weekly summary
+  if (!haftalikAktif) return // user disabled weekly summary
 
   const monday = format(startOfWeek(today, { weekStartsOn: 1 }), 'yyyy-MM-dd')
   const sunday = format(endOfWeek(today, { weekStartsOn: 1 }), 'yyyy-MM-dd')
@@ -60,7 +73,7 @@ export async function sendWeeklySureSummary(): Promise<void> {
     durusmaQueryRows = await db
       .select({
         tarih: durusma.tarih,
-        label: durusma.mahkeme_kurum,   // D-16: no saat in weekly format
+        label: durusma.mahkeme_kurum, // D-16: no saat in weekly format
         dosya_no: dosya.dosya_no,
       })
       .from(durusma)
@@ -87,7 +100,7 @@ export async function sendWeeklySureSummary(): Promise<void> {
 
   // Merge and sort by tarih (D-17: süreler and duruşmalar in the same message, date order)
   const merged = [...sureNormalized, ...durusmaNormalized].sort((a, b) =>
-    a.tarih.localeCompare(b.tarih)
+    a.tarih.localeCompare(b.tarih),
   )
 
   // Mark as sent even when empty so we don't query again until next Monday

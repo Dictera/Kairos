@@ -23,17 +23,19 @@ export async function POST(req: Request) {
     const retryAfter = Math.ceil(lockMs / 1000)
     return Response.json(
       { error: `Çok fazla hatalı deneme. ${retryAfter} saniye sonra tekrar deneyin.` },
-      { status: 429, headers: { 'Retry-After': String(retryAfter) } }
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } },
     )
   }
 
   const expected = process.env.APP_PASSWORD
-  if (!expected || typeof password !== 'string' || !password || !passwordMatches(password, expected)) {
+  if (
+    !expected ||
+    typeof password !== 'string' ||
+    !password ||
+    !passwordMatches(password, expected)
+  ) {
     recordLoginFailure()
-    return Response.json(
-      { error: 'Şifre hatalı. Lütfen tekrar deneyin.' },
-      { status: 401 }
-    )
+    return Response.json({ error: 'Şifre hatalı. Lütfen tekrar deneyin.' }, { status: 401 })
   }
   recordLoginSuccess()
 

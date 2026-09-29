@@ -3,7 +3,10 @@ import path from 'path'
 import { runSidecarCommand } from '@/lib/services/docx-pipeline'
 
 const cleanFixture = path.resolve(process.cwd(), 'tests/fixtures/test-template.docx')
-const fragmentedFixture = path.resolve(process.cwd(), 'tests/fixtures/test-template-fragmented.docx')
+const fragmentedFixture = path.resolve(
+  process.cwd(),
+  'tests/fixtures/test-template-fragmented.docx',
+)
 
 describe('Sidecar: extract-vars (SABLON-03)', () => {
   it('extracts {{var}} and {%p var%} placeholders, deduped (clean fixture)', async () => {
@@ -13,7 +16,11 @@ describe('Sidecar: extract-vars (SABLON-03)', () => {
     })
     expect(result.status).toBe('success')
     // @ts-expect-error narrow
-    expect(result.result.variables).toEqual(['taraf.karsitaraf_ad', 'dosya.dosya_no', 'muvekkil.ad'])
+    expect(result.result.variables).toEqual([
+      'taraf.karsitaraf_ad',
+      'dosya.dosya_no',
+      'muvekkil.ad',
+    ])
   }, 30_000)
 
   it('handles Word-fragmented placeholders split across <w:t> nodes (RESEARCH Pitfall #1)', async () => {

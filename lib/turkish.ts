@@ -8,17 +8,25 @@
 export type SqliteValue = string | number | bigint | Buffer | null | undefined
 
 export function foldTr(s: SqliteValue): string {
-  return String(s ?? '')
-    .toLowerCase()
-    .replace(/ş/g, 's').replace(/Ş/g, 's')
-    .replace(/ğ/g, 'g').replace(/Ğ/g, 'g')
-    .replace(/ü/g, 'u').replace(/Ü/g, 'u')
-    .replace(/ö/g, 'o').replace(/Ö/g, 'o')
-    .replace(/ç/g, 'c').replace(/Ç/g, 'c')
-    .replace(/ı/g, 'i').replace(/İ/g, 'i')
-    // JS lowercases 'İ' to 'i' + U+0307 (combining dot above); strip it so
-    // uppercase-İ queries fold to clean ASCII and match stored text.
-    .replace(/̇/g, '')
+  return (
+    String(s ?? '')
+      .toLowerCase()
+      .replace(/ş/g, 's')
+      .replace(/Ş/g, 's')
+      .replace(/ğ/g, 'g')
+      .replace(/Ğ/g, 'g')
+      .replace(/ü/g, 'u')
+      .replace(/Ü/g, 'u')
+      .replace(/ö/g, 'o')
+      .replace(/Ö/g, 'o')
+      .replace(/ç/g, 'c')
+      .replace(/Ç/g, 'c')
+      .replace(/ı/g, 'i')
+      .replace(/İ/g, 'i')
+      // JS lowercases 'İ' to 'i' + U+0307 (combining dot above); strip it so
+      // uppercase-İ queries fold to clean ASCII and match stored text.
+      .replace(/̇/g, '')
+  )
 }
 
 // Folded searchable blob for a dosya row (own fields + linked müvekkil name).
@@ -29,8 +37,9 @@ export function dosyaFtsText(d: {
   ad?: string | null
   soyad?: string | null
 }): string {
-  return foldTr([d.dosya_no, d.hasar_dosya_no, d.muvekkil_plaka, d.ad, d.soyad]
-    .filter(Boolean).join(' '))
+  return foldTr(
+    [d.dosya_no, d.hasar_dosya_no, d.muvekkil_plaka, d.ad, d.soyad].filter(Boolean).join(' '),
+  )
 }
 
 // Folded searchable blob for a müvekkil row.

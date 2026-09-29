@@ -79,15 +79,19 @@ describe('dosya router: behavior', () => {
   let muvekkilId: number
 
   beforeAll(async () => {
-    globalThis.__testSqlite!.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS dosya_fts USING fts5(txt, tokenize='trigram')`)
-    globalThis.__testSqlite!.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS muvekkil_fts USING fts5(txt, tokenize='trigram')`)
+    globalThis.__testSqlite!.exec(
+      `CREATE VIRTUAL TABLE IF NOT EXISTS dosya_fts USING fts5(txt, tokenize='trigram')`,
+    )
+    globalThis.__testSqlite!.exec(
+      `CREATE VIRTUAL TABLE IF NOT EXISTS muvekkil_fts USING fts5(txt, tokenize='trigram')`,
+    )
     const m = await muvekkil.create({ ad: 'DosyaTest', soyad: 'Sahibi' })
     muvekkilId = m.id
   })
 
   function tarafCount(dosyaId: number): number {
-    const row = globalThis.__testSqlite!
-      .prepare('SELECT COUNT(*) AS c FROM taraf WHERE dosya_id = ?')
+    const row = globalThis
+      .__testSqlite!.prepare('SELECT COUNT(*) AS c FROM taraf WHERE dosya_id = ?')
       .get(dosyaId) as { c: number }
     return row.c
   }

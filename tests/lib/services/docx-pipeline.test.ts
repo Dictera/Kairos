@@ -14,6 +14,8 @@ describe('lib/services/docx-pipeline', () => {
 
     const { runSidecarCommand } = await import('@/lib/services/docx-pipeline')
 
-    await expect(runSidecarCommand({ command: 'health-check', params: {} })).rejects.toThrow('Python bulunamadı')
+    await expect(runSidecarCommand({ command: 'health-check', params: {} })).rejects.toThrow(
+      'Python bulunamadı',
+    )
   })
 })

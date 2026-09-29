@@ -73,7 +73,7 @@ export function StkDataForm({ dosyaId, initialData }: StkDataFormProps) {
       onError: () => {
         toast.error('Kaydetme sırasında hata oluştu. Tekrar deneyin.')
       },
-    })
+    }),
   )
 
   const onSubmit = (values: StkDataFormValues) => {

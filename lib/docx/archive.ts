@@ -37,7 +37,7 @@ export function safeUnlinkArchive(filePath: string): void {
 
 export function buildArchivePath(
   dosyaBilgi: BelgeDosyaBilgi,
-  displayName?: string
+  displayName?: string,
 ): { dir: string; filePath: string; fileName: string } {
   const dir = buildBelgelerDir(dosyaBilgi)
 
@@ -63,7 +63,7 @@ export function buildArchivePath(
 export async function generateSlugs(
   muvekkilAd: string | null,
   dosyaNo: string,
-  plaka: string | null
+  plaka: string | null,
 ): Promise<{ muvekkilSlug: string; plakaSlug: string | null }> {
   const muvekkilResult = await runSidecarCommand({
     command: 'slug',
@@ -119,7 +119,7 @@ export async function archivePdfAndCreateBelge(
   sablonAdi: string,
   belgeTuru: string,
   dosyaBilgi: BelgeDosyaBilgi,
-  displayName?: string
+  displayName?: string,
 ) {
   const { dir, filePath, fileName } = buildArchivePath(dosyaBilgi, displayName)
 

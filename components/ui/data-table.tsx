@@ -63,11 +63,14 @@ export function DataTable<TData, TValue>({
               const canSort = header.column.getCanSort()
               const sorted = header.column.getIsSorted()
 
-              const SortIcon = sorted === 'asc'
-                ? <ArrowUp className="h-3 w-3 shrink-0" />
-                : sorted === 'desc'
-                  ? <ArrowDown className="h-3 w-3 shrink-0" />
-                  : <ArrowUpDown className="h-3 w-3 shrink-0 opacity-40" />
+              const SortIcon =
+                sorted === 'asc' ? (
+                  <ArrowUp className="h-3 w-3 shrink-0" />
+                ) : sorted === 'desc' ? (
+                  <ArrowDown className="h-3 w-3 shrink-0" />
+                ) : (
+                  <ArrowUpDown className="h-3 w-3 shrink-0 opacity-40" />
+                )
 
               return (
                 <TableHead
@@ -76,7 +79,9 @@ export function DataTable<TData, TValue>({
                   style={canSort ? { cursor: 'pointer', userSelect: 'none' } : undefined}
                 >
                   {/* w-full flex so the header text aligns exactly with cell data */}
-                  <div className={`flex w-full items-center gap-1 ${align === 'right' ? 'justify-end' : 'justify-start'}`}>
+                  <div
+                    className={`flex w-full items-center gap-1 ${align === 'right' ? 'justify-end' : 'justify-start'}`}
+                  >
                     {/* Right-aligned: icon LEFT of text so text edge matches data edge */}
                     {canSort && align === 'right' && SortIcon}
                     {header.isPlaceholder
@@ -118,11 +123,7 @@ export function DataTable<TData, TValue>({
         )}
       </TableBody>
 
-      {footerRows && (
-        <TableFooter>
-          {footerRows}
-        </TableFooter>
-      )}
+      {footerRows && <TableFooter>{footerRows}</TableFooter>}
     </Table>
   )
 }

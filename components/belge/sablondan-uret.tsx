@@ -43,7 +43,9 @@ export function SablondanUret({ dosyaId }: SablondanUretProps) {
   const generateMutation = useMutation(
     trpc.pdf.generate.mutationOptions({
       onSuccess: () => {
-        void queryClient.invalidateQueries({ queryKey: trpc.belge.list.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({
+          queryKey: trpc.belge.list.queryKey({ dosya_id: dosyaId }),
+        })
         toast.success('PDF üretildi.')
         resetProgress()
       },
@@ -51,7 +53,7 @@ export function SablondanUret({ dosyaId }: SablondanUretProps) {
         toast.error(err.message)
         resetProgress()
       },
-    })
+    }),
   )
 
   function startGeneration() {
@@ -79,7 +81,7 @@ export function SablondanUret({ dosyaId }: SablondanUretProps) {
     }
   }, [progressOpen])
 
-  const filtered = templates.filter(t => filter === 'all' || t.kategori === filter)
+  const filtered = templates.filter((t) => filter === 'all' || t.kategori === filter)
 
   return (
     <div className="border rounded-lg p-4 space-y-4">
@@ -119,7 +121,7 @@ export function SablondanUret({ dosyaId }: SablondanUretProps) {
               Henüz şablon eklenmedi.
             </div>
           ) : (
-            filtered.map(t => (
+            filtered.map((t) => (
               <CommandItem key={t.id} onSelect={() => setSelected(t)}>
                 {t.ad}
               </CommandItem>
@@ -157,13 +159,28 @@ export function SablondanUret({ dosyaId }: SablondanUretProps) {
           <div className="flex flex-col items-center gap-4 py-6">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <div className="space-y-2 text-center">
-              <p className={cn('text-sm', step === 'render' ? 'font-medium text-foreground' : 'text-muted-foreground')}>
+              <p
+                className={cn(
+                  'text-sm',
+                  step === 'render' ? 'font-medium text-foreground' : 'text-muted-foreground',
+                )}
+              >
                 1. Şablon dolduruluyor…
               </p>
-              <p className={cn('text-sm', step === 'convert' ? 'font-medium text-foreground' : 'text-muted-foreground')}>
+              <p
+                className={cn(
+                  'text-sm',
+                  step === 'convert' ? 'font-medium text-foreground' : 'text-muted-foreground',
+                )}
+              >
                 2. PDF oluşturuluyor…
               </p>
-              <p className={cn('text-sm', step === 'archive' ? 'font-medium text-foreground' : 'text-muted-foreground')}>
+              <p
+                className={cn(
+                  'text-sm',
+                  step === 'archive' ? 'font-medium text-foreground' : 'text-muted-foreground',
+                )}
+              >
                 3. Arşivleniyor…
               </p>
             </div>

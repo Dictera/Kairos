@@ -21,7 +21,7 @@ const MIME_TYPES: Record<string, string> = {
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ dosyaId: string; filename: string }> }
+  { params }: { params: Promise<{ dosyaId: string; filename: string }> },
 ) {
   await connection()
   const authError = await requireAuth()

@@ -96,7 +96,7 @@ export function AvukatFormDialog({
       onError: () => {
         toast.error('Kaydedilemedi. Lütfen tekrar deneyin.')
       },
-    })
+    }),
   )
 
   const updateMutation = useMutation(
@@ -109,15 +109,12 @@ export function AvukatFormDialog({
       onError: () => {
         toast.error('Kaydedilemedi. Lütfen tekrar deneyin.')
       },
-    })
+    }),
   )
 
-  const linkMutation = useMutation(
-    trpc.ayarlar.avukat.addSirket.mutationOptions({})
-  )
+  const linkMutation = useMutation(trpc.ayarlar.avukat.addSirket.mutationOptions({}))
 
-  const isPending =
-    createMutation.isPending || updateMutation.isPending || linkMutation.isPending
+  const isPending = createMutation.isPending || updateMutation.isPending || linkMutation.isPending
 
   const onSubmit = (values: FormValues) => {
     if (mode === 'create') {
@@ -131,15 +128,10 @@ export function AvukatFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {mode === 'create' ? 'Avukat Ekle' : 'Avukat Düzenle'}
-          </DialogTitle>
+          <DialogTitle>{mode === 'create' ? 'Avukat Ekle' : 'Avukat Düzenle'}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 py-2"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
             <FormField
               control={form.control}
               name="ad"
@@ -177,10 +169,7 @@ export function AvukatFormDialog({
                 <FormItem>
                   <FormLabel>IBAN</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="TR00 0000 0000 0000 0000 0000 00 (opsiyonel)"
-                      {...field}
-                    />
+                    <Input placeholder="TR00 0000 0000 0000 0000 0000 00 (opsiyonel)" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -193,11 +182,7 @@ export function AvukatFormDialog({
                 <FormItem>
                   <FormLabel>E-Posta</FormLabel>
                   <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="avukat@mail.com (opsiyonel)"
-                      {...field}
-                    />
+                    <Input type="email" placeholder="avukat@mail.com (opsiyonel)" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -210,10 +195,7 @@ export function AvukatFormDialog({
                 <FormItem>
                   <FormLabel>Telefon</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="05XXXXXXXXX (opsiyonel)"
-                      {...field}
-                    />
+                    <Input placeholder="05XXXXXXXXX (opsiyonel)" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

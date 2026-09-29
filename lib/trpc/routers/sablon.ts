@@ -30,38 +30,39 @@ export const sablonRouter = createTRPCRouter({
     return db.select().from(docxSablon).orderBy(desc(docxSablon.updated_at))
   }),
 
-  create: protectedProcedure
-    .input(sablonCreateSchema)
-    .mutation(async ({ input }) => {
-      const filePath = path.join(TEMPLATES_BASE_PATH, path.basename(input.filename))
-      if (!path.resolve(filePath).startsWith(TEMPLATES_BASE_PATH + path.sep)) {
-        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Geçersiz şablon dosya yolu.' })
-      }
-      const result = await runSidecarCommand({
-        command: 'extract-vars',
-        params: { file_path: filePath },
+  create: protectedProcedure.input(sablonCreateSchema).mutation(async ({ input }) => {
+    const filePath = path.join(TEMPLATES_BASE_PATH, path.basename(input.filename))
+    if (!path.resolve(filePath).startsWith(TEMPLATES_BASE_PATH + path.sep)) {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: 'Geçersiz şablon dosya yolu.' })
+    }
+    const result = await runSidecarCommand({
+      command: 'extract-vars',
+      params: { file_path: filePath },
+    })
+
+    if (result.status === 'error') {
+      safeUnlink(filePath)
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: result.message ?? 'Değişkenler çıkarılamadı.',
       })
+    }
 
-      if (result.status === 'error') {
-        safeUnlink(filePath)
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: result.message ?? 'Değişkenler çıkarılamadı.',
-        })
-      }
+    const variables = (result.result as { variables: string[] }).variables
 
-      const variables = (result.result as { variables: string[] }).variables
-
-      const [row] = await db.insert(docxSablon).values({
+    const [row] = await db
+      .insert(docxSablon)
+      .values({
         ad: input.ad,
         kategori: input.kategori,
         dosya_yolu: filePath,
         degiskenler: variables,
         belge_turu: input.belge_turu ?? null,
-      }).returning()
+      })
+      .returning()
 
-      return row
-    }),
+    return row
+  }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.number().int() }))
@@ -80,7 +81,7 @@ export const sablonRouter = createTRPCRouter({
       return { success: true }
     }),
 
-  update: protectedProcedure  // D-06: overwrite — same id, replace file
+  update: protectedProcedure // D-06: overwrite — same id, replace file
     .input(sablonUpdateSchema)
     .mutation(async ({ input }) => {
       const [existing] = await db.select().from(docxSablon).where(eq(docxSablon.id, input.id))
@@ -112,7 +113,8 @@ export const sablonRouter = createTRPCRouter({
       // at a still-valid file (replaced new file). safeUnlink swallows errors per pattern.
       safeUnlink(existing.dosya_yolu)
 
-      const [updated] = await db.update(docxSablon)
+      const [updated] = await db
+        .update(docxSablon)
         .set({
           dosya_yolu: newFilePath,
           degiskenler: variables,

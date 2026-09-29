@@ -32,9 +32,7 @@ function formatDate(dateStr: string) {
 export function Timeline({ dosyaId }: TimelineProps) {
   const trpc = useTRPC()
 
-  const { data: events, isLoading } = useQuery(
-    trpc.olay.list.queryOptions({ dosya_id: dosyaId })
-  )
+  const { data: events, isLoading } = useQuery(trpc.olay.list.queryOptions({ dosya_id: dosyaId }))
 
   if (isLoading) {
     return (

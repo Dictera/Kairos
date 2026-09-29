@@ -37,7 +37,10 @@ afterAll(() => {
 
 function uploadRequest(fileName: string, extra: Record<string, string> = {}) {
   const fd = new FormData()
-  fd.append('file', new File([new Uint8Array([0x25, 0x50, 0x44, 0x46])], fileName, { type: 'application/pdf' }))
+  fd.append(
+    'file',
+    new File([new Uint8Array([0x25, 0x50, 0x44, 0x46])], fileName, { type: 'application/pdf' }),
+  )
   fd.append('dosyaId', String(dosyaId))
   fd.append('dosyaNo', 'SEC-1')
   for (const [k, v] of Object.entries(extra)) fd.append(k, v)
@@ -46,7 +49,8 @@ function uploadRequest(fileName: string, extra: Record<string, string> = {}) {
 
 function listFilesRecursive(dir: string): string[] {
   if (!fs.existsSync(dir)) return []
-  return fs.readdirSync(dir, { recursive: true, withFileTypes: true })
+  return fs
+    .readdirSync(dir, { recursive: true, withFileTypes: true })
     .filter((e) => e.isFile())
     .map((e) => path.join(e.parentPath, e.name))
 }

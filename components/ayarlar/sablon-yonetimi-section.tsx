@@ -45,7 +45,13 @@ import {
   FormControl,
   FormMessage,
 } from '@/components/ui/form'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { VariableCatalogModal } from './variable-catalog-modal'
 import { Badge } from '@/components/ui/badge'
 // WARN-3 fix: canonical kategori tuple from Drizzle schema (single source of truth);
@@ -59,7 +65,9 @@ const sablonFormSchema = z.object({
 })
 type SablonFormValues = z.infer<typeof sablonFormSchema>
 
-async function uploadFileAndGetPath(f: File): Promise<{ filename: string; fileName: string; fileSize: number }> {
+async function uploadFileAndGetPath(
+  f: File,
+): Promise<{ filename: string; fileName: string; fileSize: number }> {
   const fd = new FormData()
   fd.append('file', f)
   const res = await fetch('/api/templates/upload', { method: 'POST', body: fd })
@@ -81,7 +89,9 @@ export default function SablonYonetimiSection() {
   const [filterKategori, setFilterKategori] = useState<string>('all')
   const [uploadOpen, setUploadOpen] = useState(false)
   const [overwriteTarget, setOverwriteTarget] = useState<(typeof templates)[number] | null>(null)
-  const [overwriteBelgeTuru, setOverwriteBelgeTuru] = useState<(typeof BELGE_KATEGORILER)[number] | undefined>(undefined)
+  const [overwriteBelgeTuru, setOverwriteBelgeTuru] = useState<
+    (typeof BELGE_KATEGORILER)[number] | undefined
+  >(undefined)
   const [deleteTarget, setDeleteTarget] = useState<(typeof templates)[number] | null>(null)
   const [catalogTarget, setCatalogTarget] = useState<(typeof templates)[number] | null>(null)
   const [file, setFile] = useState<File | null>(null)
@@ -100,7 +110,7 @@ export default function SablonYonetimiSection() {
         resetUpload()
       },
       onError: (e) => toast.error(e.message ?? 'Yükleme başarısız. Lütfen tekrar deneyin.'),
-    })
+    }),
   )
 
   const updateSablon = useMutation(
@@ -112,7 +122,7 @@ export default function SablonYonetimiSection() {
         setFile(null)
       },
       onError: (e) => toast.error(e.message ?? 'Yükleme başarısız. Lütfen tekrar deneyin.'),
-    })
+    }),
   )
 
   const deleteSablon = useMutation(
@@ -123,7 +133,7 @@ export default function SablonYonetimiSection() {
         setDeleteTarget(null)
       },
       onError: () => toast.error('Silme başarısız. Lütfen tekrar deneyin.'),
-    })
+    }),
   )
 
   function resetUpload() {
@@ -137,7 +147,14 @@ export default function SablonYonetimiSection() {
     setUploading(true)
     try {
       const { filename, fileName, fileSize } = await uploadFileAndGetPath(file)
-      await createSablon.mutateAsync({ ad: values.ad, kategori: values.kategori, belge_turu: values.belge_turu, filename, fileName, fileSize })
+      await createSablon.mutateAsync({
+        ad: values.ad,
+        kategori: values.kategori,
+        belge_turu: values.belge_turu,
+        filename,
+        fileName,
+        fileSize,
+      })
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Yükleme başarısız. Lütfen tekrar deneyin.'
       toast.error(msg)
@@ -151,7 +168,12 @@ export default function SablonYonetimiSection() {
     setUploading(true)
     try {
       const { filename, fileName } = await uploadFileAndGetPath(file)
-      await updateSablon.mutateAsync({ id: overwriteTarget.id, belge_turu: overwriteBelgeTuru, filename, fileName })
+      await updateSablon.mutateAsync({
+        id: overwriteTarget.id,
+        belge_turu: overwriteBelgeTuru,
+        filename,
+        fileName,
+      })
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Yükleme başarısız. Lütfen tekrar deneyin.'
       toast.error(msg)
@@ -174,7 +196,7 @@ export default function SablonYonetimiSection() {
   }
 
   const filtered = templates.filter(
-    (t) => filterKategori === 'all' || t.kategori === filterKategori
+    (t) => filterKategori === 'all' || t.kategori === filterKategori,
   )
 
   return (
@@ -240,13 +262,20 @@ export default function SablonYonetimiSection() {
                     className="cursor-pointer"
                     tabIndex={0}
                     onClick={() => setCatalogTarget(t)}
-                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCatalogTarget(t) } }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setCatalogTarget(t)
+                      }
+                    }}
                   >
                     <TableCell>{t.ad}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{t.kategori}</Badge>
                       {t.belge_turu && (
-                        <Badge variant="secondary" className="ml-1">{t.belge_turu}</Badge>
+                        <Badge variant="secondary" className="ml-1">
+                          {t.belge_turu}
+                        </Badge>
                       )}
                     </TableCell>
                     <TableCell>{t.degiskenler.length}</TableCell>
@@ -260,7 +289,13 @@ export default function SablonYonetimiSection() {
                           size="icon-sm"
                           className="h-9 w-9"
                           aria-label="Şablonu değiştir"
-                          onClick={() => { setOverwriteTarget(t); setOverwriteBelgeTuru(t.belge_turu as (typeof BELGE_KATEGORILER)[number] | undefined ?? undefined) }}
+                          onClick={() => {
+                            setOverwriteTarget(t)
+                            setOverwriteBelgeTuru(
+                              (t.belge_turu as (typeof BELGE_KATEGORILER)[number] | undefined) ??
+                                undefined,
+                            )
+                          }}
                         >
                           <Upload className="h-4 w-4" />
                         </Button>
@@ -284,16 +319,18 @@ export default function SablonYonetimiSection() {
       </Card>
 
       {/* Upload Dialog */}
-      <Dialog open={uploadOpen} onOpenChange={(open) => { if (!open) resetUpload() }}>
+      <Dialog
+        open={uploadOpen}
+        onOpenChange={(open) => {
+          if (!open) resetUpload()
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Şablon Yükle</DialogTitle>
           </DialogHeader>
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onCreateSubmit)}
-              className="space-y-4 py-2 min-w-0"
-            >
+            <form onSubmit={form.handleSubmit(onCreateSubmit)} className="space-y-4 py-2 min-w-0">
               <FormField
                 control={form.control}
                 name="ad"
@@ -317,10 +354,7 @@ export default function SablonYonetimiSection() {
                     <FormLabel>
                       Kategori <span className="text-destructive">*</span>
                     </FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Kategori seçin" />
@@ -344,10 +378,7 @@ export default function SablonYonetimiSection() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Belge Türü</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Belge türü seçin (isteğe bağlı)" />
@@ -362,7 +393,8 @@ export default function SablonYonetimiSection() {
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-muted-foreground">
-                      Belge türü seçilirse üretilen PDF bu türle adlandırılır (örn. İhtarname.pdf). Seçilmezse şablon adı kullanılır.
+                      Belge türü seçilirse üretilen PDF bu türle adlandırılır (örn. İhtarname.pdf).
+                      Seçilmezse şablon adı kullanılır.
                     </p>
                     <FormMessage />
                   </FormItem>
@@ -373,7 +405,9 @@ export default function SablonYonetimiSection() {
               <div className="space-y-2">
                 <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-accent transition-colors relative">
                   <Upload className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                  <p className="text-sm font-medium">.docx dosyasını sürükle &amp; bırak veya tıkla</p>
+                  <p className="text-sm font-medium">
+                    .docx dosyasını sürükle &amp; bırak veya tıkla
+                  </p>
                   <p className="text-xs text-muted-foreground mt-1">Maks. 10 MB</p>
                   <input
                     type="file"
@@ -385,7 +419,9 @@ export default function SablonYonetimiSection() {
                 </div>
                 {file && (
                   <div className="flex items-center justify-between rounded border px-3 py-2 text-sm min-w-0">
-                    <span className="truncate text-muted-foreground flex-1 min-w-0">{file.name}</span>
+                    <span className="truncate text-muted-foreground flex-1 min-w-0">
+                      {file.name}
+                    </span>
                     <Button
                       type="button"
                       variant="ghost"
@@ -401,18 +437,10 @@ export default function SablonYonetimiSection() {
               </div>
 
               <DialogFooter>
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={resetUpload}
-                  disabled={uploading}
-                >
+                <Button variant="outline" type="button" onClick={resetUpload} disabled={uploading}>
                   İptal
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={!file || uploading}
-                >
+                <Button type="submit" disabled={!file || uploading}>
                   {uploading ? 'Yükleniyor...' : 'Şablon Yükle'}
                 </Button>
               </DialogFooter>
@@ -424,7 +452,13 @@ export default function SablonYonetimiSection() {
       {/* Overwrite Dialog */}
       <Dialog
         open={overwriteTarget !== null}
-        onOpenChange={(open) => { if (!open) { setOverwriteTarget(null); setFile(null); setOverwriteBelgeTuru(undefined) } }}
+        onOpenChange={(open) => {
+          if (!open) {
+            setOverwriteTarget(null)
+            setFile(null)
+            setOverwriteBelgeTuru(undefined)
+          }
+        }}
       >
         <DialogContent>
           <DialogHeader>
@@ -436,10 +470,14 @@ export default function SablonYonetimiSection() {
                 <strong>{overwriteTarget.ad}</strong> — {overwriteTarget.kategori}
               </p>
               <div className="space-y-2">
-                <label htmlFor="overwrite-belge-turu" className="text-sm font-medium">Belge Türü</label>
+                <label htmlFor="overwrite-belge-turu" className="text-sm font-medium">
+                  Belge Türü
+                </label>
                 <Select
                   value={overwriteBelgeTuru}
-                  onValueChange={(v) => setOverwriteBelgeTuru(v as (typeof BELGE_KATEGORILER)[number] | undefined)}
+                  onValueChange={(v) =>
+                    setOverwriteBelgeTuru(v as (typeof BELGE_KATEGORILER)[number] | undefined)
+                  }
                 >
                   <SelectTrigger id="overwrite-belge-turu" aria-label="Belge Türü">
                     <SelectValue placeholder="Belge türü seçin (isteğe bağlı)" />
@@ -454,17 +492,19 @@ export default function SablonYonetimiSection() {
                 </Select>
               </div>
               <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-accent transition-colors relative">
-                  <Upload className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                  <p className="text-sm font-medium">.docx dosyasını sürükle &amp; bırak veya tıkla</p>
-                  <p className="text-xs text-muted-foreground mt-1">Maks. 10 MB</p>
-                  <input
-                    type="file"
-                    accept=".docx"
-                    aria-label=".docx dosyası yükle"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                    onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
-                  />
-                </div>
+                <Upload className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+                <p className="text-sm font-medium">
+                  .docx dosyasını sürükle &amp; bırak veya tıkla
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">Maks. 10 MB</p>
+                <input
+                  type="file"
+                  accept=".docx"
+                  aria-label=".docx dosyası yükle"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
+                />
+              </div>
               {file && (
                 <div className="flex items-center justify-between rounded border px-3 py-2 text-sm min-w-0">
                   <span className="truncate text-muted-foreground flex-1 min-w-0">{file.name}</span>
@@ -484,16 +524,15 @@ export default function SablonYonetimiSection() {
                 <Button
                   variant="outline"
                   type="button"
-                  onClick={() => { setOverwriteTarget(null); setFile(null) }}
+                  onClick={() => {
+                    setOverwriteTarget(null)
+                    setFile(null)
+                  }}
                   disabled={uploading}
                 >
                   İptal
                 </Button>
-                <Button
-                  type="button"
-                  disabled={!file || uploading}
-                  onClick={onOverwriteSubmit}
-                >
+                <Button type="button" disabled={!file || uploading} onClick={onOverwriteSubmit}>
                   {uploading ? 'Yükleniyor...' : 'Şablonu Değiştir'}
                 </Button>
               </DialogFooter>
@@ -505,13 +544,16 @@ export default function SablonYonetimiSection() {
       {/* Delete Confirmation AlertDialog */}
       <AlertDialog
         open={deleteTarget !== null}
-        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null)
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Şablonu Sil</AlertDialogTitle>
             <AlertDialogDescription>
-              Bu şablonu silmek istediğinize emin misiniz? Bu şablondan üretilmiş belgeler silinmeyecek, ancak şablon referansı kaldırılacaktır.
+              Bu şablonu silmek istediğinize emin misiniz? Bu şablondan üretilmiş belgeler
+              silinmeyecek, ancak şablon referansı kaldırılacaktır.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -532,7 +574,9 @@ export default function SablonYonetimiSection() {
 
       <VariableCatalogModal
         sablon={catalogTarget}
-        onOpenChange={(open) => { if (!open) setCatalogTarget(null) }}
+        onOpenChange={(open) => {
+          if (!open) setCatalogTarget(null)
+        }}
       />
     </>
   )

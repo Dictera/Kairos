@@ -19,16 +19,22 @@ const muvekkilSchema = z.object({
   tc_vergi_no: z.string().max(11).optional().or(z.literal('')),
   adres: z.string().max(500).optional().or(z.literal('')),
   notlar: z.string().max(2000).optional().or(z.literal('')),
-  iban: z.string().regex(/^TR\d{24}$/, 'Geçersiz IBAN formatı (TRXXXXXXXXXXXXXXXXXXXXXXXX)').optional().or(z.literal('')),
+  iban: z
+    .string()
+    .regex(/^TR\d{24}$/, 'Geçersiz IBAN formatı (TRXXXXXXXXXXXXXXXXXXXXXXXX)')
+    .optional()
+    .or(z.literal('')),
 })
 
 export const muvekkillRouter = createTRPCRouter({
   list: protectedProcedure
-    .input(z.object({
-      search: z.string().max(100).optional(),
-      page: z.number().int().min(1).default(1),
-      pageSize: z.number().int().min(1).max(100).default(25),
-    }))
+    .input(
+      z.object({
+        search: z.string().max(100).optional(),
+        page: z.number().int().min(1).default(1),
+        pageSize: z.number().int().min(1).max(100).default(25),
+      }),
+    )
     .query(async ({ input }) => {
       const { search, page, pageSize } = input
       const offset = (page - 1) * pageSize
@@ -36,21 +42,22 @@ export const muvekkillRouter = createTRPCRouter({
       // ≥3 chars → trigram FTS substring index. <3 chars → lower_tr LIKE scan.
       const match = search ? ftsMatchQuery(search) : null
       const where = search
-        ? (match
-            ? sql`${muvekkil.id} IN (SELECT rowid FROM muvekkil_fts WHERE muvekkil_fts MATCH ${match})`
-            : sql`lower_tr(${muvekkil.ad} || ' ' || ${muvekkil.soyad}) LIKE lower_tr(${'%' + search + '%'}) OR lower_tr(${muvekkil.tc_vergi_no}) LIKE lower_tr(${'%' + search + '%'})`)
+        ? match
+          ? sql`${muvekkil.id} IN (SELECT rowid FROM muvekkil_fts WHERE muvekkil_fts MATCH ${match})`
+          : sql`lower_tr(${muvekkil.ad} || ' ' || ${muvekkil.soyad}) LIKE lower_tr(${'%' + search + '%'}) OR lower_tr(${muvekkil.tc_vergi_no}) LIKE lower_tr(${'%' + search + '%'})`
         : undefined
 
       const [rows, totalResult] = await Promise.all([
-        db.select({
-          id: muvekkil.id,
-          ad: muvekkil.ad,
-          soyad: muvekkil.soyad,
-          telefon: muvekkil.telefon,
-          tc_vergi_no: muvekkil.tc_vergi_no,
-          iban: muvekkil.iban,
-          created_at: muvekkil.created_at,
-        })
+        db
+          .select({
+            id: muvekkil.id,
+            ad: muvekkil.ad,
+            soyad: muvekkil.soyad,
+            telefon: muvekkil.telefon,
+            tc_vergi_no: muvekkil.tc_vergi_no,
+            iban: muvekkil.iban,
+            created_at: muvekkil.created_at,
+          })
           .from(muvekkil)
           .where(where)
           .orderBy(desc(muvekkil.id))
@@ -60,7 +67,7 @@ export const muvekkillRouter = createTRPCRouter({
       ])
 
       // Add linked dosya count per muvekkil
-      const ids = rows.map(r => r.id)
+      const ids = rows.map((r) => r.id)
       let dosyaCounts: Record<number, number> = {}
       if (ids.length > 0) {
         const counts = await db
@@ -68,12 +75,12 @@ export const muvekkillRouter = createTRPCRouter({
           .from(dosya)
           .where(inArray(dosya.muvekkil_id, ids))
           .groupBy(dosya.muvekkil_id)
-        dosyaCounts = Object.fromEntries(counts.map(c => [c.muvekkil_id, c.cnt]))
+        dosyaCounts = Object.fromEntries(counts.map((c) => [c.muvekkil_id, c.cnt]))
       }
 
       const total = totalResult[0]?.total ?? 0
       return {
-        rows: rows.map(r => ({ ...r, dosya_count: dosyaCounts[r.id] ?? 0 })),
+        rows: rows.map((r) => ({ ...r, dosya_count: dosyaCounts[r.id] ?? 0 })),
         total,
         page,
         pageSize,
@@ -81,31 +88,27 @@ export const muvekkillRouter = createTRPCRouter({
       }
     }),
 
-  getById: protectedProcedure
-    .input(z.object({ id: z.number().int() }))
-    .query(async ({ input }) => {
-      const row = await db.query.muvekkil.findFirst({
-        where: eq(muvekkil.id, input.id),
-        with: {
-          dosyalar: {
-            columns: { id: true, dosya_no: true, tur: true, durum: true, talep_tutari: true },
-            orderBy: desc(dosya.id),
-          },
+  getById: protectedProcedure.input(z.object({ id: z.number().int() })).query(async ({ input }) => {
+    const row = await db.query.muvekkil.findFirst({
+      where: eq(muvekkil.id, input.id),
+      with: {
+        dosyalar: {
+          columns: { id: true, dosya_no: true, tur: true, durum: true, talep_tutari: true },
+          orderBy: desc(dosya.id),
         },
-      })
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Müvekkil bulunamadı.' })
-      return row
-    }),
+      },
+    })
+    if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Müvekkil bulunamadı.' })
+    return row
+  }),
 
-  create: protectedProcedure
-    .input(muvekkilSchema)
-    .mutation(async ({ input }) => {
-      return db.transaction((tx) => {
-        const row = tx.insert(muvekkil).values(input).returning().get()
-        upsertMuvekkilFts(tx, row.id, row)
-        return row
-      })
-    }),
+  create: protectedProcedure.input(muvekkilSchema).mutation(async ({ input }) => {
+    return db.transaction((tx) => {
+      const row = tx.insert(muvekkil).values(input).returning().get()
+      upsertMuvekkilFts(tx, row.id, row)
+      return row
+    })
+  }),
 
   update: protectedProcedure
     .input(muvekkilSchema.extend({ id: z.number().int() }))

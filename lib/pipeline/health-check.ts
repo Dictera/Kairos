@@ -73,7 +73,10 @@ async function runHealthChecks(): Promise<HealthStatus> {
 
   if (pythonPath) {
     try {
-      const result = await runSidecarCommand({ command: 'health-check', params: { libreoffice_path: libreofficePath ?? undefined } })
+      const result = await runSidecarCommand({
+        command: 'health-check',
+        params: { libreoffice_path: libreofficePath ?? undefined },
+      })
       if (result.status === 'success' && result.result) {
         const r = result.result as { python_version?: string; python_accessible?: boolean }
         pythonVersion = r.python_version ?? null

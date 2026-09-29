@@ -35,7 +35,7 @@ export function TelegramBildirimSection() {
         toast.success('Bildirim saatleri güncellendi.')
       },
       onError: () => toast.error('Güncelleme başarısız.'),
-    })
+    }),
   )
 
   // ── Update toggles mutation ────────────────────────────────────────────
@@ -47,7 +47,7 @@ export function TelegramBildirimSection() {
         toast.success('Bildirim ayarları güncellendi.')
       },
       onError: () => toast.error('Güncelleme başarısız. Lütfen tekrar deneyin.'),
-    })
+    }),
   )
 
   // ── Test connection mutation ───────────────────────────────────────────
@@ -59,15 +59,16 @@ export function TelegramBildirimSection() {
         } else {
           // Distinguish config errors from API errors per UI-SPEC
           if (data.error?.includes('BOT_TOKEN') || data.error?.includes('CHAT_ID')) {
-            toast.error('BOT_TOKEN veya CHAT_ID yapılandırılmamış. .env.local dosyasını kontrol edin.')
+            toast.error(
+              'BOT_TOKEN veya CHAT_ID yapılandırılmamış. .env.local dosyasını kontrol edin.',
+            )
           } else {
             toast.error("Telegram API'ye ulaşılamadı. Token ve Chat ID'yi kontrol edin.")
           }
         }
       },
-      onError: () =>
-        toast.error("Telegram API'ye ulaşılamadı. Token ve Chat ID'yi kontrol edin."),
-    })
+      onError: () => toast.error("Telegram API'ye ulaşılamadı. Token ve Chat ID'yi kontrol edin."),
+    }),
   )
 
   // ── Add time via clock picker ──────────────────────────────────────────
@@ -108,19 +109,16 @@ export function TelegramBildirimSection() {
       <CardHeader>
         <CardTitle className="text-base font-semibold">Telegram Bildirimleri</CardTitle>
         <CardDescription>
-          Yaklaşan duruşma ve süre bildirimleri Telegram&apos;a gönderilir. Bot yapılandırmak
-          için{' '}
+          Yaklaşan duruşma ve süre bildirimleri Telegram&apos;a gönderilir. Bot yapılandırmak için{' '}
           <code className="rounded bg-muted px-1 text-xs">.env.local</code> dosyasına{' '}
           <code className="rounded bg-muted px-1 text-xs">TELEGRAM_BOT_TOKEN</code> ve{' '}
           <code className="rounded bg-muted px-1 text-xs">TELEGRAM_CHAT_ID</code> ekleyin.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-
         {/* Env key instruction block */}
         <div className="rounded-md border bg-muted/40 px-4 py-2 text-sm text-muted-foreground">
-          Kurulum için{' '}
-          <code className="rounded bg-muted px-1 text-xs">.env.example</code>{' '}
+          Kurulum için <code className="rounded bg-muted px-1 text-xs">.env.example</code>{' '}
           dosyasındaki talimatları izleyin.
         </div>
 
@@ -132,10 +130,12 @@ export function TelegramBildirimSection() {
           <div className="flex items-center justify-between py-1">
             <div>
               <p className="text-sm font-normal">Günlük Duruşmalar</p>
-              <p className="text-xs text-muted-foreground">Yaklaşan duruşmalar tek mesajda gönderilir.</p>
+              <p className="text-xs text-muted-foreground">
+                Yaklaşan duruşmalar tek mesajda gönderilir.
+              </p>
             </div>
             <Switch
-              checked={(toggles?.telegram_gunluk_durusma_aktif) ?? true}
+              checked={toggles?.telegram_gunluk_durusma_aktif ?? true}
               onCheckedChange={(v) =>
                 updateToggles.mutate({
                   telegram_gunluk_durusma_aktif: v,
@@ -152,10 +152,12 @@ export function TelegramBildirimSection() {
           <div className="flex items-center justify-between py-1">
             <div>
               <p className="text-sm font-normal">Günlük Süreler</p>
-              <p className="text-xs text-muted-foreground">Yaklaşan hak düşürücü süreler tek mesajda gönderilir.</p>
+              <p className="text-xs text-muted-foreground">
+                Yaklaşan hak düşürücü süreler tek mesajda gönderilir.
+              </p>
             </div>
             <Switch
-              checked={(toggles?.telegram_gunluk_sure_aktif) ?? true}
+              checked={toggles?.telegram_gunluk_sure_aktif ?? true}
               onCheckedChange={(v) =>
                 updateToggles.mutate({
                   telegram_gunluk_durusma_aktif: toggles?.telegram_gunluk_durusma_aktif ?? true,
@@ -172,10 +174,12 @@ export function TelegramBildirimSection() {
           <div className="flex items-center justify-between py-1">
             <div>
               <p className="text-sm font-normal">Haftalık Özet</p>
-              <p className="text-xs text-muted-foreground">Her Pazartesi bu haftaki duruşma ve süreler özetlenir.</p>
+              <p className="text-xs text-muted-foreground">
+                Her Pazartesi bu haftaki duruşma ve süreler özetlenir.
+              </p>
             </div>
             <Switch
-              checked={(toggles?.telegram_haftalik_ozet_aktif) ?? true}
+              checked={toggles?.telegram_haftalik_ozet_aktif ?? true}
               onCheckedChange={(v) =>
                 updateToggles.mutate({
                   telegram_gunluk_durusma_aktif: toggles?.telegram_gunluk_durusma_aktif ?? true,
@@ -203,9 +207,7 @@ export function TelegramBildirimSection() {
                   key={time}
                   variant="secondary"
                   className="flex items-center gap-1 pl-2 pr-1 py-1"
-                  style={
-                    updateSchedule.isPending ? { opacity: 0.5, pointerEvents: 'none' } : {}
-                  }
+                  style={updateSchedule.isPending ? { opacity: 0.5, pointerEvents: 'none' } : {}}
                 >
                   <span className="text-sm tabular-nums">{time}</span>
                   <button
@@ -236,11 +238,7 @@ export function TelegramBildirimSection() {
             <Clock className="h-3.5 w-3.5" />
             Saat Ekle
           </Button>
-          <ClockPicker
-            open={clockOpen}
-            onOpenChange={setClockOpen}
-            onConfirm={handleTimeConfirm}
-          />
+          <ClockPicker open={clockOpen} onOpenChange={setClockOpen} onConfirm={handleTimeConfirm} />
         </div>
 
         {/* Bağlantı Testi button — D-20 (Claude's discretion: include) */}
@@ -257,7 +255,6 @@ export function TelegramBildirimSection() {
             {testConnection.isPending ? 'Gönderiliyor…' : 'Bağlantı Testi'}
           </Button>
         </div>
-
       </CardContent>
     </Card>
   )

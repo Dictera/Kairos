@@ -102,7 +102,10 @@ export function GenelBilgilerTab({ dosya }: GenelBilgilerTabProps) {
           <Row label="Talep Tutarı" value={formatTutar(dosya.talep_tutari)} />
           <Row label="Müvekkil Plaka No" value={dosya.muvekkil_plaka ?? '—'} />
           <Row label="Hasar Dosya No" value={dosya.hasar_dosya_no ?? '—'} />
-          <Row label="Kaza Tarihi" value={dosya.kaza_tarihi ? formatDate(dosya.kaza_tarihi) : '—'} />
+          <Row
+            label="Kaza Tarihi"
+            value={dosya.kaza_tarihi ? formatDate(dosya.kaza_tarihi) : '—'}
+          />
           <Row label="Müvekkil Sigorta/Kasko Şirketi" value={dosya.muvekkilSigorta?.ad ?? '—'} />
           {dosya.kusur_orani_karsi !== null && dosya.kusur_orani_karsi > 0 && (
             <>

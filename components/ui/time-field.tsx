@@ -8,7 +8,7 @@ interface TimeFieldProps {
   onBlur?: () => void
 }
 
-const fmt = (n: number | null) => n !== null ? String(n).padStart(2, '0') : '--'
+const fmt = (n: number | null) => (n !== null ? String(n).padStart(2, '0') : '--')
 
 export function TimeField({ value, onChange, onBlur }: TimeFieldProps) {
   const [editing, setEditing] = useState<'hour' | 'minute' | null>(null)
@@ -36,8 +36,14 @@ export function TimeField({ value, onChange, onBlur }: TimeFieldProps) {
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); commitEdit() }
-    if (e.key === 'Escape') { setEditing(null); setDraft('') }
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault()
+      commitEdit()
+    }
+    if (e.key === 'Escape') {
+      setEditing(null)
+      setDraft('')
+    }
   }
 
   const segClass = 'w-7 text-center tabular-nums bg-transparent outline-none'
@@ -53,7 +59,7 @@ export function TimeField({ value, onChange, onBlur }: TimeFieldProps) {
           maxLength={2}
           value={draft}
           placeholder={fmt(hour)}
-          onChange={e => {
+          onChange={(e) => {
             const raw = e.target.value.replace(/\D/g, '').slice(0, 2)
             const n = parseInt(raw, 10)
             setDraft(!isNaN(n) && n > 23 ? '23' : raw)
@@ -63,8 +69,11 @@ export function TimeField({ value, onChange, onBlur }: TimeFieldProps) {
           className={segClass}
         />
       ) : (
-        <button type="button" onClick={() => startEdit('hour')}
-          className={`${segClass} hover:text-primary transition-colors cursor-text`}>
+        <button
+          type="button"
+          onClick={() => startEdit('hour')}
+          className={`${segClass} hover:text-primary transition-colors cursor-text`}
+        >
           {fmt(hour)}
         </button>
       )}
@@ -78,7 +87,7 @@ export function TimeField({ value, onChange, onBlur }: TimeFieldProps) {
           maxLength={2}
           value={draft}
           placeholder={fmt(minute)}
-          onChange={e => {
+          onChange={(e) => {
             const raw = e.target.value.replace(/\D/g, '').slice(0, 2)
             const n = parseInt(raw, 10)
             setDraft(!isNaN(n) && n > 59 ? '59' : raw)
@@ -88,8 +97,11 @@ export function TimeField({ value, onChange, onBlur }: TimeFieldProps) {
           className={segClass}
         />
       ) : (
-        <button type="button" onClick={() => startEdit('minute')}
-          className={`${segClass} hover:text-primary transition-colors cursor-text`}>
+        <button
+          type="button"
+          onClick={() => startEdit('minute')}
+          className={`${segClass} hover:text-primary transition-colors cursor-text`}
+        >
           {fmt(minute)}
         </button>
       )}

@@ -35,11 +35,15 @@ export function KPICard({ label, value, sub, color, Icon, trend, trendLabel }: K
             className="flex items-center gap-0.5 text-[11px] font-semibold tabular-nums"
             style={{ color: up ? '#22c55e' : '#ef4444' }}
           >
-            {up ? '▲' : '▼'} {up ? '+' : ''}{trend}%
+            {up ? '▲' : '▼'} {up ? '+' : ''}
+            {trend}%
           </span>
         )}
       </div>
-      <p className="text-[26px] font-bold tracking-tight leading-none tabular-nums" style={{ color }}>
+      <p
+        className="text-[26px] font-bold tracking-tight leading-none tabular-nums"
+        style={{ color }}
+      >
         {value}
       </p>
       {sub && <p className="text-[11.5px] text-muted-foreground">{sub}</p>}
@@ -134,7 +138,11 @@ export function ReportLoading() {
 
 // ── Empty state ───────────────────────────────────────────────────────────────
 
-export function ReportEmpty({ message = 'Bu rapor için henüz veri bulunmuyor.' }: { message?: string }) {
+export function ReportEmpty({
+  message = 'Bu rapor için henüz veri bulunmuyor.',
+}: {
+  message?: string
+}) {
   return (
     <div className="flex items-center justify-center rounded-xl border border-dashed bg-card/40 px-6 py-16 text-center">
       <p className="text-sm text-muted-foreground">{message}</p>

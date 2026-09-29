@@ -138,8 +138,8 @@ describe('Entry sorting: tarih descending (newest first) (FINANS-02)', () => {
       return new Date(b.tarih).getTime() - new Date(a.tarih).getTime()
     })
 
-    expect(sorted[0].id).toBe(2)  // 2024-03-10 (newest)
-    expect(sorted[1].id).toBe(3)  // 2024-02-20
-    expect(sorted[2].id).toBe(1)  // 2024-01-15 (oldest)
+    expect(sorted[0].id).toBe(2) // 2024-03-10 (newest)
+    expect(sorted[1].id).toBe(3) // 2024-02-20
+    expect(sorted[2].id).toBe(1) // 2024-01-15 (oldest)
   })
 })

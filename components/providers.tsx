@@ -16,7 +16,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           transformer: superjson,
         }),
       ],
-    })
+    }),
   )
   return (
     <QueryClientProvider client={queryClient}>

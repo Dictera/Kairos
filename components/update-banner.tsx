@@ -67,7 +67,9 @@ export function UpdateBanner() {
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-background/90 backdrop-blur-sm">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="text-sm font-medium">Güncelleme uygulanıyor, sunucu yeniden başlatılıyor…</p>
-        <p className="text-xs text-muted-foreground">Bu birkaç dakika sürebilir, sayfayı kapatmayın.</p>
+        <p className="text-xs text-muted-foreground">
+          Bu birkaç dakika sürebilir, sayfayı kapatmayın.
+        </p>
       </div>
     )
   }
@@ -80,7 +82,8 @@ export function UpdateBanner() {
         <div className="flex items-center gap-2 text-foreground">
           <ArrowUpCircle className="h-4 w-4 shrink-0 text-accent" />
           <p className="text-sm font-medium">
-            Yeni sürüm mevcut ({data.behind} güncelleme geride){data.offline ? ' — çevrimdışı' : ''}.
+            Yeni sürüm mevcut ({data.behind} güncelleme geride){data.offline ? ' — çevrimdışı' : ''}
+            .
           </p>
         </div>
         <AlertDialog>
