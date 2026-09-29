@@ -34,6 +34,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 
+- Zamanaşımı Riski raporu ve Yönetim Özeti'ndeki zamanaşımı uyarıları — süre yalnızca kaza tarihi ve sigorta türünden güvenilir biçimde hesaplanamıyordu (öğrenme/maluliyet tarihi ve uzamış ceza zamanaşımı dikkate alınmıyordu)
+- Rapor detayındaki işlevsiz "Dışa Aktar" düğmesi; raporlar "Yazdır" → PDF olarak kaydet ile alınabilir
 - Excel rapor dışa aktarım — finans ve dosya listesi `.xlsx` endpoint'leri kaldırıldı (UI'dan erişilmiyordu); `exceljs` bağımlılığı çıkarıldı. Raporlar PDF olarak indirilmeye devam ediyor.
 
 ## [0.1.0] - 2026-05-17

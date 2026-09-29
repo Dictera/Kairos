@@ -60,7 +60,6 @@ const DESC: Record<string, string> = {
   tahsilat: '3 kademeli analiz: talep → karar → tahsilat; şirket karşılaştırması',
   'sonuc-basari': 'Kazanma/kaybetme oranları, şirket & tür bazlı başarı analizi',
   arabuluculuk: 'Arabuluculuk vs dava oranı, süre karşılaştırması, başarı oranları',
-  zamanasimi: 'Yaklaşan hak düşüm süreleri; acil, kritik ve dikkat gerektiren dosyalar',
   'dosya-raporu': 'Dosya durumu, tür analizi, yaş dağılımı, kâr marjı',
   'muvekkil-raporu': 'Müvekkil performansı, tahsilat oranları, aktivite',
   'dava-sureci': 'Aşama bazlı süre analizi, şirket çözüm süreleri, uzun dosyalar',

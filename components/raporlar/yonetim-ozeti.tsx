@@ -12,9 +12,8 @@ import {
   DollarSign,
   Trophy,
   Briefcase,
-  AlertTriangle,
   CheckCircle2,
-  AlertOctagon,
+  type LucideIcon,
 } from 'lucide-react'
 
 import {
@@ -27,7 +26,6 @@ import {
   type SirketRow,
   type SonucTurRow,
   type DosyaStatusRow,
-  type ZamanasimıRow,
 } from './raporlar-data'
 import { KPICard, CardHead, Pill, ReportLoading, ReportEmpty } from './raporlar-shared'
 
@@ -50,7 +48,6 @@ interface YonetimOzetiData {
   sirketler: SirketRow[]
   sonucTur: SonucTurRow[]
   dosyaStatus: DosyaStatusRow[]
-  zamanasimı: ZamanasimıRow[]
 }
 
 export function YonetimOzeti() {
@@ -67,7 +64,7 @@ export function YonetimOzeti() {
   if (isLoading) return <ReportLoading />
   if (!data) return <ReportEmpty />
 
-  const { sirketler, sonucTur, dosyaStatus, zamanasimı } = data
+  const { sirketler, sonucTur, dosyaStatus } = data
 
   const topTalep = sirketler.reduce((a, s) => a + s.talep, 0)
   const topKarar = sirketler.reduce((a, s) => a + s.karar, 0)
@@ -83,9 +80,6 @@ export function YonetimOzeti() {
       ? (((sonucTot.k + sonucTot.u) / (sonucTot.k + sonucTot.u + sonucTot.l)) * 100).toFixed(0)
       : '0'
 
-  const acil = zamanasimı.filter((d) => d.risk === 'Acil').length
-  const kritik = zamanasimı.filter((d) => d.risk === 'Kritik').length
-
   const funnel = [
     { label: 'Talep', tutar: topTalep, renk: C.accent },
     { label: 'Karar', tutar: topKarar, renk: C.success },
@@ -94,25 +88,13 @@ export function YonetimOzeti() {
   const fMax = funnel[0].tutar || 1
 
   const alerts = [
-    acil > 0 && {
-      sev: 'Acil',
-      color: C.danger,
-      msg: `${acil} dosyada zamanaşımı 60 günden az — hemen aksiyon gerekli`,
-      Icon: AlertOctagon,
-    },
-    kritik > 0 && {
-      sev: 'Kritik',
-      color: C.warning,
-      msg: `${kritik} dosyada zamanaşımı 90–150 gün içinde dolacak`,
-      Icon: AlertTriangle,
-    },
     topTalep > 0 && {
       sev: 'Bilgi',
       color: C.accent,
       Icon: CheckCircle2,
       msg: `Toplam tahsilat kayıp oranı: %${(((topTalep - topTahsilat) / topTalep) * 100).toFixed(1)} — talep → tahsilat farkı`,
     },
-  ].filter(Boolean) as Array<{ sev: string; color: string; msg: string; Icon: typeof AlertOctagon }>
+  ].filter(Boolean) as Array<{ sev: string; color: string; msg: string; Icon: LucideIcon }>
 
   const trendData = ay2026.map((d) => ({ name: d.label, Gelen: d.gelen, Net: d.net }))
 

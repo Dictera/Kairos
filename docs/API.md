@@ -271,12 +271,11 @@ Arama alanları: dosya_no, müvekkil ad/soyad, hasar dosya no, plaka, TC/Vergi n
 ### `rapor`
 | Procedure | Tip | Açıklama |
 |-----------|-----|----------|
-| `yonetimOzeti` | query | Yönetim özeti: dosya sayıları, finans özeti, başarı oranı, zamanaşımı riskleri, şirket/tür analizi |
+| `yonetimOzeti` | query | Yönetim özeti: dosya sayıları, finans özeti, başarı oranı, şirket/tür analizi |
 | `genelBakis` | query | Aylık finans ve dosya trendi (gelen/giden/masraf/net + yeni dosya) |
 | `tahsilat` | query | Sigorta şirketi bazlı tahsilat analizi (talep/karar/tahsilat oranları, ödeme aşaması dağılımı) |
 | `sonucBasari` | query | Başarı oranı analizi: kazanılan/uzlaşma/kaybedilen/devam eden, tür ve şirket bazlı |
 | `arabuluculuk` | query | STK arabuluculuk analizi: arabuluculukta kalan vs davaya giden, çözülme oranları, ortalama süreler |
-| `zamanasimi` | query | Zamanaşımı risk raporu: tüm dosyaların kalan gün ve risk seviyesi (Acil ≤60, Kritik ≤180, Dikkat ≤365) |
 | `dosyaRaporu` | query | Dosya dağılım raporu: durum, tür ve alt tür (sigorta türü) bazlı sayılar ve tahsilat |
 | `muvekkilRaporu` | query | Müvekkil bazlı rapor: dosya sayısı, tahsilat/gider/masraf/net, tahsilat oranı, son aktivite |
 | `davaSureci` | query | Dava süreç analizi: aşama bazlı ortalama/min/max süreler, en uzun süren aktif dosyalar |

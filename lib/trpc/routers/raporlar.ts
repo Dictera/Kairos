@@ -47,33 +47,16 @@ function ayLabel(ay: string): string {
   return MONTHS_TR[m - 1] ?? ay
 }
 
-function zaYil(tur: string, sigortaTuruAd?: string): number {
-  if (sigortaTuruAd === 'Bedeni Hasar') return 10
-  if (tur === 'AT') return 10
-  return 2
-}
-
-function zaRisk(kalan: number): 'Acil' | 'Kritik' | 'Dikkat' | 'Güvenli' {
-  if (kalan < 60) return 'Acil'
-  if (kalan < 180) return 'Kritik'
-  if (kalan < 365) return 'Dikkat'
-  return 'Güvenli'
-}
-
 export const raporlarRouter = createTRPCRouter({
   // ── Yönetim Özeti ──────────────────────────────────────────────────────────
   yonetimOzeti: protectedProcedure.query(async () => {
-    const [tumDosyalar, tumFinans, tumSirket, tumMuvekkil, tumSigortaTuru] = await Promise.all([
+    const [tumDosyalar, tumFinans, tumSirket] = await Promise.all([
       db.select().from(dosya),
       db.select().from(finans_kalemi),
       db.select().from(sigortaSirketi),
-      db.select().from(muvekkil),
-      db.select().from(sigortaTuru),
     ])
 
     const sirketMap = Object.fromEntries(tumSirket.map((s) => [s.id, s.ad]))
-    const muvekkilMap = Object.fromEntries(tumMuvekkil.map((m) => [m.id, `${m.ad} ${m.soyad}`]))
-    const sigortaTuruMap = Object.fromEntries(tumSigortaTuru.map((t) => [t.id, t.ad]))
 
     // ay2026 — monthly rows filtered to 2026
     const byMonth2026: Record<
@@ -159,33 +142,7 @@ export const raporlarRouter = createTRPCRouter({
       renk: STATUS_RENK[durum] ?? '#1c768f',
     }))
 
-    // zamanasimı
-    const bugun = new Date()
-    const zamanasimıRows = tumDosyalar
-      .flatMap((d) => {
-        if (!d.kaza_tarihi) return []
-        const turuAd = d.sigorta_turu_id ? sigortaTuruMap[d.sigorta_turu_id] : undefined
-        const yil = zaYil(d.tur, turuAd)
-        const son = new Date(d.kaza_tarihi)
-        son.setFullYear(son.getFullYear() + yil)
-        const kalan = Math.ceil((son.getTime() - bugun.getTime()) / 86_400_000)
-        const risk = zaRisk(kalan)
-        return [
-          {
-            no: d.dosya_no,
-            muvekkil: muvekkilMap[d.muvekkil_id] ?? '',
-            sirket: d.karsitaraf_sigorta_id ? (sirketMap[d.karsitaraf_sigorta_id] ?? '') : '',
-            tur: turuAd ?? TUR_LABEL[d.tur] ?? d.tur,
-            basTarih: d.kaza_tarihi,
-            zamanasimıYil: yil,
-            kalanGun: kalan,
-            risk,
-          },
-        ]
-      })
-      .sort((a, b) => a.kalanGun - b.kalanGun)
-
-    return { ay2026, sirketler, sonucTur, dosyaStatus, zamanasimı: zamanasimıRows }
+    return { ay2026, sirketler, sonucTur, dosyaStatus }
   }),
 
   // ── Genel Bakış ────────────────────────────────────────────────────────────
@@ -398,46 +355,6 @@ export const raporlarRouter = createTRPCRouter({
       }))
 
     return { aylik }
-  }),
-
-  // ── Zamanaşımı ─────────────────────────────────────────────────────────────
-  zamanasimi: protectedProcedure.query(async () => {
-    const [tumDosyalar, tumMuvekkil, tumSirket, tumSigortaTuru] = await Promise.all([
-      db.select().from(dosya),
-      db.select().from(muvekkil),
-      db.select().from(sigortaSirketi),
-      db.select().from(sigortaTuru),
-    ])
-
-    const muvekkilMap = Object.fromEntries(tumMuvekkil.map((m) => [m.id, `${m.ad} ${m.soyad}`]))
-    const sirketMap = Object.fromEntries(tumSirket.map((s) => [s.id, s.ad]))
-    const sigortaTuruMap = Object.fromEntries(tumSigortaTuru.map((t) => [t.id, t.ad]))
-    const bugun = new Date()
-
-    const dosyalar = tumDosyalar
-      .flatMap((d) => {
-        if (!d.kaza_tarihi || d.durum !== 'aktif') return []
-        const turuAd = d.sigorta_turu_id ? sigortaTuruMap[d.sigorta_turu_id] : undefined
-        const yil = zaYil(d.tur, turuAd)
-        const son = new Date(d.kaza_tarihi)
-        son.setFullYear(son.getFullYear() + yil)
-        const kalan = Math.ceil((son.getTime() - bugun.getTime()) / 86_400_000)
-        return [
-          {
-            no: d.dosya_no,
-            muvekkil: muvekkilMap[d.muvekkil_id] ?? '',
-            sirket: d.karsitaraf_sigorta_id ? (sirketMap[d.karsitaraf_sigorta_id] ?? '') : '',
-            tur: turuAd ?? TUR_LABEL[d.tur] ?? d.tur,
-            basTarih: d.kaza_tarihi,
-            zamanasimıYil: yil,
-            kalanGun: kalan,
-            risk: zaRisk(kalan),
-          },
-        ]
-      })
-      .sort((a, b) => a.kalanGun - b.kalanGun)
-
-    return { dosyalar }
   }),
 
   // ── Dosya Raporu ───────────────────────────────────────────────────────────
