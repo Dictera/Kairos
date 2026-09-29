@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight, Printer, Download, type LucideIcon } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Printer, type LucideIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -19,7 +19,6 @@ import { GenelBakis } from './genel-bakis'
 import { Tahsilat } from './tahsilat'
 import { SonucBasari } from './sonuc-basari'
 import { Arabuluculuk } from './arabuluculuk'
-import { Zamanasimi } from './zamanasimi'
 import { DosyaRaporu } from './dosya-raporu'
 import { MuvekkilRaporu } from './muvekkil-raporu'
 import { DavaSureci } from './dava-sureci'
@@ -40,8 +39,6 @@ function ReportBody({ slug, yil }: { slug: string; yil: YilFilter }) {
       return <SonucBasari />
     case 'arabuluculuk':
       return <Arabuluculuk />
-    case 'zamanasimi':
-      return <Zamanasimi />
     case 'dosya-raporu':
       return <DosyaRaporu />
     case 'muvekkil-raporu':
@@ -136,9 +133,6 @@ export function RaporDetay({ slug }: { slug: string }) {
 
           <Button variant="outline" size="sm" onClick={() => window.print()}>
             <Printer className="h-3.5 w-3.5 mr-1.5" /> Yazdır
-          </Button>
-          <Button size="sm">
-            <Download className="h-3.5 w-3.5 mr-1.5" /> Dışa Aktar
           </Button>
         </div>
       </div>

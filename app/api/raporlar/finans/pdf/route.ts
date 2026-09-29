@@ -1,52 +1,19 @@
-import { db } from '@/lib/db'
-import { finans_kalemi } from '@/lib/schema'
+import { getFinansOzet } from '@/lib/finans-ozet'
 import { requireAuth } from '@/lib/auth-guard'
 import { connection } from 'next/server'
-
-// pdfmake's @types/pdfmake only covers the browser API (createPdf).
-// The PdfPrinter class lives in js/Printer.js — access it directly.
-import PdfPrinterClass from 'pdfmake/js/Printer'
+import type { TDocumentDefinitions } from 'pdfmake/interfaces'
+import { generatePdfBuffer, pdfResponse } from '@/lib/pdf-report'
 
 export const dynamic = 'force-dynamic'
-
-const fonts = {
-  Roboto: {
-    normal: 'Helvetica',
-    bold: 'Helvetica-Bold',
-    italics: 'Helvetica-Oblique',
-    bolditalics: 'Helvetica-BoldOblique',
-  },
-}
-const printer = new PdfPrinterClass(fonts)
-
-interface DocDefinition {
-  content: Record<string, unknown>[]
-  defaultStyle?: { font?: string; fontSize?: number }
-}
-
-async function generatePdfBuffer(docDefinition: DocDefinition): Promise<Buffer> {
-  const pdfDoc = printer.createPdfKitDocument(docDefinition)
-  const chunks: Buffer[] = []
-  pdfDoc.on('data', (chunk: Buffer) => chunks.push(chunk))
-  await new Promise<void>((resolve) => pdfDoc.on('end', resolve))
-  pdfDoc.end()
-  return Buffer.concat(chunks)
-}
 
 export async function GET() {
   await connection()
   const authError = await requireAuth()
   if (authError) return authError
 
-  const entries = await db.select().from(finans_kalemi)
+  const { gelen, giden, masraf, son30Gun } = await getFinansOzet()
 
-  const gelen = entries.filter((e) => e.tur === 'Gelen').reduce((sum, e) => sum + (e.tutar || 0), 0)
-  const giden = entries.filter((e) => e.tur === 'Giden').reduce((sum, e) => sum + (e.tutar || 0), 0)
-  const masraf = entries
-    .filter((e) => e.tur === 'Masraf')
-    .reduce((sum, e) => sum + (e.tutar || 0), 0)
-
-  const docDefinition = {
+  const docDefinition: TDocumentDefinitions = {
     content: [
       { text: 'FİNANSAL RAPOR', font: 'Roboto', bold: true, fontSize: 18, margin: [0, 0, 0, 20] },
       {
@@ -69,7 +36,7 @@ export async function GET() {
         font: 'Roboto',
         margin: [0, 0, 0, 20],
       },
-      { text: `Son 30 Gün İşlem Sayısı: ${entries.length}`, font: 'Roboto' },
+      { text: `Son 30 Gün İşlem Sayısı: ${son30Gun}`, font: 'Roboto' },
     ],
     defaultStyle: {
       font: 'Roboto',
@@ -78,10 +45,5 @@ export async function GET() {
 
   const pdfBuffer = await generatePdfBuffer(docDefinition)
 
-  return new Response(new Uint8Array(pdfBuffer), {
-    headers: {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename="finansal-rapor.pdf"',
-    },
-  })
+  return pdfResponse(pdfBuffer, 'finansal-rapor.pdf')
 }

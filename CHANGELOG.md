@@ -21,14 +21,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Webcal butonu tek buton yerine "Uygulama Aç" + "Linki Kopyala" olarak ikiye bölündü
 - Telegram bildirim mesajları gruplandırıldı; müvekkil adı kaldırıldı
 - Hızlı metin arama — SQLite FTS5 trigram dizini ve pragma ayarlarıyla dosya/müvekkil aramaları belirgin şekilde hızlandı
+- Belge yükleme sınırı 20 MB'tan 10 MB'a indirildi
 
 ### Fixed
 
 - Kurulum başlatıcıları artık Türkçe olmayan Windows dil ayarlarında da çalışıyor
 - Erişilebilirlik ve arayüz render düzeltmeleri (React Doctor bulguları)
+- Belge yükleme: kayıt oluşturulamazsa yüklenen dosya diskte sahipsiz kalmıyor; dosya içeriği bildirilen türle doğrulanıyor
+- Finansal rapor PDF'i: "Son 30 Gün İşlem Sayısı" artık tüm kayıtları değil, son 30 gündeki işlemleri sayıyor
+- Finans ve portföy rapor PDF'leri (`/api/raporlar/*/pdf`) pdfmake 0.3 ile hiç üretilemiyordu (500); düzeltildi ve Türkçe karakterler (İ, ş, ğ, ı) doğru görünüyor
+- Portföy rapor PDF'i: Aktif/Pasif ve "Mahkeme" sayıları var olmayan değerlere bakıldığı için hep 0'dı; artık Aktif/Arşiv ve STK / Asliye Ticaret / Asliye Hukuk dağılımı doğru sayılıyor
 
 ### Removed
 
+- Zamanaşımı Riski raporu ve Yönetim Özeti'ndeki zamanaşımı uyarıları — süre yalnızca kaza tarihi ve sigorta türünden güvenilir biçimde hesaplanamıyordu (öğrenme/maluliyet tarihi ve uzamış ceza zamanaşımı dikkate alınmıyordu)
+- Rapor detayındaki işlevsiz "Dışa Aktar" düğmesi; raporlar "Yazdır" → PDF olarak kaydet ile alınabilir
 - Excel rapor dışa aktarım — finans ve dosya listesi `.xlsx` endpoint'leri kaldırıldı (UI'dan erişilmiyordu); `exceljs` bağımlılığı çıkarıldı. Raporlar PDF olarak indirilmeye devam ediyor.
 
 ## [0.1.0] - 2026-05-17

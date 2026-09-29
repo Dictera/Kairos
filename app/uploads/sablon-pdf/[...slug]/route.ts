@@ -1,22 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
+import { connection } from 'next/server'
 import path from 'path'
 import { ARCHIVE_BASE } from '@/lib/docx/archive'
+import { isInsideDir } from '@/lib/belgeler-storage'
 import { requireAuth } from '@/lib/auth-guard'
+import { fileResponse, MIME_FOR_EXTENSION, statFile } from '@/lib/file-transfer'
 
-const MIME_TYPES: Record<string, string> = {
-  '.pdf': 'application/pdf',
-  '.doc': 'application/msword',
-  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.png': 'image/png',
-}
+export const dynamic = 'force-dynamic'
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string[] }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ slug: string[] }> },
 ) {
+  await connection()
   const authError = await requireAuth()
   if (authError) return authError
 
@@ -28,32 +24,20 @@ export async function GET(
     return NextResponse.json({ error: 'Geçersiz dosya yolu' }, { status: 400 })
   }
 
-  const filePath = path.join(ARCHIVE_BASE, relativePath)
-  const resolved = path.resolve(filePath)
-  const baseResolved = path.resolve(ARCHIVE_BASE)
-  const rel = path.relative(baseResolved, resolved)
-
-  if (rel.startsWith('..') || path.isAbsolute(rel)) {
+  const resolved = path.resolve(ARCHIVE_BASE, relativePath)
+  if (!isInsideDir(ARCHIVE_BASE, resolved)) {
     return NextResponse.json({ error: 'Geçersiz dosya yolu' }, { status: 400 })
   }
 
-  if (!fs.existsSync(resolved)) {
+  const stat = await statFile(resolved)
+  if (!stat) {
     return NextResponse.json({ error: 'Dosya bulunamadı' }, { status: 404 })
   }
 
-  const stat = fs.statSync(resolved)
-  if (!stat.isFile()) {
-    return NextResponse.json({ error: 'Dosya bulunamadı' }, { status: 404 })
-  }
-
-  const file = fs.readFileSync(resolved)
   const ext = path.extname(resolved).toLowerCase()
-
-  return new NextResponse(file, {
-    headers: {
-      'Content-Type': MIME_TYPES[ext] || 'application/octet-stream',
-      'Content-Disposition': `inline; filename="${path.basename(resolved)}"`,
-      'Content-Length': String(stat.size),
-    },
+  return fileResponse(resolved, {
+    size: stat.size,
+    contentType: MIME_FOR_EXTENSION[ext] || 'application/octet-stream',
+    filename: path.basename(resolved),
   })
 }

@@ -135,19 +135,6 @@ export interface ArabuluculukAylikRow {
   davaSure: number
 }
 
-export type ZamanasimıRisk = 'Acil' | 'Kritik' | 'Dikkat' | 'Güvenli'
-
-export interface ZamanasimıRow {
-  no: string
-  muvekkil: string
-  sirket: string
-  tur: string
-  basTarih: string
-  zamanasimıYil: number
-  kalanGun: number
-  risk: ZamanasimıRisk
-}
-
 export interface AsamaRow {
   asama: string
   ort: number
@@ -205,18 +192,4 @@ export const fmtKN = (v: number): string => {
   if (a >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`
   if (a >= 1_000) return `${(v / 1_000).toFixed(1)}k`
   return String(v)
-}
-
-export const riskColor: Record<ZamanasimıRisk, string> = {
-  Acil: C.danger,
-  Kritik: C.warning,
-  Dikkat: C.amber,
-  Güvenli: C.success,
-}
-
-export const riskLabel: Record<ZamanasimıRisk, string> = {
-  Acil: '60 günden az',
-  Kritik: '60–180 gün',
-  Dikkat: '180 gün – 1 yıl',
-  Güvenli: '1 yıldan fazla',
 }

@@ -40,9 +40,9 @@ describe('Upload route: ALLOWED_TYPES and MAX_SIZE', () => {
     expect(routeContent).toContain("'image/png'")
   })
 
-  it('MAX_SIZE is 20MB (20 * 1024 * 1024)', () => {
+  it('MAX_SIZE is 10MB (10 * 1024 * 1024)', () => {
     const routeContent = readFileSync('app/api/upload/route.ts', 'utf-8')
-    expect(routeContent).toContain('20 * 1024 * 1024')
+    expect(routeContent).toContain('10 * 1024 * 1024')
   })
 
   it('upload route exports POST handler', () => {
@@ -57,8 +57,8 @@ describe('belge router: procedure existence (BELGE-03)', () => {
     expect(belgeRouter._def.procedures).toHaveProperty('list')
   })
 
-  it('has create procedure', () => {
-    expect(belgeRouter._def.procedures).toHaveProperty('create')
+  it('has no create procedure (rows are created by POST /api/upload)', () => {
+    expect(belgeRouter._def.procedures).not.toHaveProperty('create')
   })
 
   it('has delete procedure', () => {

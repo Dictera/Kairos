@@ -149,10 +149,9 @@ Tarih formatı: `YYYY-MM-DD`
 |-----------|-----|-------|----------|
 | `list` | query | `{ dosya_id: number }` | Dosyaya ait belgeler |
 | `treeList` | query | — | Tüm belgeler + dosya/müvekkil/sigorta türü bilgisi (ağaç görünüm için) |
-| `create` | mutation | `{ dosya_id, dosya_no, kategori, dosya_adi, dosya_yolu, dosya_boyutu, mime_tur }` | Belge kaydı oluştur (upload sonrası çağrılır) |
 | `delete` | mutation | `{ id: number }` | Belge kaydı + disk dosyası sil |
 
-Dosya yüklemesi `POST /api/upload` REST endpoint'i üzerinden yapılır.
+Belge kaydı, dosyayla birlikte `POST /api/upload` REST endpoint'i üzerinden oluşturulur.
 
 ---
 
@@ -272,12 +271,11 @@ Arama alanları: dosya_no, müvekkil ad/soyad, hasar dosya no, plaka, TC/Vergi n
 ### `rapor`
 | Procedure | Tip | Açıklama |
 |-----------|-----|----------|
-| `yonetimOzeti` | query | Yönetim özeti: dosya sayıları, finans özeti, başarı oranı, zamanaşımı riskleri, şirket/tür analizi |
+| `yonetimOzeti` | query | Yönetim özeti: dosya sayıları, finans özeti, başarı oranı, şirket/tür analizi |
 | `genelBakis` | query | Aylık finans ve dosya trendi (gelen/giden/masraf/net + yeni dosya) |
 | `tahsilat` | query | Sigorta şirketi bazlı tahsilat analizi (talep/karar/tahsilat oranları, ödeme aşaması dağılımı) |
 | `sonucBasari` | query | Başarı oranı analizi: kazanılan/uzlaşma/kaybedilen/devam eden, tür ve şirket bazlı |
 | `arabuluculuk` | query | STK arabuluculuk analizi: arabuluculukta kalan vs davaya giden, çözülme oranları, ortalama süreler |
-| `zamanasimi` | query | Zamanaşımı risk raporu: tüm dosyaların kalan gün ve risk seviyesi (Acil ≤60, Kritik ≤180, Dikkat ≤365) |
 | `dosyaRaporu` | query | Dosya dağılım raporu: durum, tür ve alt tür (sigorta türü) bazlı sayılar ve tahsilat |
 | `muvekkilRaporu` | query | Müvekkil bazlı rapor: dosya sayısı, tahsilat/gider/masraf/net, tahsilat oranı, son aktivite |
 | `davaSureci` | query | Dava süreç analizi: aşama bazlı ortalama/min/max süreler, en uzun süren aktif dosyalar |
@@ -330,7 +328,7 @@ Oturum açar. Şifre `APP_PASSWORD` ortam değişkeniyle eşleşmelidir.
 
 ### `POST /api/upload`
 
-Dosyayı belirli bir dava dosyasına yükler. Session korumalı değildir — form-data üzerinden token/oturum beklenmez.
+Dosyayı belirli bir dava dosyasına yükler ve `belge` kaydını (etkinlik günlüğü satırıyla birlikte) aynı istekte oluşturur. Kayıt oluşturulamazsa yazılan dosya diskten silinir. Session korumalı.
 
 **Request:** `multipart/form-data`
 
@@ -338,13 +336,12 @@ Dosyayı belirli bir dava dosyasına yükler. Session korumalı değildir — fo
 |------|-----|----------|
 | `file` | File | Yüklenecek dosya |
 | `dosyaId` | string | Hedef dosya ID'si |
-| `dosyaNo` | string | Dosya numarası (klasör adı için) |
-| `kategori` | string | Belge kategorisi (opsiyonel; dosya adına eklenir) |
+| `kategori` | string | Belge kategorisi (zorunlu; `BELGE_KATEGORILER` değerlerinden biri, dosya adı olarak kullanılır) |
 
-**İzin verilen MIME tipleri:** `application/pdf`, `application/msword`, `application/vnd.openxmlformats-officedocument.wordprocessingml.document`, `image/jpeg`, `image/png`  
-**Maksimum boyut:** 20 MB
+**İzin verilen MIME tipleri:** `application/pdf`, `application/msword`, `application/vnd.openxmlformats-officedocument.wordprocessingml.document`, `image/jpeg`, `image/png` — dosya içeriği (imza baytları) bildirilen türle eşleşmelidir  
+**Maksimum boyut:** 10 MB (`Content-Length` daha büyükse gövde okunmadan `413`)
 
-**Response:** `{ filename, dosya_yolu, dosya_boyutu, mime_tur, dosya_adi }`
+**Response:** Oluşturulan `belge` satırı — `{ id, dosya_id, dosya_no, kategori, dosya_adi, dosya_yolu, dosya_boyutu, mime_tur, sablon_id, created_at }`
 
 ---
 
@@ -377,7 +374,7 @@ Portföy raporunu PDF olarak indir (`Content-Disposition: attachment`).
 
 ### `GET /api/raporlar/finans/pdf`
 
-Finansal raporu PDF olarak indir.
+Finansal raporu PDF olarak indir: tüm zamanların Gelen/Giden/Masraf toplamları, net bakiye ve son 30 gündeki (bugün dahil) işlem sayısı.
 
 ---
 

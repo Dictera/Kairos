@@ -1,7 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { db } from '@/lib/db'
-import { belge, dosya, muvekkil, sigortaTuru, BELGE_KATEGORILER } from '@/lib/schema'
+import { belge, dosya, muvekkil, sigortaTuru } from '@/lib/schema'
 import { logOlayTx } from './olay'
 import { eq, desc } from 'drizzle-orm'
 import { z } from 'zod'
@@ -9,7 +9,10 @@ import path from 'path'
 import { safeUnlinkArchive } from '@/lib/docx/archive'
 import { buildBelgelerDir, safeDeleteBelge } from '@/lib/belgeler-storage'
 
-const belgeKategoriEnum = z.enum(BELGE_KATEGORILER)
+// Rows are created by POST /api/upload (file and row in one request, so a
+// failed insert never orphans the file). Only paths of the exact shape it
+// writes are resolved to disk on delete.
+const API_FILE_PATH = /^\/api\/files\/(\d+)\/([^/\\]+)$/
 
 export const belgeRouter = createTRPCRouter({
   list: protectedProcedure
@@ -47,26 +50,6 @@ export const belgeRouter = createTRPCRouter({
       .orderBy(desc(belge.created_at))
   }),
 
-  create: protectedProcedure
-    .input(
-      z.object({
-        dosya_id: z.number().int(),
-        dosya_no: z.string(),
-        kategori: belgeKategoriEnum,
-        dosya_adi: z.string(),
-        dosya_yolu: z.string(),
-        dosya_boyutu: z.number().int(),
-        mime_tur: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      return db.transaction((tx) => {
-        const row = tx.insert(belge).values(input).returning().get()
-        logOlayTx(tx, input.dosya_id, 'belge_eklendi', `Belge eklendi: ${input.dosya_adi}`)
-        return row
-      })
-    }),
-
   delete: protectedProcedure
     .input(z.object({ id: z.number().int() }))
     .mutation(async ({ input }) => {
@@ -80,7 +63,7 @@ export const belgeRouter = createTRPCRouter({
       }
 
       const dosyaYolu = existing.dosya_yolu
-      const apiMatch = dosyaYolu?.match(/^\/api\/files\/(\d+)\/(.+)$/)
+      const apiMatch = dosyaYolu?.match(API_FILE_PATH)
 
       // Resolve filesystem target(s) BEFORE the transaction (this read is async).
       const fsTargets: string[] = []
