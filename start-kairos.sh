@@ -58,11 +58,13 @@ printf "\n  \033[36mKairos başlatılıyor... (bu terminali açık bırakın)\03
 printf "  Tarayıcı birkaç saniye içinde açılacaktır.\n\n"
 
 open_browser() {
-  local url="http://localhost:3000" i code
+  # Sunucu yalnızca 127.0.0.1 üzerinde dinler; yoklamayı IPv4 adrese yap
+  # (localhost bazı sistemlerde önce ::1'e çözülür).
+  local url="http://localhost:3000" probe="http://127.0.0.1:3000" i code
   # Sunucu HTTP 200 dönene kadar bekle (port açık != sayfa hazır), en fazla ~120sn
   for i in $(seq 1 120); do
     if command -v curl >/dev/null 2>&1; then
-      code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 2 "$url" 2>/dev/null || true)"
+      code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 2 "$probe" 2>/dev/null || true)"
       [ "$code" = "200" ] && break
     elif (exec 3<>/dev/tcp/127.0.0.1/3000) 2>/dev/null; then
       exec 3>&- 3<&-; break

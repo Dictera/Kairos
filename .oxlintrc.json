@@ -1,0 +1,47 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript",
+    "react",
+    "nextjs",
+    "jsx-a11y",
+    "import",
+    "unicorn",
+    "oxc"
+  ],
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2024": true
+  },
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+    "react/jsx-key": "error",
+    "nextjs/no-html-link-for-pages": "error",
+    "nextjs/no-img-element": "warn",
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-unused-vars": "warn",
+    "jsx-a11y/alt-text": "warn",
+    "jsx-a11y/aria-props": "warn",
+    "jsx-a11y/aria-proptypes": "warn",
+    "jsx-a11y/aria-unsupported-elements": "warn",
+    "jsx-a11y/role-has-required-aria-props": "warn",
+    "jsx-a11y/role-supports-aria-props": "warn",
+    "jsx-a11y/control-has-associated-label": "off",
+    "jsx-a11y/anchor-has-content": "off",
+    "jsx-a11y/click-events-have-key-events": "off",
+    "jsx-a11y/no-noninteractive-element-interactions": "off",
+    "jsx-a11y/no-autofocus": "off"
+  },
+  "ignorePatterns": [
+    ".claude/**",
+    ".opencode/**",
+    ".next/**",
+    "node_modules/**",
+    "next-env.d.ts"
+  ]
+}

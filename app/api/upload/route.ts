@@ -3,7 +3,7 @@ import { connection } from 'next/server'
 import { db } from '@/lib/db'
 import { dosya } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
-import { buildBelgelerDir, BELGELER_BASE } from '@/lib/belgeler-storage'
+import { buildBelgelerDir, BELGELER_BASE, isInsideDir, sanitizeFsSegment } from '@/lib/belgeler-storage'
 import { requireAuth } from '@/lib/auth-guard'
 import fs from 'fs'
 import path from 'path'
@@ -70,14 +70,17 @@ export async function POST(request: NextRequest) {
   })
 
   // Verify resolved dir stays within BELGELER_BASE
-  if (!path.resolve(uploadDir).startsWith(path.resolve(BELGELER_BASE))) {
+  if (!isInsideDir(BELGELER_BASE, uploadDir)) {
     return NextResponse.json({ error: 'Geçersiz dizin' }, { status: 400 })
   }
 
   fs.mkdirSync(uploadDir, { recursive: true })
 
   const timestamp = Date.now()
-  const ext = path.extname(file.name)
+  // file.name is client-controlled and may carry path segments ("../../x") —
+  // keep only the final segment and strip unsafe characters.
+  const originalName = sanitizeFsSegment(path.basename(file.name.replace(/\\/g, '/')))
+  const ext = path.extname(originalName)
 
   let filename: string
   let dosya_adi: string
@@ -87,12 +90,15 @@ export async function POST(request: NextRequest) {
     filename = `${timestamp}-${safeKategori}${ext}`
     dosya_adi = `${safeKategori}${ext}`
   } else {
-    const normalizedName = file.name.toLowerCase().replace(/\s+/g, '-')
+    const normalizedName = originalName.toLowerCase().replace(/\s+/g, '-')
     filename = `${timestamp}-${normalizedName}`
-    dosya_adi = file.name
+    dosya_adi = originalName
   }
 
   const filePath = path.join(uploadDir, filename)
+  if (!isInsideDir(uploadDir, filePath)) {
+    return NextResponse.json({ error: 'Geçersiz dosya adı' }, { status: 400 })
+  }
   const buffer = Buffer.from(await file.arrayBuffer())
   fs.writeFileSync(filePath, buffer)
 
