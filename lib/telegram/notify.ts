@@ -88,7 +88,7 @@ export function buildGroupedMessage({
       blocks.push(`<b>Bugünkü Süreler</b>\n` + bugunSureler.map(formatDailyRow).join('\n'))
   }
 
-  if (blocks.length === 0) return null  // D-15 + Pitfall 2: no empty message to Telegram
+  if (blocks.length === 0) return null // D-15 + Pitfall 2: no empty message to Telegram
 
   return blocks.join('\n\n')
 }
@@ -99,12 +99,12 @@ export async function sendPendingTelegramNotifications(): Promise<void> {
 
   // Read category toggles — use ?? true (NOT || true) to respect explicit false values (Pitfall 1)
   const durusmaAktif = (settings.telegram_gunluk_durusma_aktif as boolean | undefined) ?? true
-  const sureAktif    = (settings.telegram_gunluk_sure_aktif    as boolean | undefined) ?? true
+  const sureAktif = (settings.telegram_gunluk_sure_aktif as boolean | undefined) ?? true
 
   // Early return if both categories disabled — no DB query needed
   if (!durusmaAktif && !sureAktif) return
 
-  const today    = todayStr()
+  const today = todayStr()
   const tomorrow = tomorrowStr()
 
   let pending: (typeof bildirim.$inferSelect)[]
@@ -115,9 +115,9 @@ export async function sendPendingTelegramNotifications(): Promise<void> {
       .from(bildirim)
       .where(
         and(
-          isNull(bildirim.telegram_sent_at),          // only unsent rows
-          inArray(bildirim.tarih, [today, tomorrow])  // today + tomorrow window only
-        )
+          isNull(bildirim.telegram_sent_at), // only unsent rows
+          inArray(bildirim.tarih, [today, tomorrow]), // today + tomorrow window only
+        ),
       )
   } catch (err) {
     console.error('[telegram] DB query failed:', String(err))
@@ -126,10 +126,14 @@ export async function sendPendingTelegramNotifications(): Promise<void> {
 
   // Split pending into durusma/sure arrays (toggle gates applied)
   const durusmaRows = durusmaAktif ? pending.filter((r) => r.tip === 'durusma') : []
-  const sureRows    = sureAktif    ? pending.filter((r) => r.tip === 'sure')    : []
+  const sureRows = sureAktif ? pending.filter((r) => r.tip === 'sure') : []
 
   // Build single grouped message — returns null if all blocks empty (D-15, Pitfall 2)
-  const message = buildGroupedMessage({ durusmaRows, sureRows, toggles: { durusmaAktif, sureAktif } })
+  const message = buildGroupedMessage({
+    durusmaRows,
+    sureRows,
+    toggles: { durusmaAktif, sureAktif },
+  })
   if (message === null) return
 
   const sent = await sendTelegramMessage(message)

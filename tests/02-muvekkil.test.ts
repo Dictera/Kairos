@@ -87,13 +87,11 @@ describe('muvekkil create — input validation', () => {
   })
   it('rejects malformed telefon', async () => {
     await expect(
-      caller.create({ ad: 'Ahmet', soyad: 'Yılmaz', telefon: '5321234567' })
+      caller.create({ ad: 'Ahmet', soyad: 'Yılmaz', telefon: '5321234567' }),
     ).rejects.toThrow()
   })
   it('rejects malformed IBAN', async () => {
-    await expect(
-      caller.create({ ad: 'Ahmet', soyad: 'Yılmaz', iban: 'TR123' })
-    ).rejects.toThrow()
+    await expect(caller.create({ ad: 'Ahmet', soyad: 'Yılmaz', iban: 'TR123' })).rejects.toThrow()
   })
 })
 
@@ -102,8 +100,12 @@ describe('muvekkil router: CRUD behavior', () => {
   const dosya = createCallerFactory(dosyaRouter)({ session: mockSession, headers: new Headers() })
 
   beforeAll(() => {
-    globalThis.__testSqlite!.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS dosya_fts USING fts5(txt, tokenize='trigram')`)
-    globalThis.__testSqlite!.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS muvekkil_fts USING fts5(txt, tokenize='trigram')`)
+    globalThis.__testSqlite!.exec(
+      `CREATE VIRTUAL TABLE IF NOT EXISTS dosya_fts USING fts5(txt, tokenize='trigram')`,
+    )
+    globalThis.__testSqlite!.exec(
+      `CREATE VIRTUAL TABLE IF NOT EXISTS muvekkil_fts USING fts5(txt, tokenize='trigram')`,
+    )
   })
 
   it('create then getById round-trips the row', async () => {

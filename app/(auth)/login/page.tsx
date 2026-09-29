@@ -49,9 +49,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-[400px]">
         <CardHeader>
           <CardTitle>Kairos</CardTitle>
-          <CardDescription>
-            Avukat paneline erişmek için şifrenizi girin.
-          </CardDescription>
+          <CardDescription>Avukat paneline erişmek için şifrenizi girin.</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">

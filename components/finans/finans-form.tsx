@@ -8,12 +8,18 @@ import { Button } from '@/components/ui/button'
 import { DatePickerField } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 
 const ODEME_ASAMASI = ['İhtar', 'Arabulucu', 'Bilirkişi', 'İcra'] as const
-type OdemeAsamasiVal = typeof ODEME_ASAMASI[number]
+type OdemeAsamasiVal = (typeof ODEME_ASAMASI)[number]
 
 interface FinansFormProps {
   dosyaId: number
@@ -34,36 +40,46 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
   const [tutar, setTutar] = useState(initialData?.tutar?.toString() ?? '')
   const [tarih, setTarih] = useState(initialData?.tarih ?? format(new Date(), 'yyyy-MM-dd'))
   const [aciklama, setAciklama] = useState(initialData?.aciklama ?? '')
-  const [odemeAsamasi, setOdemeAsamasi] = useState<OdemeAsamasiVal | ''>(initialData?.odeme_asamasi ?? '')
-  
+  const [odemeAsamasi, setOdemeAsamasi] = useState<OdemeAsamasiVal | ''>(
+    initialData?.odeme_asamasi ?? '',
+  )
+
   const trpc = useTRPC()
   const queryClient = useQueryClient()
-  
+
   const createMutation = useMutation(
     trpc.finans.create.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.finans.list.queryKey({ dosya_id: dosyaId }) })
-        queryClient.invalidateQueries({ queryKey: trpc.finans.getSummary.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({
+          queryKey: trpc.finans.list.queryKey({ dosya_id: dosyaId }),
+        })
+        void queryClient.invalidateQueries({
+          queryKey: trpc.finans.getSummary.queryKey({ dosya_id: dosyaId }),
+        })
         toast.success('Finans kaydı eklendi')
         resetForm()
         onSuccess?.()
       },
-      onError: (err) => toast.error('Kayıt başarısız: ' + (err.message || 'Bilinmeyen hata'))
-    })
+      onError: (err) => toast.error('Kayıt başarısız: ' + (err.message || 'Bilinmeyen hata')),
+    }),
   )
-  
+
   const updateMutation = useMutation(
     trpc.finans.update.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.finans.list.queryKey({ dosya_id: dosyaId }) })
-        queryClient.invalidateQueries({ queryKey: trpc.finans.getSummary.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({
+          queryKey: trpc.finans.list.queryKey({ dosya_id: dosyaId }),
+        })
+        void queryClient.invalidateQueries({
+          queryKey: trpc.finans.getSummary.queryKey({ dosya_id: dosyaId }),
+        })
         toast.success('Finans kaydı güncellendi')
         onCancel?.()
       },
-      onError: (err) => toast.error('Güncelleme başarısız: ' + (err.message || 'Bilinmeyen hata'))
-    })
+      onError: (err) => toast.error('Güncelleme başarısız: ' + (err.message || 'Bilinmeyen hata')),
+    }),
   )
-  
+
   const resetForm = () => {
     setTur('')
     setTutar('')
@@ -71,15 +87,15 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
     setAciklama('')
     setOdemeAsamasi('')
   }
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!tur || !tutar || !tarih) {
       toast.error('Lütfen tüm zorunlu alanları doldurun')
       return
     }
-    
+
     const data = {
       dosya_id: dosyaId,
       tur: tur as 'Gelen' | 'Giden' | 'Masraf',
@@ -96,9 +112,9 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
       createMutation.mutate({ ...data, odeme_asamasi: odemeAsamasiValue })
     }
   }
-  
+
   const isPending = createMutation.isPending || updateMutation.isPending
-  
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Type selector */}
@@ -115,18 +131,23 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
           </SelectContent>
         </Select>
       </div>
-      
+
       {/* Payment stage (optional) */}
       <div className="space-y-2">
         <Label htmlFor="odeme-asamasi">Ödeme Aşaması (Opsiyonel)</Label>
-        <Select value={odemeAsamasi} onValueChange={(v) => setOdemeAsamasi(v === '__none__' ? '' : v as OdemeAsamasiVal)}>
+        <Select
+          value={odemeAsamasi}
+          onValueChange={(v) => setOdemeAsamasi(v === '__none__' ? '' : (v as OdemeAsamasiVal))}
+        >
           <SelectTrigger id="odeme-asamasi" className="w-[200px]">
             <SelectValue placeholder="Seçim yapma" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="__none__">— Seçim yapma —</SelectItem>
             {ODEME_ASAMASI.map((asama) => (
-              <SelectItem key={asama} value={asama}>{asama}</SelectItem>
+              <SelectItem key={asama} value={asama}>
+                {asama}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -146,7 +167,7 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
           className="w-[200px]"
         />
       </div>
-      
+
       {/* Date */}
       <div className="space-y-2">
         <Label htmlFor="tarih">Tarih *</Label>
@@ -158,7 +179,7 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
           />
         </div>
       </div>
-      
+
       {/* Description */}
       <div className="space-y-2">
         <Label htmlFor="aciklama">Açıklama</Label>
@@ -171,7 +192,7 @@ export function FinansForm({ dosyaId, onSuccess, editId, initialData, onCancel }
           className="max-w-[400px]"
         />
       </div>
-      
+
       {/* Actions */}
       <div className="flex gap-2">
         <Button type="submit" disabled={isPending}>

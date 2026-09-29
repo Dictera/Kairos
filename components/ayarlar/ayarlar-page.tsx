@@ -27,17 +27,17 @@ export function AyarlarPage() {
   const addMahkeme = useMutation(
     trpc.ayarlar.mahkeme.create.mutationOptions({
       onSuccess: () => qc.invalidateQueries({ queryKey: mahkemeOpts.queryKey }),
-    })
+    }),
   )
   const editMahkeme = useMutation(
     trpc.ayarlar.mahkeme.update.mutationOptions({
       onSuccess: () => qc.invalidateQueries({ queryKey: mahkemeOpts.queryKey }),
-    })
+    }),
   )
   const delMahkeme = useMutation(
     trpc.ayarlar.mahkeme.delete.mutationOptions({
       onSuccess: () => qc.invalidateQueries({ queryKey: mahkemeOpts.queryKey }),
-    })
+    }),
   )
 
   // Sigorta Türleri
@@ -46,17 +46,17 @@ export function AyarlarPage() {
   const addSigortaTuru = useMutation(
     trpc.ayarlar.sigortaTuru.create.mutationOptions({
       onSuccess: () => qc.invalidateQueries({ queryKey: sigortaTuruOpts.queryKey }),
-    })
+    }),
   )
   const editSigortaTuru = useMutation(
     trpc.ayarlar.sigortaTuru.update.mutationOptions({
       onSuccess: () => qc.invalidateQueries({ queryKey: sigortaTuruOpts.queryKey }),
-    })
+    }),
   )
   const delSigortaTuru = useMutation(
     trpc.ayarlar.sigortaTuru.delete.mutationOptions({
       onSuccess: () => qc.invalidateQueries({ queryKey: sigortaTuruOpts.queryKey }),
-    })
+    }),
   )
 
   // Takvim Export Goster
@@ -65,7 +65,7 @@ export function AyarlarPage() {
   const setExportGoster = useMutation(
     trpc.ayarlar.takvim.setExportGoster.mutationOptions({
       onSuccess: () => qc.invalidateQueries({ queryKey: exportGosterOpts.queryKey }),
-    })
+    }),
   )
 
   // Changelog
@@ -78,12 +78,12 @@ export function AyarlarPage() {
   const setBelgelerPath = useMutation(
     trpc.ayarlar.belgeler.setPath.mutationOptions({
       onSuccess: () => {
-        qc.invalidateQueries({ queryKey: belgelerOpts.queryKey })
+        void qc.invalidateQueries({ queryKey: belgelerOpts.queryKey })
         setEditingPath(false)
         toast.success('Klasör yolu güncellendi.')
       },
       onError: () => toast.error('Yol kaydedilemedi.'),
-    })
+    }),
   )
   const pickFolder = useMutation(
     trpc.ayarlar.belgeler.pickFolder.mutationOptions({
@@ -91,7 +91,7 @@ export function AyarlarPage() {
         if (data.path) setBelgelerPath.mutate({ path: data.path })
       },
       onError: () => toast.error('Klasör seçilemedi.'),
-    })
+    }),
   )
   const [belgelerPath, setBelgelerPathInput] = useState('')
   const [editingPath, setEditingPath] = useState(false)
@@ -130,9 +130,15 @@ export function AyarlarPage() {
           description="Dosyalarda kullanılacak mahkeme ve kurum listesi."
           items={mahkemeList}
           isLoading={mahkemeLoading}
-          onAdd={async (v) => { await addMahkeme.mutateAsync(v) }}
-          onEdit={async (id, v) => { await editMahkeme.mutateAsync({ id, ...v }) }}
-          onDelete={async (id) => { await delMahkeme.mutateAsync({ id }) }}
+          onAdd={async (v) => {
+            await addMahkeme.mutateAsync(v)
+          }}
+          onEdit={async (id, v) => {
+            await editMahkeme.mutateAsync({ id, ...v })
+          }}
+          onDelete={async (id) => {
+            await delMahkeme.mutateAsync({ id })
+          }}
           showSehir={true}
         />
       </TabsContent>
@@ -144,9 +150,15 @@ export function AyarlarPage() {
           description="Dosya oluştururken seçilebilecek sigorta türleri."
           items={sigortaTuruList}
           isLoading={sigortaTuruLoading}
-          onAdd={async (v) => { await addSigortaTuru.mutateAsync(v) }}
-          onEdit={async (id, v) => { await editSigortaTuru.mutateAsync({ id, ...v }) }}
-          onDelete={async (id) => { await delSigortaTuru.mutateAsync({ id }) }}
+          onAdd={async (v) => {
+            await addSigortaTuru.mutateAsync(v)
+          }}
+          onEdit={async (id, v) => {
+            await editSigortaTuru.mutateAsync({ id, ...v })
+          }}
+          onDelete={async (id) => {
+            await delSigortaTuru.mutateAsync({ id })
+          }}
         />
       </TabsContent>
 
@@ -219,16 +231,15 @@ export function AyarlarPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base font-semibold">Takvim</CardTitle>
-            <CardDescription>
-              Takvim sayfasındaki export ve abonelik butonları
-            </CardDescription>
+            <CardDescription>Takvim sayfasındaki export ve abonelik butonları</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
                 <Label className="font-medium">Export Butonlarını Göster</Label>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  Takvim sayfasında &quot;Takvimi İndir&quot; ve &quot;Abone Ol&quot; butonlarını göster/gizle
+                  Takvim sayfasında &quot;Takvimi İndir&quot; ve &quot;Abone Ol&quot; butonlarını
+                  göster/gizle
                 </p>
               </div>
               <Switch
@@ -244,9 +255,7 @@ export function AyarlarPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base font-semibold">Şifre Değiştirme</CardTitle>
-            <CardDescription>
-              Giriş şifresi yapılandırma dosyasında saklanır.
-            </CardDescription>
+            <CardDescription>Giriş şifresi yapılandırma dosyasında saklanır.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             <ol className="list-decimal list-inside space-y-2">
@@ -256,8 +265,10 @@ export function AyarlarPage() {
                 dosyasını Not Defteri ile açın.
               </li>
               <li>
-                <code className="bg-muted px-1 py-0.5 rounded text-xs font-mono">APP_PASSWORD=</code>
-                {' '}satırındaki değeri yeni şifrenizle değiştirin.
+                <code className="bg-muted px-1 py-0.5 rounded text-xs font-mono">
+                  APP_PASSWORD=
+                </code>{' '}
+                satırındaki değeri yeni şifrenizle değiştirin.
               </li>
               <li>Dosyayı kaydedin ve uygulamayı yeniden başlatın.</li>
             </ol>

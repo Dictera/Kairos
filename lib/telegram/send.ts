@@ -30,7 +30,7 @@ export async function sendTelegramMessage(text: string): Promise<boolean> {
       body: JSON.stringify({
         chat_id: chatId,
         text,
-        parse_mode: 'HTML',  // HTML is safer than MarkdownV2 for Turkish text (no escaping needed)
+        parse_mode: 'HTML', // HTML is safer than MarkdownV2 for Turkish text (no escaping needed)
       }),
     })
 

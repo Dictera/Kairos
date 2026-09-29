@@ -9,7 +9,13 @@ import { DatePickerField } from '@/components/ui/date-picker'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Table,
   TableBody,
@@ -46,32 +52,16 @@ function getTurLabel(t: string) {
 
 function getTurBadge(t: string) {
   if (t === 'STK') {
-    return (
-      <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-        {getTurLabel(t)}
-      </Badge>
-    )
+    return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">{getTurLabel(t)}</Badge>
   }
-  return (
-    <Badge className="bg-muted text-muted-foreground hover:bg-muted">
-      {getTurLabel(t)}
-    </Badge>
-  )
+  return <Badge className="bg-muted text-muted-foreground hover:bg-muted">{getTurLabel(t)}</Badge>
 }
 
 function getDurumBadge(d: string) {
   if (d === 'aktif') {
-    return (
-      <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-        Aktif
-      </Badge>
-    )
+    return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Aktif</Badge>
   }
-  return (
-    <Badge className="bg-muted text-muted-foreground hover:bg-muted">
-      Arşivlenmiş
-    </Badge>
-  )
+  return <Badge className="bg-muted text-muted-foreground hover:bg-muted">Arşivlenmiş</Badge>
 }
 
 export function DosyaList() {
@@ -94,21 +84,21 @@ export function DosyaList() {
   const archiveMutation = useMutation(
     trpc.dosya.archive.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya']] })
         toast.success('Dosya arşivlendi.')
       },
       onError: () => toast.error('Arşivlenemedi.'),
-    })
+    }),
   )
 
   const unarchiveMutation = useMutation(
     trpc.dosya.unarchive.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya']] })
         toast.success('Dosya aktifleştirildi.')
       },
       onError: () => toast.error('Aktifleştirilemedi.'),
-    })
+    }),
   )
 
   // 300ms debounce
@@ -140,7 +130,7 @@ export function DosyaList() {
       tarih_bitis: tarihBitis || undefined,
       page,
       pageSize: 25,
-    })
+    }),
   )
 
   const hasFilters = debouncedSearch || tur || durum || tarihBaslangic || tarihBitis
@@ -173,7 +163,9 @@ export function DosyaList() {
       {/* Toolbar Row 2: Filters */}
       <div className="flex flex-wrap items-end gap-3">
         <div className="space-y-1">
-          <label htmlFor="filter-tur" className="text-sm font-semibold text-muted-foreground">Tür</label>
+          <label htmlFor="filter-tur" className="text-sm font-semibold text-muted-foreground">
+            Tür
+          </label>
           <Select value={tur || 'all'} onValueChange={handleTurChange}>
             <SelectTrigger id="filter-tur" aria-label="Tür" className="w-[160px]">
               <SelectValue placeholder="Tümü" />
@@ -188,7 +180,9 @@ export function DosyaList() {
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="filter-durum" className="text-sm font-semibold text-muted-foreground">Durum</label>
+          <label htmlFor="filter-durum" className="text-sm font-semibold text-muted-foreground">
+            Durum
+          </label>
           <Select value={durum || 'all'} onValueChange={handleDurumChange}>
             <SelectTrigger id="filter-durum" aria-label="Durum" className="w-[160px]">
               <SelectValue placeholder="Tümü" />
@@ -202,23 +196,33 @@ export function DosyaList() {
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="filter-baslangic" className="text-sm font-semibold text-muted-foreground">Başlangıç</label>
+          <label htmlFor="filter-baslangic" className="text-sm font-semibold text-muted-foreground">
+            Başlangıç
+          </label>
           <DatePickerField
             id="filter-baslangic"
             aria-label="Başlangıç"
             value={tarihBaslangic}
-            onChange={(val) => { setTarihBaslangic(val || ''); setPage(1) }}
+            onChange={(val) => {
+              setTarihBaslangic(val || '')
+              setPage(1)
+            }}
             placeholder="Başlangıç tarihi"
           />
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="filter-bitis" className="text-sm font-semibold text-muted-foreground">Bitiş</label>
+          <label htmlFor="filter-bitis" className="text-sm font-semibold text-muted-foreground">
+            Bitiş
+          </label>
           <DatePickerField
             id="filter-bitis"
             aria-label="Bitiş"
             value={tarihBitis}
-            onChange={(val) => { setTarihBitis(val || ''); setPage(1) }}
+            onChange={(val) => {
+              setTarihBitis(val || '')
+              setPage(1)
+            }}
             placeholder="Bitiş tarihi"
           />
         </div>
@@ -261,7 +265,8 @@ export function DosyaList() {
                     <div className="space-y-1">
                       <p className="text-sm font-semibold">Henüz dosya oluşturulmadı</p>
                       <p className="text-sm text-muted-foreground">
-                        İlk dosyanızı oluşturmak için &quot;Yeni Dosya Oluştur&quot; düğmesine tıklayın.
+                        İlk dosyanızı oluşturmak için &quot;Yeni Dosya Oluştur&quot; düğmesine
+                        tıklayın.
                       </p>
                     </div>
                   )}
@@ -290,7 +295,10 @@ export function DosyaList() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
-                          <Link href={`/dosyalar/${row.id}/duzenle`} className="flex items-center gap-2">
+                          <Link
+                            href={`/dosyalar/${row.id}/duzenle`}
+                            className="flex items-center gap-2"
+                          >
                             <Pencil className="h-4 w-4" />
                             Düzenle
                           </Link>

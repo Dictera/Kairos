@@ -71,7 +71,8 @@ const editSchema = z.object({
   surucu_ad: z.string().max(200).optional().or(z.literal('')),
   surucu_soyad: z.string().max(200).optional().or(z.literal('')),
   surucu_plaka: z.string().max(10).optional().or(z.literal('')),
-  surucu_telefon: z.string()
+  surucu_telefon: z
+    .string()
     .regex(/^05[0-9]{9}$/, 'Geçersiz telefon formatı (05XXXXXXXXX gerekli)')
     .optional()
     .or(z.literal('')),
@@ -117,8 +118,8 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
   const { data: avukatList } = useQuery(
     trpc.ayarlar.avukat.bySirket.queryOptions(
       { sigorta_sirketi_id: selectedSirketId ?? 0 },
-      { enabled: !!selectedSirketId }
-    )
+      { enabled: !!selectedSirketId },
+    ),
   )
 
   const isMounted = useRef(false)
@@ -148,16 +149,16 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
   const upsertMutation = useMutation(
     trpc.dosya.upsertTaraf.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['dosya', 'getById', { id: dosyaId }] })
-        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
-        queryClient.invalidateQueries({ queryKey: ['dosya'] })
+        void queryClient.invalidateQueries({ queryKey: ['dosya', 'getById', { id: dosyaId }] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        void queryClient.invalidateQueries({ queryKey: ['dosya'] })
         toast.success('Kaydedildi.')
         setIsEditing(false)
       },
       onError: () => {
         toast.error('Kaydedilemedi. Lütfen tekrar deneyin.')
       },
-    })
+    }),
   )
 
   const onSubmit = (values: EditValues) => {
@@ -185,8 +186,11 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
       !taraf.surucu_police_no)
 
   const hasDriverInfo = !!(
-    taraf?.surucu_ad || taraf?.surucu_soyad ||
-    taraf?.surucu_plaka || taraf?.surucu_telefon || taraf?.surucu_police_no
+    taraf?.surucu_ad ||
+    taraf?.surucu_soyad ||
+    taraf?.surucu_plaka ||
+    taraf?.surucu_telefon ||
+    taraf?.surucu_police_no
   )
 
   if (isEditing) {
@@ -240,7 +244,11 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder={selectedSirketId ? 'Avukat seçin...' : 'Önce sigorta şirketi seçin'} />
+                            <SelectValue
+                              placeholder={
+                                selectedSirketId ? 'Avukat seçin...' : 'Önce sigorta şirketi seçin'
+                              }
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -270,7 +278,9 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Sürücü Adı</FormLabel>
-                        <FormControl><Input {...field} /></FormControl>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -281,7 +291,9 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Sürücü Soyadı</FormLabel>
-                        <FormControl><Input {...field} /></FormControl>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -292,7 +304,9 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Plaka</FormLabel>
-                        <FormControl><Input placeholder="34 ABC 123" {...field} /></FormControl>
+                        <FormControl>
+                          <Input placeholder="34 ABC 123" {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -303,7 +317,9 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Telefon</FormLabel>
-                        <FormControl><Input placeholder="05XXXXXXXXX" {...field} /></FormControl>
+                        <FormControl>
+                          <Input placeholder="05XXXXXXXXX" {...field} />
+                        </FormControl>
                         <p className="text-xs text-muted-foreground">Format: 05XXXXXXXXX</p>
                         <FormMessage />
                       </FormItem>
@@ -315,7 +331,9 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Poliçe No</FormLabel>
-                        <FormControl><Input placeholder="XXXXX" {...field} /></FormControl>
+                        <FormControl>
+                          <Input placeholder="XXXXX" {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -326,7 +344,9 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>TC / Vergi No</FormLabel>
-                        <FormControl><Input placeholder="TC veya Vergi No" {...field} /></FormControl>
+                        <FormControl>
+                          <Input placeholder="TC veya Vergi No" {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -378,7 +398,10 @@ export function KarsitaraflarTab({ dosyaId, taraf, karsitarafSirketAd }: Karsita
             <InfoRow label="Şirket Adı" value={taraf?.sigortaSirketi?.ad ?? karsitarafSirketAd} />
             <InfoRow label="Vergi No" value={taraf?.sigortaSirketi?.vergi_no} />
             <InfoRow label="Mersis No" value={taraf?.sigortaSirketi?.mersis_no} />
-            <InfoRow label="Bağlı Olduğu Vergi Dairesi" value={taraf?.sigortaSirketi?.bagli_oldugu_vergi_dairesi} />
+            <InfoRow
+              label="Bağlı Olduğu Vergi Dairesi"
+              value={taraf?.sigortaSirketi?.bagli_oldugu_vergi_dairesi}
+            />
             <InfoRow label="İhtar Mail" value={taraf?.sigortaSirketi?.ihtar_mail} />
             <InfoRow label="KEP Mail" value={taraf?.sigortaSirketi?.kep_mail} />
           </div>

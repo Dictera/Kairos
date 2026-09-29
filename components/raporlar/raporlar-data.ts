@@ -3,30 +3,50 @@
 // ── Locale ───────────────────────────────────────────────────────────────────
 
 const MONTHS_TR = [
-  'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-  'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
+  'Oca',
+  'Şub',
+  'Mar',
+  'Nis',
+  'May',
+  'Haz',
+  'Tem',
+  'Ağu',
+  'Eyl',
+  'Eki',
+  'Kas',
+  'Ara',
 ]
 
 const MONTHS_FULL = [
-  'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-  'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
+  'Ocak',
+  'Şubat',
+  'Mart',
+  'Nisan',
+  'Mayıs',
+  'Haziran',
+  'Temmuz',
+  'Ağustos',
+  'Eylül',
+  'Ekim',
+  'Kasım',
+  'Aralık',
 ]
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 
 export const C = {
-  gelen:    '#22c55e',
-  giden:    '#ef4444',
-  masraf:   '#f97316',
-  net:      '#1c768f',
-  kasa:     '#1c768f',
-  accent:   '#1c768f',
-  purple:   '#746cac',
-  amber:    '#f59e0b',
-  warning:  '#f97316',
-  danger:   '#ef4444',
-  success:  '#22c55e',
-  primary:  '#FA991C',
+  gelen: '#22c55e',
+  giden: '#ef4444',
+  masraf: '#f97316',
+  net: '#1c768f',
+  kasa: '#1c768f',
+  accent: '#1c768f',
+  purple: '#746cac',
+  amber: '#f59e0b',
+  warning: '#f97316',
+  danger: '#ef4444',
+  success: '#22c55e',
+  primary: '#FA991C',
 } as const
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -34,7 +54,7 @@ export const C = {
 export type YilFilter = 'all' | '2025' | '2026'
 
 export interface AyRow {
-  ay: string        // "YYYY-MM"
+  ay: string // "YYYY-MM"
   gelen: number
   giden: number
   masraf: number
@@ -158,7 +178,7 @@ export function enrichAy(rows: AyRow[]): EnrichedAyRow[] {
       ...r,
       net,
       kasa,
-      label:     `${MONTHS_TR[m - 1]}'${String(y).slice(2)}`,
+      label: `${MONTHS_TR[m - 1]}'${String(y).slice(2)}`,
       labelFull: `${MONTHS_FULL[m - 1]} ${y}`,
     }
   })
@@ -183,20 +203,20 @@ export const fmtK = (v: number): string =>
 export const fmtKN = (v: number): string => {
   const a = Math.abs(v)
   if (a >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`
-  if (a >= 1_000)     return `${(v / 1_000).toFixed(1)}k`
+  if (a >= 1_000) return `${(v / 1_000).toFixed(1)}k`
   return String(v)
 }
 
 export const riskColor: Record<ZamanasimıRisk, string> = {
-  Acil:    C.danger,
-  Kritik:  C.warning,
-  Dikkat:  C.amber,
+  Acil: C.danger,
+  Kritik: C.warning,
+  Dikkat: C.amber,
   Güvenli: C.success,
 }
 
 export const riskLabel: Record<ZamanasimıRisk, string> = {
-  Acil:    '60 günden az',
-  Kritik:  '60–180 gün',
-  Dikkat:  '180 gün – 1 yıl',
+  Acil: '60 günden az',
+  Kritik: '60–180 gün',
+  Dikkat: '180 gün – 1 yıl',
   Güvenli: '1 yıldan fazla',
 }

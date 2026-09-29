@@ -74,6 +74,7 @@ Proje kökünde bulunan yapılandırma dosyaları:
 | `tailwind.config.ts` | Tailwind CSS tema ve içerik ayarları |
 | `postcss.config.mjs` | PostCSS eklentileri |
 | `.oxlintrc.json` | oxlint kuralları |
+| `.oxfmtrc.json` | oxfmt biçimlendirme ayarları |
 
 ### Next.js Configuration (`next.config.ts`)
 

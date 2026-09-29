@@ -28,25 +28,26 @@ export function timeToCron(time: string): string {
 // ── Schedule cron tasks from settings ─────────────────────────────────────
 export function scheduleFromSettings(times?: string[]): void {
   const settings = readSettings()
-  const configuredTimes =
-    times ??
-    ((settings.telegram_bildirim_saatleri as string[] | undefined) ?? ['09:00', '15:00'])
+  const configuredTimes = times ??
+    (settings.telegram_bildirim_saatleri as string[] | undefined) ?? ['09:00', '15:00']
 
   const tasks = configuredTimes.flatMap((t) =>
     // TEL-07: reject invalid HH:MM
     cron.validate(timeToCron(t))
-      ? [cron.schedule(
-          timeToCron(t),
-          async () => {
-            await sendPendingTelegramNotifications()
-            await sendWeeklySureSummary()
-          },
-          {
-            timezone: 'Europe/Istanbul',  // A1: Turkey timezone (see RESEARCH.md Assumptions)
-            noOverlap: true,              // Skip run if previous is still in progress
-          }
-        )]
-      : []
+      ? [
+          cron.schedule(
+            timeToCron(t),
+            async () => {
+              await sendPendingTelegramNotifications()
+              await sendWeeklySureSummary()
+            },
+            {
+              timezone: 'Europe/Istanbul', // A1: Turkey timezone (see RESEARCH.md Assumptions)
+              noOverlap: true, // Skip run if previous is still in progress
+            },
+          ),
+        ]
+      : [],
   )
 
   globalThis.__telegramCronTasks = tasks

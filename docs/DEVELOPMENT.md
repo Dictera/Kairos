@@ -32,13 +32,15 @@ Gerekli ortam değişkenleri `.env.example` dosyasında listelenmiştir. Detayla
 
 ## Code Style
 
-Proje [oxlint](https://oxc.rs/docs/guide/usage/linter) kullanır; yapılandırma `.oxlintrc.json` dosyasındadır (TypeScript, React/hooks, Next.js ve jsx-a11y erişilebilirlik kuralları). Ayrı bir Prettier veya Biome yapılandırması yoktur. Lint CI'da her PR'da çalışır.
+Proje [oxlint](https://oxc.rs/docs/guide/usage/linter) kullanır; yapılandırma `.oxlintrc.json` dosyasındadır (TypeScript ve `oxlint-tsgolint` ile tip bilgili kurallar, React/hooks, Next.js ve jsx-a11y erişilebilirlik kuralları). Kod biçimlendirme [oxfmt](https://oxc.rs/docs/guide/usage/formatter) ile yapılır (`.oxfmtrc.json`). İkisi de CI'da her PR'da çalışır.
 
 ```bash
-pnpm run lint          # Tüm projeyi kontrol et
+pnpm run lint          # Tüm projeyi kontrol et (tip bilgili)
+pnpm run format        # Dosyaları biçimlendir
+pnpm run format:check  # Yalnızca biçim kontrolü (CI)
 ```
 
-CI'da `pnpm run lint` adımı bulunmamaktadır; lint kontrolü şimdilik yalnızca build (`next build`) sırasında Next.js tarafından yapılır. Manuel çalıştırma önerilir.
+Toplu biçimlendirme commit'i `.git-blame-ignore-revs` dosyasında listelenir; `git blame` için `git config blame.ignoreRevsFile .git-blame-ignore-revs` çalıştırın (GitHub bunu otomatik uygular).
 
 ## Branch Conventions
 

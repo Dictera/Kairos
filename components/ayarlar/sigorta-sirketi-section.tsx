@@ -9,7 +9,14 @@ import { useTRPC } from '@/lib/trpc/context'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Plus, Pencil, Trash2, ChevronDown } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardAction } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardAction,
+} from '@/components/ui/card'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -83,27 +90,39 @@ export function SigortaSirketiSection() {
 
   const createSirketi = useMutation(
     trpc.ayarlar.sigortaSirketi.create.mutationOptions({
-      onSuccess: () => { invalidate(); toast.success('Kaydedildi.') },
+      onSuccess: () => {
+        void invalidate()
+        toast.success('Kaydedildi.')
+      },
       onError: () => toast.error('Kaydedilemedi. Lütfen tekrar deneyin.'),
-    })
+    }),
   )
   const updateSirketi = useMutation(
     trpc.ayarlar.sigortaSirketi.update.mutationOptions({
-      onSuccess: () => { invalidate(); toast.success('Kaydedildi.') },
+      onSuccess: () => {
+        void invalidate()
+        toast.success('Kaydedildi.')
+      },
       onError: () => toast.error('Kaydedilemedi. Lütfen tekrar deneyin.'),
-    })
+    }),
   )
   const deleteSirketi = useMutation(
     trpc.ayarlar.sigortaSirketi.delete.mutationOptions({
-      onSuccess: () => { invalidate(); toast.success('Silindi.') },
+      onSuccess: () => {
+        void invalidate()
+        toast.success('Silindi.')
+      },
       onError: () => toast.error('Silinemedi.'),
-    })
+    }),
   )
   const removeAvukat = useMutation(
     trpc.ayarlar.avukat.removeSirket.mutationOptions({
-      onSuccess: () => { invalidate(); toast.success('Silindi.') },
+      onSuccess: () => {
+        void invalidate()
+        toast.success('Silindi.')
+      },
       onError: () => toast.error('Silinemedi.'),
-    })
+    }),
   )
 
   const [open, setOpen] = useState(true)
@@ -165,7 +184,7 @@ export function SigortaSirketiSection() {
     if (editingSirketi) {
       updateSirketi.mutate(
         { id: editingSirketi.id, ...values },
-        { onSuccess: () => setSirketiDialogOpen(false) }
+        { onSuccess: () => setSirketiDialogOpen(false) },
       )
     } else {
       createSirketi.mutate(values, { onSuccess: () => setSirketiDialogOpen(false) })
@@ -175,193 +194,198 @@ export function SigortaSirketiSection() {
   return (
     <>
       <Collapsible open={open} onOpenChange={setOpen}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-semibold">Sigorta Şirketleri</CardTitle>
-          <CardDescription>Karşı taraf sigorta şirketleri ve bağlı avukatlar.</CardDescription>
-          <CardAction>
-            <Button size="sm" onClick={openAddDialog}>
-              <Plus className="mr-1 h-4 w-4" />
-              Sigorta Şirketi Ekle
-            </Button>
-            <CollapsibleTrigger asChild>
-              <Button size="icon-sm" variant="ghost" className="h-8 w-8" aria-label="Aç/kapat">
-                <ChevronDown className={cn('h-4 w-4 transition-transform duration-200', open && 'rotate-180')} />
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold">Sigorta Şirketleri</CardTitle>
+            <CardDescription>Karşı taraf sigorta şirketleri ve bağlı avukatlar.</CardDescription>
+            <CardAction>
+              <Button size="sm" onClick={openAddDialog}>
+                <Plus className="mr-1 h-4 w-4" />
+                Sigorta Şirketi Ekle
               </Button>
-            </CollapsibleTrigger>
-          </CardAction>
-        </CardHeader>
-        <CollapsibleContent>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-9 w-full" />
-              <Skeleton className="h-9 w-full" />
-              <Skeleton className="h-9 w-full" />
-            </div>
-          ) : !list || list.length === 0 ? (
-            <p className="py-4 text-center text-sm text-muted-foreground">
-              Henüz kayıt eklenmedi.
-            </p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Ad</TableHead>
-                  <TableHead>Vergi No</TableHead>
-                  <TableHead>İhtar Mail</TableHead>
-                  <TableHead className="w-36 text-right">İşlemler</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {(list as ListItem[]).map((sirketi) => (
-                  <Fragment key={sirketi.id}>
+              <CollapsibleTrigger asChild>
+                <Button size="icon-sm" variant="ghost" className="h-8 w-8" aria-label="Aç/kapat">
+                  <ChevronDown
+                    className={cn(
+                      'h-4 w-4 transition-transform duration-200',
+                      open && 'rotate-180',
+                    )}
+                  />
+                </Button>
+              </CollapsibleTrigger>
+            </CardAction>
+          </CardHeader>
+          <CollapsibleContent>
+            <CardContent>
+              {isLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-9 w-full" />
+                  <Skeleton className="h-9 w-full" />
+                  <Skeleton className="h-9 w-full" />
+                </div>
+              ) : !list || list.length === 0 ? (
+                <p className="py-4 text-center text-sm text-muted-foreground">
+                  Henüz kayıt eklenmedi.
+                </p>
+              ) : (
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell>{sirketi.ad}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {sirketi.vergi_no || '—'}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {sirketi.ihtar_mail || '—'}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            className="h-9 w-9"
-                            aria-label={`${sirketi.ad} avukatları göster/gizle`}
-                            aria-expanded={expandedId === sirketi.id}
-                            onClick={() =>
-                              setExpandedId(expandedId === sirketi.id ? null : sirketi.id)
-                            }
-                          >
-                            <ChevronDown
-                              className={cn(
-                                'h-4 w-4 transition-transform duration-150',
-                                expandedId === sirketi.id && 'rotate-180'
-                              )}
-                            />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            className="h-9 w-9"
-                            aria-label={`${sirketi.ad} düzenle`}
-                            onClick={() => openEditDialog(sirketi)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            className="h-9 w-9 text-destructive hover:text-destructive"
-                            aria-label={`${sirketi.ad} sil`}
-                            onClick={() => setDeleteTarget(sirketi)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+                      <TableHead>Ad</TableHead>
+                      <TableHead>Vergi No</TableHead>
+                      <TableHead>İhtar Mail</TableHead>
+                      <TableHead className="w-36 text-right">İşlemler</TableHead>
                     </TableRow>
-
-                    {expandedId === sirketi.id && (
-                      <TableRow>
-                        <TableCell colSpan={4} className="bg-muted/30 p-0">
-                          <div className="ml-8 border-l-2 border-primary/20 pl-4 py-4">
-                            <div className="flex items-center justify-between mb-2">
-                              <h4 className="text-sm font-semibold">Avukatlar</h4>
+                  </TableHeader>
+                  <TableBody>
+                    {(list as ListItem[]).map((sirketi) => (
+                      <Fragment key={sirketi.id}>
+                        <TableRow>
+                          <TableCell>{sirketi.ad}</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {sirketi.vergi_no || '—'}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {sirketi.ihtar_mail || '—'}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
                               <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setAvukatDialogContext({
-                                    mode: 'create',
-                                    sirketiId: sirketi.id,
-                                  })
-                                  setAvukatDialogOpen(true)
-                                }}
+                                variant="ghost"
+                                size="icon-sm"
+                                className="h-9 w-9"
+                                aria-label={`${sirketi.ad} avukatları göster/gizle`}
+                                aria-expanded={expandedId === sirketi.id}
+                                onClick={() =>
+                                  setExpandedId(expandedId === sirketi.id ? null : sirketi.id)
+                                }
                               >
-                                <Plus className="mr-1 h-4 w-4" />
-                                Avukat Ekle
+                                <ChevronDown
+                                  className={cn(
+                                    'h-4 w-4 transition-transform duration-150',
+                                    expandedId === sirketi.id && 'rotate-180',
+                                  )}
+                                />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                className="h-9 w-9"
+                                aria-label={`${sirketi.ad} düzenle`}
+                                onClick={() => openEditDialog(sirketi)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                className="h-9 w-9 text-destructive hover:text-destructive"
+                                aria-label={`${sirketi.ad} sil`}
+                                onClick={() => setDeleteTarget(sirketi)}
+                              >
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
-                            {sirketi.avukatlar.length === 0 ? (
-                              <p className="py-3 text-center text-sm text-muted-foreground">
-                                Bu şirkete bağlı avukat bulunmuyor.
-                              </p>
-                            ) : (
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead>Ad</TableHead>
-                                    <TableHead>TBB Sicil No</TableHead>
-                                    <TableHead>Telefon</TableHead>
-                                    <TableHead className="w-24 text-right">İşlemler</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {sirketi.avukatlar.map((link) => (
-                                    <TableRow key={link.avukat.id}>
-                                      <TableCell>{link.avukat.ad}</TableCell>
-                                      <TableCell className="text-muted-foreground">
-                                        {link.avukat.tbb_sicil_no}
-                                      </TableCell>
-                                      <TableCell className="text-muted-foreground">
-                                        {link.avukat.telefon || '—'}
-                                      </TableCell>
-                                      <TableCell className="text-right">
-                                        <div className="flex justify-end gap-1">
-                                          <Button
-                                            variant="ghost"
-                                            size="icon-sm"
-                                            className="h-9 w-9"
-                                            aria-label={`${link.avukat.ad} düzenle`}
-                                            onClick={() => {
-                                              setAvukatDialogContext({
-                                                mode: 'edit',
-                                                sirketiId: sirketi.id,
-                                                avukat: link.avukat,
-                                              })
-                                              setAvukatDialogOpen(true)
-                                            }}
-                                          >
-                                            <Pencil className="h-4 w-4" />
-                                          </Button>
-                                          <Button
-                                            variant="ghost"
-                                            size="icon-sm"
-                                            className="h-9 w-9 text-destructive hover:text-destructive"
-                                            aria-label={`${link.avukat.ad} sil`}
-                                            onClick={() =>
-                                              setAvukatDeleteTarget({
-                                                avukatId: link.avukat.id,
-                                                sirketiId: sirketi.id,
-                                                avukatAd: link.avukat.ad,
-                                              })
-                                            }
-                                          >
-                                            <Trash2 className="h-4 w-4" />
-                                          </Button>
-                                        </div>
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </Fragment>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-        </CollapsibleContent>
-      </Card>
+                          </TableCell>
+                        </TableRow>
+
+                        {expandedId === sirketi.id && (
+                          <TableRow>
+                            <TableCell colSpan={4} className="bg-muted/30 p-0">
+                              <div className="ml-8 border-l-2 border-primary/20 pl-4 py-4">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h4 className="text-sm font-semibold">Avukatlar</h4>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      setAvukatDialogContext({
+                                        mode: 'create',
+                                        sirketiId: sirketi.id,
+                                      })
+                                      setAvukatDialogOpen(true)
+                                    }}
+                                  >
+                                    <Plus className="mr-1 h-4 w-4" />
+                                    Avukat Ekle
+                                  </Button>
+                                </div>
+                                {sirketi.avukatlar.length === 0 ? (
+                                  <p className="py-3 text-center text-sm text-muted-foreground">
+                                    Bu şirkete bağlı avukat bulunmuyor.
+                                  </p>
+                                ) : (
+                                  <Table>
+                                    <TableHeader>
+                                      <TableRow>
+                                        <TableHead>Ad</TableHead>
+                                        <TableHead>TBB Sicil No</TableHead>
+                                        <TableHead>Telefon</TableHead>
+                                        <TableHead className="w-24 text-right">İşlemler</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {sirketi.avukatlar.map((link) => (
+                                        <TableRow key={link.avukat.id}>
+                                          <TableCell>{link.avukat.ad}</TableCell>
+                                          <TableCell className="text-muted-foreground">
+                                            {link.avukat.tbb_sicil_no}
+                                          </TableCell>
+                                          <TableCell className="text-muted-foreground">
+                                            {link.avukat.telefon || '—'}
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            <div className="flex justify-end gap-1">
+                                              <Button
+                                                variant="ghost"
+                                                size="icon-sm"
+                                                className="h-9 w-9"
+                                                aria-label={`${link.avukat.ad} düzenle`}
+                                                onClick={() => {
+                                                  setAvukatDialogContext({
+                                                    mode: 'edit',
+                                                    sirketiId: sirketi.id,
+                                                    avukat: link.avukat,
+                                                  })
+                                                  setAvukatDialogOpen(true)
+                                                }}
+                                              >
+                                                <Pencil className="h-4 w-4" />
+                                              </Button>
+                                              <Button
+                                                variant="ghost"
+                                                size="icon-sm"
+                                                className="h-9 w-9 text-destructive hover:text-destructive"
+                                                aria-label={`${link.avukat.ad} sil`}
+                                                onClick={() =>
+                                                  setAvukatDeleteTarget({
+                                                    avukatId: link.avukat.id,
+                                                    sirketiId: sirketi.id,
+                                                    avukatAd: link.avukat.ad,
+                                                  })
+                                                }
+                                              >
+                                                <Trash2 className="h-4 w-4" />
+                                              </Button>
+                                            </div>
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </Fragment>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
       </Collapsible>
 
       {/* Sigorta Şirketi Add/Edit Dialog */}
@@ -379,7 +403,9 @@ export function SigortaSirketiSection() {
                 name="ad"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Ad <span className="text-destructive">*</span></FormLabel>
+                    <FormLabel>
+                      Ad <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input placeholder="Sigorta şirketi adı..." {...field} />
                     </FormControl>
@@ -392,7 +418,9 @@ export function SigortaSirketiSection() {
                 name="vergi_no"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Vergi No <span className="text-destructive">*</span></FormLabel>
+                    <FormLabel>
+                      Vergi No <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input placeholder="VKN (10 hane) veya TCKN (11 hane)" {...field} />
                     </FormControl>
@@ -461,10 +489,7 @@ export function SigortaSirketiSection() {
                 >
                   İptal
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={createSirketi.isPending || updateSirketi.isPending}
-                >
+                <Button type="submit" disabled={createSirketi.isPending || updateSirketi.isPending}>
                   Kaydet
                 </Button>
               </DialogFooter>
@@ -476,13 +501,16 @@ export function SigortaSirketiSection() {
       {/* Sigorta Şirketi Delete AlertDialog */}
       <AlertDialog
         open={deleteTarget !== null}
-        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null)
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Kaydı Sil</AlertDialogTitle>
             <AlertDialogDescription>
-              Bu sigorta şirketini silmek istediğinize emin misiniz? Bağlı avukatlar listeden kaldırılacaktır.
+              Bu sigorta şirketini silmek istediğinize emin misiniz? Bağlı avukatlar listeden
+              kaldırılacaktır.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -505,13 +533,16 @@ export function SigortaSirketiSection() {
       {/* Avukat Delete AlertDialog */}
       <AlertDialog
         open={avukatDeleteTarget !== null}
-        onOpenChange={(open) => { if (!open) setAvukatDeleteTarget(null) }}
+        onOpenChange={(open) => {
+          if (!open) setAvukatDeleteTarget(null)
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Avukatı Kaldır</AlertDialogTitle>
             <AlertDialogDescription>
-              {avukatDeleteTarget?.avukatAd} adlı avukatı bu şirketten kaldırmak istediğinize emin misiniz?
+              {avukatDeleteTarget?.avukatAd} adlı avukatı bu şirketten kaldırmak istediğinize emin
+              misiniz?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

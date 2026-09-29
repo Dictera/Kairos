@@ -2,15 +2,21 @@ import { createTRPCRouter, protectedProcedure } from '@/lib/trpc/init'
 import { TRPCError } from '@trpc/server'
 import { db } from '@/lib/db'
 import {
-  dosya, durusma,
-  STK_ASAMALAR, MAHKEME_ASAMALAR, STK_ASAMA_LABELS, MAHKEME_ASAMA_LABELS,
-  parseSurecDetay, serializeSurecDetay,
-  type SurecDetay, type StkSurecData, type MahkemeSurecData,
+  dosya,
+  durusma,
+  STK_ASAMALAR,
+  MAHKEME_ASAMALAR,
+  STK_ASAMA_LABELS,
+  MAHKEME_ASAMA_LABELS,
+  parseSurecDetay,
+  serializeSurecDetay,
+  type SurecDetay,
+  type StkSurecData,
+  type MahkemeSurecData,
 } from '@/lib/schema'
 import { eq, asc, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { logOlayTx } from './olay'
-
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -136,8 +142,11 @@ export const surecRouter = createTRPCRouter({
     .input(z.object({ dosya_id: z.number().int(), data: stkDataSchema }))
     .mutation(async ({ input }) => {
       return db.transaction((tx) => {
-        const row = tx.select({ surec_detay: dosya.surec_detay })
-          .from(dosya).where(eq(dosya.id, input.dosya_id)).get()
+        const row = tx
+          .select({ surec_detay: dosya.surec_detay })
+          .from(dosya)
+          .where(eq(dosya.id, input.dosya_id))
+          .get()
         if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
 
         const surec = parseSurecDetay(row.surec_detay)
@@ -162,8 +171,11 @@ export const surecRouter = createTRPCRouter({
     .input(z.object({ dosya_id: z.number().int() }))
     .mutation(async ({ input }) => {
       return db.transaction((tx) => {
-        const row = tx.select({ surec_detay: dosya.surec_detay })
-          .from(dosya).where(eq(dosya.id, input.dosya_id)).get()
+        const row = tx
+          .select({ surec_detay: dosya.surec_detay })
+          .from(dosya)
+          .where(eq(dosya.id, input.dosya_id))
+          .get()
         if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
 
         const surec = parseSurecDetay(row.surec_detay)
@@ -179,7 +191,12 @@ export const surecRouter = createTRPCRouter({
           .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
           .where(eq(dosya.id, input.dosya_id))
           .run()
-        logOlayTx(tx, input.dosya_id, 'surec_asama', `STK aşaması ilerletildi: ${STK_ASAMA_LABELS[next]}`)
+        logOlayTx(
+          tx,
+          input.dosya_id,
+          'surec_asama',
+          `STK aşaması ilerletildi: ${STK_ASAMA_LABELS[next]}`,
+        )
         return { asama: next }
       })
     }),
@@ -189,15 +206,20 @@ export const surecRouter = createTRPCRouter({
     .input(z.object({ dosya_id: z.number().int() }))
     .mutation(async ({ input }) => {
       return db.transaction((tx) => {
-        const row = tx.select({ surec_detay: dosya.surec_detay })
-          .from(dosya).where(eq(dosya.id, input.dosya_id)).get()
+        const row = tx
+          .select({ surec_detay: dosya.surec_detay })
+          .from(dosya)
+          .where(eq(dosya.id, input.dosya_id))
+          .get()
         if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
 
         const surec = parseSurecDetay(row.surec_detay)
         const currentAsama = surec.stk?.asama ?? null
-        if (!currentAsama) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Geri alınacak aşama yok.' })
+        if (!currentAsama)
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Geri alınacak aşama yok.' })
         const prev = prevAsama(STK_ASAMALAR, currentAsama)
-        if (!prev) throw new TRPCError({ code: 'BAD_REQUEST', message: 'İlk aşamaya geri dönülemez.' })
+        if (!prev)
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'İlk aşamaya geri dönülemez.' })
 
         const updated: SurecDetay = {
           ...surec,
@@ -207,7 +229,12 @@ export const surecRouter = createTRPCRouter({
           .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
           .where(eq(dosya.id, input.dosya_id))
           .run()
-        logOlayTx(tx, input.dosya_id, 'surec_asama', `STK aşaması geri alındı: ${STK_ASAMA_LABELS[prev]}`)
+        logOlayTx(
+          tx,
+          input.dosya_id,
+          'surec_asama',
+          `STK aşaması geri alındı: ${STK_ASAMA_LABELS[prev]}`,
+        )
         return { asama: prev }
       })
     }),
@@ -217,8 +244,11 @@ export const surecRouter = createTRPCRouter({
     .input(z.object({ dosya_id: z.number().int(), data: mahkemeDataSchema }))
     .mutation(async ({ input }) => {
       return db.transaction((tx) => {
-        const row = tx.select({ surec_detay: dosya.surec_detay })
-          .from(dosya).where(eq(dosya.id, input.dosya_id)).get()
+        const row = tx
+          .select({ surec_detay: dosya.surec_detay })
+          .from(dosya)
+          .where(eq(dosya.id, input.dosya_id))
+          .get()
         if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
 
         const surec = parseSurecDetay(row.surec_detay)
@@ -243,8 +273,11 @@ export const surecRouter = createTRPCRouter({
     .input(z.object({ dosya_id: z.number().int() }))
     .mutation(async ({ input }) => {
       return db.transaction((tx) => {
-        const row = tx.select({ surec_detay: dosya.surec_detay })
-          .from(dosya).where(eq(dosya.id, input.dosya_id)).get()
+        const row = tx
+          .select({ surec_detay: dosya.surec_detay })
+          .from(dosya)
+          .where(eq(dosya.id, input.dosya_id))
+          .get()
         if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
 
         const surec = parseSurecDetay(row.surec_detay)
@@ -260,7 +293,12 @@ export const surecRouter = createTRPCRouter({
           .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
           .where(eq(dosya.id, input.dosya_id))
           .run()
-        logOlayTx(tx, input.dosya_id, 'surec_asama', `Mahkeme aşaması ilerletildi: ${MAHKEME_ASAMA_LABELS[next]}`)
+        logOlayTx(
+          tx,
+          input.dosya_id,
+          'surec_asama',
+          `Mahkeme aşaması ilerletildi: ${MAHKEME_ASAMA_LABELS[next]}`,
+        )
         return { asama: next }
       })
     }),
@@ -270,15 +308,20 @@ export const surecRouter = createTRPCRouter({
     .input(z.object({ dosya_id: z.number().int() }))
     .mutation(async ({ input }) => {
       return db.transaction((tx) => {
-        const row = tx.select({ surec_detay: dosya.surec_detay })
-          .from(dosya).where(eq(dosya.id, input.dosya_id)).get()
+        const row = tx
+          .select({ surec_detay: dosya.surec_detay })
+          .from(dosya)
+          .where(eq(dosya.id, input.dosya_id))
+          .get()
         if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
 
         const surec = parseSurecDetay(row.surec_detay)
         const currentAsama = surec.mahkeme?.asama ?? null
-        if (!currentAsama) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Geri alınacak aşama yok.' })
+        if (!currentAsama)
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Geri alınacak aşama yok.' })
         const prev = prevAsama(MAHKEME_ASAMALAR, currentAsama)
-        if (!prev) throw new TRPCError({ code: 'BAD_REQUEST', message: 'İlk aşamaya geri dönülemez.' })
+        if (!prev)
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'İlk aşamaya geri dönülemez.' })
 
         const updated: SurecDetay = {
           ...surec,
@@ -288,7 +331,12 @@ export const surecRouter = createTRPCRouter({
           .set({ surec_detay: serializeSurecDetay(updated), updated_at: sql`(datetime('now'))` })
           .where(eq(dosya.id, input.dosya_id))
           .run()
-        logOlayTx(tx, input.dosya_id, 'surec_asama', `Mahkeme aşaması geri alındı: ${MAHKEME_ASAMA_LABELS[prev]}`)
+        logOlayTx(
+          tx,
+          input.dosya_id,
+          'surec_asama',
+          `Mahkeme aşaması geri alındı: ${MAHKEME_ASAMA_LABELS[prev]}`,
+        )
         return { asama: prev }
       })
     }),
@@ -298,12 +346,16 @@ export const surecRouter = createTRPCRouter({
     .input(z.object({ dosya_id: z.number().int() }))
     .mutation(async ({ input }) => {
       return db.transaction((tx) => {
-        const row = tx.select({ surec_detay: dosya.surec_detay })
-          .from(dosya).where(eq(dosya.id, input.dosya_id)).get()
+        const row = tx
+          .select({ surec_detay: dosya.surec_detay })
+          .from(dosya)
+          .where(eq(dosya.id, input.dosya_id))
+          .get()
         if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Dosya bulunamadı.' })
 
         const surec = parseSurecDetay(row.surec_detay)
-        if (surec.mahkeme) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Mahkeme süreci zaten başlatılmış.' })
+        if (surec.mahkeme)
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Mahkeme süreci zaten başlatılmış.' })
 
         const updated: SurecDetay = {
           ...surec,
@@ -321,26 +373,24 @@ export const surecRouter = createTRPCRouter({
   durusmaList: protectedProcedure
     .input(z.object({ dosya_id: z.number().int() }))
     .query(async ({ input }) => {
-      return db.select().from(durusma)
+      return db
+        .select()
+        .from(durusma)
         .where(eq(durusma.dosya_id, input.dosya_id))
         .orderBy(asc(durusma.tarih))
     }),
 
-  durusmaCreate: protectedProcedure
-    .input(durusmaCreateSchema)
-    .mutation(async ({ input }) => {
-      const [row] = await db.insert(durusma).values(input).returning()
-      return row
-    }),
+  durusmaCreate: protectedProcedure.input(durusmaCreateSchema).mutation(async ({ input }) => {
+    const [row] = await db.insert(durusma).values(input).returning()
+    return row
+  }),
 
-  durusmaUpdate: protectedProcedure
-    .input(durusmaUpdateSchema)
-    .mutation(async ({ input }) => {
-      const { id, ...data } = input
-      const [row] = await db.update(durusma).set(data).where(eq(durusma.id, id)).returning()
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Duruşma bulunamadı.' })
-      return row
-    }),
+  durusmaUpdate: protectedProcedure.input(durusmaUpdateSchema).mutation(async ({ input }) => {
+    const { id, ...data } = input
+    const [row] = await db.update(durusma).set(data).where(eq(durusma.id, id)).returning()
+    if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Duruşma bulunamadı.' })
+    return row
+  }),
 
   durusmaDelete: protectedProcedure
     .input(z.object({ id: z.number().int() }))

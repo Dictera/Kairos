@@ -12,11 +12,9 @@ interface FinansSummaryProps {
 
 export function FinansSummary({ dosyaId }: FinansSummaryProps) {
   const trpc = useTRPC()
-  
-  const { data, isLoading } = useQuery(
-    trpc.finans.getSummary.queryOptions({ dosya_id: dosyaId })
-  )
-  
+
+  const { data, isLoading } = useQuery(trpc.finans.getSummary.queryOptions({ dosya_id: dosyaId }))
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -26,11 +24,11 @@ export function FinansSummary({ dosyaId }: FinansSummaryProps) {
       </div>
     )
   }
-  
+
   if (!data) return null
-  
+
   const { gelen, giden, masraf, net } = data
-  
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {/* Gelen - green */}
@@ -47,7 +45,7 @@ export function FinansSummary({ dosyaId }: FinansSummaryProps) {
           </p>
         </CardContent>
       </Card>
-      
+
       {/* Giden - red */}
       <Card className="border-l-4 border-l-red-500">
         <CardHeader className="pb-2">
@@ -62,7 +60,7 @@ export function FinansSummary({ dosyaId }: FinansSummaryProps) {
           </p>
         </CardContent>
       </Card>
-      
+
       {/* Masraf - orange */}
       <Card className="border-l-4 border-l-orange-500">
         <CardHeader className="pb-2">
@@ -77,7 +75,7 @@ export function FinansSummary({ dosyaId }: FinansSummaryProps) {
           </p>
         </CardContent>
       </Card>
-      
+
       {/* Net balance - color based on positive/negative */}
       <Card className={`border-l-4 ${net >= 0 ? 'border-l-blue-500' : 'border-l-gray-500'}`}>
         <CardHeader className="pb-2">

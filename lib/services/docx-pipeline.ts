@@ -13,13 +13,13 @@ export interface SidecarResult extends CommandResult {
  */
 export async function runSidecarCommand(
   envelope: CommandEnvelope,
-  timeout?: number
+  timeout?: number,
 ): Promise<SidecarResult> {
   const pythonPath = await getSidecarPythonPath()
 
   if (!pythonPath) {
     throw new Error(
-      'Python bulunamadı. PYTHON_PATH ortam değişkenini ayarlayın veya Python\'u PATH\'e ekleyin.'
+      "Python bulunamadı. PYTHON_PATH ortam değişkenini ayarlayın veya Python'u PATH'e ekleyin.",
     )
   }
 

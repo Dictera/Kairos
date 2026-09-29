@@ -9,15 +9,7 @@ type StatCardsProps = {
   buAyDelta?: number
 }
 
-function StatCard({
-  label,
-  value,
-  delta,
-}: {
-  label: string
-  value: number
-  delta?: number
-}) {
+function StatCard({ label, value, delta }: { label: string; value: number; delta?: number }) {
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -30,11 +22,7 @@ function StatCard({
         {delta !== undefined && (
           <p className="text-xs text-muted-foreground">
             <span
-              className={
-                delta >= 0
-                  ? 'text-green-600 font-medium'
-                  : 'text-destructive font-medium'
-              }
+              className={delta >= 0 ? 'text-green-600 font-medium' : 'text-destructive font-medium'}
             >
               {delta >= 0 ? '+' : ''}
               {delta}
@@ -58,8 +46,8 @@ export function StatCards({
   return (
     <div className="grid grid-cols-3 gap-4">
       <StatCard label="Toplam Dosya" value={totalDosya} delta={totalDelta} />
-      <StatCard label="Aktif Dosya"  value={aktivDosya}  delta={aktivDelta} />
-      <StatCard label="Bu Ay Açılan" value={buAyAcilan}  delta={buAyDelta} />
+      <StatCard label="Aktif Dosya" value={aktivDosya} delta={aktivDelta} />
+      <StatCard label="Bu Ay Açılan" value={buAyAcilan} delta={buAyDelta} />
     </div>
   )
 }

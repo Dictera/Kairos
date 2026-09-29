@@ -26,7 +26,7 @@ export function RetirementModal() {
   const { data: checkLegacy } = useQuery(
     trpc.retirement.checkLegacyTables.queryOptions(undefined, {
       enabled: !alreadyDone && typeof window !== 'undefined',
-    })
+    }),
   )
 
   const executeRetirement = useMutation(
@@ -41,7 +41,7 @@ export function RetirementModal() {
       onError: (error) => {
         toast.error('Temizlik işlemi başarısız oldu: ' + error.message)
       },
-    })
+    }),
   )
 
   // No legacy tables → nothing to clean; persist the flag so we stop checking.
@@ -58,7 +58,12 @@ export function RetirementModal() {
   }
 
   return (
-    <AlertDialog open={showModal} onOpenChange={(open) => { if (!open) setDismissed(true) }}>
+    <AlertDialog
+      open={showModal}
+      onOpenChange={(open) => {
+        if (!open) setDismissed(true)
+      }}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Eski Sistemleri Temizle</AlertDialogTitle>

@@ -47,9 +47,7 @@ export function NotList({ dosyaId }: NotListProps) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  const { data: notes, isLoading } = useQuery(
-    trpc.notlar.list.queryOptions({ dosya_id: dosyaId })
-  )
+  const { data: notes, isLoading } = useQuery(trpc.notlar.list.queryOptions({ dosya_id: dosyaId }))
 
   const [editingId, setEditingId] = useState<number | null>(null)
   const [deleteId, setDeleteId] = useState<number | null>(null)
@@ -57,27 +55,31 @@ export function NotList({ dosyaId }: NotListProps) {
   const updateMutation = useMutation(
     trpc.notlar.update.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.notlar.list.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({
+          queryKey: trpc.notlar.list.queryKey({ dosya_id: dosyaId }),
+        })
         toast.success('Not güncellendi.')
         setEditingId(null)
       },
       onError: () => {
         toast.error('Not kaydedilemedi. Lütfen tekrar deneyin.')
       },
-    })
+    }),
   )
 
   const deleteMutation = useMutation(
     trpc.notlar.delete.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.notlar.list.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({
+          queryKey: trpc.notlar.list.queryKey({ dosya_id: dosyaId }),
+        })
         toast.success('Not silindi.')
         setDeleteId(null)
       },
       onError: () => {
         toast.error('Not silinemedi. Lütfen tekrar deneyin.')
       },
-    })
+    }),
   )
 
   if (isLoading) {
@@ -206,11 +208,7 @@ function EditForm({
       })}
       className="space-y-3"
     >
-      <Textarea
-        {...form.register('icerik')}
-        rows={3}
-        className="whitespace-pre-wrap"
-      />
+      <Textarea {...form.register('icerik')} rows={3} className="whitespace-pre-wrap" />
       <div className="flex gap-2">
         <Button type="submit" size="sm" disabled={isPending}>
           {isPending ? 'Kaydediliyor...' : 'Notu Kaydet'}

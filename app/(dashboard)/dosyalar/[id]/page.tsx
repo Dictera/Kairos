@@ -11,11 +11,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 
-export default function DosyaDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default function DosyaDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   return (
     <div className="p-6 space-y-6">

@@ -58,12 +58,7 @@ type DurusmaDialogProps = {
   onOpenChange: (open: boolean) => void
 }
 
-export function DurusmaDialog({
-  dosyaId,
-  durusma,
-  open,
-  onOpenChange,
-}: DurusmaDialogProps) {
+export function DurusmaDialog({ dosyaId, durusma, open, onOpenChange }: DurusmaDialogProps) {
   const trpc = useTRPC()
 
   const { data: mahkemeList = [] } = useQuery(trpc.ayarlar.mahkeme.list.queryOptions())
@@ -117,7 +112,7 @@ export function DurusmaDialog({
       onError: () => {
         toast.error('İşlem sırasında hata oluştu. Tekrar deneyin.')
       },
-    })
+    }),
   )
 
   const updateMutation = useMutation(
@@ -129,7 +124,7 @@ export function DurusmaDialog({
       onError: () => {
         toast.error('İşlem sırasında hata oluştu. Tekrar deneyin.')
       },
-    })
+    }),
   )
 
   const onSubmit = (values: DurusmaFormValues) => {
@@ -268,11 +263,7 @@ export function DurusmaDialog({
             />
 
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Vazgeç
               </Button>
               <Button type="submit" variant="default" disabled={isPending}>

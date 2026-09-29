@@ -8,7 +8,17 @@ import { tr } from 'date-fns/locale'
 import { ArrowDownCircle, ArrowUpCircle, Receipt, Pencil, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FinansForm } from './finans-form'
 import { toast } from 'sonner'
@@ -35,22 +45,26 @@ export function FinansEntryList({ dosyaId }: FinansEntryListProps) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const [editId, setEditId] = useState<number | null>(null)
-  
+
   const { data: entries, isLoading } = useQuery(
-    trpc.finans.list.queryOptions({ dosya_id: dosyaId })
+    trpc.finans.list.queryOptions({ dosya_id: dosyaId }),
   )
-  
+
   const deleteMutation = useMutation(
     trpc.finans.delete.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.finans.list.queryKey({ dosya_id: dosyaId }) })
-        queryClient.invalidateQueries({ queryKey: trpc.finans.getSummary.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({
+          queryKey: trpc.finans.list.queryKey({ dosya_id: dosyaId }),
+        })
+        void queryClient.invalidateQueries({
+          queryKey: trpc.finans.getSummary.queryKey({ dosya_id: dosyaId }),
+        })
         toast.success('Finans kaydı silindi')
       },
-      onError: (err) => toast.error('Silme başarısız: ' + (err.message || 'Bilinmeyen hata'))
-    })
+      onError: (err) => toast.error('Silme başarısız: ' + (err.message || 'Bilinmeyen hata')),
+    }),
   )
-  
+
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -60,7 +74,7 @@ export function FinansEntryList({ dosyaId }: FinansEntryListProps) {
       </div>
     )
   }
-  
+
   if (!entries || entries.length === 0) {
     return (
       <div className="text-center py-6 text-muted-foreground">
@@ -68,18 +82,18 @@ export function FinansEntryList({ dosyaId }: FinansEntryListProps) {
       </div>
     )
   }
-  
+
   const sortedEntries = entries.toSorted((a, b) => {
     return parseISO(b.tarih).getTime() - parseISO(a.tarih).getTime()
   })
-  
+
   return (
     <div className="space-y-2">
       {sortedEntries.map((entry) => {
         const Icon = typeIcons[entry.tur as keyof typeof typeIcons] || Receipt
         const colorClass = typeColors[entry.tur as keyof typeof typeColors] || 'text-gray-600'
         const isEditing = editId === entry.id
-        
+
         return (
           <div
             key={entry.id}
@@ -95,7 +109,12 @@ export function FinansEntryList({ dosyaId }: FinansEntryListProps) {
                     tutar: entry.tutar,
                     tarih: entry.tarih,
                     aciklama: entry.aciklama ?? undefined,
-                    odeme_asamasi: entry.odeme_asamasi as 'İhtar' | 'Arabulucu' | 'Bilirkişi' | 'İcra' | null,
+                    odeme_asamasi: entry.odeme_asamasi as
+                      | 'İhtar'
+                      | 'Arabulucu'
+                      | 'Bilirkişi'
+                      | 'İcra'
+                      | null,
                   }}
                   onCancel={() => setEditId(null)}
                 />
@@ -112,25 +131,23 @@ export function FinansEntryList({ dosyaId }: FinansEntryListProps) {
                       {format(new Date(entry.tarih), 'dd MMM yyyy', { locale: tr })}
                       {entry.aciklama && ` • ${entry.aciklama}`}
                       {entry.odeme_asamasi && (
-                        <Badge variant="outline" className="ml-1 text-xs">{entry.odeme_asamasi}</Badge>
+                        <Badge variant="outline" className="ml-1 text-xs">
+                          {entry.odeme_asamasi}
+                        </Badge>
                       )}
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                   <span className={`font-semibold ${colorClass}`}>
                     {entry.tutar.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
                   </span>
-                  
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setEditId(entry.id)}
-                  >
+
+                  <Button variant="ghost" size="icon" onClick={() => setEditId(entry.id)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  
+
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="icon" className="text-destructive">

@@ -6,7 +6,9 @@ const SECTION_PATH = 'components/ayarlar/sablon-yonetimi-section.tsx'
 describe('Şablon Yönetimi section: copy + structure (SABLON-02, SABLON-04)', () => {
   const src = readFileSync(SECTION_PATH, 'utf-8')
 
-  it('uses client directive', () => { expect(src.startsWith("'use client'")).toBe(true) })
+  it('uses client directive', () => {
+    expect(src.startsWith("'use client'")).toBe(true)
+  })
   it('renders required Turkish copy strings (UI-SPEC contract)', () => {
     expect(src).toContain('Şablon Yönetimi')
     expect(src).toContain('Şablon Yükle')
@@ -33,7 +35,9 @@ describe('Şablon Yönetimi section: copy + structure (SABLON-02, SABLON-04)', (
 describe('Şablon Yönetimi page mount (SABLON-04)', () => {
   const sablonPage = readFileSync('app/(dashboard)/sablon-yonetimi/page.tsx', 'utf-8')
   it('imports SablonYonetimiSection', () => {
-    expect(sablonPage).toMatch(/import\s+SablonYonetimiSection\s+from\s+['"]@\/components\/ayarlar\/sablon-yonetimi-section['"]/)
+    expect(sablonPage).toMatch(
+      /import\s+SablonYonetimiSection\s+from\s+['"]@\/components\/ayarlar\/sablon-yonetimi-section['"]/,
+    )
   })
   it('renders SablonYonetimiSection in JSX', () => {
     expect(sablonPage).toMatch(/<SablonYonetimiSection\s*\/>/)

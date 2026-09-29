@@ -7,7 +7,7 @@ import { sql } from 'drizzle-orm'
 export const retirementRouter = createTRPCRouter({
   checkLegacyTables: protectedProcedure.query(async () => {
     const tables = db.all<{ name: string }>(
-      sql`SELECT name FROM sqlite_master WHERE type='table' AND name IN ('dilekce_sablonu', 'dilekce_odt_sablonu')`
+      sql`SELECT name FROM sqlite_master WHERE type='table' AND name IN ('dilekce_sablonu', 'dilekce_odt_sablonu')`,
     )
     return { hasLegacyTables: tables.length > 0 }
   }),

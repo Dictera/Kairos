@@ -17,9 +17,9 @@ function wrap(val: number, max: number) {
 }
 
 const ORANGE = 'oklch(0.746 0.174 57)'
-const NAVY   = 'oklch(0.219 0.044 240)'
-const MUTED  = 'oklch(0.219 0.044 240 / 0.35)'
-const CARD   = 'oklch(0.969 0.008 20)'
+const NAVY = 'oklch(0.219 0.044 240)'
+const MUTED = 'oklch(0.219 0.044 240 / 0.35)'
+const CARD = 'oklch(0.969 0.008 20)'
 const BORDER = 'oklch(0.88 0.008 20)'
 
 const inputStyle: CSSProperties = {
@@ -57,7 +57,12 @@ export function ClockPicker({ open, onOpenChange, onConfirm }: ClockPickerProps)
   // Reset on every close path (Esc, overlay, close button, confirm) — Radix
   // routes all of them through onOpenChange, so resetting here covers them all.
   function handleOpenChange(next: boolean) {
-    if (!next) { setHour(8); setMinute(0); setEditing(null); setDraft('') }
+    if (!next) {
+      setHour(8)
+      setMinute(0)
+      setEditing(null)
+      setDraft('')
+    }
     onOpenChange(next)
   }
 
@@ -78,7 +83,10 @@ export function ClockPicker({ open, onOpenChange, onConfirm }: ClockPickerProps)
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') commitEdit()
-    if (e.key === 'Escape') { setEditing(null); setDraft('') }
+    if (e.key === 'Escape') {
+      setEditing(null)
+      setDraft('')
+    }
   }
 
   function handleConfirm() {
@@ -96,21 +104,23 @@ export function ClockPicker({ open, onOpenChange, onConfirm }: ClockPickerProps)
         <DialogTitle className="sr-only">Bildirim Saati Seç</DialogTitle>
         {/* ── Header ── */}
         <div style={{ background: NAVY }} className="px-6 pt-5 pb-5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] mb-3 select-none"
-            style={{ color: 'oklch(0.969 0.008 20 / 0.4)' }}>
+          <p
+            className="text-[10px] font-semibold uppercase tracking-[0.18em] mb-3 select-none"
+            style={{ color: 'oklch(0.969 0.008 20 / 0.4)' }}
+          >
             Bildirim Saati
           </p>
           <div className="flex items-end gap-1.5">
             {editing === 'hour' ? (
               <input
-                ref={el => el?.focus()}
+                ref={(el) => el?.focus()}
                 aria-label="Saat"
                 type="text"
                 inputMode="numeric"
                 maxLength={2}
                 value={draft}
                 placeholder={String(hour).padStart(2, '0')}
-                onChange={e => {
+                onChange={(e) => {
                   const raw = e.target.value.replace(/\D/g, '').slice(0, 2)
                   const n = parseInt(raw, 10)
                   setDraft(!isNaN(n) && n > 23 ? '23' : raw)
@@ -120,26 +130,31 @@ export function ClockPicker({ open, onOpenChange, onConfirm }: ClockPickerProps)
                 style={inputStyle}
               />
             ) : (
-              <button type="button" onClick={() => startEdit('hour')}
+              <button
+                type="button"
+                onClick={() => startEdit('hour')}
                 className="tabular-nums leading-none transition-opacity hover:opacity-70"
-                style={bigDigitStyle}>
+                style={bigDigitStyle}
+              >
                 {String(hour).padStart(2, '0')}
               </button>
             )}
-            <span className="text-[52px] font-thin leading-none pb-1 select-none"
-              style={{ color: 'oklch(0.969 0.008 20 / 0.2)', letterSpacing: '-0.04em' }}>
+            <span
+              className="text-[52px] font-thin leading-none pb-1 select-none"
+              style={{ color: 'oklch(0.969 0.008 20 / 0.2)', letterSpacing: '-0.04em' }}
+            >
               :
             </span>
             {editing === 'minute' ? (
               <input
-                ref={el => el?.focus()}
+                ref={(el) => el?.focus()}
                 aria-label="Dakika"
                 type="text"
                 inputMode="numeric"
                 maxLength={2}
                 value={draft}
                 placeholder={String(minute).padStart(2, '0')}
-                onChange={e => {
+                onChange={(e) => {
                   const raw = e.target.value.replace(/\D/g, '').slice(0, 2)
                   const n = parseInt(raw, 10)
                   setDraft(!isNaN(n) && n > 59 ? '59' : raw)
@@ -149,9 +164,12 @@ export function ClockPicker({ open, onOpenChange, onConfirm }: ClockPickerProps)
                 style={inputStyle}
               />
             ) : (
-              <button type="button" onClick={() => startEdit('minute')}
+              <button
+                type="button"
+                onClick={() => startEdit('minute')}
                 className="tabular-nums leading-none transition-opacity hover:opacity-70"
-                style={bigDigitStyle}>
+                style={bigDigitStyle}
+              >
                 {String(minute).padStart(2, '0')}
               </button>
             )}
@@ -175,7 +193,9 @@ export function ClockPicker({ open, onOpenChange, onConfirm }: ClockPickerProps)
 
             {/* Separator */}
             <div className="flex flex-col items-center justify-center gap-3 px-1">
-              <span className="text-2xl font-light" style={{ color: MUTED }}>:</span>
+              <span className="text-2xl font-light" style={{ color: MUTED }}>
+                :
+              </span>
             </div>
 
             {/* Minute column */}
@@ -193,8 +213,7 @@ export function ClockPicker({ open, onOpenChange, onConfirm }: ClockPickerProps)
         </div>
 
         {/* ── Footer ── */}
-        <div className="flex justify-end gap-2 px-5 pb-4"
-          style={{ background: CARD }}>
+        <div className="flex justify-end gap-2 px-5 pb-4" style={{ background: CARD }}>
           <DialogClose asChild>
             <Button variant="ghost" type="button" className="h-9 px-4 text-sm">
               İptal
@@ -235,8 +254,10 @@ function DrumColumn({ value, max, label, onChange, orange, navy, muted, border }
 
   return (
     <div className="flex-1 flex flex-col items-center gap-1">
-      <span className="text-[10px] font-semibold uppercase tracking-widest mb-1"
-        style={{ color: muted }}>
+      <span
+        className="text-[10px] font-semibold uppercase tracking-widest mb-1"
+        style={{ color: muted }}
+      >
         {label}
       </span>
 
@@ -251,14 +272,14 @@ function DrumColumn({ value, max, label, onChange, orange, navy, muted, border }
       </button>
 
       {/* Values */}
-      <div
-        className="w-full rounded-xl overflow-hidden"
-        style={{ border: `1px solid ${border}` }}
-      >
+      <div className="w-full rounded-xl overflow-hidden" style={{ border: `1px solid ${border}` }}>
         {/* Prev — clickable */}
-        <button type="button" onClick={() => onChange(wrap(value - 1, max))}
+        <button
+          type="button"
+          onClick={() => onChange(wrap(value - 1, max))}
           className="w-full flex justify-center py-2.5 hover:bg-black/5 transition-colors"
-          style={{ borderBottom: `1px solid ${border}` }}>
+          style={{ borderBottom: `1px solid ${border}` }}
+        >
           <span className="text-lg tabular-nums font-light" style={{ color: muted }}>
             {fmt(prev)}
           </span>
@@ -266,16 +287,21 @@ function DrumColumn({ value, max, label, onChange, orange, navy, muted, border }
 
         {/* Current — highlighted */}
         <div className="flex justify-center py-3" style={{ background: `${orange}18` }}>
-          <span className="text-3xl tabular-nums font-semibold"
-            style={{ color: navy, letterSpacing: '-0.02em' }}>
+          <span
+            className="text-3xl tabular-nums font-semibold"
+            style={{ color: navy, letterSpacing: '-0.02em' }}
+          >
             {fmt(value)}
           </span>
         </div>
 
         {/* Next — clickable */}
-        <button type="button" onClick={() => onChange(wrap(value + 1, max))}
+        <button
+          type="button"
+          onClick={() => onChange(wrap(value + 1, max))}
           className="w-full flex justify-center py-2.5 hover:bg-black/5 transition-colors"
-          style={{ borderTop: `1px solid ${border}` }}>
+          style={{ borderTop: `1px solid ${border}` }}
+        >
           <span className="text-lg tabular-nums font-light" style={{ color: muted }}>
             {fmt(next)}
           </span>

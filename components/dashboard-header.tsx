@@ -2,7 +2,18 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, Plus, Bell, FolderOpen, Users, FileText, X, Calendar, Clock, Check } from 'lucide-react'
+import {
+  Search,
+  Plus,
+  Bell,
+  FolderOpen,
+  Users,
+  FileText,
+  X,
+  Calendar,
+  Clock,
+  Check,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -15,11 +26,7 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useTRPC } from '@/lib/trpc/context'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -40,7 +47,9 @@ function highlight(text: string | null, query: string) {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="rounded-sm bg-primary/20 px-0.5 font-semibold text-primary">{text.slice(idx, idx + query.length)}</mark>
+      <mark className="rounded-sm bg-primary/20 px-0.5 font-semibold text-primary">
+        {text.slice(idx, idx + query.length)}
+      </mark>
       {text.slice(idx + query.length)}
     </>
   )
@@ -70,24 +79,24 @@ function NotificationDropdown() {
   const syncMutation = useMutation({
     ...trpc.bildirim.sync.mutationOptions(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: trpc.bildirim.list.queryKey() })
-      queryClient.invalidateQueries({ queryKey: trpc.bildirim.unreadCount.queryKey() })
+      void queryClient.invalidateQueries({ queryKey: trpc.bildirim.list.queryKey() })
+      void queryClient.invalidateQueries({ queryKey: trpc.bildirim.unreadCount.queryKey() })
     },
   })
 
   const markAsRead = useMutation({
     ...trpc.bildirim.markAsRead.mutationOptions(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: trpc.bildirim.list.queryKey() })
-      queryClient.invalidateQueries({ queryKey: trpc.bildirim.unreadCount.queryKey() })
+      void queryClient.invalidateQueries({ queryKey: trpc.bildirim.list.queryKey() })
+      void queryClient.invalidateQueries({ queryKey: trpc.bildirim.unreadCount.queryKey() })
     },
   })
 
   const markAllAsRead = useMutation({
     ...trpc.bildirim.markAllAsRead.mutationOptions(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: trpc.bildirim.list.queryKey() })
-      queryClient.invalidateQueries({ queryKey: trpc.bildirim.unreadCount.queryKey() })
+      void queryClient.invalidateQueries({ queryKey: trpc.bildirim.list.queryKey() })
+      void queryClient.invalidateQueries({ queryKey: trpc.bildirim.unreadCount.queryKey() })
     },
   })
 
@@ -154,16 +163,11 @@ function NotificationDropdown() {
             <div className="px-3 py-4 text-center text-xs text-muted-foreground">Yükleniyor...</div>
           )}
           {notifications.length === 0 && !listLoading && (
-            <div className="px-3 py-6 text-center text-sm text-muted-foreground">
-              Bildirim yok
-            </div>
+            <div className="px-3 py-6 text-center text-sm text-muted-foreground">Bildirim yok</div>
           )}
           <div className="flex flex-col">
             {notifications.map((n) => (
-              <div
-                key={n.id}
-                className="group relative border-b border-border/40 last:border-b-0"
-              >
+              <div key={n.id} className="group relative border-b border-border/40 last:border-b-0">
                 <button
                   type="button"
                   onClick={() => handleNotificationClick(n.dosya_id)}
@@ -270,7 +274,12 @@ export function DashboardHeader() {
       </header>
 
       {/* Command Palette Dialog */}
-      <CommandDialog open={open} onOpenChange={setOpen} title="Ara" description="Dosya veya müvekkil ara">
+      <CommandDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Ara"
+        description="Dosya veya müvekkil ara"
+      >
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Dosya no, müvekkil adı, plaka, TC/Vergi no..."
@@ -309,7 +318,9 @@ export function DashboardHeader() {
                           {highlight(d.dosya_no, query)} — {highlight(d.muvekkil_ad, query)}
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span className="rounded-sm bg-muted px-1 py-0.5 font-medium">{d.tur}</span>
+                          <span className="rounded-sm bg-muted px-1 py-0.5 font-medium">
+                            {d.tur}
+                          </span>
                           {d.sigorta_turu_ad && <span>{d.sigorta_turu_ad}</span>}
                           {d.hasar_dosya_no && (
                             <span className="truncate">{highlight(d.hasar_dosya_no, query)}</span>
@@ -341,12 +352,8 @@ export function DashboardHeader() {
                           {highlight(`${m.ad} ${m.soyad}`, query)}
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          {m.tc_vergi_no && (
-                            <span>{highlight(m.tc_vergi_no, query)}</span>
-                          )}
-                          {m.telefon && (
-                            <span>{highlight(m.telefon, query)}</span>
-                          )}
+                          {m.tc_vergi_no && <span>{highlight(m.tc_vergi_no, query)}</span>}
+                          {m.telefon && <span>{highlight(m.telefon, query)}</span>}
                         </div>
                       </div>
                     </div>

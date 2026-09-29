@@ -29,21 +29,24 @@ function formatDate(dateStr: string): string {
  * kırmızı için destructive token'ı korundu.
  */
 function urgencyClasses(days: number): { badge: string; dot: string } {
-  if (days < 0)  return { badge: 'bg-destructive/10 text-destructive border-0', dot: 'bg-destructive' }
-  if (days === 0) return { badge: 'bg-destructive/10 text-destructive border-0', dot: 'bg-destructive' }
-  if (days < 3)  return { badge: 'bg-destructive/10 text-destructive border-0', dot: 'bg-destructive' }
-  if (days < 7)  return { badge: 'bg-amber-100 text-amber-700 border-0', dot: 'bg-amber-400' }
+  if (days < 0)
+    return { badge: 'bg-destructive/10 text-destructive border-0', dot: 'bg-destructive' }
+  if (days === 0)
+    return { badge: 'bg-destructive/10 text-destructive border-0', dot: 'bg-destructive' }
+  if (days < 3)
+    return { badge: 'bg-destructive/10 text-destructive border-0', dot: 'bg-destructive' }
+  if (days < 7) return { badge: 'bg-amber-100 text-amber-700 border-0', dot: 'bg-amber-400' }
   return { badge: 'bg-muted text-muted-foreground border-0', dot: 'bg-muted-foreground/40' }
 }
 
 function urgencyLabel(days: number): string {
-  if (days < 0)  return 'Geçti'
+  if (days < 0) return 'Geçti'
   if (days === 0) return 'Bugün'
   return `${days} gün`
 }
 
 export function UpcomingDeadlines({ deadlines }: UpcomingDeadlinesProps) {
-  const urgentCount = deadlines.filter(d => getDaysUntil(d.son_tarih) < 3).length
+  const urgentCount = deadlines.filter((d) => getDaysUntil(d.son_tarih) < 3).length
 
   return (
     <Card className="overflow-hidden">
@@ -99,7 +102,8 @@ export function UpcomingDeadlines({ deadlines }: UpcomingDeadlinesProps) {
                           </Badge>
                         </TooltipTrigger>
                         <TooltipContent>
-                          {formatDate(deadline.son_tarih)} — adli tatil dönemine denk geliyor, manuel kontrol yapın.
+                          {formatDate(deadline.son_tarih)} — adli tatil dönemine denk geliyor,
+                          manuel kontrol yapın.
                         </TooltipContent>
                       </Tooltip>
                     )}

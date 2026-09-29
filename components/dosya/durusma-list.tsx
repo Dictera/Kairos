@@ -56,14 +56,14 @@ export function DurusmaList({ dosyaId }: DurusmaListProps) {
   const [deletingId, setDeletingId] = useState<number | null>(null)
 
   const { data: durusmaList = [] } = useQuery(
-    trpc.surec.durusmaList.queryOptions({ dosya_id: dosyaId })
+    trpc.surec.durusmaList.queryOptions({ dosya_id: dosyaId }),
   )
 
   const deleteMutation = useMutation(
     trpc.surec.durusmaDelete.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['surec', 'durusmaList']] })
-        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        void queryClient.invalidateQueries({ queryKey: [['surec', 'durusmaList']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
         toast.success('Duruşma silindi.')
         setDeletingId(null)
       },
@@ -71,7 +71,7 @@ export function DurusmaList({ dosyaId }: DurusmaListProps) {
         toast.error('İşlem sırasında hata oluştu. Tekrar deneyin.')
         setDeletingId(null)
       },
-    })
+    }),
   )
 
   const handleEdit = (durusma: DurusmaRow) => {
@@ -103,11 +103,10 @@ export function DurusmaList({ dosyaId }: DurusmaListProps) {
             <CardTitle className="text-base">Duruşmalar</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">Henüz duruşma kaydı yok</p>
             <p className="text-sm text-muted-foreground">
-              Henüz duruşma kaydı yok
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Bu dosyaya ait duruşma kaydı bulunmuyor. Duruşma eklemek için aşağıdaki butonu kullanın.
+              Bu dosyaya ait duruşma kaydı bulunmuyor. Duruşma eklemek için aşağıdaki butonu
+              kullanın.
             </p>
             <Button variant="default" onClick={handleAdd}>
               Duruşma Ekle
@@ -156,9 +155,7 @@ export function DurusmaList({ dosyaId }: DurusmaListProps) {
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className="cursor-help">
-                                {truncate(d.notlar, 40)}
-                              </span>
+                              <span className="cursor-help">{truncate(d.notlar, 40)}</span>
                             </TooltipTrigger>
                             <TooltipContent>
                               <p className="max-w-xs">{d.notlar}</p>
@@ -213,11 +210,7 @@ export function DurusmaList({ dosyaId }: DurusmaListProps) {
             Bu duruşmayı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
           </AlertDialogDescription>
           <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => setDeletingId(null)}
-            >
-              Vazgeç
-            </AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setDeletingId(null)}>Vazgeç</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={() => deletingId !== null && handleDelete(deletingId)}

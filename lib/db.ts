@@ -6,7 +6,7 @@
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import * as schema from './schema'
-import { foldTr, dosyaFtsText, muvekkilFtsText } from './turkish'
+import { foldTr, dosyaFtsText, muvekkilFtsText, type SqliteValue } from './turkish'
 
 const globalForDb = globalThis as unknown as {
   db: ReturnType<typeof drizzle<typeof schema>> | undefined
@@ -36,14 +36,16 @@ function createDb() {
   // Used in the <3-char LIKE fallback: sql`lower_tr(col) LIKE lower_tr(${pattern})`
   // IMPORTANT: must be registered BEFORE drizzle() wraps the connection.
   // Shares foldTr() with the FTS index so both normalize text identically.
-  sqlite.function('lower_tr', (s: unknown) => foldTr(s))
+  sqlite.function('lower_tr', (s: SqliteValue) => foldTr(s))
 
   // FTS5 trigram indexes and backfill are WRITE operations that cause SQLITE_BUSY
   // when Next.js build spawns multiple workers that import this module concurrently.
   // Skip all FTS setup during build; it will run on first request at runtime.
   if (!isBuildPhase) {
     sqlite.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS dosya_fts USING fts5(txt, tokenize='trigram')`)
-    sqlite.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS muvekkil_fts USING fts5(txt, tokenize='trigram')`)
+    sqlite.exec(
+      `CREATE VIRTUAL TABLE IF NOT EXISTS muvekkil_fts USING fts5(txt, tokenize='trigram')`,
+    )
     backfillFts(sqlite)
   }
 
@@ -59,32 +61,56 @@ function backfillFts(sqlite: Database.Database) {
   // before migrations run. Backfill is a best-effort optimization, so skip a
   // table until it is present rather than throwing "no such table".
   const hasTable = (name: string) =>
-    sqlite.prepare(`SELECT 1 FROM sqlite_master WHERE type='table' AND name=?`).get(name) !== undefined
+    sqlite.prepare(`SELECT 1 FROM sqlite_master WHERE type='table' AND name=?`).get(name) !==
+    undefined
 
   if (hasTable('dosya')) {
-    const dosyaNeeds = sqlite.prepare(
-      `SELECT (SELECT count(*) FROM dosya_fts) = 0 AND (SELECT count(*) FROM dosya) > 0 AS n`
-    ).get() as { n: number }
+    const dosyaNeeds = sqlite
+      .prepare(
+        `SELECT (SELECT count(*) FROM dosya_fts) = 0 AND (SELECT count(*) FROM dosya) > 0 AS n`,
+      )
+      .get() as { n: number }
     if (dosyaNeeds.n) {
-      const rows = sqlite.prepare(
-        `SELECT d.id, d.dosya_no, d.hasar_dosya_no, d.muvekkil_plaka, m.ad, m.soyad
-           FROM dosya d LEFT JOIN muvekkil m ON m.id = d.muvekkil_id`
-      ).all() as Array<{ id: number; dosya_no: string | null; hasar_dosya_no: string | null; muvekkil_plaka: string | null; ad: string | null; soyad: string | null }>
+      const rows = sqlite
+        .prepare(
+          `SELECT d.id, d.dosya_no, d.hasar_dosya_no, d.muvekkil_plaka, m.ad, m.soyad
+           FROM dosya d LEFT JOIN muvekkil m ON m.id = d.muvekkil_id`,
+        )
+        .all() as Array<{
+        id: number
+        dosya_no: string | null
+        hasar_dosya_no: string | null
+        muvekkil_plaka: string | null
+        ad: string | null
+        soyad: string | null
+      }>
       const ins = sqlite.prepare(`INSERT INTO dosya_fts(rowid, txt) VALUES (?, ?)`)
-      sqlite.transaction(() => { for (const r of rows) ins.run(r.id, dosyaFtsText(r)) })()
+      sqlite.transaction(() => {
+        for (const r of rows) ins.run(r.id, dosyaFtsText(r))
+      })()
     }
   }
 
   if (hasTable('muvekkil')) {
-    const muvekkilNeeds = sqlite.prepare(
-      `SELECT (SELECT count(*) FROM muvekkil_fts) = 0 AND (SELECT count(*) FROM muvekkil) > 0 AS n`
-    ).get() as { n: number }
+    const muvekkilNeeds = sqlite
+      .prepare(
+        `SELECT (SELECT count(*) FROM muvekkil_fts) = 0 AND (SELECT count(*) FROM muvekkil) > 0 AS n`,
+      )
+      .get() as { n: number }
     if (muvekkilNeeds.n) {
-      const rows = sqlite.prepare(
-        `SELECT id, ad, soyad, tc_vergi_no, telefon FROM muvekkil`
-      ).all() as Array<{ id: number; ad: string | null; soyad: string | null; tc_vergi_no: string | null; telefon: string | null }>
+      const rows = sqlite
+        .prepare(`SELECT id, ad, soyad, tc_vergi_no, telefon FROM muvekkil`)
+        .all() as Array<{
+        id: number
+        ad: string | null
+        soyad: string | null
+        tc_vergi_no: string | null
+        telefon: string | null
+      }>
       const ins = sqlite.prepare(`INSERT INTO muvekkil_fts(rowid, txt) VALUES (?, ?)`)
-      sqlite.transaction(() => { for (const r of rows) ins.run(r.id, muvekkilFtsText(r)) })()
+      sqlite.transaction(() => {
+        for (const r of rows) ins.run(r.id, muvekkilFtsText(r))
+      })()
     }
   }
 }

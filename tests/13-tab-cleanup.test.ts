@@ -1,8 +1,14 @@
 import { describe, it, expect } from 'vitest'
 import {
-  dosya, muvekkil, dosyaNot, olayGunlugu,
-  STK_ASAMALAR, MAHKEME_ASAMALAR, BELGE_KATEGORILER,
-  STK_ASAMA_LABELS, MAHKEME_ASAMA_LABELS,
+  dosya,
+  muvekkil,
+  dosyaNot,
+  olayGunlugu,
+  STK_ASAMALAR,
+  MAHKEME_ASAMALAR,
+  BELGE_KATEGORILER,
+  STK_ASAMA_LABELS,
+  MAHKEME_ASAMA_LABELS,
 } from '@/lib/schema'
 import { dosyaSchema } from '@/lib/trpc/routers/dosya'
 
@@ -28,17 +34,32 @@ describe('TAB-01: Notes + Timeline', () => {
 
 describe('TAB-02: Genel Bilgiler new fields', () => {
   it('dosyaSchema accepts hasar_dosya_no', () => {
-    const result = dosyaSchema.safeParse({ muvekkil_id: 1, dosya_no: '2024/001', tur: 'STK', hasar_dosya_no: 'Sigorta - 111' })
+    const result = dosyaSchema.safeParse({
+      muvekkil_id: 1,
+      dosya_no: '2024/001',
+      tur: 'STK',
+      hasar_dosya_no: 'Sigorta - 111',
+    })
     expect(result.success).toBe(true)
   })
 
   it('dosyaSchema accepts kaza_tarihi', () => {
-    const result = dosyaSchema.safeParse({ muvekkil_id: 1, dosya_no: '2024/001', tur: 'STK', kaza_tarihi: '2024-01-15' })
+    const result = dosyaSchema.safeParse({
+      muvekkil_id: 1,
+      dosya_no: '2024/001',
+      tur: 'STK',
+      kaza_tarihi: '2024-01-15',
+    })
     expect(result.success).toBe(true)
   })
 
   it('dosyaSchema accepts kusur_orani_karsi as integer 0-100', () => {
-    const result = dosyaSchema.safeParse({ muvekkil_id: 1, dosya_no: '2024/001', tur: 'STK', kusur_orani_karsi: 75 })
+    const result = dosyaSchema.safeParse({
+      muvekkil_id: 1,
+      dosya_no: '2024/001',
+      tur: 'STK',
+      kusur_orani_karsi: 75,
+    })
     expect(result.success).toBe(true)
   })
 
@@ -92,12 +113,22 @@ describe('TAB-02: Belge categories', () => {
 describe('UIUX-01: IBAN validation', () => {
   it('dosyaSchema rejects invalid IBAN format in muvekkil_sigorta_id field', () => {
     // muvekkil_sigorta_id is a number FK, not IBAN — IBAN is on muvekkil
-    const result = dosyaSchema.safeParse({ muvekkil_id: 1, dosya_no: '2024/001', tur: 'STK', muvekkil_sigorta_id: 'not-a-number' })
+    const result = dosyaSchema.safeParse({
+      muvekkil_id: 1,
+      dosya_no: '2024/001',
+      tur: 'STK',
+      muvekkil_sigorta_id: 'not-a-number',
+    })
     expect(result.success).toBe(false)
   })
 
   it('dosyaSchema accepts muvekkil_sigorta_id as valid integer', () => {
-    const result = dosyaSchema.safeParse({ muvekkil_id: 1, dosya_no: '2024/001', tur: 'STK', muvekkil_sigorta_id: 5 })
+    const result = dosyaSchema.safeParse({
+      muvekkil_id: 1,
+      dosya_no: '2024/001',
+      tur: 'STK',
+      muvekkil_sigorta_id: 5,
+    })
     expect(result.success).toBe(true)
   })
 })

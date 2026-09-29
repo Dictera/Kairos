@@ -7,10 +7,12 @@ import { ftsMatchQuery } from '@/lib/turkish'
 
 export const searchRouter = createTRPCRouter({
   global: protectedProcedure
-    .input(z.object({
-      query: z.string().min(1).max(100),
-      limit: z.number().int().min(1).max(20).default(10),
-    }))
+    .input(
+      z.object({
+        query: z.string().min(1).max(100),
+        limit: z.number().int().min(1).max(20).default(10),
+      }),
+    )
     .query(async ({ input }) => {
       const { query, limit } = input
       const match = ftsMatchQuery(query)
@@ -31,29 +33,31 @@ export const searchRouter = createTRPCRouter({
             OR lower_tr(COALESCE(${muvekkil.telefon},'')) LIKE lower_tr(${likePattern})`
 
       const [dosyaResults, muvekkilResults] = await Promise.all([
-        db.select({
-          id: dosya.id,
-          dosya_no: dosya.dosya_no,
-          tur: dosya.tur,
-          durum: dosya.durum,
-          muvekkil_ad: sql<string>`${muvekkil.ad} || ' ' || ${muvekkil.soyad}`,
-          sigorta_turu_ad: sigortaTuru.ad,
-          hasar_dosya_no: dosya.hasar_dosya_no,
-          muvekkil_plaka: dosya.muvekkil_plaka,
-        })
+        db
+          .select({
+            id: dosya.id,
+            dosya_no: dosya.dosya_no,
+            tur: dosya.tur,
+            durum: dosya.durum,
+            muvekkil_ad: sql<string>`${muvekkil.ad} || ' ' || ${muvekkil.soyad}`,
+            sigorta_turu_ad: sigortaTuru.ad,
+            hasar_dosya_no: dosya.hasar_dosya_no,
+            muvekkil_plaka: dosya.muvekkil_plaka,
+          })
           .from(dosya)
           .leftJoin(muvekkil, eq(dosya.muvekkil_id, muvekkil.id))
           .leftJoin(sigortaTuru, eq(dosya.sigorta_turu_id, sigortaTuru.id))
           .where(dosyaWhere)
           .orderBy(desc(dosya.id))
           .limit(limit),
-        db.select({
-          id: muvekkil.id,
-          ad: muvekkil.ad,
-          soyad: muvekkil.soyad,
-          telefon: muvekkil.telefon,
-          tc_vergi_no: muvekkil.tc_vergi_no,
-        })
+        db
+          .select({
+            id: muvekkil.id,
+            ad: muvekkil.ad,
+            soyad: muvekkil.soyad,
+            telefon: muvekkil.telefon,
+            tc_vergi_no: muvekkil.tc_vergi_no,
+          })
           .from(muvekkil)
           .where(muvekkilWhere)
           .orderBy(desc(muvekkil.id))

@@ -67,13 +67,13 @@ export function StkDataForm({ dosyaId, initialData }: StkDataFormProps) {
   const saveMutation = useMutation(
     trpc.surec.updateStkData.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya', 'getById']] })
         toast.success('Bilgiler kaydedildi.')
       },
       onError: () => {
         toast.error('Kaydetme sırasında hata oluştu. Tekrar deneyin.')
       },
-    })
+    }),
   )
 
   const onSubmit = (values: StkDataFormValues) => {

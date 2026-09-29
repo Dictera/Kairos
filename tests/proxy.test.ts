@@ -22,12 +22,16 @@ describe('proxy: logged-out access', () => {
     expect((await statusFor(p)).status).toBe(200)
   })
 
-  it.each(['/', '/dosyalar', '/api/upload', '/api/files/1/a.pdf', '/api/healthz', '/uploads/sablon-pdf/x.pdf'])(
-    'redirects %s to /login',
-    async (p) => {
-      const { status, location } = await statusFor(p)
-      expect(status).toBe(307)
-      expect(new URL(location!).pathname).toBe('/login')
-    },
-  )
+  it.each([
+    '/',
+    '/dosyalar',
+    '/api/upload',
+    '/api/files/1/a.pdf',
+    '/api/healthz',
+    '/uploads/sablon-pdf/x.pdf',
+  ])('redirects %s to /login', async (p) => {
+    const { status, location } = await statusFor(p)
+    expect(status).toBe(307)
+    expect(new URL(location!).pathname).toBe('/login')
+  })
 })

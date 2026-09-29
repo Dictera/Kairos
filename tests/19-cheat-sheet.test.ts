@@ -12,7 +12,9 @@ describe('CheatSheetPage (BUI-08, BUI-09, D-09)', () => {
     expect(src.startsWith("'use client'")).toBe(false)
   })
   it('imports VARIABLE_REGISTRY', () => {
-    expect(src).toMatch(/import\s*\{[^}]*VARIABLE_REGISTRY[^}]*\}\s*from\s*['"]@\/lib\/docx\/variable-registry['"]/)
+    expect(src).toMatch(
+      /import\s*\{[^}]*VARIABLE_REGISTRY[^}]*\}\s*from\s*['"]@\/lib\/docx\/variable-registry['"]/,
+    )
   })
   it('renders page heading and subtitle', () => {
     expect(src).toContain('Değişken Listesi')
@@ -46,7 +48,9 @@ describe('CheatSheetSummaryCard (BUI-08 entry, D-10)', () => {
   it('contains card title and link copy', () => {
     expect(src).toContain('Değişken Listesi')
     expect(src).toContain('Tüm değişkenleri gör')
-    expect(src).toContain('Şablonlarınızda kullanabileceğiniz tüm değişkenlerin listesi ve açıklamaları.')
+    expect(src).toContain(
+      'Şablonlarınızda kullanabileceğiniz tüm değişkenlerin listesi ve açıklamaları.',
+    )
   })
   it('imports Link from next/link', () => {
     expect(src).toMatch(/import\s+Link\s+from\s+['"]next\/link['"]/)
@@ -66,7 +70,9 @@ describe('CheatSheetSummaryCard (BUI-08 entry, D-10)', () => {
 describe('Cheat-sheet route', () => {
   const src = readFileSync(ROUTE_PATH, 'utf-8')
   it('imports CheatSheetPage', () => {
-    expect(src).toMatch(/import\s*\{\s*CheatSheetPage\s*\}\s*from\s*['"]@\/components\/degiskenler\/cheat-sheet-page['"]/)
+    expect(src).toMatch(
+      /import\s*\{\s*CheatSheetPage\s*\}\s*from\s*['"]@\/components\/degiskenler\/cheat-sheet-page['"]/,
+    )
   })
   it('has default export', () => {
     expect(src).toMatch(/export\s+default\s+function/)

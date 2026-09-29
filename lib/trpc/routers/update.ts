@@ -17,10 +17,18 @@ export const updateRouter = createTRPCRouter({
       return { ok: false as const, restarting: false, message: 'Bu kurulum git ile yönetilmiyor.' }
     }
     if (!status.remoteTrusted) {
-      return { ok: false as const, restarting: false, message: 'Güncelleme kaynağı doğrulanamadı (origin resmi depo değil).' }
+      return {
+        ok: false as const,
+        restarting: false,
+        message: 'Güncelleme kaynağı doğrulanamadı (origin resmi depo değil).',
+      }
     }
     if (status.dirty) {
-      return { ok: false as const, restarting: false, message: 'Yerel değişiklikler var; otomatik güncelleme yapılamaz.' }
+      return {
+        ok: false as const,
+        restarting: false,
+        message: 'Yerel değişiklikler var; otomatik güncelleme yapılamaz.',
+      }
     }
     if (!status.updateAvailable) {
       return { ok: false as const, restarting: false, message: 'Zaten güncel.' }
@@ -32,7 +40,11 @@ export const updateRouter = createTRPCRouter({
       // Launcher (start-kairos) yönetiyor: süreçten çık -> launcher güncelleyip yeniden başlatır.
       // Yanıtın istemciye ulaşması için kısa gecikme.
       setTimeout(() => process.exit(0), 750)
-      return { ok: true as const, restarting: true, message: 'Güncelleme uygulanıyor, sunucu yeniden başlatılıyor...' }
+      return {
+        ok: true as const,
+        restarting: true,
+        message: 'Güncelleme uygulanıyor, sunucu yeniden başlatılıyor...',
+      }
     }
 
     return {

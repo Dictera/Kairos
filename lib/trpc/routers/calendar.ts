@@ -22,17 +22,14 @@ export const calendarRouter = createTRPCRouter({
       z.object({
         year: z.number(),
         month: z.number().int().min(1).max(12),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const { year, month } = input
 
       // Calculate start and end dates for the month
       const startDate = `${year}-${String(month).padStart(2, '0')}-01`
-      const endDate = format(
-        endOfMonth(new Date(year, month - 1)),
-        'yyyy-MM-dd'
-      )
+      const endDate = format(endOfMonth(new Date(year, month - 1)), 'yyyy-MM-dd')
 
       // Query süre (deadlines) for the month
       const sureRows = await db

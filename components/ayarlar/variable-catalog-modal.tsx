@@ -15,20 +15,51 @@ interface VariableCatalogModalProps {
 const JINJA2_EXAMPLES = [
   { filter: 'upper', example: '{{ muvekkil.ad | upper }}', desc: 'Büyük harfe çevir' },
   { filter: 'lower', example: '{{ muvekkil.ad | lower }}', desc: 'Küçük harfe çevir' },
-  { filter: 'title', example: '{{ muvekkil.ad_soyad | title }}', desc: 'Her kelimenin ilk harfi büyük' },
-  { filter: 'capitalize', example: '{{ muvekkil.ad | capitalize }}', desc: 'İlk harf büyük, geri kalan küçük' },
-  { filter: 'default', example: '{{ dosya.aciklama | default("—") }}', desc: 'Boşsa varsayılan değer' },
-  { filter: 'default(true)', example: '{{ dosya.talep_tutari | default(0, true) }}', desc: 'None veya boşsa varsayılan' },
-  { filter: 'round', example: '{{ dosya.talep_tutari | round(2) }}', desc: 'Ondalık basamağa yuvarla' },
-  { filter: 'replace', example: '{{ muvekkil.telefon | replace(" ", "") }}', desc: 'Karakter değiştir' },
-  { filter: 'truncate', example: '{{ dosya.aciklama | truncate(50) }}', desc: 'Belirli uzunlukta kes' },
+  {
+    filter: 'title',
+    example: '{{ muvekkil.ad_soyad | title }}',
+    desc: 'Her kelimenin ilk harfi büyük',
+  },
+  {
+    filter: 'capitalize',
+    example: '{{ muvekkil.ad | capitalize }}',
+    desc: 'İlk harf büyük, geri kalan küçük',
+  },
+  {
+    filter: 'default',
+    example: '{{ dosya.aciklama | default("—") }}',
+    desc: 'Boşsa varsayılan değer',
+  },
+  {
+    filter: 'default(true)',
+    example: '{{ dosya.talep_tutari | default(0, true) }}',
+    desc: 'None veya boşsa varsayılan',
+  },
+  {
+    filter: 'round',
+    example: '{{ dosya.talep_tutari | round(2) }}',
+    desc: 'Ondalık basamağa yuvarla',
+  },
+  {
+    filter: 'replace',
+    example: '{{ muvekkil.telefon | replace(" ", "") }}',
+    desc: 'Karakter değiştir',
+  },
+  {
+    filter: 'truncate',
+    example: '{{ dosya.aciklama | truncate(50) }}',
+    desc: 'Belirli uzunlukta kes',
+  },
   { filter: 'join', example: '{{ liste | join(", ") }}', desc: 'Listeyi birleştir' },
 ]
 
 function handleCopyExample(example: string) {
-  navigator.clipboard.writeText(example).then(() => {
-    toast.success(`Kopyalandı: ${example}`)
-  }).catch(() => toast.error('Kopyalanamadı.'))
+  navigator.clipboard
+    .writeText(example)
+    .then(() => {
+      toast.success(`Kopyalandı: ${example}`)
+    })
+    .catch(() => toast.error('Kopyalanamadı.'))
 }
 
 export function VariableCatalogModal({ sablon, onOpenChange }: VariableCatalogModalProps) {
@@ -39,11 +70,14 @@ export function VariableCatalogModal({ sablon, onOpenChange }: VariableCatalogMo
 
   function handleCopy(v: string) {
     const text = `{{ ${v} }}`
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedVar(v)
-      toast.success(`Kopyalandı: ${text}`)
-      setTimeout(() => setCopiedVar(null), 1500)
-    }).catch(() => toast.error('Kopyalanamadı.'))
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopiedVar(v)
+        toast.success(`Kopyalandı: ${text}`)
+        setTimeout(() => setCopiedVar(null), 1500)
+      })
+      .catch(() => toast.error('Kopyalanamadı.'))
   }
 
   return (
@@ -71,8 +105,14 @@ export function VariableCatalogModal({ sablon, onOpenChange }: VariableCatalogMo
                 onClick={() => handleCopy(v)}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <Copy className={`h-3.5 w-3.5 shrink-0 transition-colors ${isCopied ? 'text-green-600' : 'text-muted-foreground opacity-0 group-hover:opacity-100'}`} />
-                  <code className="text-sm font-mono truncate">{'{{ '}{v}{' }}'}</code>
+                  <Copy
+                    className={`h-3.5 w-3.5 shrink-0 transition-colors ${isCopied ? 'text-green-600' : 'text-muted-foreground opacity-0 group-hover:opacity-100'}`}
+                  />
+                  <code className="text-sm font-mono truncate">
+                    {'{{ '}
+                    {v}
+                    {' }}'}
+                  </code>
                 </div>
                 {known ? (
                   <Badge
@@ -82,7 +122,10 @@ export function VariableCatalogModal({ sablon, onOpenChange }: VariableCatalogMo
                     ✓ Bilinen
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="text-amber-600 border-amber-600 shrink-0 ml-2">
+                  <Badge
+                    variant="outline"
+                    className="text-amber-600 border-amber-600 shrink-0 ml-2"
+                  >
                     ⚠ Bilinmeyen
                   </Badge>
                 )}

@@ -40,10 +40,10 @@ export async function GET() {
 
   const allDosya = await db.select().from(dosya)
 
-  const aktifCount = allDosya.filter(d => d.durum === 'AKTIF').length
-  const pasifCount = allDosya.filter(d => d.durum === 'PASIF').length
-  const stkCount = allDosya.filter(d => d.tur === 'STK').length
-  const mahkemeCount = allDosya.filter(d => d.tur === 'Mahkeme').length
+  const aktifCount = allDosya.filter((d) => d.durum === 'AKTIF').length
+  const pasifCount = allDosya.filter((d) => d.durum === 'PASIF').length
+  const stkCount = allDosya.filter((d) => d.tur === 'STK').length
+  const mahkemeCount = allDosya.filter((d) => d.tur === 'Mahkeme').length
 
   const docDefinition = {
     content: [

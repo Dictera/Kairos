@@ -22,9 +22,7 @@ async function resolveDir(dosyaRow: {
     ? sanitizeFsSegment(dosyaRow.sigortaTuru.ad)
     : 'Belirtilmemiş'
   const muvekkilBase = sanitizeFsSegment(
-    dosyaRow.muvekkil
-      ? `${dosyaRow.muvekkil.ad} ${dosyaRow.muvekkil.soyad}`.trim()
-      : 'bilinmiyor'
+    dosyaRow.muvekkil ? `${dosyaRow.muvekkil.ad} ${dosyaRow.muvekkil.soyad}`.trim() : 'bilinmiyor',
   )
   const muvekkilLabel = dosyaRow.muvekkil_plaka?.trim()
     ? `${muvekkilBase} - ${sanitizeFsSegment(dosyaRow.muvekkil_plaka)}`
@@ -42,7 +40,10 @@ export async function GET(request: NextRequest) {
   if (authError) return authError
 
   if (process.platform !== 'win32') {
-    return NextResponse.json({ error: 'Bu özellik yalnızca Windows ortamında çalışır.' }, { status: 501 })
+    return NextResponse.json(
+      { error: 'Bu özellik yalnızca Windows ortamında çalışır.' },
+      { status: 501 },
+    )
   }
 
   const params = request.nextUrl.searchParams

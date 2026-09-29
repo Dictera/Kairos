@@ -75,7 +75,9 @@ describe('BelgeList generated-PDF row (BUI-05, D-11, D-12)', () => {
 describe('DosyaDetailTabs mount (D-01)', () => {
   const src = readFileSync(TABS_PATH, 'utf-8')
   it('imports SablondanUret from belge folder', () => {
-    expect(src).toMatch(/import\s*\{\s*SablondanUret\s*\}\s*from\s*['"]@\/components\/belge\/sablondan-uret['"]/)
+    expect(src).toMatch(
+      /import\s*\{\s*SablondanUret\s*\}\s*from\s*['"]@\/components\/belge\/sablondan-uret['"]/,
+    )
   })
   it('mounts SablondanUret BEFORE BelgeUpload in belgeler TabsContent', () => {
     const iUret = src.indexOf('<SablondanUret')

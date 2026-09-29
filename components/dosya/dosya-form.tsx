@@ -115,20 +115,20 @@ function DosyaFormInner({
   const createMutation = useMutation(
     trpc.dosya.create.mutationOptions({
       onSuccess: (row) => {
-        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya']] })
         toast.success(`Dosya başarıyla oluşturuldu. Dosya No: ${row.dosya_no}`)
         router.push('/dosyalar/' + row.id)
       },
       onError: () => {
         toast.error('Kaydedilemedi. Lütfen tekrar deneyin.')
       },
-    })
+    }),
   )
 
   const updateMutation = useMutation(
     trpc.dosya.update.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya']] })
         toast.success('Kaydedildi.')
         router.push('/dosyalar/' + dosyaId)
       },
@@ -139,20 +139,20 @@ function DosyaFormInner({
           toast.error('Kaydedilemedi. Lütfen tekrar deneyin.')
         }
       },
-    })
+    }),
   )
 
   const archiveMutation = useMutation(
     trpc.dosya.archive.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya']] })
         toast.success('Dosya arşivlendi.')
         router.push('/dosyalar/' + dosyaId)
       },
       onError: () => {
         toast.error('Arşivlenemedi. Lütfen tekrar deneyin.')
       },
-    })
+    }),
   )
 
   const onSubmit = (values: FormValues) => {
@@ -219,7 +219,13 @@ function DosyaFormInner({
                   <FormItem>
                     <FormLabel>Avukat Dosya No</FormLabel>
                     <FormControl>
-                      <Input readOnly className="bg-muted cursor-not-allowed" value={field.value ?? ''} name={field.name} ref={field.ref} />
+                      <Input
+                        readOnly
+                        className="bg-muted cursor-not-allowed"
+                        value={field.value ?? ''}
+                        name={field.name}
+                        ref={field.ref}
+                      />
                     </FormControl>
                     <FormDescription>Otomatik atanır, değiştirilemez.</FormDescription>
                     <FormMessage />
@@ -385,7 +391,14 @@ function DosyaFormInner({
                 <FormItem>
                   <FormLabel>Müvekkil Poliçe No</FormLabel>
                   <FormControl>
-                    <Input placeholder="Poliçe numarası" value={field.value ?? ''} onChange={field.onChange} onBlur={field.onBlur} name={field.name} ref={field.ref} />
+                    <Input
+                      placeholder="Poliçe numarası"
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -460,7 +473,11 @@ function DosyaFormInner({
                 <FormItem>
                   <FormLabel>Sonuç</FormLabel>
                   <Select
-                    onValueChange={(v) => field.onChange(v === 'none' ? null : v as 'kazanıldı' | 'uzlaşma' | 'kaybedildi')}
+                    onValueChange={(v) =>
+                      field.onChange(
+                        v === 'none' ? null : (v as 'kazanıldı' | 'uzlaşma' | 'kaybedildi'),
+                      )
+                    }
                     value={field.value ?? 'none'}
                   >
                     <FormControl>
@@ -488,7 +505,14 @@ function DosyaFormInner({
                 <FormItem>
                   <FormLabel>Hasar Dosya No</FormLabel>
                   <FormControl>
-                    <Input placeholder="Sigorta Şirketi - 111" value={field.value ?? ''} onChange={field.onChange} onBlur={field.onBlur} name={field.name} ref={field.ref} />
+                    <Input
+                      placeholder="Sigorta Şirketi - 111"
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -545,7 +569,10 @@ function DosyaFormInner({
               />
               <div className="flex items-end">
                 <div className="text-sm text-muted-foreground">
-                  Müvekkil Kusur Oranı: {kusur_orani_karsi != null && kusur_orani_karsi >= 0 ? `${100 - kusur_orani_karsi}%` : '—'}
+                  Müvekkil Kusur Oranı:{' '}
+                  {kusur_orani_karsi != null && kusur_orani_karsi >= 0
+                    ? `${100 - kusur_orani_karsi}%`
+                    : '—'}
                 </div>
               </div>
             </div>
@@ -669,25 +696,26 @@ export function DosyaForm({ mode, dosyaId }: DosyaFormProps) {
 
   // Build defaultValues from loaded data — ensures Radix UI Select components
   // are initialised with the correct value on first mount (not patched via reset()).
-  const defaultValues: FormValues = mode === 'edit' && dosyaData
-    ? {
-        muvekkil_id: dosyaData.muvekkil_id,
-        dosya_no: dosyaData.dosya_no,
-        tur: dosyaData.tur as (typeof TUR_VALUES)[number],
-        sigorta_turu_id: dosyaData.sigorta_turu_id ?? null,
-        karsitaraf_sigorta_id: dosyaData.karsitaraf_sigorta_id ?? null,
-        muvekkil_sigorta_id: dosyaData.muvekkil_sigorta_id ?? null,
-        muvekkil_police_no: dosyaData.muvekkil_police_no ?? '',
-        talep_tutari: dosyaData.talep_tutari ?? null,
-        karar_tutari: dosyaData.karar_tutari ?? null,
-        sonuc: dosyaData.sonuc as 'kazanıldı' | 'uzlaşma' | 'kaybedildi' ?? null,
-        muvekkil_plaka: dosyaData.muvekkil_plaka ?? '',
-        hasar_dosya_no: dosyaData.hasar_dosya_no ?? '',
-        kaza_tarihi: dosyaData.kaza_tarihi ?? '',
-        kusur_orani_karsi: dosyaData.kusur_orani_karsi ?? null,
-        aciklama: dosyaData.aciklama ?? '',
-      }
-    : EMPTY_DEFAULTS
+  const defaultValues: FormValues =
+    mode === 'edit' && dosyaData
+      ? {
+          muvekkil_id: dosyaData.muvekkil_id,
+          dosya_no: dosyaData.dosya_no,
+          tur: dosyaData.tur as (typeof TUR_VALUES)[number],
+          sigorta_turu_id: dosyaData.sigorta_turu_id ?? null,
+          karsitaraf_sigorta_id: dosyaData.karsitaraf_sigorta_id ?? null,
+          muvekkil_sigorta_id: dosyaData.muvekkil_sigorta_id ?? null,
+          muvekkil_police_no: dosyaData.muvekkil_police_no ?? '',
+          talep_tutari: dosyaData.talep_tutari ?? null,
+          karar_tutari: dosyaData.karar_tutari ?? null,
+          sonuc: (dosyaData.sonuc as 'kazanıldı' | 'uzlaşma' | 'kaybedildi') ?? null,
+          muvekkil_plaka: dosyaData.muvekkil_plaka ?? '',
+          hasar_dosya_no: dosyaData.hasar_dosya_no ?? '',
+          kaza_tarihi: dosyaData.kaza_tarihi ?? '',
+          kusur_orani_karsi: dosyaData.kusur_orani_karsi ?? null,
+          aciklama: dosyaData.aciklama ?? '',
+        }
+      : EMPTY_DEFAULTS
 
   return (
     <DosyaFormInner

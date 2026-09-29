@@ -6,7 +6,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Upload, FileIcon, AlertCircle, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { BELGE_KATEGORILER } from '@/lib/schema'
 import { toast } from 'sonner'
 
@@ -21,14 +27,16 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
   const [kategori, setKategori] = useState<string>('')
   const [dragActive, setDragActive] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   const trpc = useTRPC()
   const queryClient = useQueryClient()
-  
+
   const createMutation = useMutation(
     trpc.belge.create.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.belge.list.queryKey({ dosya_id: dosyaId }) })
+        void queryClient.invalidateQueries({
+          queryKey: trpc.belge.list.queryKey({ dosya_id: dosyaId }),
+        })
         toast.success('Belge yüklendi')
         setFile(null)
         setKategori('')
@@ -37,13 +45,13 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
       },
       onError: (err) => {
         toast.error('Belge kaydedilemedi: ' + err.message)
-      }
-    })
+      },
+    }),
   )
-  
+
   const handleFile = useCallback((selectedFile: File) => {
     setError(null)
-    
+
     // Validate type
     const allowedTypes = [
       'application/pdf',
@@ -56,36 +64,39 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
       setError('İzin verilmeyen dosya türü. Yalnızca PDF, DOC, DOCX, JPG, PNG kabul edilir.')
       return
     }
-    
+
     // Validate size (20MB)
     if (selectedFile.size > 20 * 1024 * 1024) {
-      setError('Dosya boyutu 20 MB\'ı aşamaz.')
+      setError("Dosya boyutu 20 MB'ı aşamaz.")
       return
     }
-    
+
     setFile(selectedFile)
   }, [])
-  
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setDragActive(false)
-    const droppedFile = e.dataTransfer.files[0]
-    if (droppedFile) handleFile(droppedFile)
-  }, [handleFile])
-  
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      setDragActive(false)
+      const droppedFile = e.dataTransfer.files[0]
+      if (droppedFile) handleFile(droppedFile)
+    },
+    [handleFile],
+  )
+
   const handleUpload = async () => {
     if (!file || !kategori) {
       setError('Lütfen hem dosya seçin hem de kategori belirleyin.')
       return
     }
-    
+
     // Upload to Route Handler
     const formData = new FormData()
     formData.append('file', file)
     formData.append('dosyaId', dosyaId.toString())
     formData.append('dosyaNo', dosyaNo)
     formData.append('kategori', kategori)
-    
+
     let uploadResult
     try {
       const res = await fetch('/api/upload', {
@@ -101,19 +112,19 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
       setError(e instanceof Error ? e.message : 'Yükleme başarısız. Lütfen tekrar deneyin.')
       return
     }
-    
+
     // Call tRPC to save metadata
     createMutation.mutate({
       dosya_id: dosyaId,
       dosya_no: dosyaNo,
-      kategori: kategori as typeof BELGE_KATEGORILER[number],
+      kategori: kategori as (typeof BELGE_KATEGORILER)[number],
       dosya_adi: uploadResult.dosya_adi,
       dosya_yolu: uploadResult.dosya_yolu,
       dosya_boyutu: uploadResult.dosya_boyutu,
       mime_tur: uploadResult.mime_tur,
     })
   }
-  
+
   return (
     <div className="space-y-4 relative">
       {/* Category selector */}
@@ -125,12 +136,14 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
           </SelectTrigger>
           <SelectContent>
             {BELGE_KATEGORILER.map((kat) => (
-              <SelectItem key={kat} value={kat}>{kat}</SelectItem>
+              <SelectItem key={kat} value={kat}>
+                {kat}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
-      
+
       {/* Drop zone - accent color per UI-SPEC */}
       <div
         className={`
@@ -138,7 +151,10 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
           ${dragActive ? 'border-[var(--accent)] bg-[var(--accent)]/5' : 'border-muted'}
           ${file ? 'border-[var(--accent)]' : ''}
         `}
-        onDragOver={(e) => { e.preventDefault(); setDragActive(true) }}
+        onDragOver={(e) => {
+          e.preventDefault()
+          setDragActive(true)
+        }}
         onDragLeave={() => setDragActive(false)}
         onDrop={handleDrop}
       >
@@ -155,12 +171,8 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
         ) : (
           <>
             <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-lg font-medium mb-1">
-              Dosyayı sürükle & bırak veya tıkla
-            </p>
-            <p className="text-sm text-muted-foreground">
-              PDF, DOC, DOCX, JPG, PNG — maks. 20 MB
-            </p>
+            <p className="text-lg font-medium mb-1">Dosyayı sürükle & bırak veya tıkla</p>
+            <p className="text-sm text-muted-foreground">PDF, DOC, DOCX, JPG, PNG — maks. 20 MB</p>
           </>
         )}
         <input
@@ -171,22 +183,29 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
             absolute inset-0 w-full h-full opacity-0 cursor-pointer
             ${file ? 'pointer-events-none' : ''}
           `}
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f) }}
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            if (f) handleFile(f)
+          }}
         />
       </div>
-      
+
       {/* X Button - outside drop zone to prevent file input triggering */}
       {file && (
         <Button
           variant="outline"
           size="icon"
           className="absolute top-2 right-2 text-muted-foreground hover:text-foreground z-10"
-          onClick={(e) => { e.stopPropagation(); setFile(null); setError(null) }}
+          onClick={(e) => {
+            e.stopPropagation()
+            setFile(null)
+            setError(null)
+          }}
         >
           <X className="h-4 w-4" />
         </Button>
       )}
-      
+
       {/* Error message */}
       {error && (
         <div className="flex items-center gap-2 text-destructive text-sm">
@@ -194,7 +213,7 @@ export function BelgeUpload({ dosyaId, dosyaNo, onUploadComplete }: BelgeUploadP
           {error}
         </div>
       )}
-      
+
       {/* Upload button - accent colored per UI-SPEC */}
       <Button
         onClick={handleUpload}

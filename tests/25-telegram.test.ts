@@ -57,11 +57,14 @@ describe('TEL-03: sendTelegramMessage does not throw on API error', () => {
   })
 
   it('does not throw when fetch returns non-ok response', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
-      status: 401,
-      text: () => Promise.resolve('{"ok":false,"description":"Unauthorized"}'),
-    }))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        text: () => Promise.resolve('{"ok":false,"description":"Unauthorized"}'),
+      }),
+    )
     const { sendTelegramMessage } = await import('@/lib/telegram/send')
     await expect(sendTelegramMessage('test')).resolves.toBe(false)
   })

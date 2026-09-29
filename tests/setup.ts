@@ -44,15 +44,21 @@ function applyMigrations(sqlite: Database.Database) {
 // Create in-memory DB once at module load (before vi.mock hoisting)
 const testSqlite = new Database(':memory:')
 testSqlite.pragma('foreign_keys = ON')
-testSqlite.function('lower_tr', (s: unknown) =>
+testSqlite.function('lower_tr', (s: string | number | bigint | Buffer | null) =>
   String(s ?? '')
     .toLowerCase()
-    .replace(/ş/g, 's').replace(/Ş/g, 's')
-    .replace(/ğ/g, 'g').replace(/Ğ/g, 'g')
-    .replace(/ü/g, 'u').replace(/Ü/g, 'u')
-    .replace(/ö/g, 'o').replace(/Ö/g, 'o')
-    .replace(/ç/g, 'c').replace(/Ç/g, 'c')
-    .replace(/ı/g, 'i').replace(/İ/g, 'i')
+    .replace(/ş/g, 's')
+    .replace(/Ş/g, 's')
+    .replace(/ğ/g, 'g')
+    .replace(/Ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/Ü/g, 'u')
+    .replace(/ö/g, 'o')
+    .replace(/Ö/g, 'o')
+    .replace(/ç/g, 'c')
+    .replace(/Ç/g, 'c')
+    .replace(/ı/g, 'i')
+    .replace(/İ/g, 'i'),
 )
 
 applyMigrations(testSqlite)

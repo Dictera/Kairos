@@ -137,9 +137,7 @@ describe('buildArchivePath', () => {
       muvekkilPlaka: null,
     })
 
-    expect(result.dir).toBe(
-      path.join(ARCHIVE_BASE, 'Asliye Ticaret', 'Belirtilmemiş', 'Test Kişi')
-    )
+    expect(result.dir).toBe(path.join(ARCHIVE_BASE, 'Asliye Ticaret', 'Belirtilmemiş', 'Test Kişi'))
   })
 
   it('maps AT to Asliye Ticaret', () => {
@@ -257,17 +255,26 @@ describe('filename format', () => {
   })
 
   it('prefixes filename with sanitized displayName when provided', () => {
-    const result = buildArchivePath({ tur: 'STK', muvekkilAd: 'Test', muvekkilPlaka: null }, 'İhtarname')
+    const result = buildArchivePath(
+      { tur: 'STK', muvekkilAd: 'Test', muvekkilPlaka: null },
+      'İhtarname',
+    )
     expect(result.fileName).toMatch(/^İhtarname-[a-f0-9]{8}\.pdf$/)
   })
 
   it('uses template ad as prefix when displayName is template name', () => {
-    const result = buildArchivePath({ tur: 'STK', muvekkilAd: 'Test', muvekkilPlaka: null }, 'Değer Kaybı Dilekçesi')
+    const result = buildArchivePath(
+      { tur: 'STK', muvekkilAd: 'Test', muvekkilPlaka: null },
+      'Değer Kaybı Dilekçesi',
+    )
     expect(result.fileName).toMatch(/^Değer Kaybı Dilekçesi-[a-f0-9]{8}\.pdf$/)
   })
 
   it('sanitizes unsafe chars in displayName', () => {
-    const result = buildArchivePath({ tur: 'STK', muvekkilAd: 'Test', muvekkilPlaka: null }, 'my:file/name')
+    const result = buildArchivePath(
+      { tur: 'STK', muvekkilAd: 'Test', muvekkilPlaka: null },
+      'my:file/name',
+    )
     expect(result.fileName).not.toContain(':')
     expect(result.fileName).not.toContain('/')
     expect(result.fileName).toMatch(/\.pdf$/)

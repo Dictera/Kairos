@@ -31,7 +31,7 @@ export function DatePickerField({
           variant="outline"
           className="w-full justify-start text-left font-normal"
         >
-          {date ? format(date, 'dd.MM.yyyy', { locale: tr }) : placeholder ?? 'Tarih seçin'}
+          {date ? format(date, 'dd.MM.yyyy', { locale: tr }) : (placeholder ?? 'Tarih seçin')}
           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>

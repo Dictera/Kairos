@@ -9,7 +9,9 @@ vi.mock('which', () => ({
 
 vi.mock('fs', () => ({
   existsSync: vi.fn(),
-  access: vi.fn((_path: string, _mode: number, cb: (err: NodeJS.ErrnoException | null) => void) => cb(null)),
+  access: vi.fn((_path: string, _mode: number, cb: (err: NodeJS.ErrnoException | null) => void) =>
+    cb(null),
+  ),
 }))
 
 describe('lib/pipeline/config', () => {

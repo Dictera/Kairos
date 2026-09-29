@@ -32,12 +32,14 @@ export const BELGELER_BASE = process.env.TEST_BELGELER_BASE
 const WINDOWS_UNSAFE = /[<>:"/\\|?*\x00-\x1f]/g
 
 export function sanitizeFsSegment(str: string): string {
-  return str
-    .replace(WINDOWS_UNSAFE, '-')
-    .replace(/\.\./g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .trim() || 'bilinmiyor'
+  return (
+    str
+      .replace(WINDOWS_UNSAFE, '-')
+      .replace(/\.\./g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .trim() || 'bilinmiyor'
+  )
 }
 
 export function getTurLabel(tur: string): string {

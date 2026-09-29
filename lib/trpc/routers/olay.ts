@@ -19,7 +19,9 @@ export const olayRouter = createTRPCRouter({
   list: protectedProcedure
     .input(z.object({ dosya_id: z.number().int() }))
     .query(async ({ input }) => {
-      return db.select().from(olayGunlugu)
+      return db
+        .select()
+        .from(olayGunlugu)
         .where(eq(olayGunlugu.dosya_id, input.dosya_id))
         .orderBy(desc(olayGunlugu.created_at))
     }),

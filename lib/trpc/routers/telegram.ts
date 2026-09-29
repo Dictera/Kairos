@@ -42,8 +42,10 @@ export const telegramRouter = createTRPCRouter({
    */
   getSchedule: protectedProcedure.query(() => {
     const settings = readSettings()
-    const times =
-      (settings.telegram_bildirim_saatleri as string[] | undefined) ?? ['09:00', '15:00']
+    const times = (settings.telegram_bildirim_saatleri as string[] | undefined) ?? [
+      '09:00',
+      '15:00',
+    ]
     return { times }
   }),
 
@@ -54,11 +56,8 @@ export const telegramRouter = createTRPCRouter({
   updateSchedule: protectedProcedure
     .input(
       z.object({
-        times: z
-          .array(timeSchema)
-          .min(0)
-          .max(24, 'En fazla 24 bildirim saati eklenebilir'),
-      })
+        times: z.array(timeSchema).min(0).max(24, 'En fazla 24 bildirim saati eklenebilir'),
+      }),
     )
     .mutation(async ({ input }) => {
       const settings = readSettings()
@@ -89,9 +88,7 @@ export const telegramRouter = createTRPCRouter({
     }
 
     try {
-      await sendTelegramMessage(
-        '<b>Kairos</b>\nTelegram bağlantısı başarıyla test edildi.'
-      )
+      await sendTelegramMessage('<b>Kairos</b>\nTelegram bağlantısı başarıyla test edildi.')
       return { ok: true as const }
     } catch (err) {
       return {

@@ -167,7 +167,7 @@ export async function GET(): Promise<Response> {
         dtstamp,
         description,
         location: row.mahkeme_kurum ?? undefined,
-      })
+      }),
     )
   }
 
@@ -190,20 +190,21 @@ export async function GET(): Promise<Response> {
         dtend,
         dtstamp,
         description,
-      })
+      }),
     )
   }
 
-  const icsContent = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//Sigorta Takip//TR',
-    'CALSCALE:GREGORIAN',
-    'X-WR-CALNAME:Sigorta Takvimi',
-    'X-WR-TIMEZONE:Europe/Istanbul',
-    ...vevents,
-    'END:VCALENDAR',
-  ].join('\r\n') + '\r\n'
+  const icsContent =
+    [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Sigorta Takip//TR',
+      'CALSCALE:GREGORIAN',
+      'X-WR-CALNAME:Sigorta Takvimi',
+      'X-WR-TIMEZONE:Europe/Istanbul',
+      ...vevents,
+      'END:VCALENDAR',
+    ].join('\r\n') + '\r\n'
 
   return new Response(icsContent, {
     headers: {

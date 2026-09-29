@@ -41,8 +41,9 @@ export function ChangelogSection({ content }: ChangelogSectionProps) {
   // Drop the leading boilerplate (H1 title + intro + format note) and the
   // link-reference definitions at the bottom (`[x]: https://...`).
   const firstSection = allLines.findIndex((l) => l.startsWith('## '))
-  const lines = (firstSection === -1 ? allLines : allLines.slice(firstSection))
-    .filter((l) => !/^\[[^\]]+\]:\s/.test(l))
+  const lines = (firstSection === -1 ? allLines : allLines.slice(firstSection)).filter(
+    (l) => !/^\[[^\]]+\]:\s/.test(l),
+  )
 
   const seen = new Map<string, number>()
   const keyFor = (line: string) => {
@@ -55,20 +56,14 @@ export function ChangelogSection({ content }: ChangelogSectionProps) {
     const key = keyFor(line)
     if (line.startsWith('## ')) {
       return (
-        <h2
-          key={key}
-          className="font-semibold text-base border-b pb-1 mb-2 mt-4 first:mt-0"
-        >
+        <h2 key={key} className="font-semibold text-base border-b pb-1 mb-2 mt-4 first:mt-0">
           <Inline text={line.replace(/^## /, '').replace(/\[([^\]]+)\]/g, '$1')} />
         </h2>
       )
     }
     if (line.startsWith('### ')) {
       return (
-        <h3
-          key={key}
-          className="font-medium text-sm text-muted-foreground mt-3 mb-1"
-        >
+        <h3 key={key} className="font-medium text-sm text-muted-foreground mt-3 mb-1">
           <Inline text={line.replace(/^### /, '')} />
         </h3>
       )
@@ -76,7 +71,9 @@ export function ChangelogSection({ content }: ChangelogSectionProps) {
     if (line.startsWith('- ') || line.startsWith('* ')) {
       return (
         <ul key={key} className="list-disc list-inside">
-          <li className="text-sm"><Inline text={line.replace(/^[-*] /, '')} /></li>
+          <li className="text-sm">
+            <Inline text={line.replace(/^[-*] /, '')} />
+          </li>
         </ul>
       )
     }

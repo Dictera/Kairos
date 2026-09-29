@@ -38,15 +38,14 @@ export interface DosyaWithRelations extends DosyaRow {
   muvekkilSigorta: SigortaSirketiRow | null
 }
 
-export function buildJinja2Context(
-  dosya: DosyaWithRelations
-): Record<string, unknown> {
+export function buildJinja2Context(dosya: DosyaWithRelations): Record<string, unknown> {
   const surecDetay = parseSurecDetay(dosya.surec_detay)
 
   const now = new Date()
-  const bugun = `${String(now.getDate()).padStart(2, '0')}/${String(
-    now.getMonth() + 1
-  ).padStart(2, '0')}/${now.getFullYear()}`
+  const bugun = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(
+    2,
+    '0',
+  )}/${now.getFullYear()}`
 
   const rawContext = {
     bugun,
@@ -82,7 +81,8 @@ export function buildJinja2Context(
           karsitaraf_plaka: dosya.taraflar[0].karsitaraf_plaka,
           surucu_ad: dosya.taraflar[0].surucu_ad,
           surucu_soyad: dosya.taraflar[0].surucu_soyad,
-          surucu_ad_soyad: `${dosya.taraflar[0].surucu_ad ?? ''} ${dosya.taraflar[0].surucu_soyad ?? ''}`.trim(),
+          surucu_ad_soyad:
+            `${dosya.taraflar[0].surucu_ad ?? ''} ${dosya.taraflar[0].surucu_soyad ?? ''}`.trim(),
           surucu_plaka: dosya.taraflar[0].surucu_plaka,
           surucu_telefon: dosya.taraflar[0].surucu_telefon,
           surucu_police_no: dosya.taraflar[0].surucu_police_no,

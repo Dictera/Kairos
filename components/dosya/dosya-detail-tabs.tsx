@@ -50,7 +50,7 @@ export function DosyaDetailTabs({ dosyaId }: DosyaDetailTabsProps) {
   const [activeTab, setActiveTab] = useState(() =>
     typeof window === 'undefined'
       ? 'genel-bilgiler'
-      : window.location.hash.slice(1) || 'genel-bilgiler'
+      : window.location.hash.slice(1) || 'genel-bilgiler',
   )
   const [archiveOpen, setArchiveOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -69,23 +69,23 @@ export function DosyaDetailTabs({ dosyaId }: DosyaDetailTabsProps) {
   const archiveMutation = useMutation(
     trpc.dosya.archive.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya']] })
         toast.success('Dosya arşivlendi.')
         router.push('/dosyalar')
       },
       onError: () => toast.error('Arşivlenemedi. Lütfen tekrar deneyin.'),
-    })
+    }),
   )
 
   const deleteMutation = useMutation(
     trpc.dosya.delete.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [['dosya']] })
+        void queryClient.invalidateQueries({ queryKey: [['dosya']] })
         toast.success('Silindi.')
         router.push('/dosyalar')
       },
       onError: () => toast.error('Silinemedi. Lütfen tekrar deneyin.'),
-    })
+    }),
   )
 
   if (isLoading) {
@@ -126,9 +126,7 @@ export function DosyaDetailTabs({ dosyaId }: DosyaDetailTabsProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setArchiveOpen(true)}>
-              Arşivle
-            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setArchiveOpen(true)}>Arşivle</DropdownMenuItem>
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
               onClick={() => setDeleteOpen(true)}

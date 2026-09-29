@@ -21,47 +21,28 @@ describe('getNestedValue', () => {
 
 describe('getMissingVariables', () => {
   it('returns empty array when all variables are present', () => {
-    const result = getMissingVariables(
-      ['muvekkil.ad'],
-      { muvekkil: { ad: 'Ali' } }
-    )
+    const result = getMissingVariables(['muvekkil.ad'], { muvekkil: { ad: 'Ali' } })
     expect(result).toEqual([])
   })
 
   it('returns missing variable info when value is absent', () => {
-    const result = getMissingVariables(
-      ['muvekkil.ad'],
-      { muvekkil: {} }
-    )
-    expect(result).toEqual([
-      { var: 'muvekkil.ad', tab: 'genel', label: 'Müvekkil adı' },
-    ])
+    const result = getMissingVariables(['muvekkil.ad'], { muvekkil: {} })
+    expect(result).toEqual([{ var: 'muvekkil.ad', tab: 'genel', label: 'Müvekkil adı' }])
   })
 
   it('falls back to genel tab and var name for unknown variables', () => {
-    const result = getMissingVariables(
-      ['bilinmeyen.x'],
-      { bilinmeyen: {} }
-    )
-    expect(result).toEqual([
-      { var: 'bilinmeyen.x', tab: 'genel', label: 'bilinmeyen.x' },
-    ])
+    const result = getMissingVariables(['bilinmeyen.x'], { bilinmeyen: {} })
+    expect(result).toEqual([{ var: 'bilinmeyen.x', tab: 'genel', label: 'bilinmeyen.x' }])
   })
 
   it('detects null as missing', () => {
-    const result = getMissingVariables(
-      ['muvekkil.ad'],
-      { muvekkil: { ad: null } }
-    )
+    const result = getMissingVariables(['muvekkil.ad'], { muvekkil: { ad: null } })
     expect(result).toHaveLength(1)
     expect(result[0].var).toBe('muvekkil.ad')
   })
 
   it('detects empty string as missing', () => {
-    const result = getMissingVariables(
-      ['muvekkil.ad'],
-      { muvekkil: { ad: '' } }
-    )
+    const result = getMissingVariables(['muvekkil.ad'], { muvekkil: { ad: '' } })
     expect(result).toHaveLength(1)
     expect(result[0].var).toBe('muvekkil.ad')
   })

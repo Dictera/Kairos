@@ -15,7 +15,7 @@ function login(body: unknown) {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: typeof body === 'string' ? body : JSON.stringify(body),
-    })
+    }),
   )
 }
 

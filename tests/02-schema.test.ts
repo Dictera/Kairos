@@ -3,7 +3,17 @@ import { muvekkil } from '@/lib/schema'
 
 describe('Schema: muvekkil table', () => {
   it('muvekkil table has correct columns and no email', () => {
-    const expectedColumns = ['id', 'ad', 'soyad', 'telefon', 'tc_vergi_no', 'adres', 'notlar', 'created_at', 'updated_at']
+    const expectedColumns = [
+      'id',
+      'ad',
+      'soyad',
+      'telefon',
+      'tc_vergi_no',
+      'adres',
+      'notlar',
+      'created_at',
+      'updated_at',
+    ]
     for (const col of expectedColumns) {
       expect(muvekkil).toHaveProperty(col)
     }

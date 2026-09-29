@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { calcStkItirazSuresi, calcIstinafBasvurusu, calcCevapDilekce, isInAdliTatil, getDaysUntil } from '@/lib/deadline-service'
+import {
+  calcStkItirazSuresi,
+  calcIstinafBasvurusu,
+  calcCevapDilekce,
+  isInAdliTatil,
+  getDaysUntil,
+} from '@/lib/deadline-service'
 
 describe('deadline-service: calcStkItirazSuresi (SURE-01)', () => {
   it('returns tebligat + 10 calendar days', () => {

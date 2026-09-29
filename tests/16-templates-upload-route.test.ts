@@ -23,7 +23,9 @@ afterAll(() => {
   if (existsSync(UPLOAD_DIR)) {
     for (const f of readdirSync(UPLOAD_DIR)) {
       if (f.includes('_test-upload-')) {
-        try { rmSync(path.join(UPLOAD_DIR, f)) } catch {}
+        try {
+          rmSync(path.join(UPLOAD_DIR, f))
+        } catch {}
       }
     }
   }
@@ -57,7 +59,12 @@ describe('Upload route behavior: SABLON-01 validation', () => {
 
   it('rejects .pdf with Turkish error', async () => {
     const fd = new FormData()
-    fd.append('file', new File([new Uint8Array([0x25, 0x50, 0x44, 0x46])], 'test-upload-doc.pdf', { type: 'application/pdf' }))
+    fd.append(
+      'file',
+      new File([new Uint8Array([0x25, 0x50, 0x44, 0x46])], 'test-upload-doc.pdf', {
+        type: 'application/pdf',
+      }),
+    )
     const res = await POST(makeRequest(fd) as unknown as Parameters<typeof POST>[0])
     expect(res.status).toBe(400)
     const body = await res.json()
@@ -68,9 +75,12 @@ describe('Upload route behavior: SABLON-01 validation', () => {
     // Build a minimal valid docx-like file (zip with word/document.xml).
     const docxBytes = readFileSync(path.join(process.cwd(), 'tests/fixtures/test-template.docx'))
     const fd = new FormData()
-    fd.append('file', new File([docxBytes], 'test-upload-tiny.docx', {
-      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    }))
+    fd.append(
+      'file',
+      new File([docxBytes], 'test-upload-tiny.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      }),
+    )
     const res = await POST(makeRequest(fd) as unknown as Parameters<typeof POST>[0])
     expect(res.status).toBe(200)
     const body = await res.json()
@@ -82,9 +92,12 @@ describe('Upload route behavior: SABLON-01 validation', () => {
   it('rejects file larger than 10 MB', async () => {
     const big = new Uint8Array(11 * 1024 * 1024)
     const fd = new FormData()
-    fd.append('file', new File([big], 'test-upload-big.docx', {
-      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    }))
+    fd.append(
+      'file',
+      new File([big], 'test-upload-big.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      }),
+    )
     const res = await POST(makeRequest(fd) as unknown as Parameters<typeof POST>[0])
     expect(res.status).toBe(400)
     const body = await res.json()

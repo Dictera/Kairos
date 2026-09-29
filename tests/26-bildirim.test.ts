@@ -101,9 +101,7 @@ describe('BLD-05: Toggle disabled → rows not included in message', () => {
     const today = new Date()
     const pad = (n: number) => String(n).padStart(2, '0')
     const tarih = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`
-    const durusmaRows: Row[] = [
-      { id: 1, tip: 'DURUSMA', tarih, dosya_no: '2024/5', mesaj: 'test' },
-    ]
+    const durusmaRows: Row[] = [{ id: 1, tip: 'DURUSMA', tarih, dosya_no: '2024/5', mesaj: 'test' }]
     const result = buildGroupedMessage({
       durusmaRows,
       sureRows: [],

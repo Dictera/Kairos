@@ -64,7 +64,11 @@ export function MuvekkilList() {
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const { data, isLoading } = useQuery(
-    trpc.muvekkil.list.queryOptions({ page: currentPage, pageSize: 25, search: search || undefined })
+    trpc.muvekkil.list.queryOptions({
+      page: currentPage,
+      pageSize: 25,
+      search: search || undefined,
+    }),
   )
 
   const deleteMutation = useMutation(
@@ -72,7 +76,7 @@ export function MuvekkilList() {
       onSuccess: () => {
         toast.success('Silindi.')
         setPendingDelete(null)
-        queryClient.invalidateQueries({ queryKey: [['muvekkil']] })
+        void queryClient.invalidateQueries({ queryKey: [['muvekkil']] })
       },
       onError: (err) => {
         setPendingDelete(null)
@@ -82,20 +86,23 @@ export function MuvekkilList() {
           toast.error('Silinemedi. Lütfen tekrar deneyin.')
         }
       },
-    })
+    }),
   )
 
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchInput(value)
-    if (debounceTimer.current) clearTimeout(debounceTimer.current)
-    debounceTimer.current = setTimeout(() => {
-      setSearch(value)
-      // Reset to page 1 on new search
-      const params = new URLSearchParams(searchParams.toString())
-      params.delete('sayfa')
-      router.replace(`/muvekkiller?${params.toString()}`)
-    }, 300)
-  }, [searchParams, router])
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchInput(value)
+      if (debounceTimer.current) clearTimeout(debounceTimer.current)
+      debounceTimer.current = setTimeout(() => {
+        setSearch(value)
+        // Reset to page 1 on new search
+        const params = new URLSearchParams(searchParams.toString())
+        params.delete('sayfa')
+        router.replace(`/muvekkiller?${params.toString()}`)
+      }, 300)
+    },
+    [searchParams, router],
+  )
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -166,24 +173,39 @@ export function MuvekkilList() {
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell><Skeleton className="h-4 w-full" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-full" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-full" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-full" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-full" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-8" /></TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-8" />
+                  </TableCell>
                 </TableRow>
               ))
             ) : data?.rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-12">
                   {search ? (
-                    <p className="text-sm text-muted-foreground">Arama kriterlerine uyan müvekkil bulunamadı.</p>
+                    <p className="text-sm text-muted-foreground">
+                      Arama kriterlerine uyan müvekkil bulunamadı.
+                    </p>
                   ) : (
                     <div className="space-y-2">
                       <p className="text-sm font-semibold">Henüz müvekkil eklenmedi</p>
                       <p className="text-sm text-muted-foreground">
-                        Yeni bir müvekkil kaydı oluşturmak için &quot;Yeni Müvekkil Ekle&quot; düğmesine tıklayın.
+                        Yeni bir müvekkil kaydı oluşturmak için &quot;Yeni Müvekkil Ekle&quot;
+                        düğmesine tıklayın.
                       </p>
                     </div>
                   )}
@@ -202,9 +224,7 @@ export function MuvekkilList() {
                   <TableCell className="text-sm text-muted-foreground">
                     {row.telefon ?? '—'}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {row.iban ?? '—'}
-                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{row.iban ?? '—'}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {row.tc_vergi_no ?? '—'}
                   </TableCell>
@@ -227,7 +247,9 @@ export function MuvekkilList() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="text-destructive focus:text-destructive"
-                          onClick={() => handleDeleteClick({ id: row.id, ad: row.ad, soyad: row.soyad })}
+                          onClick={() =>
+                            handleDeleteClick({ id: row.id, ad: row.ad, soyad: row.soyad })
+                          }
                         >
                           Sil
                         </DropdownMenuItem>

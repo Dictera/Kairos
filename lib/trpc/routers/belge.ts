@@ -15,47 +15,50 @@ export const belgeRouter = createTRPCRouter({
   list: protectedProcedure
     .input(z.object({ dosya_id: z.number().int() }))
     .query(async ({ input }) => {
-      return db.select().from(belge)
+      return db
+        .select()
+        .from(belge)
         .where(eq(belge.dosya_id, input.dosya_id))
         .orderBy(desc(belge.created_at))
     }),
 
-  treeList: protectedProcedure
-    .query(async () => {
-      return db
-        .select({
-          id: belge.id,
-          dosya_id: belge.dosya_id,
-          dosya_adi: belge.dosya_adi,
-          dosya_yolu: belge.dosya_yolu,
-          dosya_boyutu: belge.dosya_boyutu,
-          kategori: belge.kategori,
-          created_at: belge.created_at,
-          sablon_id: belge.sablon_id,
-          tur: dosya.tur,
-          dosya_no: dosya.dosya_no,
-          muvekkil_plaka: dosya.muvekkil_plaka,
-          muvekkil_ad: muvekkil.ad,
-          muvekkil_soyad: muvekkil.soyad,
-          sigorta_turu_ad: sigortaTuru.ad,
-        })
-        .from(belge)
-        .innerJoin(dosya, eq(belge.dosya_id, dosya.id))
-        .innerJoin(muvekkil, eq(dosya.muvekkil_id, muvekkil.id))
-        .leftJoin(sigortaTuru, eq(dosya.sigorta_turu_id, sigortaTuru.id))
-        .orderBy(desc(belge.created_at))
-    }),
+  treeList: protectedProcedure.query(async () => {
+    return db
+      .select({
+        id: belge.id,
+        dosya_id: belge.dosya_id,
+        dosya_adi: belge.dosya_adi,
+        dosya_yolu: belge.dosya_yolu,
+        dosya_boyutu: belge.dosya_boyutu,
+        kategori: belge.kategori,
+        created_at: belge.created_at,
+        sablon_id: belge.sablon_id,
+        tur: dosya.tur,
+        dosya_no: dosya.dosya_no,
+        muvekkil_plaka: dosya.muvekkil_plaka,
+        muvekkil_ad: muvekkil.ad,
+        muvekkil_soyad: muvekkil.soyad,
+        sigorta_turu_ad: sigortaTuru.ad,
+      })
+      .from(belge)
+      .innerJoin(dosya, eq(belge.dosya_id, dosya.id))
+      .innerJoin(muvekkil, eq(dosya.muvekkil_id, muvekkil.id))
+      .leftJoin(sigortaTuru, eq(dosya.sigorta_turu_id, sigortaTuru.id))
+      .orderBy(desc(belge.created_at))
+  }),
 
   create: protectedProcedure
-    .input(z.object({
-      dosya_id: z.number().int(),
-      dosya_no: z.string(),
-      kategori: belgeKategoriEnum,
-      dosya_adi: z.string(),
-      dosya_yolu: z.string(),
-      dosya_boyutu: z.number().int(),
-      mime_tur: z.string(),
-    }))
+    .input(
+      z.object({
+        dosya_id: z.number().int(),
+        dosya_no: z.string(),
+        kategori: belgeKategoriEnum,
+        dosya_adi: z.string(),
+        dosya_yolu: z.string(),
+        dosya_boyutu: z.number().int(),
+        mime_tur: z.string(),
+      }),
+    )
     .mutation(async ({ input }) => {
       return db.transaction((tx) => {
         const row = tx.insert(belge).values(input).returning().get()
@@ -67,7 +70,11 @@ export const belgeRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.number().int() }))
     .mutation(async ({ input }) => {
-      const existing = await db.select().from(belge).where(eq(belge.id, input.id)).then(r => r[0])
+      const existing = await db
+        .select()
+        .from(belge)
+        .where(eq(belge.id, input.id))
+        .then((r) => r[0])
       if (!existing) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Belge bulunamadı.' })
       }
