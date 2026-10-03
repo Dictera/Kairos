@@ -3,11 +3,10 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTRPC } from '@/lib/trpc/context'
-import { ColumnDef } from '@tanstack/react-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TableCell, TableRow } from '@/components/ui/table'
-import { DataTable, ColumnMeta } from '@/components/ui/data-table'
+import { DataTable, ColumnMeta, DataTableColumnDef } from '@/components/ui/data-table'
 import { Skeleton } from '@/components/ui/skeleton'
 import { C, fmt } from './finans-data'
 
@@ -31,7 +30,7 @@ type YearlyRow = { yil: string; gelen: number; giden: number; masraf: number; ne
 
 const rightMeta: ColumnMeta = { align: 'right' }
 
-const monthlyColumns: ColumnDef<MonthlyRow>[] = [
+const monthlyColumns: DataTableColumnDef<MonthlyRow>[] = [
   { accessorKey: 'ay', header: 'Ay', meta: { align: 'left' } satisfies ColumnMeta },
   {
     accessorKey: 'gelen',
@@ -66,7 +65,7 @@ const monthlyColumns: ColumnDef<MonthlyRow>[] = [
   },
 ]
 
-const yearlyColumns: ColumnDef<YearlyRow>[] = [
+const yearlyColumns: DataTableColumnDef<YearlyRow>[] = [
   { accessorKey: 'yil', header: 'Yıl', meta: { align: 'left' } satisfies ColumnMeta },
   {
     accessorKey: 'gelen',
