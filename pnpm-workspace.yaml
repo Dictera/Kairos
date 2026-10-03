@@ -51,3 +51,12 @@ overrides:
   '@hono/node-server@^1': '^1.19.17'
   qs@^6: '^6.16.0'
   baseline-browser-mapping@^2: '^2.11.24'
+
+# Audit exceptions — only for advisories with no published fix.
+# GHSA-vfj7-8cjw-p6xm (braces, high): advisory lists >=3.0.4 as patched, but
+#   3.0.3 is still the latest braces on npm. Reached only via the shadcn CLI
+#   (shadcn>fast-glob>micromatch>braces), which expands developer-supplied globs
+#   and never sees user input at runtime. Remove once braces 3.0.4 is published.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-vfj7-8cjw-p6xm
