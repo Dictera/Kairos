@@ -1,12 +1,16 @@
 'use client'
 
 import {
-  ColumnDef,
-  SortingState,
+  type CellData,
+  type ColumnDef,
+  type RowData,
+  type SortingState,
+  createSortedRowModel,
   flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  useReactTable,
+  rowSortingFeature,
+  sortFns,
+  tableFeatures,
+  useTable,
 } from '@tanstack/react-table'
 import { useState } from 'react'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
@@ -25,31 +29,42 @@ export type ColumnMeta = {
   align?: 'left' | 'right'
 }
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
+// The full sortFns registry keeps v8's auto sort (text/alphanumeric/datetime by value type).
+const features = tableFeatures({
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
+  sortFns,
+})
+
+export type DataTableColumnDef<
+  TData extends RowData,
+  TValue extends CellData = CellData,
+> = ColumnDef<typeof features, TData, TValue>
+
+interface DataTableProps<TData extends RowData> {
+  columns: DataTableColumnDef<TData>[]
   data: TData[]
   /** Optional footer rows rendered inside <tfoot> */
   footerRows?: React.ReactNode
   emptyText?: string
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends RowData>({
   columns,
   data,
   footerRows,
   emptyText = 'Veri yok',
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([])
 
-  // TanStack Table's useReactTable() returns functions the React Compiler can't memoize.
+  // TanStack Table's useTable() returns functions the React Compiler can't memoize.
   // eslint-disable-next-line react-hooks/incompatible-library
-  const table = useReactTable({
+  const table = useTable({
+    features,
     data,
     columns,
     state: { sorting },
     onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
   })
 
   return (
@@ -100,8 +115,8 @@ export function DataTable<TData, TValue>({
       <TableBody>
         {table.getRowModel().rows.length ? (
           table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id} data-state={row.getIsSelected() ? 'selected' : undefined}>
-              {row.getVisibleCells().map((cell) => {
+            <TableRow key={row.id}>
+              {row.getAllCells().map((cell) => {
                 const meta = cell.column.columnDef.meta as ColumnMeta | undefined
                 return (
                   <TableCell
