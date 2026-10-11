@@ -35,6 +35,10 @@ allowBuilds:
 # ip-address 10.7.2, js-yaml 4.3.2, nanoid 3.3.19, browserslist 4.29.0: high.
 # hono/@hono/node-server, qs, baseline-browser-mapping, postcss: moderate.
 # esbuild@<0.24.3: GHSA-67mh-4wv8-2f99 (mod) in drizzle-kit>@esbuild-kit.
+# proxy-addr 2.0.8: GHSA-jqcg-44mw-7w3h IP spoofing (critical), via shadcn>mcp-sdk>express.
+# source-map-js 1.2.2: GHSA-68fv-2mgg-jv7q DoS (high), via postcss/tailwind.
+# sharp 0.35.5: GHSA-wq5f-xc86-pv6w librsvg (high), via next.
+# @modelcontextprotocol/sdk 1.31.0: GHSA-6qxp-vccf-f47h OAuth (high), via shadcn.
 overrides:
   vite: '^8.0.16'
   esbuild@^0.28.0: '0.28.2'
@@ -51,6 +55,10 @@ overrides:
   '@hono/node-server@^1': '^1.19.17'
   qs@^6: '^6.16.0'
   baseline-browser-mapping@^2: '^2.11.24'
+  proxy-addr@^2: '^2.0.8'
+  source-map-js@^1: '^1.2.2'
+  sharp@^0.35: '^0.35.5'
+  '@modelcontextprotocol/sdk@^1': '^1.31.0'
 
 # Audit exceptions — only for advisories with no published fix.
 # GHSA-vfj7-8cjw-p6xm (braces, high): advisory lists >=3.0.4 as patched, but
