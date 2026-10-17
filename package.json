@@ -43,7 +43,7 @@
     "next-themes": "^0.4.6",
     "node-cron": "^4.6.0",
     "pdfmake": "^0.3.11",
-    "postcss": "^8.5.29",
+    "postcss": "^8.5.30",
     "radix-ui": "^1.5.0",
     "react": "^19.2.7",
     "react-day-picker": "^10.0.1",
